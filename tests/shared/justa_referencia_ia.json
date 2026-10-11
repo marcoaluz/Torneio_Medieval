@@ -1,0 +1,537 @@
+{
+	"config": {
+		"galope": {
+			"folego": {
+				"base": 60.0,
+				"custo_erro": 6.0,
+				"custo_por_passada": 10.0,
+				"por_ponto_milesimos": 800.0
+			},
+			"galope": {
+				"compasso_ms": 500.0,
+				"ganho_pct": 4.0,
+				"janela_base_ms": 70.0,
+				"janela_max_ms": 180.0,
+				"janela_por_temperamento_milesimos": 1000.0,
+				"perda_perdido_pct": 4.0,
+				"perda_sem_folego_pct": 5.0,
+				"velocidade_base": 80.0,
+				"velocidade_max_cansado_pct": 100.0,
+				"velocidade_max_pct": 120.0,
+				"velocidade_min_pct": 80.0,
+				"velocidade_por_ponto_milesimos": 300.0
+			},
+			"largada": {
+				"bandeira_ms": 250.0,
+				"bandeira_variacao_ms": 350.0,
+				"boa_ms": 350.0,
+				"bonus_precisao_pct": {
+					"boa": 0.0,
+					"perfeita": 10.0,
+					"ruim": 0.0
+				},
+				"perfeita_ms": 150.0,
+				"velocidade_inicial_pct": {
+					"boa": 100.0,
+					"perfeita": 115.0,
+					"ruim": 85.0
+				}
+			},
+			"pista": {
+				"distancia_mira": 150.0,
+				"distancia_total": 1000.0
+			},
+			"versao": 2.0
+		},
+		"impacto": {
+			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos).",
+			"bloqueio": {
+				"base_milesimos": 50.0,
+				"teto_milesimos": 400.0,
+				"vira_zona": "escudo",
+				"zonas": [
+					"capacete",
+					"peito"
+				]
+			},
+			"dano": {
+				"base_por_zona": {
+					"capacete": 20.0,
+					"cavalo": 8.0,
+					"escudo": 10.0,
+					"peito": 15.0
+				},
+				"defesa_reduz_por_ponto_milesimos": 500.0,
+				"lanca_por_contato": 4.0,
+				"minimo": 1.0,
+				"peca_por_zona": {
+					"capacete": "elmo",
+					"cavalo": "peitoral_cavalo",
+					"escudo": "escudo",
+					"peito": "peitoral"
+				},
+				"velocidade_por_pct_milesimos": 10.0
+			},
+			"derrubada": {
+				"base_por_zona_milesimos": {
+					"capacete": 120.0,
+					"escudo": 30.0,
+					"peito": 90.0
+				},
+				"defesa_peca_milesimos": 2.0,
+				"forca_menos_equilibrio_milesimos": 3.0,
+				"poder_lanca_milesimos": 2.0,
+				"ritmo_max_milesimos": 40.0,
+				"teto_milesimos": 450.0,
+				"velocidade_por_pct_milesimos": 4.0
+			},
+			"falta": {
+				"faltas_para_desclassificar": 2.0,
+				"penalidade_pontos": 2.0,
+				"zona": "cavalo"
+			},
+			"habilidades": {
+				"bloqueio": {
+					"bloqueio_milesimos": 700.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 0.0,
+					"tipo": "passiva",
+					"vence": "golpe_pesado"
+				},
+				"golpe_pesado": {
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 50.0,
+					"derrubada_bonus_milesimos": 40.0,
+					"tipo": "ativa",
+					"vence": "investida"
+				},
+				"investida": {
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 80.0,
+					"tipo": "ativa",
+					"vence": "bloqueio"
+				}
+			},
+			"pontos": {
+				"capacete": 3.0,
+				"cavalo": 0.0,
+				"erro": 0.0,
+				"escudo": 1.0,
+				"peito": 2.0
+			},
+			"teto_suave_joelho_pct": 70.0,
+			"versao": 1.0
+		},
+		"justa": {
+			"_nota": "fases_ms.corrida e o teto da Corrida; ela termina antes quando os cavaleiros chegam ao ponto da Mira (galope.json, pista)",
+			"fases_ms": {
+				"apresentacao": 2000.0,
+				"corrida": 6000.0,
+				"impacto": 2000.0,
+				"largada": 1000.0,
+				"mira": 2000.0
+			},
+			"passadas": 3.0,
+			"passadas_extras_max": 1.0,
+			"versao": 2.0
+		},
+		"mira": {
+			"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+			"limites_ponta": [
+				-90.0,
+				-200.0,
+				180.0,
+				200.0
+			],
+			"oscilacao": {
+				"amplitude_px": 3.0,
+				"frequencia_x_milesimos": 1300.0,
+				"frequencia_y_milesimos": 1700.0
+			},
+			"ponta_inicial": [
+				40.0,
+				-175.0
+			],
+			"precisao": {
+				"crescimento_max_pct": 50.0,
+				"crescimento_por_ponto_milesimos": 400.0
+			},
+			"versao": 1.0,
+			"zonas": [
+				{
+					"cresce": true,
+					"nome": "escudo",
+					"retangulos": [
+						[
+							6.0,
+							-123.0,
+							16.0,
+							30.0
+						]
+					]
+				},
+				{
+					"cresce": true,
+					"nome": "capacete",
+					"retangulos": [
+						[
+							-10.0,
+							-150.0,
+							20.0,
+							22.0
+						]
+					]
+				},
+				{
+					"cresce": true,
+					"nome": "peito",
+					"retangulos": [
+						[
+							-12.0,
+							-128.0,
+							24.0,
+							44.0
+						]
+					]
+				},
+				{
+					"cresce": false,
+					"nome": "cavalo",
+					"retangulos": [
+						[
+							-50.0,
+							-84.0,
+							100.0,
+							42.0
+						],
+						[
+							36.0,
+							-116.0,
+							38.0,
+							34.0
+						],
+						[
+							-60.0,
+							-80.0,
+							10.0,
+							26.0
+						]
+					]
+				}
+			]
+		}
+	},
+	"descricao": "Justa com IA (game/scripts/rules/justa.gd + game/scripts/ai/ia_rival.gd), gravada pelo GDScript. Repita: Justa(config, lado_jogador, lado_rival, semente, perfil); iniciar(); para cada entrada [t, acao, x, y] avance ate t e aplique (tocar | mirar x y | soltar); avance ate o fim. Eventos: tipo|chave=valor ordenados.",
+	"entradas": [
+		[
+			2692,
+			"tocar",
+			0,
+			0
+		],
+		[
+			3500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			4000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			4500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			5000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			5500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			6000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			6500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			7001,
+			"mirar",
+			-50,
+			-1060
+		],
+		[
+			7801,
+			"soltar",
+			0,
+			0
+		],
+		[
+			13257,
+			"tocar",
+			0,
+			0
+		],
+		[
+			14401,
+			"tocar",
+			0,
+			0
+		],
+		[
+			14901,
+			"tocar",
+			0,
+			0
+		],
+		[
+			15401,
+			"tocar",
+			0,
+			0
+		],
+		[
+			15901,
+			"tocar",
+			0,
+			0
+		],
+		[
+			16401,
+			"tocar",
+			0,
+			0
+		],
+		[
+			16901,
+			"tocar",
+			0,
+			0
+		],
+		[
+			17401,
+			"tocar",
+			0,
+			0
+		],
+		[
+			17761,
+			"mirar",
+			-50,
+			-1060
+		],
+		[
+			18561,
+			"soltar",
+			0,
+			0
+		],
+		[
+			24295,
+			"tocar",
+			0,
+			0
+		],
+		[
+			25161,
+			"tocar",
+			0,
+			0
+		],
+		[
+			25661,
+			"tocar",
+			0,
+			0
+		],
+		[
+			26161,
+			"tocar",
+			0,
+			0
+		],
+		[
+			26661,
+			"tocar",
+			0,
+			0
+		],
+		[
+			27161,
+			"tocar",
+			0,
+			0
+		],
+		[
+			27661,
+			"tocar",
+			0,
+			0
+		],
+		[
+			28161,
+			"tocar",
+			0,
+			0
+		],
+		[
+			28658,
+			"mirar",
+			-50,
+			-1060
+		],
+		[
+			29458,
+			"soltar",
+			0,
+			0
+		]
+	],
+	"eventos": [
+		"fase|anterior=5|fase=0|passada=1|t=0",
+		"fase|anterior=0|fase=1|passada=1|t=2000",
+		"bandeira|passada=1|t=2592",
+		"largada|passada=1|qualidade=perfeita|queimada=false|reacao_ms=100|t=2692|tocou=true",
+		"largada_rival|passada=1|qualidade=boa|reacao_ms=168|t=2760",
+		"fase|anterior=1|fase=2|passada=1|t=3000",
+		"toque_rival|batida=1|desvio_ms=-41|folego=90|passada=1|resultado=no_tempo|t=3459|velocidade=98",
+		"toque|batida=1|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=3500|velocidade=112",
+		"toque_rival|batida=2|desvio_ms=-9|folego=90|passada=1|resultado=no_tempo|t=3991|velocidade=101",
+		"toque|batida=2|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=4000|velocidade=114",
+		"habilidade|lado=rival|nome=investida|passada=1|t=4000",
+		"toque_rival|batida=3|desvio_ms=-10|folego=90|passada=1|resultado=no_tempo|t=4490|velocidade=104",
+		"toque|batida=3|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=4500|velocidade=114",
+		"toque_rival|batida=4|desvio_ms=-14|folego=90|passada=1|resultado=no_tempo|t=4986|velocidade=107",
+		"toque|batida=4|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=5000|velocidade=114",
+		"toque_rival|batida=5|desvio_ms=-61|folego=90|passada=1|resultado=no_tempo|t=5439|velocidade=110",
+		"toque|batida=5|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=5500|velocidade=114",
+		"toque|batida=6|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=6000|velocidade=114",
+		"toque_rival|batida=6|desvio_ms=29|folego=90|passada=1|resultado=no_tempo|t=6029|velocidade=113",
+		"toque|batida=7|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=6500|velocidade=114",
+		"toque_rival|batida=7|desvio_ms=0|folego=90|passada=1|resultado=perdido|t=6620|velocidade=110",
+		"corrida_fim|distancia_jogador_mil=441214|distancia_rival_mil=408791|passada=1|ritmo_jogador_milesimos=1000|t=6901|velocidade_jogador=114|velocidade_rival=110",
+		"fase|anterior=2|fase=3|passada=1|t=6901",
+		"soltou|passada=1|t=7801|t_mira_ms=900|x=-50|y=-1060",
+		"golpe|automatico=false|passada=1|sem_golpe=false|t=8901|t_mira_ms=900|x=-50|y=-1060|zona=peito",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 210, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=1|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 294, \"derrubou\": false, \"habilidade\": \"investida\", \"dano\": { \"elmo\": 23 }, \"dano_lanca\": 4 }|t=8901",
+		"fase|anterior=3|fase=4|passada=1|t=8901",
+		"passada|derrubado=0|desclassificado=0|passada=1|pontos_jogador=2|pontos_rival=3|t=10901",
+		"fase|anterior=4|fase=0|passada=2|t=10901",
+		"fase|anterior=0|fase=1|passada=2|t=12901",
+		"bandeira|passada=2|t=13157",
+		"largada|passada=2|qualidade=perfeita|queimada=false|reacao_ms=100|t=13257|tocou=true",
+		"largada_rival|passada=2|qualidade=perfeita|reacao_ms=108|t=13265",
+		"fase|anterior=1|fase=2|passada=2|t=13901",
+		"toque|batida=1|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=14401|velocidade=112",
+		"toque_rival|batida=1|desvio_ms=21|folego=80|passada=2|resultado=no_tempo|t=14422|velocidade=112",
+		"toque|batida=2|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=14901|velocidade=114",
+		"toque_rival|batida=2|desvio_ms=6|folego=80|passada=2|resultado=no_tempo|t=14907|velocidade=114",
+		"toque|batida=3|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=15401|velocidade=114",
+		"toque_rival|batida=3|desvio_ms=5|folego=80|passada=2|resultado=no_tempo|t=15406|velocidade=114",
+		"toque|batida=4|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=15901|velocidade=114",
+		"toque_rival|batida=4|desvio_ms=16|folego=80|passada=2|resultado=no_tempo|t=15917|velocidade=114",
+		"toque_rival|batida=5|desvio_ms=-63|folego=80|passada=2|resultado=no_tempo|t=16338|velocidade=114",
+		"toque|batida=5|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=16401|velocidade=114",
+		"toque_rival|batida=6|desvio_ms=-1|folego=80|passada=2|resultado=no_tempo|t=16900|velocidade=114",
+		"toque|batida=6|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=16901|velocidade=114",
+		"toque_rival|batida=7|desvio_ms=-35|folego=80|passada=2|resultado=no_tempo|t=17366|velocidade=114",
+		"toque|batida=7|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=17401|velocidade=114",
+		"corrida_fim|distancia_jogador_mil=425140|distancia_rival_mil=425065|passada=2|ritmo_jogador_milesimos=1000|t=17661|velocidade_jogador=114|velocidade_rival=114",
+		"fase|anterior=2|fase=3|passada=2|t=17661",
+		"soltou|passada=2|t=18561|t_mira_ms=900|x=-50|y=-1060",
+		"golpe|automatico=false|passada=2|sem_golpe=false|t=19661|t_mira_ms=900|x=-50|y=-1060|zona=peito",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 210, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=2|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 240, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"elmo\": 24 }, \"dano_lanca\": 4 }|t=19661",
+		"fase|anterior=3|fase=4|passada=2|t=19661",
+		"passada|derrubado=0|desclassificado=0|passada=2|pontos_jogador=2|pontos_rival=3|t=21661",
+		"fase|anterior=4|fase=0|passada=3|t=21661",
+		"fase|anterior=0|fase=1|passada=3|t=23661",
+		"bandeira|passada=3|t=24195",
+		"largada|passada=3|qualidade=perfeita|queimada=false|reacao_ms=100|t=24295|tocou=true",
+		"largada_rival|passada=3|qualidade=boa|reacao_ms=166|t=24361",
+		"fase|anterior=1|fase=2|passada=3|t=24661",
+		"toque|batida=1|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=25161|velocidade=112",
+		"toque_rival|batida=1|desvio_ms=49|folego=70|passada=3|resultado=no_tempo|t=25210|velocidade=98",
+		"toque_rival|batida=2|desvio_ms=-23|folego=70|passada=3|resultado=no_tempo|t=25638|velocidade=101",
+		"toque|batida=2|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=25661|velocidade=114",
+		"toque_rival|batida=3|desvio_ms=-40|folego=70|passada=3|resultado=no_tempo|t=26121|velocidade=104",
+		"toque|batida=3|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=26161|velocidade=114",
+		"toque_rival|batida=4|desvio_ms=-18|folego=70|passada=3|resultado=no_tempo|t=26643|velocidade=107",
+		"toque|batida=4|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=26661|velocidade=114",
+		"toque|batida=5|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=27161|velocidade=114",
+		"toque_rival|batida=5|desvio_ms=17|folego=70|passada=3|resultado=no_tempo|t=27178|velocidade=110",
+		"toque|batida=6|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=27661|velocidade=114",
+		"toque_rival|batida=6|desvio_ms=28|folego=70|passada=3|resultado=no_tempo|t=27689|velocidade=113",
+		"toque_rival|batida=7|desvio_ms=-34|folego=70|passada=3|resultado=no_tempo|t=28127|velocidade=114",
+		"toque|batida=7|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=28161|velocidade=114",
+		"corrida_fim|distancia_jogador_mil=440758|distancia_rival_mil=409253|passada=3|ritmo_jogador_milesimos=1000|t=28558|velocidade_jogador=114|velocidade_rival=114",
+		"fase|anterior=2|fase=3|passada=3|t=28558",
+		"soltou|passada=3|t=29458|t_mira_ms=900|x=-50|y=-1060",
+		"golpe|automatico=false|passada=3|sem_golpe=false|t=30558|t_mira_ms=900|x=-50|y=-1060|zona=peito",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 210, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=3|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 240, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"elmo\": 24 }, \"dano_lanca\": 4 }|t=30558",
+		"fase|anterior=3|fase=4|passada=3|t=30558",
+		"passada|derrubado=0|desclassificado=0|passada=3|pontos_jogador=2|pontos_rival=3|t=32558",
+		"fase|anterior=4|fase=5|passada=3|t=32558",
+		"fim|motivo=pontos|placar_jogador=6|placar_rival=9|t=32558|vencedor=2"
+	],
+	"lado_jogador": {
+		"cavaleiro": {
+			"equilibrio": 50.0,
+			"forca": 50.0,
+			"precisao": 50.0
+		},
+		"cavalo": {
+			"folego": 50.0,
+			"temperamento": 50.0,
+			"velocidade": 50.0
+		}
+	},
+	"lado_rival": {
+		"cavaleiro": {
+			"equilibrio": 50.0,
+			"forca": 50.0,
+			"precisao": 50.0
+		},
+		"cavalo": {
+			"folego": 50.0,
+			"temperamento": 50.0,
+			"velocidade": 50.0
+		},
+		"habilidade": "investida"
+	},
+	"perfil": {
+		"acelera": "cedo",
+		"deslocamento_mira_px": [
+			0.0,
+			0.0
+		],
+		"desvio_medio_ms": -10.0,
+		"desvio_variacao_ms": 70.0,
+		"erro_mira_px": 8.0,
+		"habilidade_batida": 2.0,
+		"metade_batidas": 7.0,
+		"perder_batida_milesimos": 60.0,
+		"reacao_media_ms": 120.0,
+		"reacao_variacao_ms": 90.0,
+		"zona_preferida": "capacete"
+	},
+	"semente": 7,
+	"versao": 1
+}

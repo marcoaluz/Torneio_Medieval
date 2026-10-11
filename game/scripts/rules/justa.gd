@@ -20,7 +20,10 @@ extends RefCounted
 ## No choque, a regra do impacto resolve os dois golpes; falta conta para a
 ## desclassificação (impacto.falta.faltas_para_desclassificar) e o dano gasta
 ## a durabilidade das peças, que vale para as passadas seguintes.
-## O golpe do rival vem de rival_mirar(ponto) (IA, 1.6); sem ele, o rival erra.
+## Rival: com `perfil_ia` (ia_rival.json), a IA (IaRival, semente derivada)
+## larga, galopa, mira e aciona a habilidade sozinha, nos instantes que ela
+## planeja. Sem perfil, o rival corre na velocidade nominal e só golpeia se
+## alguém chamar rival_mirar().
 ##
 ## Configuração: {justa, galope, mira, impacto} (os JSON de game/data/balance/).
 ## Cada lado: {cavaleiro: {forca, precisao, equilibrio}, cavalo: {velocidade,
@@ -38,6 +41,8 @@ extends RefCounted
 ##   {tipo:"golpe", passada, zona, x, y, t_mira_ms, automatico, sem_golpe}
 ##        (x, y em décimos de px do quadro do rival; vem logo antes da fase Impacto)
 ##   {tipo:"habilidade", passada, lado, nome}  (ativa acionada)
+##   {tipo:"largada_rival", passada, qualidade, reacao_ms}
+##   {tipo:"toque_rival", passada, resultado, batida, desvio_ms, velocidade, folego}
 ##   {tipo:"impacto", passada, jogador, rival, faltas_jogador, faltas_rival,
 ##        derrubado, desclassificado}  (jogador/rival = resultado de Impacto.resolver)
 
@@ -70,6 +75,14 @@ var habilidade_na_passada_jogador := false
 var habilidade_na_passada_rival := false
 ## Último resultado do impacto (para a apresentação).
 var ultimo_impacto: Dictionary
+## Largada do rival nesta passada.
+var qualidade_largada_rival := ""
+var ia: IaRival
+
+var _rival_largada_ms := -1  ## instante (na Largada) do toque do rival; -1 = não toca
+var _rival_largou := false
+var _plano_rival: Array[int] = []
+var _plano_ix := 0
 
 var _cfg: Dictionary
 var _rng: Aleatorio
@@ -103,14 +116,16 @@ static func carregar_configuracao() -> Dictionary:
 		cfg[nome] = Balanceamento.carregar(nome)
 	return cfg
 
-func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int) -> void:
+func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int, perfil_ia := {}) -> void:
 	_cfg = cfg
 	lado_jogador = lado_j.duplicate(true)
 	lado_rival = lado_r.duplicate(true)
 	fases = JustaFases.new(cfg["justa"])
 	jogador = Galope.new(cfg["galope"], lado_jogador["cavalo"])
 	rival = Galope.new(cfg["galope"], lado_rival["cavalo"])
-	rival.automatico = true
+	rival.automatico = perfil_ia.is_empty()
+	if not perfil_ia.is_empty():
+		ia = IaRival.new(perfil_ia, IaRival.semente_da_justa(semente))
 	_rng = Aleatorio.new(semente)
 	precisao_jogador = Impacto.precisao_efetiva(lado_jogador)
 	precisao_rival = Impacto.precisao_efetiva(lado_rival)
@@ -190,12 +205,17 @@ func avancar(ms: int) -> Array[Dictionary]:
 				var passo := mini(ms, ate_fase)
 				if not bandeira_baixou:
 					passo = mini(passo, bandeira_ms - fases.tempo_na_fase_ms)
+				if not _rival_largou and _rival_largada_ms >= 0:
+					passo = mini(passo, _rival_largada_ms - fases.tempo_na_fase_ms)
 				if passo > 0:
 					ms -= passo
 					eventos.append_array(_observar(fases.avancar(passo)))
-				if not bandeira_baixou and fases.fase == JustaFases.Fase.LARGADA and fases.tempo_na_fase_ms >= bandeira_ms:
-					bandeira_baixou = true
-					eventos.append({"tipo": "bandeira", "passada": fases.passada, "t": fases.tempo_total_ms})
+				if fases.fase == JustaFases.Fase.LARGADA:
+					if not bandeira_baixou and fases.tempo_na_fase_ms >= bandeira_ms:
+						bandeira_baixou = true
+						eventos.append({"tipo": "bandeira", "passada": fases.passada, "t": fases.tempo_total_ms})
+					if not _rival_largou and _rival_largada_ms >= 0 and fases.tempo_na_fase_ms >= _rival_largada_ms:
+						eventos.append(_rival_larga())
 			_:
 				var ate_fase := fases.duracao_ms(fases.fase) - fases.tempo_na_fase_ms
 				var passo := mini(ms, ate_fase)
@@ -240,10 +260,26 @@ func soltar() -> Array[Dictionary]:
 
 func _corrida_1ms() -> Array[Dictionary]:
 	var eventos: Array[Dictionary] = []
+	if ia:
+		# Toques da IA no instante planejado (mesma regra do toque do jogador).
+		while _plano_ix < _plano_rival.size() and _plano_rival[_plano_ix] <= rival.t_ms:
+			if _plano_rival[_plano_ix] == rival.t_ms:
+				var r := rival.tocar()
+				var ev := _evento_toque(r, rival)
+				ev["tipo"] = "toque_rival"
+				eventos.append(ev)
+			_plano_ix += 1
+		var hb := ia.batida_habilidade()
+		if hb > 0 and rival.t_ms == hb * rival.compasso_ms():
+			eventos.append_array(rival_ativar_habilidade())
 	var perdido := jogador.avancar_1ms()
-	rival.avancar_1ms()
+	var perdido_rival := rival.avancar_1ms()
 	if not perdido.is_empty():
 		eventos.append(_evento_toque(perdido, jogador))
+	if not perdido_rival.is_empty():
+		var ev := _evento_toque(perdido_rival, rival)
+		ev["tipo"] = "toque_rival"
+		eventos.append(ev)
 	# Primeiro o relógio (pode bater o teto); depois a chegada.
 	eventos.append_array(_observar(fases.avancar(1)))
 	if fases.fase == JustaFases.Fase.CORRIDA and jogador.distancia_mil + rival.distancia_mil >= distancia_corrida_mil():
@@ -280,12 +316,30 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 				tocou_largada = false
 				qualidade_largada = ""
 				reacao_largada_ms = 0
+				_rival_largou = false
+				qualidade_largada_rival = ""
+				_rival_largada_ms = -1
+				if ia:
+					# Reação antes da bandeira = toque antes dela (queimada); nunca antes do 0.
+					var tr := maxi(bandeira_ms + ia.reacao_largada_ms(), 0)
+					if tr < fases.duracao_ms(JustaFases.Fase.LARGADA):
+						_rival_largada_ms = tr
 			JustaFases.Fase.CORRIDA:
 				if not tocou_largada:
 					qualidade_largada = Galope.avaliar_largada(_cfg["galope"], false, 0)
 					saida.append(_evento_largada())
 				jogador.nova_passada(qualidade_largada)
-				rival.nova_passada("boa")
+				if ia:
+					if not _rival_largou:
+						qualidade_largada_rival = Galope.avaliar_largada(_cfg["galope"], false, 0)
+						saida.append({"tipo": "largada_rival", "passada": fases.passada,
+							"qualidade": qualidade_largada_rival, "reacao_ms": 0, "t": fases.tempo_total_ms})
+						_rival_largou = true
+					rival.nova_passada(qualidade_largada_rival)
+					_plano_rival = ia.plano_galope(rival.compasso_ms(), fases.duracao_ms(JustaFases.Fase.CORRIDA))
+					_plano_ix = 0
+				else:
+					rival.nova_passada("boa")
 			JustaFases.Fase.MIRA:
 				ponta = Mira.ponta_inicial(_cfg["mira"])
 				segurando = false
@@ -294,6 +348,8 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 				rival_mirou = false
 				precisao_jogador = Impacto.precisao_efetiva(lado_jogador)
 				precisao_rival = Impacto.precisao_efetiva(lado_rival)
+				if ia:
+					rival_mirar(ia.ponto_mira(_cfg["mira"]))
 	return saida
 
 func _avaliar_golpe(t: int) -> Dictionary:
@@ -311,7 +367,10 @@ func _avaliar_golpe(t: int) -> Dictionary:
 func _resolver_impacto(golpe: Dictionary, t: int) -> Dictionary:
 	var zona_rival := Mira.ERRO
 	if rival_mirou:
-		zona_rival = Mira.zona_no_ponto(_cfg["mira"], ponta_rival, precisao_rival, 0)
+		var bonus_rival := 0
+		if qualidade_largada_rival != "":
+			bonus_rival = int(_cfg["galope"]["largada"]["bonus_precisao_pct"][qualidade_largada_rival])
+		zona_rival = Mira.zona_no_ponto(_cfg["mira"], ponta_rival, precisao_rival, bonus_rival)
 	var entrada := {
 		"jogador": _golpeador(lado_jogador, golpe["zona"], jogador, habilidade_na_passada_jogador),
 		"rival": _golpeador(lado_rival, zona_rival, rival, habilidade_na_passada_rival),
@@ -368,6 +427,13 @@ static func _gastar(lado: Dictionary, dano: Dictionary) -> void:
 		if equip.has(peca):
 			var p: Dictionary = equip[peca]
 			p["durabilidade"] = maxi(int(p.get("durabilidade", 0)) - int(dano[peca]), 0)
+
+func _rival_larga() -> Dictionary:
+	_rival_largou = true
+	var reacao := _rival_largada_ms - bandeira_ms
+	qualidade_largada_rival = Galope.avaliar_largada(_cfg["galope"], true, reacao)
+	return {"tipo": "largada_rival", "passada": fases.passada, "qualidade": qualidade_largada_rival,
+		"reacao_ms": reacao, "t": fases.tempo_total_ms}
 
 func _evento_largada() -> Dictionary:
 	return {"tipo": "largada", "passada": fases.passada, "qualidade": qualidade_largada,

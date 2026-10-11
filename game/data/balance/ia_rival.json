@@ -1,0 +1,54 @@
+{
+	"versao": 1,
+	"_nota": "Perfis da IA do rival. Tempos em ms, erros de mira em px do quadro do alvo, chances em milesimos. 'acelera': 'cedo' = toca todas as batidas ate metade_batidas e depois uma sim, uma nao; 'tarde' = o contrario. habilidade_batida: batida da corrida em que aciona a habilidade ativa (0 = nunca). deslocamento_mira_px: [x, y] somado ao centro da zona (o centro do peito fica meio atras do escudo).",
+	"perfis": {
+		"novato": {
+			"reacao_media_ms": 320,
+			"reacao_variacao_ms": 220,
+			"desvio_medio_ms": 40,
+			"desvio_variacao_ms": 170,
+			"perder_batida_milesimos": 300,
+			"acelera": "tarde",
+			"metade_batidas": 4,
+			"zona_preferida": "peito",
+			"erro_mira_px": 20,
+			"habilidade_batida": 6,
+			"deslocamento_mira_px": [
+				0,
+				0
+			]
+		},
+		"equilibrado": {
+			"reacao_media_ms": 190,
+			"reacao_variacao_ms": 110,
+			"desvio_medio_ms": 0,
+			"desvio_variacao_ms": 90,
+			"perder_batida_milesimos": 120,
+			"acelera": "cedo",
+			"metade_batidas": 5,
+			"zona_preferida": "peito",
+			"erro_mira_px": 9,
+			"habilidade_batida": 4,
+			"deslocamento_mira_px": [
+				-5,
+				0
+			]
+		},
+		"agressivo": {
+			"reacao_media_ms": 120,
+			"reacao_variacao_ms": 90,
+			"desvio_medio_ms": -10,
+			"desvio_variacao_ms": 70,
+			"perder_batida_milesimos": 60,
+			"acelera": "cedo",
+			"metade_batidas": 7,
+			"zona_preferida": "capacete",
+			"erro_mira_px": 8,
+			"habilidade_batida": 2,
+			"deslocamento_mira_px": [
+				0,
+				0
+			]
+		}
+	}
+}

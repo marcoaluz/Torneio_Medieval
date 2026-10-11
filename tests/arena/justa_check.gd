@@ -15,6 +15,7 @@ var _toques := {}
 var _largadas: Array[String] = []
 var _golpes: Array[String] = []
 var _impactos := 0
+var _toques_rival := 0
 
 func _initialize() -> void:
 	var arena: Arena = load("res://game/scenes/arena/arena.tscn").instantiate()
@@ -33,6 +34,7 @@ func _initialize() -> void:
 	c.toque_galope.connect(func(r, _d, _v, _f): _toques[r] = _toques.get(r, 0) + 1)
 	c.corrida_terminou.connect(func(p, _v, _r): _log.append("corrida_fim:%d" % p))
 	c.impacto_resolvido.connect(func(_p, _j, _r, _d, _q): _impactos += 1)
+	c.fase_mudou.connect(func(_f, _a, _p): _toques_rival = c.justa.rival.acertos + _toques_rival if _f == JustaFases.Fase.MIRA else _toques_rival)
 	c.golpe_avaliado.connect(func(_p, z, a, s): _golpes.append("%s%s%s" % [z, ":auto" if a else "", ":sem" if s else ""]))
 	c.passada_terminou.connect(func(p, pj, pr, _d): _log.append("passada:%d:%d-%d" % [p, pj, pr]))
 	c.justa_terminou.connect(func(v, m, pj, pr): _log.append("fim:%s:%s:%d-%d" % [JustaFases.NOMES_LADO[v], m, pj, pr]))
@@ -77,7 +79,8 @@ func _initialize() -> void:
 			barra_fim_mira = absf(c.barra.posicao_jogador - c.barra.posicao_rival)
 
 	_checa("justa termina", c.justa.terminou())
-	_checa("jogador vence (o rival nao mira ate a IA): %s" % _log.back(), _log.back().begins_with("fim:jogador:"))
+	_checa("justa termina com resultado: %s" % _log.back(), _log.back().begins_with("fim:"))
+	_checa("a IA do rival galopa (%d toques)" % _toques_rival, _toques_rival > 0)
 	_checa("impacto resolvido a cada passada (%d)" % _impactos, _impactos == _log.count("fase:impacto:1") + _log.count("fase:impacto:2") + _log.count("fase:impacto:3"))
 	_checa("um sinal por fase e na ordem", _log.slice(0, 11) == [
 		"fase:apresentacao:1", "sinal:apresentacao:1", "fase:largada:1", "sinal:largada:1", "bandeira:1",

@@ -45,6 +45,8 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var arena: Arena
 @export var barra: BarraDistancia
 @export var iniciar_sozinho := true
+## Perfil da IA do rival (game/data/balance/ia_rival.json); vazio = rival sem IA.
+@export var perfil_rival := "equilibrado"
 ## Velocidade dos cavaleiros na Mira e no Impacto em relação à Corrida
 ## (câmera lenta). Ajuste visual: o tempo de jogo da Mira não muda.
 @export_range(0.05, 1.0, 0.05) var camera_lenta := 0.3
@@ -91,8 +93,17 @@ func iniciar(semente_fixa := -1) -> void:
 		lado_jogador = {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
 	if lado_rival.is_empty():
 		lado_rival = {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
+	var perfil := {}
+	if perfil_rival != "":
+		var ia_cfg := Balanceamento.carregar("ia_rival")
+		var e_ia := IaRival.validar(ia_cfg)
+		if e_ia != "" or not ia_cfg["perfis"].has(perfil_rival):
+			push_error("ControladorJusta: perfil de IA \"%s\" inválido: %s" % [perfil_rival, e_ia])
+			set_process(false)
+			return
+		perfil = ia_cfg["perfis"][perfil_rival]
 	semente = semente_fixa if semente_fixa >= 0 else randi()
-	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente)
+	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente, perfil)
 	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)
 	_px_por_mil = vao / float(justa.distancia_total_mil())
 	_resto_ms = 0.0

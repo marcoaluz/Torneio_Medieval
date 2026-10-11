@@ -1,0 +1,697 @@
+{
+	"versao": 1,
+	"descricao": "IA do rival (game/scripts/ai/ia_rival.gd). Para cada caso: IaRival(perfil, semente_ia); por passada chame reacao_largada_ms(), plano_galope(500, 6000), ponto_mira(mira) nessa ordem. semente_ia = (semente_justa ^ 0x5DEECE66) & 0xFFFFFFFF.",
+	"config_ia": {
+		"versao": 1,
+		"_nota": "Perfis da IA do rival. Tempos em ms, erros de mira em px do quadro do alvo, chances em milesimos. 'acelera': 'cedo' = toca todas as batidas ate metade_batidas e depois uma sim, uma nao; 'tarde' = o contrario. habilidade_batida: batida da corrida em que aciona a habilidade ativa (0 = nunca). deslocamento_mira_px: [x, y] somado ao centro da zona (o centro do peito fica meio atras do escudo).",
+		"perfis": {
+			"novato": {
+				"reacao_media_ms": 320,
+				"reacao_variacao_ms": 220,
+				"desvio_medio_ms": 40,
+				"desvio_variacao_ms": 170,
+				"perder_batida_milesimos": 300,
+				"acelera": "tarde",
+				"metade_batidas": 4,
+				"zona_preferida": "peito",
+				"erro_mira_px": 20,
+				"habilidade_batida": 6,
+				"deslocamento_mira_px": [
+					0,
+					0
+				]
+			},
+			"equilibrado": {
+				"reacao_media_ms": 190,
+				"reacao_variacao_ms": 110,
+				"desvio_medio_ms": 0,
+				"desvio_variacao_ms": 90,
+				"perder_batida_milesimos": 120,
+				"acelera": "cedo",
+				"metade_batidas": 5,
+				"zona_preferida": "peito",
+				"erro_mira_px": 9,
+				"habilidade_batida": 4,
+				"deslocamento_mira_px": [
+					-5,
+					0
+				]
+			},
+			"agressivo": {
+				"reacao_media_ms": 120,
+				"reacao_variacao_ms": 90,
+				"desvio_medio_ms": -10,
+				"desvio_variacao_ms": 70,
+				"perder_batida_milesimos": 60,
+				"acelera": "cedo",
+				"metade_batidas": 7,
+				"zona_preferida": "capacete",
+				"erro_mira_px": 8,
+				"habilidade_batida": 2,
+				"deslocamento_mira_px": [
+					0,
+					0
+				]
+			}
+		}
+	},
+	"config_mira": {
+		"versao": 1,
+		"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+		"zonas": [
+			{
+				"nome": "escudo",
+				"retangulos": [
+					[
+						6,
+						-123,
+						16,
+						30
+					]
+				],
+				"cresce": true
+			},
+			{
+				"nome": "capacete",
+				"retangulos": [
+					[
+						-10,
+						-150,
+						20,
+						22
+					]
+				],
+				"cresce": true
+			},
+			{
+				"nome": "peito",
+				"retangulos": [
+					[
+						-12,
+						-128,
+						24,
+						44
+					]
+				],
+				"cresce": true
+			},
+			{
+				"nome": "cavalo",
+				"retangulos": [
+					[
+						-50,
+						-84,
+						100,
+						42
+					],
+					[
+						36,
+						-116,
+						38,
+						34
+					],
+					[
+						-60,
+						-80,
+						10,
+						26
+					]
+				],
+				"cresce": false
+			}
+		],
+		"precisao": {
+			"crescimento_por_ponto_milesimos": 400,
+			"crescimento_max_pct": 50
+		},
+		"ponta_inicial": [
+			40,
+			-175
+		],
+		"limites_ponta": [
+			-90,
+			-200,
+			180,
+			200
+		],
+		"oscilacao": {
+			"amplitude_px": 3,
+			"frequencia_x_milesimos": 1300,
+			"frequencia_y_milesimos": 1700
+		}
+	},
+	"centros": {
+		"capacete": [
+			0,
+			-1390
+		],
+		"peito": [
+			0,
+			-1060
+		],
+		"escudo": [
+			140,
+			-1080
+		],
+		"cavalo": [
+			0,
+			-630
+		],
+		"inexistente": [
+			0,
+			0
+		]
+	},
+	"casos": [
+		{
+			"perfil": "agressivo",
+			"semente_justa": 1,
+			"semente_ia": 1575931495,
+			"passadas": [
+				{
+					"reacao_ms": 97,
+					"galope": [
+						474,
+						1036,
+						1491,
+						1988,
+						2503,
+						2997,
+						3526,
+						4004,
+						4992,
+						6050
+					],
+					"mira": [
+						15,
+						-1412
+					]
+				},
+				{
+					"reacao_ms": 68,
+					"galope": [
+						551,
+						969,
+						1510,
+						1968,
+						2492,
+						2994,
+						3460,
+						4005,
+						5018,
+						5978
+					],
+					"mira": [
+						-59,
+						-1339
+					]
+				},
+				{
+					"reacao_ms": 163,
+					"galope": [
+						490,
+						967,
+						1498,
+						2009,
+						2469,
+						2928,
+						3439,
+						3948,
+						5034,
+						6002
+					],
+					"mira": [
+						-10,
+						-1372
+					]
+				}
+			]
+		},
+		{
+			"perfil": "agressivo",
+			"semente_justa": 99,
+			"semente_ia": 1575931397,
+			"passadas": [
+				{
+					"reacao_ms": 122,
+					"galope": [
+						514,
+						983,
+						1509,
+						2015,
+						2465,
+						2971,
+						3498,
+						4046,
+						5038,
+						5964
+					],
+					"mira": [
+						4,
+						-1435
+					]
+				},
+				{
+					"reacao_ms": 91,
+					"galope": [
+						1022,
+						1475,
+						1990,
+						2521,
+						2985,
+						3471,
+						3975,
+						5005,
+						5960
+					],
+					"mira": [
+						-17,
+						-1436
+					]
+				},
+				{
+					"reacao_ms": 126,
+					"galope": [
+						476,
+						1015,
+						1457,
+						1958,
+						2475,
+						2981,
+						3502,
+						3956,
+						4989,
+						5960
+					],
+					"mira": [
+						63,
+						-1417
+					]
+				}
+			]
+		},
+		{
+			"perfil": "agressivo",
+			"semente_justa": 123456,
+			"semente_ia": 1575955494,
+			"passadas": [
+				{
+					"reacao_ms": 155,
+					"galope": [
+						484,
+						1509,
+						1950,
+						3009,
+						3503,
+						3957,
+						4972,
+						5967
+					],
+					"mira": [
+						8,
+						-1399
+					]
+				},
+				{
+					"reacao_ms": 202,
+					"galope": [
+						479,
+						1013,
+						1470,
+						2024,
+						2962,
+						3455,
+						3991,
+						4966,
+						5938
+					],
+					"mira": [
+						32,
+						-1416
+					]
+				},
+				{
+					"reacao_ms": 112,
+					"galope": [
+						447,
+						985,
+						1480,
+						2016,
+						2532,
+						3033,
+						3470,
+						3997,
+						4953,
+						6001
+					],
+					"mira": [
+						37,
+						-1382
+					]
+				}
+			]
+		},
+		{
+			"perfil": "equilibrado",
+			"semente_justa": 1,
+			"semente_ia": 1575931495,
+			"passadas": [
+				{
+					"reacao_ms": 202,
+					"galope": [
+						519,
+						976,
+						1428,
+						2027,
+						2496,
+						3022,
+						3923,
+						4975,
+						5977
+					],
+					"mira": [
+						-55,
+						-1078
+					]
+				},
+				{
+					"reacao_ms": 129,
+					"galope": [
+						448,
+						1511,
+						1968,
+						2487,
+						2974,
+						4013,
+						4975
+					],
+					"mira": [
+						-41,
+						-1027
+					]
+				},
+				{
+					"reacao_ms": 136,
+					"galope": [
+						454,
+						981,
+						1509,
+						2017,
+						2461,
+						3030,
+						4016,
+						4949,
+						5935
+					],
+					"mira": [
+						-49,
+						-1102
+					]
+				}
+			]
+		},
+		{
+			"perfil": "equilibrado",
+			"semente_justa": 99,
+			"semente_ia": 1575931397,
+			"passadas": [
+				{
+					"reacao_ms": 175,
+					"galope": [
+						510,
+						1483,
+						1986,
+						2551,
+						3000,
+						3978,
+						5029,
+						5953
+					],
+					"mira": [
+						-42,
+						-1053
+					]
+				},
+				{
+					"reacao_ms": 172,
+					"galope": [
+						461,
+						980,
+						1466,
+						2071,
+						2443,
+						2973,
+						4017,
+						4994,
+						6016
+					],
+					"mira": [
+						-75,
+						-1062
+					]
+				},
+				{
+					"reacao_ms": 191,
+					"galope": [
+						465,
+						1006,
+						1530,
+						1963,
+						2490,
+						2989,
+						3962,
+						4935,
+						6035
+					],
+					"mira": [
+						9,
+						-1034
+					]
+				}
+			]
+		},
+		{
+			"perfil": "equilibrado",
+			"semente_justa": 123456,
+			"semente_ia": 1575955494,
+			"passadas": [
+				{
+					"reacao_ms": 115,
+					"galope": [
+						495,
+						1488,
+						3033,
+						3996,
+						4949,
+						6025
+					],
+					"mira": [
+						-26,
+						-1042
+					]
+				},
+				{
+					"reacao_ms": 134,
+					"galope": [
+						472,
+						1038,
+						1498,
+						1968,
+						2570,
+						2968,
+						4002,
+						5996
+					],
+					"mira": [
+						-52,
+						-1029
+					]
+				},
+				{
+					"reacao_ms": 238,
+					"galope": [
+						518,
+						976,
+						1481,
+						1963,
+						2547,
+						3066,
+						3977,
+						5980
+					],
+					"mira": [
+						-102,
+						-1100
+					]
+				}
+			]
+		},
+		{
+			"perfil": "novato",
+			"semente_justa": 1,
+			"semente_ia": 1575931495,
+			"passadas": [
+				{
+					"reacao_ms": 271,
+					"galope": [
+						1031,
+						2485,
+						3147,
+						3685,
+						4075,
+						4520,
+						5121,
+						5501
+					],
+					"mira": [
+						132,
+						-908
+					]
+				},
+				{
+					"reacao_ms": 391,
+					"galope": [
+						1122,
+						2032,
+						2402,
+						2938,
+						3479,
+						4023,
+						4536,
+						5036,
+						5539
+					],
+					"mira": [
+						20,
+						-1119
+					]
+				},
+				{
+					"reacao_ms": 432,
+					"galope": [
+						1084,
+						2042,
+						3148,
+						3539,
+						3994,
+						5091
+					],
+					"mira": [
+						-40,
+						-1125
+					]
+				}
+			]
+		},
+		{
+			"perfil": "novato",
+			"semente_justa": 99,
+			"semente_ia": 1575931397,
+			"passadas": [
+				{
+					"reacao_ms": 339,
+					"galope": [
+						1110,
+						2627,
+						3010,
+						3533,
+						4493,
+						4956,
+						5667,
+						5964
+					],
+					"mira": [
+						-26,
+						-1092
+					]
+				},
+				{
+					"reacao_ms": 233,
+					"galope": [
+						1097,
+						2050,
+						2530,
+						3921,
+						4436,
+						5085,
+						5479
+					],
+					"mira": [
+						-10,
+						-1050
+					]
+				},
+				{
+					"reacao_ms": 224,
+					"galope": [
+						1066,
+						2550,
+						3046,
+						3542,
+						4511,
+						5051,
+						5563,
+						6089
+					],
+					"mira": [
+						-28,
+						-1036
+					]
+				}
+			]
+		},
+		{
+			"perfil": "novato",
+			"semente_justa": 123456,
+			"semente_ia": 1575955494,
+			"passadas": [
+				{
+					"reacao_ms": 117,
+					"galope": [
+						1062,
+						2471,
+						4009,
+						6087
+					],
+					"mira": [
+						84,
+						-1006
+					]
+				},
+				{
+					"reacao_ms": 300,
+					"galope": [
+						2601,
+						2995,
+						3665,
+						4130,
+						5084,
+						5564,
+						6017
+					],
+					"mira": [
+						-56,
+						-1217
+					]
+				},
+				{
+					"reacao_ms": 270,
+					"galope": [
+						1013,
+						2597,
+						3568,
+						4193,
+						4549,
+						5040,
+						5664,
+						6045
+					],
+					"mira": [
+						-119,
+						-1053
+					]
+				}
+			]
+		}
+	]
+}
