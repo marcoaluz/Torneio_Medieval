@@ -51,3 +51,5 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Partículas em `CPUParticles2D`**, não GPU: no renderer Compatibility, em Android de entrada, as GPU são menos previsíveis, e são poucas partículas por choque. Cenas de disparo único, criadas no choque e apagadas no fim.
 - **2026-10-11 · Hit-stop por `Engine.time_scale`** com timer que ignora a escala: congela regra e apresentação juntas (a Justa anda pelo delta escalado), então nada fica fora de sincronia.
 - **2026-10-11 · Intensidades da sensação em `sensacao.json`** (pasta balance, mas são números de apresentação; a regra não lê esse arquivo).
+- **2026-10-11 · APK de teste: só arm64-v8a, sem Gradle, permissão só de vibração.** A grande maioria dos Androids atuais é arm64; o Gradle só é preciso para AAB/plugins (Play Store, Parte 3). Os JSON de dados entram no pacote pelo `include_filter` (`game/data/*.json`).
+- **2026-10-11 · Ferramentas de Android não instaladas automaticamente:** JDK e SDK são instalações de sistema grandes; ficam no passo a passo (`docs/ANDROID.md`) para o usuário.

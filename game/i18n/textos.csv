@@ -29,3 +29,4 @@ MOTIVO_DERRUBADA,Por derrubada,By unhorsing
 MOTIVO_DESCLASSIFICACAO,Por desclassificação,By disqualification
 MOTIVO_EMPATE,Ninguém venceu,Nobody won
 JUSTA_TOQUE_DE_NOVO,Toque para justar de novo,Tap to joust again
+DEPURACAO_FPS,FPS {fps},FPS {fps}
