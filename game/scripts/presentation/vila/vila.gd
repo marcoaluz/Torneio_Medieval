@@ -28,6 +28,7 @@ var _acumulado := 0.0
 @onready var _acao: Button = $Interface/Painel/Coluna/Botoes/Acao
 @onready var _fechar: Button = $Interface/Painel/Coluna/Botoes/Fechar
 @onready var _letreiro: Label = $Interface/Letreiro
+@onready var tela_treino: TelaTreino = $Interface/TelaTreino
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
@@ -45,6 +46,9 @@ func _ready() -> void:
 	_acao.pressed.connect(func(): abrir_justa.emit())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
+	var notif := get_node_or_null("/root/Notificacoes") as ServicoNotificacoes
+	if notif:
+		notif.pronto.connect(func(t): mostrar_letreiro(tr("NOTIF_" + str(t["tipo"]).to_upper())))
 	atualizar()
 
 ## Atualiza prédios e topo a partir dos dados (e o painel aberto).
@@ -57,9 +61,11 @@ func atualizar() -> void:
 		var p: PredioVila = predios[nome]
 		p.bloqueado = not _jog.predio_liberado(nome)
 		p.nivel = maxi(_jog.predio_nivel(nome), 1)
-		var t := _jog.timer_do_predio(nome)
-		p.pronto = not t.is_empty() and ServicoTempo.pronto(int(t["termina_em"]))
-		p.mostrar_timer("" if t.is_empty() or p.pronto else formatar_tempo(ServicoTempo.restante(int(t["termina_em"]))))
+		# Balão: o timer que termina primeiro; "!" se algum já terminou.
+		var ts := _jog.timers_do_predio(nome)
+		ts.sort_custom(func(a, b): return int(a["termina_em"]) < int(b["termina_em"]))
+		p.pronto = not ts.is_empty() and ServicoTempo.pronto(int(ts[0]["termina_em"]))
+		p.mostrar_timer("" if ts.is_empty() or p.pronto else formatar_tempo(ServicoTempo.restante(int(ts[0]["termina_em"]))))
 	if aberto != "":
 		_preencher_painel(aberto)
 
@@ -92,10 +98,14 @@ func tocar_predio(nome: String) -> void:
 		var nivel := int(Balanceamento.carregar("vila")["predios"][nome]["libera_nivel"])
 		mostrar_letreiro(tr("VILA_BLOQUEADO").format({"predio": tr("PREDIO_" + nome.to_upper()), "nivel": nivel}))
 		return
-	var t := _jog.timer_do_predio(nome)
+	var t := _jog.timer_do_predio(nome, "melhoria")
 	if not t.is_empty() and ServicoTempo.pronto(int(t["termina_em"])):
 		if _jog.concluir_timer(t["id"])["ok"]:
 			mostrar_letreiro(tr("VILA_MELHORIA_PRONTA").format({"predio": tr("PREDIO_" + nome.to_upper()), "nivel": t["nivel_novo"]}))
+		return
+	if nome in ["campo_treino", "estabulo"]:
+		fechar_painel()
+		tela_treino.abrir(nome)
 		return
 	abrir_painel(nome)
 
@@ -116,7 +126,7 @@ func melhorar(nome: String) -> void:
 func _preencher_painel(nome: String) -> void:
 	_titulo.text = tr("PREDIO_" + nome.to_upper())
 	_nivel.text = tr("VILA_NIVEL").format({"nivel": _jog.predio_nivel(nome), "teto": _jog.teto_predio(nome)})
-	var t := _jog.timer_do_predio(nome)
+	var t := _jog.timer_do_predio(nome, "melhoria")
 	var p := _jog.pode_melhorar(nome)
 	if not t.is_empty():
 		_estado.text = tr("VILA_EM_OBRA").format({"tempo": formatar_tempo(ServicoTempo.restante(int(t["termina_em"])))})

@@ -65,3 +65,6 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Prédio liberado pelo nível do cavaleiro começa no nível 1 sem precisar construir**; a casa senhorial é o teto dos outros. Melhoria cobra na hora e cria timer por horário de término; concluir é um comando (vira Edge Function).
 - **2026-10-11 · Dia/noite por `CanvasModulate` no mundo e tochas com `PointLight2D`** (a interface fica numa CanvasLayer e não escurece). Clima sorteado com semente = dia, para não mudar a cada vez que se abre a vila.
 - **2026-10-11 · A vila viva lê ocupado/ocioso dos timers do Jogador**, sem estado próprio; a vila só mostra.
+- **2026-10-11 · Fôlego do cavalo entre justas como valor + horário** (recuperação calculada na leitura, vale com o jogo fechado); cansado corre com penalidade de Velocidade aplicada no lado da justa, sem mexer na regra.
+- **2026-10-11 · O cavalo ativo não treina** (o jogador troca de cavalo antes); treinos ocupam vagas do prédio e não impedem melhorar o prédio.
+- **2026-10-11 · Notificações locais por serviço com fila e aviso no jogo**; o aviso do sistema depende de plugin Android (o Godot não tem nativo).

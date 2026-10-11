@@ -44,14 +44,46 @@ func cavalo_ativo() -> Dictionary:
 			return c.duplicate(true)
 	return {}
 
-## Cavalo cansado (fôlego baixo; regras na 2.7). Sem dado de fôlego, não está.
+func cavalo(id: String) -> Dictionary:
+	for c: Dictionary in estado["cavalos"]:
+		if c["id"] == id:
+			return c.duplicate(true)
+	return {}
+
+## Fôlego atual do cavalo (0 ao máximo dos dados). Guardado como valor +
+## horário; recupera com o tempo, mais rápido com o estábulo melhor, sem
+## precisar de nada rodando (vale com o jogo fechado).
+func folego_cavalo(id := "") -> int:
+	var c := cavalo_ativo() if id == "" else cavalo(id)
+	if c.is_empty():
+		return 0
+	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var maximo := int(f["maximo"])
+	var base := int(c.get("folego", maximo))
+	var desde := maxi(ServicoTempo.agora() - int(c.get("folego_em", ServicoTempo.agora())), 0)
+	return mini(maximo, base + desde * _recuperacao_por_hora() / 3600)
+
+## Cavalo cansado: fôlego abaixo do limite. Corre mesmo assim, com
+## penalidade de velocidade (GDD: nunca existe energia que impede de jogar).
 func cavalo_cansado(id := "") -> bool:
-	var c := cavalo_ativo() if id == "" else {}
-	if id != "":
-		for x: Dictionary in estado["cavalos"]:
-			if x["id"] == id:
-				c = x
-	return c.get("cansado", false)
+	return folego_cavalo(id) < int(Balanceamento.carregar("treino")["folego_cavalo"]["cansado_abaixo_de"])
+
+## Horário em que o cavalo estará com o fôlego cheio.
+func descansado_em(id := "") -> int:
+	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var falta := int(f["maximo"]) - folego_cavalo(id)
+	return ServicoTempo.agora() + (falta * 3600 + _recuperacao_por_hora() - 1) / maxi(_recuperacao_por_hora(), 1)
+
+func _recuperacao_por_hora() -> int:
+	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var bonus := int(f["bonus_recupera_por_nivel_estabulo_pct"]) * maxi(predio_nivel("estabulo") - 1, 0)
+	return int(f["recupera_por_hora"]) * (100 + bonus) / 100
+
+func cavalo_treinando(id: String) -> bool:
+	for t: Dictionary in estado["timers"]:
+		if t["tipo"] == "treino_cavalo" and t.get("cavalo", "") == id:
+			return true
+	return false
 
 func cavalos() -> Array:
 	return estado["cavalos"].duplicate(true)
@@ -97,9 +129,13 @@ func lado_para_justa() -> Dictionary:
 		p["durabilidade"] = int(it["durabilidade"])
 		equip[espaco] = p
 	var cav := cavalo_ativo()
+	var atr_cavalo: Dictionary = cav.get("atributos", {}).duplicate()
+	if cavalo_cansado():
+		var pen := int(Balanceamento.carregar("treino")["folego_cavalo"]["penalidade_velocidade_cansado_pct"])
+		atr_cavalo["velocidade"] = int(atr_cavalo.get("velocidade", 0)) * (100 - pen) / 100
 	return {
 		"cavaleiro": estado["cavaleiro"]["atributos"].duplicate(),
-		"cavalo": cav.get("atributos", {}).duplicate(),
+		"cavalo": atr_cavalo,
 		"equipamento": equip,
 		"habilidade": estado["cavaleiro"].get("habilidade", ""),
 	}
@@ -186,12 +222,17 @@ func teto_predio(nome: String) -> int:
 		return int(p["nivel_max"])
 	return mini(int(p["nivel_max"]), predio_nivel("casa_senhorial"))
 
-## Timer em andamento (ou já pronto, esperando concluir) de um prédio; {} se não tem.
-func timer_do_predio(nome: String) -> Dictionary:
+## Timer em andamento (ou já pronto, esperando concluir) de um prédio; {} se
+## não tem. `tipo` filtra ("melhoria", "treino_cavaleiro"...).
+func timer_do_predio(nome: String, tipo := "") -> Dictionary:
 	for t: Dictionary in estado["timers"]:
-		if t["alvo"] == nome:
+		if t["alvo"] == nome and (tipo == "" or t["tipo"] == tipo):
 			return t.duplicate()
 	return {}
+
+## Timers de um prédio (todas as vagas).
+func timers_do_predio(nome: String) -> Array:
+	return estado["timers"].filter(func(t): return t["alvo"] == nome).map(func(t): return t.duplicate())
 
 func timers() -> Array:
 	return estado["timers"].duplicate(true)
@@ -203,7 +244,7 @@ func pode_melhorar(nome: String) -> Dictionary:
 		return _erro("predio_inexistente")
 	if not predio_liberado(nome):
 		return _erro("predio_bloqueado")
-	if not timer_do_predio(nome).is_empty():
+	if not timer_do_predio(nome, "melhoria").is_empty():
 		return _erro("predio_ocupado")
 	var nivel := predio_nivel(nome)
 	if nivel >= teto_predio(nome):
@@ -235,13 +276,119 @@ func concluir_timer(id: String) -> Dictionary:
 			continue
 		if not ServicoTempo.pronto(int(t["termina_em"])):
 			return _erro("timer_nao_terminou")
+		var tr_cfg := Balanceamento.carregar("treino")
 		match t["tipo"]:
 			"melhoria":
 				_garantir_predio(t["alvo"])
 				estado["vila"]["predios"][t["alvo"]]["nivel"] = int(t["nivel_novo"])
+			"treino_cavaleiro":
+				var a: Dictionary = estado["cavaleiro"]["atributos"]
+				a[t["atributo"]] = mini(int(a[t["atributo"]]) + int(tr_cfg["ganho_pontos"]), int(tr_cfg["teto_atributo"]))
+			"treino_cavalo":
+				for c: Dictionary in estado["cavalos"]:
+					if c["id"] == t["cavalo"]:
+						var ac: Dictionary = c["atributos"]
+						ac[t["atributo"]] = mini(int(ac[t["atributo"]]) + int(tr_cfg["ganho_pontos"]), int(tr_cfg["teto_atributo"]))
 		estado["timers"].remove_at(i)
 		return _concluir("vila")
 	return _erro("timer_inexistente")
+
+# ------------------------------------------------------- treino e cavalos
+
+## Vagas de treino de um prédio (campo de treino ou estábulo).
+func vagas_treino(predio: String) -> int:
+	var v: Dictionary = Balanceamento.carregar("treino")["vagas"]
+	return int(v["base"]) + (1 if predio_nivel(predio) >= int(v["extra_no_nivel_do_predio"]) else 0)
+
+func treinos_em(predio: String) -> Array:
+	return timers_do_predio(predio).filter(func(t): return str(t["tipo"]).begins_with("treino_"))
+
+## Duração e custo do treino pelo nível do cavaleiro (curva dos dados).
+func duracao_treino() -> int:
+	return _da_curva(Balanceamento.carregar("treino")["duracao_por_nivel"])
+
+func custo_treino() -> int:
+	return _da_curva(Balanceamento.carregar("treino")["custo_ouro_por_nivel"])
+
+func _da_curva(curva: Array) -> int:
+	var nivel := int(estado["cavaleiro"]["nivel"])
+	var v := int(curva[0][1])
+	for par: Array in curva:
+		if nivel >= int(par[0]):
+			v = int(par[1])
+	return v
+
+## Treina um atributo do cavaleiro (ocupa uma vaga do campo de treino, não o
+## cavaleiro: ele continua disputando).
+func treinar_cavaleiro(atributo: String) -> Dictionary:
+	var cfg := Balanceamento.carregar("treino")
+	if not cfg["atributos_cavaleiro"].has(atributo):
+		return _erro("atributo_invalido")
+	if not predio_liberado("campo_treino"):
+		return _erro("predio_bloqueado")
+	if treinos_em("campo_treino").size() >= vagas_treino("campo_treino"):
+		return _erro("sem_vaga")
+	if int(estado["cavaleiro"]["atributos"][atributo]) >= int(cfg["teto_atributo"]):
+		return _erro("atributo_no_teto")
+	return _iniciar_treino("campo_treino", {"tipo": "treino_cavaleiro", "atributo": atributo})
+
+## Treina um atributo de um cavalo (ocupa uma vaga do estábulo; cavalo em
+## treino não corre, então o cavalo ativo não pode treinar).
+func treinar_cavalo(id: String, atributo: String) -> Dictionary:
+	var cfg := Balanceamento.carregar("treino")
+	var c := cavalo(id)
+	if c.is_empty():
+		return _erro("cavalo_inexistente")
+	if not cfg["atributos_cavalo"].has(atributo):
+		return _erro("atributo_invalido")
+	if id == estado["cavalo_ativo"]:
+		return _erro("cavalo_ativo_em_uso")
+	if cavalo_treinando(id):
+		return _erro("cavalo_ja_treinando")
+	if treinos_em("estabulo").size() >= vagas_treino("estabulo"):
+		return _erro("sem_vaga")
+	if int(c["atributos"][atributo]) >= int(cfg["teto_atributo"]):
+		return _erro("atributo_no_teto")
+	return _iniciar_treino("estabulo", {"tipo": "treino_cavalo", "cavalo": id, "atributo": atributo})
+
+func _iniciar_treino(predio: String, extra: Dictionary) -> Dictionary:
+	var custo := custo_treino()
+	if ouro() < custo:
+		return _erro("ouro_insuficiente")
+	estado["inventario"]["ouro"] = ouro() - custo
+	var agora := ServicoTempo.agora()
+	var t := {"id": _novo_id(estado, "t"), "alvo": predio, "inicio_em": agora, "termina_em": agora + duracao_timer(duracao_treino())}
+	t.merge(extra)
+	estado["timers"].append(t)
+	return _concluir("treino")
+
+## Escolhe o cavalo da justa (não pode estar treinando).
+func usar_cavalo(id: String) -> Dictionary:
+	if cavalo(id).is_empty():
+		return _erro("cavalo_inexistente")
+	if cavalo_treinando(id):
+		return _erro("cavalo_ja_treinando")
+	estado["cavalo_ativo"] = id
+	return _concluir("cavalos")
+
+## Novo cavalo no estábulo (recompensa ou compra; na Parte 3 vem do servidor).
+func adicionar_cavalo(pelagem: String, atributos: Dictionary) -> Dictionary:
+	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var id := _novo_id(estado, "c")
+	estado["cavalos"].append({"id": id, "nome": "", "pelagem": pelagem, "atributos": atributos.duplicate(),
+		"folego": int(f["maximo"]), "folego_em": ServicoTempo.agora()})
+	var r := _concluir("cavalos")
+	r["id"] = id
+	return r
+
+## Depois de uma justa: gasta o fôlego do cavalo que correu (recompensas: 2.10).
+func registrar_justa(_resultado: Dictionary) -> Dictionary:
+	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	for c: Dictionary in estado["cavalos"]:
+		if c["id"] == estado["cavalo_ativo"]:
+			c["folego"] = maxi(folego_cavalo(c["id"]) - int(f["gasto_por_justa"]), 0)
+			c["folego_em"] = ServicoTempo.agora()
+	return _concluir("cavalos")
 
 ## Duração real de um timer. No primeiro dia (tutorial, 2.11) os timers
 ## terminam em segundos; aqui é o ponto único onde isso entra.
@@ -275,7 +422,8 @@ func novo_estado() -> Dictionary:
 		"tutorial": {"passo": 0, "concluido": false},
 	}
 	var cid := _novo_id(e, "c")
-	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate()})
+	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
+		"folego": int(Balanceamento.carregar("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
 	e["cavalo_ativo"] = cid
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
 	var por_modelo := {}

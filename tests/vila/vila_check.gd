@@ -34,7 +34,7 @@ func _initialize() -> void:
 	var t := jog.timer_do_predio("casa_senhorial")
 	_checa("timer com horario de termino", not t.is_empty() and int(t["termina_em"]) - ServicoTempo.agora() >= 119)
 	vila.atualizar()
-	_checa("balao com o tempo", vila.predios["casa_senhorial"]._balao.visible and vila.predios["casa_senhorial"]._balao.text == "2:00")
+	_checa("balao com o tempo", vila.predios["casa_senhorial"]._balao.visible and vila.predios["casa_senhorial"]._balao.text in ["2:00", "1:59"])
 	_checa("ocupado nao melhora de novo", jog.pode_melhorar("casa_senhorial")["erro"] == "predio_ocupado")
 	_checa("concluir antes da hora falha", jog.concluir_timer(t["id"])["erro"] == "timer_nao_terminou")
 

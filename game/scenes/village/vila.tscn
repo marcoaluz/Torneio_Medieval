@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vila.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/chao_vila_provisorio.gd" id="2"]
 [ext_resource type="Theme" path="res://game/scenes/ui/tema_jogo.tres" id="3"]
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vida_vila.gd" id="4"]
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/ambiente_vila.gd" id="5"]
+[ext_resource type="PackedScene" path="res://game/scenes/village/tela_treino.tscn" id="6"]
 
 [node name="Vila" type="Node2D"]
 script = ExtResource("1")
@@ -114,3 +115,5 @@ focus_mode = 0
 [node name="Fechar" type="Button" parent="Interface/Painel/Coluna/Botoes"]
 layout_mode = 2
 focus_mode = 0
+
+[node name="TelaTreino" parent="Interface" instance=ExtResource("6")]

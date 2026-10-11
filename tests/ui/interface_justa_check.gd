@@ -8,6 +8,11 @@ const PEITO := Vector2(-5, -106)
 var _falhas := 0
 
 func _initialize() -> void:
+	await process_frame
+	var _jog_teste: ServicoJogador = root.get_node("Jogador")
+	DirAccess.make_dir_recursive_absolute("user://teste_arena/")
+	_jog_teste.caminho_save = "user://teste_arena/jogador.json"
+	_jog_teste.estado = _jog_teste.novo_estado()
 	TranslationServer.set_locale("pt_BR")
 	var arena: Arena = load("res://game/scenes/arena/arena.tscn").instantiate()
 	root.add_child(arena)

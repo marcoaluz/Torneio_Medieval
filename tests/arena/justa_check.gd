@@ -18,6 +18,11 @@ var _impactos := 0
 var _toques_rival := 0
 
 func _initialize() -> void:
+	await process_frame
+	var _jog_teste: ServicoJogador = root.get_node("Jogador")
+	DirAccess.make_dir_recursive_absolute("user://teste_arena/")
+	_jog_teste.caminho_save = "user://teste_arena/jogador.json"
+	_jog_teste.estado = _jog_teste.novo_estado()
 	var arena: Arena = load("res://game/scenes/arena/arena.tscn").instantiate()
 	root.add_child(arena)
 	await process_frame

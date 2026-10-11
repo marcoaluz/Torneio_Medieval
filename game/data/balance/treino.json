@@ -1,0 +1,19 @@
+{
+	"versao": 1,
+	"_nota": "Treino do cavaleiro (campo de treino) e do cavalo (estabulo), e folego do cavalo entre justas. duracao_por_nivel: [nivel do cavaleiro a partir do qual vale, segundos] (GDD Timers e ritmo: niveis 1-5 de 30 s a 5 min, 6-10 de 15 a 60 min, 11-20 de 1 a 4 h, 21+ de 4 a 8 h). Vagas: 1 gratis, mais 1 quando o predio chega ao nivel indicado (VIP na Parte 3).",
+	"atributos_cavaleiro": ["forca", "precisao", "equilibrio"],
+	"atributos_cavalo": ["velocidade", "folego", "temperamento"],
+	"ganho_pontos": 2,
+	"teto_atributo": 100,
+	"duracao_por_nivel": [[1, 30], [2, 60], [3, 120], [4, 180], [5, 300], [6, 900], [8, 1800], [10, 3600], [11, 3600], [15, 7200], [20, 14400], [21, 14400], [30, 28800]],
+	"custo_ouro_por_nivel": [[1, 10], [3, 20], [5, 40], [8, 80], [11, 150], [21, 300]],
+	"vagas": { "base": 1, "extra_no_nivel_do_predio": 3 },
+	"folego_cavalo": {
+		"maximo": 100,
+		"gasto_por_justa": 25,
+		"recupera_por_hora": 30,
+		"bonus_recupera_por_nivel_estabulo_pct": 15,
+		"cansado_abaixo_de": 30,
+		"penalidade_velocidade_cansado_pct": 20
+	}
+}

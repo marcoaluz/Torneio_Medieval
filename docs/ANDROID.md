@@ -57,6 +57,10 @@ A pasta `build/` e os `.apk` ficam fora do git.
 - Proporções: a interface deve caber sem corte em 16:9 até 20:9 (testado no PC com `SIZE=1600x720`).
 - Para ver erros do jogo no PC enquanto ele roda no celular: `adb logcat -s godot`.
 
+## Notificações locais (treino pronto, cavalo descansado)
+
+O Godot não tem notificação local nativa no Android. O serviço `Notificacoes` (`game/scripts/services/servico_notificacoes.gd`) já monta a lista do que avisar e quando, e mostra o aviso dentro do jogo; para o aviso do sistema com o jogo fechado, instale um plugin Android de notificação local (por exemplo, um que exponha o singleton `LocalNotification` com `show(titulo, texto, segundos, id)`), ative-o no preset Android e confira o nome do singleton no serviço. Isso exige o build com Gradle (`gradle_build/use_gradle_build=true`).
+
 ## Release (mais tarde, Parte 3)
 
 Release precisa de um keystore próprio (`keytool -genkeypair -v -keystore torneio.keystore -alias torneio -keyalg RSA -keysize 2048 -validity 10000`), guardado fora do repositório. As senhas vão em variáveis de ambiente (`GODOT_ANDROID_KEYSTORE_RELEASE_PATH`, `..._USER`, `..._PASSWORD`), nunca no `export_presets.cfg`. A Play Store pede AAB (`gradle_build/use_gradle_build=true` e `export_format=1`), o que exige instalar o template de build do Android no projeto.

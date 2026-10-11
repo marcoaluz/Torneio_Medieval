@@ -138,3 +138,29 @@ ERRO_PREDIO_NO_MAXIMO,Nível máximo.,Maximum level.
 ERRO_OURO_INSUFICIENTE,Ouro insuficiente.,Not enough gold.
 ERRO_TIMER_NAO_TERMINOU,Ainda não terminou.,Not finished yet.
 ERRO_TIMER_INEXISTENTE,Nada para concluir.,Nothing to finish.
+ATRIBUTO_FORCA,Força,Strength
+ATRIBUTO_PRECISAO,Precisão,Precision
+ATRIBUTO_EQUILIBRIO,Equilíbrio,Balance
+ATRIBUTO_VELOCIDADE,Velocidade,Speed
+ATRIBUTO_FOLEGO,Fôlego,Stamina
+ATRIBUTO_TEMPERAMENTO,Temperamento,Temper
+TREINO_INFO,Nível {nivel} de {teto} · vagas de treino: {usadas}/{vagas},Level {nivel} of {teto} · training slots: {usadas}/{vagas}
+TREINO_TREINAR,+{ganho} ({ouro} ouro · {tempo}),+{ganho} ({ouro} gold · {tempo})
+TREINO_CONCLUIR,Concluir,Collect
+CAVALO_ATIVO,na justa,jousting
+CAVALO_TREINANDO,treinando,training
+CAVALO_DESCANSANDO,no estábulo,in the stable
+CAVALO_ATIVO_CANSADO,"na justa, cansado","jousting, tired"
+CAVALO_TREINANDO_CANSADO,"treinando, cansado","training, tired"
+CAVALO_DESCANSANDO_CANSADO,"descansando, cansado","resting, tired"
+CAVALO_USAR,Usar na justa,Use for jousting
+ERRO_ATRIBUTO_INVALIDO,Atributo desconhecido.,Unknown attribute.
+ERRO_SEM_VAGA,Todas as vagas de treino estão ocupadas.,All training slots are busy.
+ERRO_ATRIBUTO_NO_TETO,Esse atributo já está no máximo.,That attribute is already at its maximum.
+ERRO_CAVALO_INEXISTENTE,Cavalo desconhecido.,Unknown horse.
+ERRO_CAVALO_ATIVO_EM_USO,Esse cavalo é o da justa. Escolha outro para justar antes de treiná-lo.,This is your jousting horse. Pick another one to joust before training it.
+ERRO_CAVALO_JA_TREINANDO,Esse cavalo já está treinando.,This horse is already training.
+NOTIF_MELHORIA,Uma obra da vila terminou.,A village upgrade is done.
+NOTIF_TREINO_CAVALEIRO,O treino do seu cavaleiro terminou.,Your knight's training is done.
+NOTIF_TREINO_CAVALO,O treino do seu cavalo terminou.,Your horse's training is done.
+NOTIF_CAVALO_DESCANSADO,Seu cavalo está descansado.,Your horse is rested.

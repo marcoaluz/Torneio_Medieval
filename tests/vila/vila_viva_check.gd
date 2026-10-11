@@ -57,7 +57,8 @@ func _initialize() -> void:
 	vida._t = float(cfg["vida"]["estabulo_troca_s"]) + 0.1
 	vida.atualizar()
 	_checa("estabulo alterna para comendo (feno)", vida.estado_estabulo == "comendo" and vida.feno.visible and not vida.cavalarico.visible)
-	jog.estado["cavalos"][0]["cansado"] = true
+	jog.estado["cavalos"][0]["folego"] = 0
+	jog.estado["cavalos"][0]["folego_em"] = ServicoTempo.agora()
 	vida.atualizar()
 	_checa("cavalo cansado deitado", vida.estado_estabulo == "deitado" and vida.cavalo.scale.y < vida.cavalo.scale.x)
 	_checa("cavalo na pelagem do jogador", vida.cavalo.camada("cavalo").texture.resource_path.contains("cavalo_alazao"))

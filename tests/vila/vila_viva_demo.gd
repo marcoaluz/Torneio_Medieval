@@ -1,7 +1,7 @@
 extends Node
 ## Demonstração da vila viva para o `driver.sh shot`. Hora e clima por
 ## variáveis de ambiente (TM_HORA, ex. 22; TM_CLIMA: limpo, nublado, chuva,
-## neblina). Põe o campo de treino e o armeiro ocupados (timers falsos, sem
+## neblina) e TM_TELA (campo_treino ou estabulo abre a tela). Põe o campo de treino e o armeiro ocupados (timers falsos, sem
 ## salvar: save em user://teste_vila_demo/).
 
 func _ready() -> void:
@@ -21,3 +21,6 @@ func _ready() -> void:
 		amb.hora_forcada = float(OS.get_environment("TM_HORA"))
 	amb.clima_forcado = OS.get_environment("TM_CLIMA")
 	add_child(vila)
+	jog.adicionar_cavalo("branco", {"velocidade": 55, "folego": 45, "temperamento": 60, "vinculo": 0})
+	if OS.get_environment("TM_TELA") != "":
+		vila.tela_treino.abrir.call_deferred(OS.get_environment("TM_TELA"))

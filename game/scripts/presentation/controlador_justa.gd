@@ -256,6 +256,7 @@ func _despachar(eventos: Array[Dictionary]) -> void:
 			"passada":
 				passada_terminou.emit(p, e["pontos_jogador"], e["pontos_rival"], e["derrubado"])
 			"fim":
+				_registrar_no_jogador(e)
 				justa_terminou.emit(e["vencedor"], e["motivo"], e["placar_jogador"], e["placar_rival"])
 
 func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
@@ -281,6 +282,16 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 			var meio := (arena.jogador.centro() + arena.rival.centro()) * 0.5
 			cam.focar(meio, zoom_impacto)
 	_atualizar_visual()
+
+## Fim da justa: avisa o serviço Jogador (fôlego do cavalo; recompensas e
+## desgaste nos prompts seguintes). Na Parte 3 vira o envio dos toques ao
+## servidor, que recalcula e paga.
+func _registrar_no_jogador(e: Dictionary) -> void:
+	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	if jog:
+		jog.registrar_justa({"vencedor": JustaFases.NOMES_LADO[e["vencedor"]], "motivo": e["motivo"],
+			"placar_jogador": e["placar_jogador"], "placar_rival": e["placar_rival"],
+			"equipamento_final": justa.equipamento_final(true), "perfil_rival": perfil_rival, "semente": semente})
 
 ## Galope na Corrida (no ritmo da velocidade) e em câmera lenta na Mira e no
 ## Impacto; parado nas pontas e no fim.
