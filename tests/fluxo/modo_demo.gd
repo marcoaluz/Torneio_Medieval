@@ -1,8 +1,8 @@
 extends Node
 ## Demonstração para o `driver.sh shot`: a arena no modo TM_MODO (exibicao ou
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
-## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, torneios com
-## TM_REGIAO). Save em
+## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
+## TM_PREDIO/TM_ABA, torneios com TM_REGIAO). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -35,6 +35,26 @@ func _ready() -> void:
 			tb.abrir_bau.call_deferred(jog.baus()[2]["id"], true)
 		elif OS.get_environment("TM_ABRIR") == "chances":
 			(tb.get_node("Coluna/Botoes/VerChances") as Button).set_pressed.call_deferred(true)
+		return
+	if tela == "forja":
+		# Armeiro (TM_ABA=criar|melhorar) ou ferreiro (TM_PREDIO=ferreiro), com
+		# projetos, materiais e uma peça na forja.
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["cavaleiro"]["nivel"] = 10
+		jog.estado["inventario"]["ouro"] = 3000
+		jog.estado["inventario"]["projetos"] = ["vigia", "ferro_negro"]
+		jog.estado["vila"]["predios"]["armeiro"] = {"nivel": 2}
+		var mats: Dictionary = jog.estado["inventario"]["materiais"]
+		mats.merge({"sucata": 23, "lingote_ferro": 30, "couro": 6, "lingote_aco": 1, "fragmentos": 60}, true)
+		jog.forjar("escudo_vigia")
+		var tf: TelaForja = load("res://game/scenes/village/tela_forja.tscn").instantiate()
+		var camada_f := CanvasLayer.new()
+		add_child(camada_f)
+		camada_f.add_child(tf)
+		var predio := OS.get_environment("TM_PREDIO") if OS.get_environment("TM_PREDIO") != "" else "armeiro"
+		tf.abrir.call_deferred(predio)
+		if OS.get_environment("TM_ABA") == "melhorar":
+			(func(): tf.aba = "melhorar"; tf.montar()).call_deferred()
 		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.

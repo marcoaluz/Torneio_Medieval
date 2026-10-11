@@ -500,8 +500,7 @@ func _gerir_forja() -> void:
 	if not forja.is_empty() or nivel < int(d["vila"]["predios"]["armeiro"]["libera_nivel"]):
 		return
 	var reserva := int(eco["simulacao"]["reserva_ouro"])
-	if lingotes < int(f["peca_lingotes"]) or ouro < int(f["peca_ouro"]) + reserva:
-		return
+
 	var melhor := {}
 	for nome in projetos:
 		var c: Dictionary = eco["conjuntos"].filter(func(x): return x["nome"] == nome)[0]
@@ -512,9 +511,15 @@ func _gerir_forja() -> void:
 				break
 	if melhor.is_empty():
 		return
-	lingotes -= int(f["peca_lingotes"])
-	ouro -= int(f["peca_ouro"])
-	melhor["resta"] = int(int(f["peca_segundos"]) * _fator_timer())
+	# Receita da raridade em lingotes de ferro equivalentes (aço = aco_por_ferro ferros;
+	# couro, tecido e ornamento ficam fora do modelo).
+	var rec: Dictionary = f["receitas"][melhor["raridade"]]
+	var custo_l := int(rec["materiais"].get("lingote_ferro", 0)) + int(rec["materiais"].get("lingote_aco", 0)) * int(f["aco_por_ferro"])
+	if lingotes < custo_l or ouro < int(rec["ouro"]) + reserva:
+		return
+	lingotes -= custo_l
+	ouro -= int(rec["ouro"])
+	melhor["resta"] = int(int(rec["segundos"]) * _fator_timer())
 	forja = melhor
 
 func _gerir_melhorias() -> void:

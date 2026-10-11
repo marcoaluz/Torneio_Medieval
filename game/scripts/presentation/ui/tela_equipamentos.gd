@@ -11,8 +11,6 @@ extends Control
 signal fechada
 
 const ESPACOS := "res://game/data/personagem/espacos.json"
-const CORES_RARIDADE := {"comum": Color("d8d2c4"), "incomum": Color("6aa84f"), "raro": Color("3d85c6"),
-	"epico": Color("8e5bbf"), "lendario": Color("e69138")}
 
 var aba := "cavaleiro"
 var espaco := ""          ## espaço com a lista aberta
@@ -89,7 +87,7 @@ func montar() -> void:
 		var linha2 := tr("EQUIP_VAZIO") if it.is_empty() else tr("ITEM_" + str(it["modelo"]).to_upper())
 		b.text = "%s\n%s" % [tr("ESPACO_" + nome.to_upper()), linha2]
 		if not it.is_empty():
-			b.add_theme_color_override("font_color", CORES_RARIDADE.get(modelos[it["modelo"]]["raridade"], Color.WHITE))
+			b.add_theme_color_override("font_color", TelaBaus.cor_raridade(modelos[it["modelo"]]["raridade"]))
 		b.pressed.connect(func(): abrir_espaco(nome))
 		(_esquerda if e["lado"] == "esquerda" else _direita).add_child(b)
 		_botoes_espaco[nome] = b
@@ -120,8 +118,9 @@ func _montar_lista() -> void:
 		var b := Button.new()
 		b.focus_mode = Control.FOCUS_NONE
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.text = "%s%s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), "  ✓" if it["id"] == equipado_id else ""]
-		b.add_theme_color_override("font_color", CORES_RARIDADE.get(m["raridade"], Color.WHITE))
+		var nivel := int(it.get("nivel", 0))
+		b.text = "%s%s%s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), " +%d" % nivel if nivel > 0 else "", "  ✓" if it["id"] == equipado_id else ""]
+		b.add_theme_color_override("font_color", TelaBaus.cor_raridade(m["raridade"]))
 		b.pressed.connect(func(): selecionar(it["id"]))
 		_lista.add_child(b)
 	_atualizar_detalhes()
@@ -145,8 +144,11 @@ func _atualizar_detalhes() -> void:
 	var it := _jog.item(selecionado)
 	var m: Dictionary = Balanceamento.carregar("itens")["modelos"][it["modelo"]]
 	var partes: Array[String] = [tr("RARIDADE_" + str(m["raridade"]).to_upper())]
-	for k: String in m["status"]:
-		partes.append(tr("STATUS_" + k.to_upper()).format({"v": int(m["status"][k])}))
+	if int(it.get("nivel", 0)) > 0:
+		partes.append(tr("EQUIP_NIVEL").format({"n": int(it["nivel"])}))
+	var st := _jog.status_do_item(selecionado)
+	for k: String in st:
+		partes.append(tr("STATUS_" + k.to_upper()).format({"v": int(st[k])}))
 	if int(m["durabilidade_max"]) > 0:
 		partes.append(tr("EQUIP_DURABILIDADE").format({"atual": int(it["durabilidade"]), "max": int(m["durabilidade_max"])}))
 		var e := _jog.estagio_dano(selecionado)

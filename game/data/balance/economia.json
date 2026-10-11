@@ -80,16 +80,28 @@
 		"teto_por_nivel_armeiro": 2,
 		"chance_sucesso_pct": [100, 100, 100, 100, 100, 80, 65, 50, 35, 25],
 		"custo_fragmentos": [10, 15, 22, 32, 45, 65, 90, 125, 170, 230],
-		"custo_ouro": [45, 75, 120, 180, 270, 390, 540, 750, 1050, 1400]
+		"custo_ouro": [45, 75, 120, 180, 270, 390, 540, 750, 1050, 1400],
+		"custo_lingotes": [0, 0, 1, 1, 2, 2, 3, 4, 5, 6]
 	},
 	"forja": {
+		"_nota": "Forja (GDD Forja, 3.15). Ferreiro: funde lingote_por_sucata sucatas em 1 lingote de ferro e aco_por_ferro lingotes de ferro em 1 de aco, fundir_segundos_por_lingote cada (fila propria, vagas_fundicao). Armeiro: cria a peca de um conjunto cujo projeto o jogador tem, com a receita da raridade do conjunto (materiais, ouro, tempo; fila vagas_forja) e variacao de +-variacao_status_pct em cada status. Cada nivel de melhoria soma bonus_status_por_nivel_pct do status base. sucata_por_vitoria e so da simulacao (no jogo vem de pve.json > regioes > materiais_vitoria).",
 		"lingote_por_sucata": 4,
+		"aco_por_ferro": 3,
+		"fundir_segundos_por_lingote": 60,
+		"vagas_fundicao": 1,
+		"vagas_forja": { "base": 1, "extra_no_nivel_do_predio": 5 },
 		"sucata_por_vitoria": 2,
-		"peca_lingotes": 12,
-		"peca_ouro": 150,
-		"peca_segundos": 7200,
-		"variacao_status_pct": 10
+		"receitas": {
+			"comum": { "materiais": { "lingote_ferro": 3 }, "ouro": 40, "segundos": 600 },
+			"incomum": { "materiais": { "lingote_ferro": 8, "couro": 2 }, "ouro": 120, "segundos": 3600 },
+			"raro": { "materiais": { "lingote_ferro": 10, "lingote_aco": 1, "couro": 3 }, "ouro": 300, "segundos": 7200 },
+			"epico": { "materiais": { "lingote_aco": 6, "couro": 4, "tecido_nobre": 2, "ornamento": 1 }, "ouro": 700, "segundos": 14400 },
+			"lendario": { "materiais": { "lingote_aco": 12, "tecido_nobre": 4, "ornamento": 3 }, "ouro": 1500, "segundos": 28800 }
+		},
+		"variacao_status_pct": 10,
+		"bonus_status_por_nivel_pct": 5
 	},
+
 	"vila_crescimento_poder": 1,
 	"vip": { "_nota": "vaga_treino_extra: a mesma vaga que o campo de treino libera (GDD: VIP da a 2a vaga, que o gratis ganha pelo nivel do predio); nao soma com ela.", "timer_reducao_pct": 20, "vaga_treino_extra": 1, "folego_recuperacao_extra_pct": 50, "beneficio_anuncios": true, "gemas_mes": 150, "gemas_por_hora_bau": 10 },
 	"passe": {

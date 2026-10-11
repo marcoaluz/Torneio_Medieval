@@ -115,6 +115,9 @@
 		"lanca_vigia": {
 			"raridade": "incomum"
 		},
+		"caparacao_vigia": {
+			"raridade": "incomum"
+		},
 		"elmo_cavaleiro_andante": {
 			"raridade": "incomum"
 		},
@@ -247,7 +250,7 @@
 				"fragmentos": 4,
 				"itens": [
 					{
-						"modelo": "escudo_cavaleiro_andante",
+						"modelo": "elmo_vigia",
 						"raridade": "incomum",
 						"repetida": false
 					},
@@ -276,7 +279,7 @@
 						"repetida": false
 					},
 					{
-						"modelo": "escudo_vigia",
+						"modelo": "elmo_vigia",
 						"raridade": "incomum",
 						"repetida": false
 					}
@@ -300,7 +303,7 @@
 						"repetida": false
 					},
 					{
-						"modelo": "peitoral_vigia",
+						"modelo": "elmo_vigia",
 						"raridade": "incomum",
 						"repetida": false
 					}
@@ -331,7 +334,7 @@
 						"repetida": false
 					},
 					{
-						"modelo": "lanca_cavaleiro_andante",
+						"modelo": "peitoral_vigia",
 						"raridade": "incomum",
 						"repetida": false
 					}
@@ -471,7 +474,7 @@
 						"repetida": false
 					},
 					{
-						"modelo": "lanca_vigia",
+						"modelo": "caparacao_vigia",
 						"raridade": "incomum",
 						"repetida": false
 					}

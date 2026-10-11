@@ -14,6 +14,7 @@
 		"peitoral_vigia": {"espaco": "peitoral", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 240, "status": {"defesa": 12}},
 		"escudo_vigia": {"espaco": "escudo", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 240, "status": {"defesa": 7, "bloqueio_milesimos": 70}},
 		"lanca_vigia": {"espaco": "lanca", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 150, "status": {"poder": 10, "precisao": 5}},
+		"caparacao_vigia": { "espaco": "caparacao", "raridade": "incomum", "conjunto": "vigia", "visual": "provisorio", "durabilidade_max": 0, "status": {} },
 		"elmo_cavaleiro_andante": {"espaco": "elmo", "raridade": "incomum", "conjunto": "cavaleiro_andante", "visual": "vigia", "durabilidade_max": 240, "status": {"defesa": 12}},
 		"peitoral_cavaleiro_andante": {"espaco": "peitoral", "raridade": "incomum", "conjunto": "cavaleiro_andante", "visual": "vigia", "durabilidade_max": 240, "status": {"defesa": 12}},
 		"escudo_cavaleiro_andante": {"espaco": "escudo", "raridade": "incomum", "conjunto": "cavaleiro_andante", "visual": "vigia", "durabilidade_max": 240, "status": {"defesa": 7, "bloqueio_milesimos": 70}},

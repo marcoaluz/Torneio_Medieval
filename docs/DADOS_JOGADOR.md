@@ -20,14 +20,17 @@ casa: nome, cores {principal, secundaria, metal}, brasao {...}         (2.3)
 cavalos: [{id, nome, pelagem, atributos {velocidade, folego, temperamento, vinculo}}]
 cavalo_ativo: id
 inventario: ouro, gemas, materiais {sucata, lingote_ferro, couro, ...},
-            itens [{id, modelo, nivel, durabilidade}]     (modelo -> itens.json)
+            itens [{id, modelo, nivel, durabilidade, status?}] (modelo -> itens.json;
+                  status só nas peças forjadas, com a variação sorteada; 3.15)
             projetos [conjunto]          (v2, 3.13: projetos ganhos dos campeões de região)
             materiais.fragmentos         (v3, 3.14: peças repetidas dos baús)
 baus: espacos [{id, tipo, abre_em (0 = fechado)}], garantia, chaves,    (v3, 3.14)
       abertos, sorteios, semente (sorteios determinísticos; o servidor assume na Parte 3)
 equipamento: {espaco: id}        visual (guarda-roupa): {espaco: id}
 vila: predios {nome: {nivel, ...}}                                     (2.5)
-timers: [{id, tipo, alvo, inicio_em, termina_em}]                      (2.7)
+timers: [{id, tipo, alvo, inicio_em, termina_em, ...}]                 (2.7)
+        tipos: melhoria, treino_cavaleiro, treino_cavalo, conserto,
+        forja {modelo} e fundicao {produto, quantidade} (3.15)
 pve: regiao (a última aberta), torneios {id: {proxima, concluido,     (2.10, 3.13)
      estrelas, falhou (desafio de uma chance perdido)}}, encontros {rival: n}
 tutorial: passo, concluido                                             (2.11)

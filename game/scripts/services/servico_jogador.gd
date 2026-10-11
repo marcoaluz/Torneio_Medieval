@@ -143,7 +143,7 @@ func lado_para_justa() -> Dictionary:
 		var it := equipado(espaco)
 		if it.is_empty():
 			continue
-		var p: Dictionary = (modelos[it["modelo"]]["status"] as Dictionary).duplicate()
+		var p := status_do_item(it["id"])
 		p["durabilidade"] = int(it["durabilidade"])
 		equip[espaco] = p
 	var cav := cavalo_ativo()
@@ -295,6 +295,7 @@ func concluir_timer(id: String) -> Dictionary:
 		if not ServicoTempo.pronto(int(t["termina_em"])):
 			return _erro("timer_nao_terminou")
 		var tr_cfg := Balanceamento.carregar("treino")
+		var extra := {}
 		match t["tipo"]:
 			"melhoria":
 				_garantir_predio(t["alvo"])
@@ -312,8 +313,16 @@ func concluir_timer(id: String) -> Dictionary:
 					if c["id"] == t["cavalo"]:
 						var ac: Dictionary = c["atributos"]
 						ac[t["atributo"]] = mini(int(ac[t["atributo"]]) + int(tr_cfg["ganho_pontos"]), int(tr_cfg["teto_atributo"]))
+			"forja":
+				extra = _entregar_forja(t["modelo"])
+			"fundicao":
+				var mats: Dictionary = estado["inventario"]["materiais"]
+				mats[t["produto"]] = int(mats.get(t["produto"], 0)) + int(t["quantidade"])
+				extra = {"produto": t["produto"], "quantidade": int(t["quantidade"])}
 		estado["timers"].remove_at(i)
-		return _concluir("vila")
+		var res := _concluir("vila")
+		res.merge(extra, true)
+		return res
 	return _erro("timer_inexistente")
 
 # ------------------------------------------------------- treino e cavalos
@@ -502,6 +511,197 @@ func xp_para_proximo() -> int:
 	var n := int(estado["cavaleiro"]["nivel"])
 	return 0 if n >= tabela.size() else maxi(int(tabela[n]) - int(estado["cavaleiro"]["xp"]), 0)
 
+# --------------------------------------------------------------------- forja
+# GDD Forja (3.15). Armeiro: cria peça de um conjunto cujo projeto o jogador
+# tem (receita pela raridade, fila de forja com timer, pequena variação de
+# status) e melhora de +1 a +10 (até +5 garantido; depois pode falhar, sem
+# destruir a peça; teto pelo nível do armeiro). Ferreiro: funde sucata em
+# lingote de ferro e ferro em aço (fila do forno). Sorteios pela regra pura
+# RegraForja com a semente do save; na Parte 3 viram Edge Function.
+
+func cfg_forja() -> Dictionary:
+	return Balanceamento.carregar("economia")["forja"]
+
+func materiais() -> Dictionary:
+	return (estado["inventario"]["materiais"] as Dictionary).duplicate()
+
+func material(nome: String) -> int:
+	return int(estado["inventario"]["materiais"].get(nome, 0))
+
+## Status que vale na justa: o base (do modelo, ou o sorteado na forja) com
+## o bônus do nível de melhoria.
+func status_do_item(id: String) -> Dictionary:
+	var it := item(id)
+	if it.is_empty():
+		return {}
+	var base: Dictionary = it.get("status", Balanceamento.carregar("itens")["modelos"][it["modelo"]]["status"])
+	return RegraForja.status_com_nivel(base, int(it.get("nivel", 0)), int(cfg_forja()["bonus_status_por_nivel_pct"]))
+
+## Peças que um projeto permite forjar (modelos do conjunto, em ordem).
+func pecas_do_projeto(conjunto: String) -> Array:
+	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var r: Array = []
+	for m: String in modelos:
+		if modelos[m]["conjunto"] == conjunto:
+			r.append(m)
+	r.sort()
+	return r
+
+func projetos() -> Array:
+	return (estado["inventario"]["projetos"] as Array).duplicate()
+
+## Receita de um modelo (a da raridade dele): {materiais, ouro, segundos}.
+func receita(modelo: String) -> Dictionary:
+	var rar: String = Balanceamento.carregar("itens")["modelos"][modelo]["raridade"]
+	return (cfg_forja()["receitas"][rar] as Dictionary).duplicate(true)
+
+func vagas_forja() -> int:
+	var v: Dictionary = cfg_forja()["vagas_forja"]
+	return int(v["base"]) + (1 if predio_nivel("armeiro") >= int(v["extra_no_nivel_do_predio"]) else 0)
+
+func forja_em_andamento() -> Array:
+	return estado["timers"].filter(func(t): return t["tipo"] == "forja").map(func(t): return t.duplicate())
+
+func pode_forjar(modelo: String) -> Dictionary:
+	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	if not modelos.has(modelo):
+		return _erro("modelo_inexistente")
+	if not predio_liberado("armeiro"):
+		return _erro("predio_bloqueado")
+	if not (estado["inventario"]["projetos"] as Array).has(modelos[modelo]["conjunto"]):
+		return _erro("sem_projeto")
+	if forja_em_andamento().size() >= vagas_forja():
+		return _erro("forja_ocupada")
+	var rec := receita(modelo)
+	if ouro() < int(rec["ouro"]):
+		return _erro("ouro_insuficiente")
+	for m: String in rec["materiais"]:
+		if material(m) < int(rec["materiais"][m]):
+			return _erro("material_insuficiente")
+	return {"ok": true, "erro": ""}
+
+## Põe a peça na forja: cobra a receita e cria o timer.
+func forjar(modelo: String) -> Dictionary:
+	var p := pode_forjar(modelo)
+	if not p["ok"]:
+		return p
+	var rec := receita(modelo)
+	estado["inventario"]["ouro"] = ouro() - int(rec["ouro"])
+	_gastar_materiais(rec["materiais"])
+	var agora := ServicoTempo.agora()
+	estado["timers"].append({"id": _novo_id(estado, "t"), "tipo": "forja", "alvo": "armeiro", "modelo": modelo,
+		"inicio_em": agora, "termina_em": agora + duracao_timer(int(rec["segundos"]))})
+	return _concluir("inventario")
+
+func _entregar_forja(modelo: String) -> Dictionary:
+	var m: Dictionary = Balanceamento.carregar("itens")["modelos"][modelo]
+	var st := RegraForja.variar_status(m["status"], int(cfg_forja()["variacao_status_pct"]), _semente_servico())
+	var id := _novo_id(estado, "i")
+	estado["inventario"]["itens"].append({"id": id, "modelo": modelo, "nivel": 0, "durabilidade": int(m["durabilidade_max"]), "status": st})
+	return {"item": id, "modelo": modelo, "status": st}
+
+## Teto de melhoria pelo nível do armeiro (0 se fechado).
+func teto_melhoria() -> int:
+	var m: Dictionary = Balanceamento.carregar("economia")["melhoria"]
+	if not predio_liberado("armeiro"):
+		return 0
+	return mini(int(m["nivel_max"]), maxi(predio_nivel("armeiro"), 1) * int(m["teto_por_nivel_armeiro"]))
+
+## Custo da próxima melhoria: {nivel, fragmentos, ouro, lingotes, chance, teto}.
+func custo_melhoria(id: String) -> Dictionary:
+	var it := item(id)
+	if it.is_empty():
+		return {}
+	var m: Dictionary = Balanceamento.carregar("economia")["melhoria"]
+	var n := int(it.get("nivel", 0))
+	if n >= int(m["nivel_max"]):
+		return {"nivel": n, "teto": teto_melhoria(), "maximo": true}
+	return {"nivel": n, "fragmentos": int(m["custo_fragmentos"][n]), "ouro": int(m["custo_ouro"][n]),
+		"lingotes": int(m["custo_lingotes"][n]), "chance": int(m["chance_sucesso_pct"][n]), "teto": teto_melhoria(), "maximo": false}
+
+func pode_melhorar_peca(id: String) -> Dictionary:
+	var c := custo_melhoria(id)
+	if c.is_empty():
+		return _erro("item_inexistente")
+	if not predio_liberado("armeiro"):
+		return _erro("predio_bloqueado")
+	if c["maximo"]:
+		return _erro("nivel_maximo")
+	if int(c["nivel"]) >= int(c["teto"]):
+		return _erro("teto_armeiro")
+	if not item_em_conserto(id).is_empty():
+		return _erro("peca_em_uso")
+	if ouro() < int(c["ouro"]):
+		return _erro("ouro_insuficiente")
+	if fragmentos() < int(c["fragmentos"]) or material("lingote_ferro") < int(c["lingotes"]):
+		return _erro("material_insuficiente")
+	var r := c.duplicate()
+	r.merge({"ok": true, "erro": ""}, true)
+	return r
+
+## Tenta subir a peça um nível: cobra sempre; se falhar, a peça fica como
+## estava (nunca é destruída). {ok, sucesso, nivel}.
+func melhorar_peca(id: String) -> Dictionary:
+	var p := pode_melhorar_peca(id)
+	if not p["ok"]:
+		return p
+	estado["inventario"]["ouro"] = ouro() - int(p["ouro"])
+	_gastar_materiais({"fragmentos": int(p["fragmentos"]), "lingote_ferro": int(p["lingotes"])})
+	var sucesso := RegraForja.melhoria_deu_certo(int(p["nivel"]), Balanceamento.carregar("economia")["melhoria"], _semente_servico())
+	var nivel := int(p["nivel"])
+	if sucesso:
+		nivel += 1
+		for it: Dictionary in estado["inventario"]["itens"]:
+			if it["id"] == id:
+				it["nivel"] = nivel
+	var r := _concluir("inventario")
+	r.merge({"sucesso": sucesso, "nivel": nivel}, true)
+	return r
+
+## Fundição no ferreiro: produto "lingote_ferro" (de sucata) ou "lingote_aco"
+## (de ferro). {ok, origem, custo, segundos}.
+func pode_fundir(produto: String, quantidade: int) -> Dictionary:
+	var f := cfg_forja()
+	var origem := {"lingote_ferro": "sucata", "lingote_aco": "lingote_ferro"}.get(produto, "") as String
+	if origem == "" or quantidade <= 0:
+		return _erro("material_insuficiente")
+	if not predio_liberado("ferreiro"):
+		return _erro("predio_bloqueado")
+	if estado["timers"].filter(func(t): return t["tipo"] == "fundicao").size() >= int(f["vagas_fundicao"]):
+		return _erro("forno_ocupado")
+	var custo := quantidade * int(f["lingote_por_sucata"] if produto == "lingote_ferro" else f["aco_por_ferro"])
+	if material(origem) < custo:
+		return _erro("material_insuficiente")
+	return {"ok": true, "erro": "", "origem": origem, "custo": custo, "segundos": quantidade * int(f["fundir_segundos_por_lingote"])}
+
+func fundir(produto: String, quantidade: int) -> Dictionary:
+	var p := pode_fundir(produto, quantidade)
+	if not p["ok"]:
+		return p
+	_gastar_materiais({p["origem"]: int(p["custo"])})
+	var agora := ServicoTempo.agora()
+	estado["timers"].append({"id": _novo_id(estado, "t"), "tipo": "fundicao", "alvo": "ferreiro", "produto": produto,
+		"quantidade": quantidade, "inicio_em": agora, "termina_em": agora + duracao_timer(int(p["segundos"]))})
+	return _concluir("inventario")
+
+## Quantos lingotes dá para fundir agora com o que tem.
+func maximo_fundir(produto: String) -> int:
+	var f := cfg_forja()
+	if produto == "lingote_ferro":
+		return material("sucata") / int(f["lingote_por_sucata"])
+	return material("lingote_ferro") / int(f["aco_por_ferro"])
+
+func _gastar_materiais(custo: Dictionary) -> void:
+	var mats: Dictionary = estado["inventario"]["materiais"]
+	for m: String in custo:
+		mats[m] = int(mats.get(m, 0)) - int(custo[m])
+
+## Semente dos sorteios do serviço: a do save mais um contador.
+func _semente_servico() -> int:
+	var bs: Dictionary = estado["baus"]
+	bs["sorteios"] = int(bs["sorteios"]) + 1
+	return int(bs["semente"]) + 1000003 * int(bs["sorteios"])
+
 # --------------------------------------------------------------------- baús
 # GDD Baús e itens: 4 espaços, um abrindo por vez, chave abre na hora,
 # vitória com os espaços cheios dá só ouro, peça repetida vira fragmentos.
@@ -614,9 +814,7 @@ func abrir_bau(id: String, com_chave := false) -> Dictionary:
 
 ## Sorteio do serviço (baú de madeira por vitória): semente do save + contador.
 func _sorteio_milesimos(chance: int) -> bool:
-	var bs: Dictionary = estado["baus"]
-	bs["sorteios"] = int(bs["sorteios"]) + 1
-	return Aleatorio.new(int(bs["semente"]) + 1000003 * int(bs["sorteios"])).chance_milesimos(chance)
+	return Aleatorio.new(_semente_servico()).chance_milesimos(chance)
 
 # ---------------------------------------------------------------------- PvE
 
@@ -830,10 +1028,26 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 			baus_ganhos.append(_guardar_bau("madeira"))
 		if dados["rivais"][rival].get("campeao", false) and cb["ouro_por_campeao"] and estrelas_antes == 0:
 			baus_ganhos.append(_guardar_bau("ouro"))
+	# Materiais (3.15): por vitória (no automático, a mesma porcentagem do
+	# ouro) e os da região ao fechá-la.
+	var mats_g := {}
+	if est > 0:
+		var mv: Dictionary = dados["regioes"][regiao].get("materiais_vitoria", {})
+		for m: String in mv:
+			var q := int(mv[m]) * (int(dados["recompensa_automatico_pct"]) if automatico else 100) / 100
+			if q > 0:
+				mats_g[m] = q
+	if projeto != "":
+		var mr: Dictionary = dados["regioes"][regiao].get("recompensa_regiao", {}).get("materiais", {})
+		for m: String in mr:
+			mats_g[m] = int(mats_g.get(m, 0)) + int(mr[m])
+	var inv_mats: Dictionary = estado["inventario"]["materiais"]
+	for m: String in mats_g:
+		inv_mats[m] = int(inv_mats.get(m, 0)) + int(mats_g[m])
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
 	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0,
-		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos}, true)
+		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos, "materiais": mats_g}, true)
 	return res
 
 ## Disputa no automático: a mesma regra, com uma IA de precisão média no

@@ -83,7 +83,10 @@ func _initialize() -> void:
 	var r := jog.concluir_disputa("torneio_castelo_alvar", 0, _ev(true))
 	var base := int(d["recompensa_disputa"]["ouro_base"]) + 2 * int(d["recompensa_disputa"]["ouro_por_estrela"])
 	_checa("recompensa da regiao multiplicada (%d)" % r["ouro"], int(r["ouro"]) == base * int(d["regioes"]["condado"]["recompensa_pct"]) / 100)
-	_checa("ouro creditado", int(jog.estado["inventario"]["ouro"]) == ouro0 + int(r["ouro"]))
+	var consolo := 0
+	for bg: Dictionary in r["baus"]:
+		consolo += int(bg["ouro"])  # espaços de baú cheios viram ouro
+	_checa("ouro creditado", int(jog.estado["inventario"]["ouro"]) == ouro0 + int(r["ouro"]) + consolo)
 	_vencer_torneio(jog, "torneio_castelo_alvar")
 	_vencer_torneio(jog, "torneio_feira_conde")
 	var fim := _vencer_torneio(jog, "torneio_conde")

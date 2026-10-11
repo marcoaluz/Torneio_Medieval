@@ -38,7 +38,12 @@ func _initialize() -> void:
 	var r := jog.abrir_bau(b_mad)
 	var novos: int = r["itens"].filter(func(i): return not i["repetida"]).size()
 	_checa("abriu: ouro, pecas e espaco livre", r["ok"] and jog.ouro() == ouro1 + int(r["ouro"]) and jog.itens().size() == n_itens + novos and jog.baus().size() == 3)
-	_checa("peca nova com id e durabilidade cheia", novos == 0 or (jog.item(r["itens"][0]["id"])["durabilidade"] > 0))
+	var nova_ok := true
+	for it: Dictionary in r["itens"]:
+		if not it["repetida"]:
+			var maxd := int(Balanceamento.carregar("itens")["modelos"][it["modelo"]]["durabilidade_max"])
+			nova_ok = nova_ok and jog.item(it["id"])["durabilidade"] == maxd
+	_checa("peca nova com id e durabilidade cheia", nova_ok)
 	_checa("fragmentos guardados", jog.fragmentos() == int(r["fragmentos"]))
 
 	# Chave

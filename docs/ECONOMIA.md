@@ -53,27 +53,27 @@ Os números vêm de `game/data/balance/`. O novo `economia.json` reúne os parâ
 
 ## Resultado (40 sementes, mediana do dia; — = não chega em 90 dias)
 
+Atualizado depois da forja (3.15): a receita da peça rara ficou em 13 lingotes de ferro equivalentes e 300 de ouro, então o primeiro conjunto raro do grátis passou do dia 32 para o dia 58.
+
 | Marco | Grátis | Grátis + anúncios | Pagante | Habilidoso grátis | Pagante ruim | Só VIP | Só passe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Condado | 6 | 5 | 4 | 4 | 5 | 4 | 6 |
-| Ducado | 31 | 22 | 13 | 21 | 18 | 14 | 21 |
-| Reino | 58 | 34 | 25 | 35 | 30 | 29 | 33 |
-| Grande Torneio | 69 | 55 | 41 | 60 | 67 | 44 | 57 |
-| Campeão do Grande Torneio | — | — | 81 | 71 | — | — | — |
-| Liga Prata | 9 | 9 | 9 | 8 | 10 | 9 | 10 |
+| Ducado | 30 | 21 | 13 | 21 | 17 | 14 | 22 |
+| Reino | 58 | 34 | 25 | 34 | 32 | 28 | 39 |
+| Grande Torneio | 71 | 55 | 41 | 59 | 75 | 49 | 61 |
+| Campeão do Grande Torneio | — | — | 80 | 78 | — | — | — |
+| Liga Prata | 9 | 9 | 9 | 8 | 11 | 8 | 10 |
 | Liga Ouro | 18 | 16 | 13 | 14 | 17 | 13 | 17 |
-| Liga Platina | 52 | 41 | 32 | 39 | 39 | 35 | 39 |
-| Liga Diamante | 83 | 74 | 54 | 72 | — | 66 | 73 |
+| Liga Platina | 50 | 38 | 34 | 38 | 40 | 35 | 40 |
+| Liga Diamante | — | 76 | 55 | 71 | — | 72 | 80 |
 | Liga Campeão | — | — | — | — | — | — | — |
-| 1º conjunto incomum completo | 12 | 9 | 8 | 10 | 8 | 7 | 10 |
-| 1º conjunto raro completo | 32 | 27 | 19 | 29 | 20 | 17 | 24 |
-| Nível 10 | 31 | 27 | 21 | 27 | 24 | 22 | 26 |
-| Nível 15 | 67 | 56 | 45 | 59 | 62 | 48 | 58 |
+| 1º conjunto incomum completo | 9 | 8 | 6 | 9 | 7 | 6 | 9 |
+| 1º conjunto raro completo | 58 | 30 | 19 | 47 | 21 | 21 | 32 |
 
 **Meta do prompt:**
 - O pagante chega primeiro em todos os marcos e o grátis com anúncios fica entre os dois.
 - O grátis chega a todas as regiões em 90 dias. Só o campeão do Grande Torneio e as ligas Diamante e Campeão ficam para depois.
-- O teste do GDD passa: o grátis habilidoso é campeão do Grande Torneio no dia 71; o pagante que joga mal não chega lá em 90 dias.
+- O teste do GDD passa: o grátis habilidoso é campeão do Grande Torneio no dia 78; o pagante que joga mal não chega lá em 90 dias.
 
 **No dia 90:**
 - Grátis: nível 17,6 e poder 152 (72% do teto).
@@ -109,3 +109,9 @@ Todos em `economia.json`, que é novo. Nenhum outro arquivo de balanceamento mud
 7. **Liga Campeão e nível 20** ficam além dos 90 dias para todos. É coerente com um jogo de meses, mas vale confirmar.
 
 As metas de ritmo (`simulacao > metas`) são uma **proposta minha**. Confirme ou troque os dias, e o script passa a medir contra os seus números.
+
+## Depois da 3.15 (forja)
+
+- A receita da peça rara (`economia.json > forja > receitas > raro`) ficou mais cara que a da simulação original: o primeiro conjunto raro do grátis caiu do dia 32 para o 58 (meta proposta: 45). Para voltar ao alvo, use 8 lingotes de ferro e 200 de ouro na receita rara, ou dê mais sucata por vitória no condado e no ducado (`pve.json > materiais_vitoria`).
+- O simulador conta só sucata e lingotes; couro, tecido nobre e ornamento ainda não limitam a forja no modelo.
+

@@ -1,0 +1,670 @@
+{
+	"versao": 1,
+	"descricao": "Forja (game/scripts/rules/forja.gd), gerada por oraculo independente em Python. Divisao inteira truncando para zero.",
+	"melhoria": {
+		"chance_sucesso_pct": [
+			100,
+			100,
+			100,
+			100,
+			100,
+			80,
+			65,
+			50,
+			35,
+			25
+		]
+	},
+	"variacao": [
+		{
+			"status": {
+				"defesa": 16
+			},
+			"pct": 10,
+			"semente": 1,
+			"esperado": {
+				"defesa": 16
+			}
+		},
+		{
+			"status": {
+				"defesa": 16
+			},
+			"pct": 10,
+			"semente": 42,
+			"esperado": {
+				"defesa": 17
+			}
+		},
+		{
+			"status": {
+				"defesa": 16
+			},
+			"pct": 10,
+			"semente": 99991,
+			"esperado": {
+				"defesa": 17
+			}
+		},
+		{
+			"status": {
+				"defesa": 16
+			},
+			"pct": 10,
+			"semente": 4294967295,
+			"esperado": {
+				"defesa": 16
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"pct": 10,
+			"semente": 1,
+			"esperado": {
+				"bloqueio_milesimos": 105,
+				"defesa": 9
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"pct": 10,
+			"semente": 42,
+			"esperado": {
+				"bloqueio_milesimos": 108,
+				"defesa": 9
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"pct": 10,
+			"semente": 99991,
+			"esperado": {
+				"bloqueio_milesimos": 108,
+				"defesa": 9
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"pct": 10,
+			"semente": 4294967295,
+			"esperado": {
+				"bloqueio_milesimos": 99,
+				"defesa": 9
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"pct": 10,
+			"semente": 1,
+			"esperado": {
+				"poder": 15,
+				"precisao": 8
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"pct": 10,
+			"semente": 42,
+			"esperado": {
+				"poder": 16,
+				"precisao": 8
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"pct": 10,
+			"semente": 99991,
+			"esperado": {
+				"poder": 16,
+				"precisao": 8
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"pct": 10,
+			"semente": 4294967295,
+			"esperado": {
+				"poder": 15,
+				"precisao": 8
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"pct": 10,
+			"semente": 1,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"pct": 10,
+			"semente": 42,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"pct": 10,
+			"semente": 99991,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"pct": 10,
+			"semente": 4294967295,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {},
+			"pct": 10,
+			"semente": 1,
+			"esperado": {}
+		},
+		{
+			"status": {},
+			"pct": 10,
+			"semente": 42,
+			"esperado": {}
+		},
+		{
+			"status": {},
+			"pct": 10,
+			"semente": 99991,
+			"esperado": {}
+		},
+		{
+			"status": {},
+			"pct": 10,
+			"semente": 4294967295,
+			"esperado": {}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"pct": 10,
+			"semente": 1,
+			"esperado": {
+				"poder": 26,
+				"precisao": 0
+			}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"pct": 10,
+			"semente": 42,
+			"esperado": {
+				"poder": 27,
+				"precisao": 0
+			}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"pct": 10,
+			"semente": 99991,
+			"esperado": {
+				"poder": 27,
+				"precisao": 0
+			}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"pct": 10,
+			"semente": 4294967295,
+			"esperado": {
+				"poder": 25,
+				"precisao": 0
+			}
+		}
+	],
+	"nivel": [
+		{
+			"status": {
+				"defesa": 16
+			},
+			"nivel": 0,
+			"pct": 5,
+			"esperado": {
+				"defesa": 16
+			}
+		},
+		{
+			"status": {
+				"defesa": 16
+			},
+			"nivel": 1,
+			"pct": 5,
+			"esperado": {
+				"defesa": 16
+			}
+		},
+		{
+			"status": {
+				"defesa": 16
+			},
+			"nivel": 5,
+			"pct": 5,
+			"esperado": {
+				"defesa": 20
+			}
+		},
+		{
+			"status": {
+				"defesa": 16
+			},
+			"nivel": 10,
+			"pct": 5,
+			"esperado": {
+				"defesa": 24
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"nivel": 0,
+			"pct": 5,
+			"esperado": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"nivel": 1,
+			"pct": 5,
+			"esperado": {
+				"defesa": 9,
+				"bloqueio_milesimos": 105
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"nivel": 5,
+			"pct": 5,
+			"esperado": {
+				"defesa": 11,
+				"bloqueio_milesimos": 125
+			}
+		},
+		{
+			"status": {
+				"defesa": 9,
+				"bloqueio_milesimos": 100
+			},
+			"nivel": 10,
+			"pct": 5,
+			"esperado": {
+				"defesa": 13,
+				"bloqueio_milesimos": 150
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"nivel": 0,
+			"pct": 5,
+			"esperado": {
+				"poder": 15,
+				"precisao": 8
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"nivel": 1,
+			"pct": 5,
+			"esperado": {
+				"poder": 15,
+				"precisao": 8
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"nivel": 5,
+			"pct": 5,
+			"esperado": {
+				"poder": 18,
+				"precisao": 10
+			}
+		},
+		{
+			"status": {
+				"poder": 15,
+				"precisao": 8
+			},
+			"nivel": 10,
+			"pct": 5,
+			"esperado": {
+				"poder": 22,
+				"precisao": 12
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"nivel": 0,
+			"pct": 5,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"nivel": 1,
+			"pct": 5,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"nivel": 5,
+			"pct": 5,
+			"esperado": {
+				"defesa": 3
+			}
+		},
+		{
+			"status": {
+				"defesa": 3
+			},
+			"nivel": 10,
+			"pct": 5,
+			"esperado": {
+				"defesa": 4
+			}
+		},
+		{
+			"status": {},
+			"nivel": 0,
+			"pct": 5,
+			"esperado": {}
+		},
+		{
+			"status": {},
+			"nivel": 1,
+			"pct": 5,
+			"esperado": {}
+		},
+		{
+			"status": {},
+			"nivel": 5,
+			"pct": 5,
+			"esperado": {}
+		},
+		{
+			"status": {},
+			"nivel": 10,
+			"pct": 5,
+			"esperado": {}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"nivel": 0,
+			"pct": 5,
+			"esperado": {
+				"poder": 25,
+				"precisao": 0
+			}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"nivel": 1,
+			"pct": 5,
+			"esperado": {
+				"poder": 26,
+				"precisao": 0
+			}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"nivel": 5,
+			"pct": 5,
+			"esperado": {
+				"poder": 31,
+				"precisao": 0
+			}
+		},
+		{
+			"status": {
+				"poder": 25,
+				"precisao": 0
+			},
+			"nivel": 10,
+			"pct": 5,
+			"esperado": {
+				"poder": 37,
+				"precisao": 0
+			}
+		}
+	],
+	"tentativas": [
+		{
+			"nivel": 0,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 0,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 0,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 1,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 1,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 1,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 2,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 2,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 2,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 3,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 3,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 3,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 4,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 4,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 4,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 5,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 5,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 5,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 6,
+			"semente": 7,
+			"esperado": true
+		},
+		{
+			"nivel": 6,
+			"semente": 123,
+			"esperado": true
+		},
+		{
+			"nivel": 6,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 7,
+			"semente": 7,
+			"esperado": false
+		},
+		{
+			"nivel": 7,
+			"semente": 123,
+			"esperado": false
+		},
+		{
+			"nivel": 7,
+			"semente": 2024,
+			"esperado": true
+		},
+		{
+			"nivel": 8,
+			"semente": 7,
+			"esperado": false
+		},
+		{
+			"nivel": 8,
+			"semente": 123,
+			"esperado": false
+		},
+		{
+			"nivel": 8,
+			"semente": 2024,
+			"esperado": false
+		},
+		{
+			"nivel": 9,
+			"semente": 7,
+			"esperado": false
+		},
+		{
+			"nivel": 9,
+			"semente": 123,
+			"esperado": false
+		},
+		{
+			"nivel": 9,
+			"semente": 2024,
+			"esperado": false
+		}
+	]
+}

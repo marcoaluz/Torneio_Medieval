@@ -448,3 +448,42 @@ ERRO_BAU_JA_ABRINDO,Esse baú já está abrindo.,That chest is already unlocking
 ERRO_OUTRO_BAU_ABRINDO,Um baú por vez: espere o outro abrir.,One chest at a time: wait for the other.
 ERRO_SEM_CHAVE,Você não tem chave.,You have no key.
 ERRO_BAU_FECHADO,Esse baú ainda não abriu.,That chest is not open yet.
+MATERIAL_LINGOTE_ACO,lingote de aço,steel ingot
+MATERIAL_TECIDO_NOBRE,tecido nobre,noble cloth
+MATERIAL_ORNAMENTO,ornamento de ouro e prata,gold and silver ornament
+MATERIAL_FRAGMENTOS,fragmentos,shards
+FORJA_TITULO_ARMEIRO,Armeiro,Armorer
+FORJA_TITULO_FERREIRO,Ferreiro,Blacksmith
+FORJA_ABA_CRIAR,Criar,Craft
+FORJA_ABA_MELHORAR,Melhorar,Upgrade
+FORJA_ABA_EQUIPAMENTOS,Equipamentos,Equipment
+FORJA_SEM_PROJETOS,Você ainda não tem projetos. Vença o campeão de uma região para ganhar o primeiro.,You have no blueprints yet. Beat a region champion to get your first.
+FORJA_PROJETO,Projeto: conjunto {conjunto},Blueprint: {conjunto} set
+FORJA_RECEITA,{custo} · {ouro} ouro · {tempo},{custo} · {ouro} gold · {tempo}
+FORJA_FORJAR,Forjar,Forge
+FORJA_EM_ANDAMENTO,Na forja: {item} · {tempo},In the forge: {item} · {tempo}
+FORJA_PRONTA,{item} pronta! Toque para pegar,{item} ready! Tap to collect
+FORJA_GANHOU,Forjado: {item} ({status}),Forged: {item} ({status})
+FORJA_LIVRE,A forja está livre.,The forge is free.
+FORJA_MATERIAIS,Materiais: {lista},Materials: {lista}
+FORJA_MELHORAR_LINHA,{item} +{nivel} → +{proximo} · {chance}% · {custo},{item} +{nivel} → +{proximo} · {chance}% · {custo}
+FORJA_MELHORAR_TETO,{item} +{nivel} · teto do armeiro (+{teto}),{item} +{nivel} · armorer cap (+{teto})
+FORJA_MELHORAR_MAX,{item} +{nivel} · nível máximo,{item} +{nivel} · max level
+FORJA_MELHOROU,Deu certo! {item} agora é +{nivel}.,Success! {item} is now +{nivel}.
+FORJA_FALHOU,"Falhou: o material se foi, mas a peça continua +{nivel}.","Failed: the materials are gone, but the piece stays +{nivel}."
+FORJA_FUNDIR_FERRO,Fundir {qtd} lingote(s) de ferro ({custo} sucata · {tempo}),Smelt {qtd} iron ingot(s) ({custo} scrap · {tempo})
+FORJA_FUNDIR_ACO,Forjar {qtd} lingote(s) de aço ({custo} lingotes de ferro · {tempo}),Forge {qtd} steel ingot(s) ({custo} iron ingots · {tempo})
+FORJA_FUNDINDO,No forno: {qtd} {material} · {tempo},In the furnace: {qtd} {material} · {tempo}
+FORJA_FUNDIDO_PRONTO,{qtd} {material} pronto(s)! Toque para pegar,{qtd} {material} ready! Tap to collect
+FORJA_PEGAR,Pegar,Collect
+ERRO_SEM_PROJETO,Falta o projeto desse conjunto.,You lack this set's blueprint.
+ERRO_FORJA_OCUPADA,A forja está ocupada.,The forge is busy.
+ERRO_FORNO_OCUPADO,O forno está ocupado.,The furnace is busy.
+ERRO_TETO_ARMEIRO,Melhore o armeiro para subir mais esta peça.,Upgrade the armorer to raise this piece further.
+ERRO_NIVEL_MAXIMO,A peça já está no nível máximo.,The piece is already at max level.
+ERRO_PECA_EM_USO,Essa peça está no conserto.,That piece is being repaired.
+EQUIP_NIVEL,Melhoria +{n},Upgrade +{n}
+PVE_MATERIAIS,Materiais: {lista},Materials: {lista}
+MATERIAL_OURO_MOEDAS,ouro,gold
+ITEM_CAPARACAO_VIGIA,Caparação da vigia,Sentinel's caparison
+FORJA_FORNO_LIVRE,O forno está livre.,The furnace is free.

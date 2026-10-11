@@ -32,6 +32,7 @@ var _acumulado := 0.0
 @onready var tela_equipamentos: TelaEquipamentos = $Interface/TelaEquipamentos
 @onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
 @onready var tela_baus: TelaBaus = $Interface/TelaBaus
+@onready var tela_forja: TelaForja = $Interface/TelaForja
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -49,6 +50,7 @@ func _ready() -> void:
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
+	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	var notif := get_node_or_null("/root/Notificacoes") as ServicoNotificacoes
@@ -112,9 +114,9 @@ func tocar_predio(nome: String) -> void:
 		if _jog.concluir_timer(t["id"])["ok"]:
 			mostrar_letreiro(tr("VILA_MELHORIA_PRONTA").format({"predio": tr("PREDIO_" + nome.to_upper()), "nivel": t["nivel_novo"]}))
 		return
-	if nome == "armeiro":
+	if nome in ["armeiro", "ferreiro"]:
 		fechar_painel()
-		tela_equipamentos.abrir()
+		tela_forja.abrir(nome)
 		return
 	if nome in ["campo_treino", "estabulo"]:
 		fechar_painel()
