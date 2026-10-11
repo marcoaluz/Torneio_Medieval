@@ -18,6 +18,10 @@ bash $D import                                   # importa e valida o projeto (h
 bash $D script res://tests/smoke/headless_check.gd   # roda script de teste (headless)
 bash $D shot res://tests/smoke/smoke.tscn 10 /tmp/out/smoke.png   # renderiza e salva PNG
 SIZE=1600x720 bash $D shot res://tests/smoke/smoke.tscn 10 /tmp/out/s209.png   # mesma coisa em 20:9
+
+# Arena (prompt 1.1)
+timeout 60 bash $D script res://tests/arena/arena_check.gd    # montagem + 3 planos da câmera; espera "ARENA TUDO OK"
+TM_CAMERA=seguir bash $D shot res://tests/arena/arena_camera_demo.tscn 60 /tmp/out/seguir.png  # aberto | seguir | focar
 ```
 
 - `import`: termina com exit 0 se o projeto abre. Cria `.godot/` (ignorado pelo git) e os `.import` dos assets (esses entram no git).
@@ -43,7 +47,9 @@ Abra a pasta do projeto no editor do Godot e use F5/F6. Inútil para agente: abr
 - `--quit-after N` conta quadros, não segundos. Com `--fixed-fps 30`, 10 quadros ≈ 0,3 s de jogo.
 - O Movie Maker também grava um `.wav` ao lado; o driver apaga a pasta temporária.
 - Cena de teste em `res://` obrigatoriamente: o Godot não carrega `.tscn` fora do projeto.
-- Ainda não existe cena principal (`run/main_scene` vazio): sempre passe a cena explicitamente até o prompt 1.1 criar a arena.
+- Cena principal: `res://game/scenes/arena/arena.tscn` (prompt 1.1). Mesmo assim passe a cena explicitamente no `shot`.
+- **Erro de script em teste headless trava o Godot** (imprime `SCRIPT ERROR` e não chama `quit`). Rode com `timeout 60 bash $D script ...` e não filtre a saída com `grep` sem timeout, senão parece que não saiu nada.
+- Em script `extends SceneTree`, o `_ready` de uma cena adicionada em `_initialize()` só roda depois de `await process_frame`.
 
 ## Troubleshooting
 
