@@ -1,0 +1,27 @@
+{
+	"versao": 1,
+	"_nota": "Cores da casa e materiais do personagem (aparencia, nao balanceamento). Os nomes viram chaves de traducao COR_<NOME> quando aparecerem na tela.",
+	"cores_casa": {
+		"azul_real": "2c3a5a",
+		"vermelho_sangue": "7a2326",
+		"verde_floresta": "2f4a2c",
+		"ouro_velho": "b08a3a",
+		"prata": "9aa0a6",
+		"preto_carvao": "26221f",
+		"purpura": "4a2a4f",
+		"branco_osso": "d8d0bf"
+	},
+	"metais": { "ferro": "8a8f96", "aco_escuro": "4b5058", "latao": "a8874a" },
+	"neutros": { "couro": "6b4a33", "madeira": "8a6a45", "tecido_cru": "9a8c74" },
+	"peles": { "clara": "e0b89a", "media": "c08c66", "morena": "8f5f40", "escura": "5c3a28", "palida": "e8cfc0" },
+	"cabelos": { "preto": "1e1a18", "castanho": "4a3020", "ruivo": "7a3a1c", "loiro": "b8955a", "grisalho": "8a8680", "branco": "d0ccc4" },
+	"pelagens": ["alazao", "preto", "branco"],
+	"casa_padrao": {
+		"principal": "azul_real",
+		"secundaria": "ouro_velho",
+		"metal": "ferro",
+		"neutro": "couro",
+		"pele": "media",
+		"cabelo": "castanho"
+	}
+}

@@ -1,0 +1,187 @@
+class_name CamadasPersonagem
+extends Node2D
+## Personagem em camadas (cavaleiro e cavalo): monta uma camada (Sprite2D com
+## folha de quadros) por espaço de equipamento a partir de
+## game/data/personagem/camadas.json, toca a mesma animação em todas, no mesmo
+## quadro, e aplica as cores da casa pelo shader de paleta.
+##
+## Serve aos três tamanhos (justa 160, vila 96, equipamentos 256): só muda o
+## `tamanho`, que escolhe o quadro, as animações e a lista de camadas.
+## Na justa as camadas vão para os encaixes do cavaleiro (Visual/Cavalo,
+## Visual/Cavaleiro/Peito...), que também são as zonas da mira e os pontos
+## dos efeitos. O brasão (nó Brasao, se houver) é posicionado a cada quadro
+## pelos pontos de encaixe (pontos.json) e desfaz o espelhamento à parte.
+
+const SHADER := preload("res://game/art/shaders/paleta_casa.gdshader")
+const DADOS := "res://game/data/personagem/camadas.json"
+const PONTOS := "res://game/data/personagem/pontos.json"
+const PALETAS := "res://game/data/personagem/paletas.json"
+
+signal quadro_mudou(animacao: String, quadro: int)
+
+@export_enum("justa", "vila", "equipamentos") var tamanho := "justa"
+## Raiz onde procurar os encaixes (vazio = o pai deste nó).
+@export var raiz: Node
+@export var animacao := "parado"
+## Multiplica o fps da animação (galope mais rápido, câmera lenta...).
+@export var velocidade := 1.0
+
+## Peça escolhida por chave do arquivo ({pelagem}, {peitoral}...).
+var pecas := {}
+## Cores por material (Color), na ordem de camadas.json/materiais.
+var cores: Array[Color] = []
+var quadro := 0
+
+var _dados: Dictionary
+var _tam: Dictionary
+var _pontos: Dictionary
+var _camadas: Array[Sprite2D] = []
+var _tempo := 0.0
+var _brasao: Node2D
+
+func _ready() -> void:
+	_dados = _ler_json(DADOS)
+	_pontos = _ler_json(PONTOS)
+	_tam = _dados["tamanhos"][tamanho]
+	pecas = (_dados["pecas_padrao"] as Dictionary).duplicate()
+	if cores.is_empty():
+		definir_casa(_ler_json(PALETAS)["casa_padrao"])
+	if raiz == null:
+		raiz = get_parent()
+	_brasao = raiz.get_node_or_null("Visual/Cavaleiro/Escudo/Brasao") if raiz else null
+	montar()
+
+## (Re)cria as camadas com as peças atuais.
+func montar() -> void:
+	for c in _camadas:
+		c.queue_free()
+	_camadas.clear()
+	for def: Dictionary in _tam["camadas"]:
+		var s := Sprite2D.new()
+		s.name = "Camada_" + def["nome"]
+		s.centered = false
+		s.set_meta("def", def)
+		var mat := ShaderMaterial.new()
+		mat.shader = SHADER
+		s.material = mat
+		var encaixe: Node2D = self
+		if def.has("encaixe") and raiz and raiz.has_node(def["encaixe"]):
+			encaixe = raiz.get_node(def["encaixe"])
+		encaixe.add_child(s)
+		# Primeiras no encaixe (atrás dos nós que já estão lá, como o Brasao).
+		encaixe.move_child(s, _camadas.filter(func(o): return o.get_parent() == encaixe).size())
+		_camadas.append(s)
+		_alinhar(s, encaixe, def)
+	_aplicar_cores()
+	tocar(animacao, true)
+
+## Troca peças ({"peitoral": "ferro_negro", "pelagem": "preto"}) e remonta as texturas.
+func vestir(novas: Dictionary) -> void:
+	pecas.merge(novas, true)
+	tocar(animacao, true)
+
+## Cores da casa a partir de nomes de paletas.json ({principal, secundaria,
+## metal, neutro, pele, cabelo}).
+func definir_casa(casa: Dictionary) -> void:
+	var pal := _ler_json(PALETAS)
+	var busca := {"principal": "cores_casa", "secundaria": "cores_casa", "metal": "metais",
+		"neutro": "neutros", "pele": "peles", "cabelo": "cabelos"}
+	cores.clear()
+	cores.append(Color.WHITE)  # original
+	for m: String in ["principal", "secundaria", "metal", "neutro", "pele", "cabelo"]:
+		var nome: String = casa.get(m, pal["casa_padrao"][m])
+		cores.append(Color(pal[busca[m]].get(nome, "ff00ff")))
+	_aplicar_cores()
+
+func tocar(nome: String, forcar := false) -> void:
+	if nome == animacao and not forcar:
+		return
+	if not _tam["animacoes"].has(nome):
+		push_error("CamadasPersonagem: animação \"%s\" não existe em %s" % [nome, tamanho])
+		return
+	animacao = nome
+	quadro = 0
+	_tempo = 0.0
+	var n := int(_tam["animacoes"][nome]["quadros"])
+	for s in _camadas:
+		var def: Dictionary = s.get_meta("def")
+		var base := _caminho(def)
+		var tex := load(base + ".png") as Texture2D if ResourceLoader.exists(base + ".png") else null
+		s.texture = tex
+		s.visible = tex != null
+		s.hframes = n
+		var mat := s.material as ShaderMaterial
+		var tem_mascara := ResourceLoader.exists(base + "_mascara.png")
+		mat.set_shader_parameter("usa_mascara", tem_mascara)
+		mat.set_shader_parameter("mascara", load(base + "_mascara.png") if tem_mascara else null)
+	_mostrar_quadro()
+
+func camada(nome: String) -> Sprite2D:
+	for s in _camadas:
+		if s.get_meta("def")["nome"] == nome:
+			return s
+	return null
+
+func _process(delta: float) -> void:
+	var a: Dictionary = _tam["animacoes"][animacao]
+	var n := int(a["quadros"])
+	if n <= 1:
+		return
+	_tempo += delta * float(a["fps"]) * velocidade
+	var novo := int(_tempo) % n
+	if novo != quadro:
+		quadro = novo
+		_mostrar_quadro()
+
+func _mostrar_quadro() -> void:
+	for s in _camadas:
+		if s.texture:
+			s.frame = mini(quadro, s.hframes - 1)
+	_posicionar_brasao()
+	quadro_mudou.emit(animacao, quadro)
+
+## Brasão no ponto de encaixe do quadro atual (coordenadas a partir da origem
+## do quadro), convertido para o pai do Brasao.
+func _posicionar_brasao() -> void:
+	if _brasao == null:
+		return
+	var pts: Variant = _pontos.get(tamanho, {}).get(animacao, {}).get("brasao")
+	if not pts is Array or pts.is_empty():
+		return
+	var p: Array = pts[mini(quadro, pts.size() - 1)]
+	var visual := raiz.get_node("Visual") as Node2D
+	var global_ponto := visual.to_global(Vector2(float(p[0]), float(p[1])))
+	_brasao.position = (_brasao.get_parent() as Node2D).to_local(global_ponto)
+
+## A origem do quadro fica na origem do personagem (Visual), mesmo com a
+## camada dentro de um encaixe deslocado.
+func _alinhar(s: Sprite2D, encaixe: Node2D, def: Dictionary) -> void:
+	var desloc := Vector2.ZERO
+	var n: Node = encaixe
+	var visual := raiz.get_node_or_null("Visual") if raiz else null
+	while n != null and n != visual and n != self and n is Node2D:
+		desloc += (n as Node2D).position
+		n = n.get_parent()
+	var origem: Array = def.get("origem", _tam["origem"])
+	s.position = -desloc
+	s.offset = -Vector2(float(origem[0]), float(origem[1]))
+
+func _caminho(def: Dictionary) -> String:
+	var arquivo: String = def["arquivo"]
+	for chave: String in pecas:
+		arquivo = arquivo.replace("{%s}" % chave, str(pecas[chave]))
+	return "%s/%s/%s_%s" % [_dados["pasta"], tamanho, arquivo, animacao]
+
+func _aplicar_cores() -> void:
+	var nomes: Array = _dados.get("materiais", [])
+	for s in _camadas:
+		var mat := s.material as ShaderMaterial
+		mat.set_shader_parameter("cores", PackedColorArray(cores))
+		mat.set_shader_parameter("material_padrao", maxi(nomes.find(s.get_meta("def")["material"]), 0))
+
+static func _ler_json(caminho: String) -> Dictionary:
+	var v: Variant = JSON.parse_string(FileAccess.get_file_as_string(caminho))
+	if not v is Dictionary:
+		push_error("CamadasPersonagem: não consegui ler %s" % caminho)
+		return {}
+	return v

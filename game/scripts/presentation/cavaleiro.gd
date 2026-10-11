@@ -4,9 +4,11 @@ extends Node2D
 ## Cavaleiro montado da justa (apresentação). A origem é o chão entre as patas
 ## do cavalo; a arte é desenhada olhando para a direita, num quadro de 160×160.
 ##
-## Encaixes para os sprites (hoje com RetanguloProvisorio dentro):
-##   Visual/Cavalo, Visual/Cavalo/Manta, Visual/Cavaleiro/Peito,
-##   Visual/Cavaleiro/Capacete, Visual/Cavaleiro/Escudo, Visual/Lanca.
+## Encaixes das camadas (montadas pelo nó Camadas, CamadasPersonagem, a
+## partir de game/data/personagem/camadas.json):
+##   Visual/Cavalo, Visual/Cavalo/Manta, Visual/Cavaleiro/Corpo,
+##   Visual/Cavaleiro/Peito, Visual/Cavaleiro/Capacete,
+##   Visual/Cavaleiro/Escudo, Visual/Lanca.
 ## Capacete, Peito e Escudo também são os alvos da mira (pontuação do GDD).
 ## O espelhamento e a escala ficam em Visual; o Brasao desfaz o espelhamento
 ## para o símbolo nunca sair invertido (GDD: brasão aplicado depois do espelho).
@@ -24,22 +26,50 @@ const COR_REALCE_FALTA := Color(1.3, 0.85, 0.8)
 	set(v):
 		escala = v
 		_aplicar_orientacao()
-## Cor da casa nos retângulos provisórios (grupo "provisorio_cor_casa").
-## Com os sprites, a cor passa a vir do shader de paleta.
-@export var cor_casa := Color("2c3a5a"):
-	set(v):
-		cor_casa = v
-		_aplicar_cor_casa()
+## Cores da casa (nomes de game/data/personagem/paletas.json), aplicadas
+## pelo shader de paleta em todas as camadas.
+@export var casa_principal := "azul_real"
+@export var casa_secundaria := "ouro_velho"
+@export var casa_metal := "ferro"
+## Cor principal da casa (para a interface, como o retrato da plaquinha).
+var cor_casa: Color:
+	get:
+		var pal: Variant = JSON.parse_string(FileAccess.get_file_as_string(CamadasPersonagem.PALETAS))
+		if pal is Dictionary and pal["cores_casa"].has(casa_principal):
+			return Color(pal["cores_casa"][casa_principal])
+		return Color.GRAY
 
 var caido := false
 var _posicao_lanca := Vector2.ZERO
 
 func _ready() -> void:
 	_aplicar_orientacao()
-	_aplicar_cor_casa()
+	if not Engine.is_editor_hint():
+		definir_casa({"principal": casa_principal, "secundaria": casa_secundaria, "metal": casa_metal})
 	var lanca := get_node_or_null("Visual/Lanca") as Node2D
 	if lanca:
 		_posicao_lanca = lanca.position
+
+func camadas() -> CamadasPersonagem:
+	return get_node_or_null("Camadas") as CamadasPersonagem
+
+## Cores da casa ({principal, secundaria, metal, ...}, nomes de paletas.json).
+func definir_casa(casa: Dictionary) -> void:
+	var c := camadas()
+	if c:
+		var atual := {"principal": casa_principal, "secundaria": casa_secundaria, "metal": casa_metal}
+		atual.merge(casa, true)
+		casa_principal = atual["principal"]
+		casa_secundaria = atual["secundaria"]
+		casa_metal = atual["metal"]
+		c.definir_casa(atual)
+
+## Animação das camadas ("parado", "galope") e o quanto ela corre.
+func animar(nome: String, velocidade := 1.0) -> void:
+	var c := camadas()
+	if c:
+		c.tocar(nome)
+		c.velocidade = velocidade
 
 func visual() -> Node2D:
 	return get_node_or_null("Visual")
@@ -126,9 +156,3 @@ func _aplicar_orientacao() -> void:
 	if b != null:
 		b.scale.x = direcao
 
-func _aplicar_cor_casa() -> void:
-	if not is_inside_tree():
-		return
-	for no in find_children("*", "RetanguloProvisorio", true, false):
-		if no.is_in_group("provisorio_cor_casa"):
-			no.cor = cor_casa

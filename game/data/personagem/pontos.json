@@ -1,0 +1,56 @@
+{
+	"versao": 1,
+	"_nota": "Gerado por tools/extrair_pontos.gd a partir das folhas pontos_<anim>.png. Nao edite a mao.",
+	"justa": {
+		"parado": {
+			"brasao": [
+				[
+					14,
+					-108
+				]
+			]
+		},
+		"galope": {
+			"brasao": [
+				[
+					14,
+					-108
+				],
+				[
+					14,
+					-110
+				],
+				[
+					14,
+					-111
+				],
+				[
+					14,
+					-109
+				]
+			]
+		}
+	},
+	"equipamentos": {
+		"parado": {
+			"brasao": [
+				[
+					76,
+					-82
+				]
+			]
+		},
+		"respirar": {
+			"brasao": [
+				[
+					76,
+					-82
+				],
+				[
+					76,
+					-84
+				]
+			]
+		}
+	}
+}

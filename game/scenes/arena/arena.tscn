@@ -76,7 +76,8 @@ position = Vector2(870, 470)
 position = Vector2(870, 270)
 direcao = -1
 escala = 0.85
-cor_casa = Color(0.48, 0.14, 0.15, 1)
+casa_principal = "vermelho_sangue"
+casa_secundaria = "preto_carvao"
 
 [node name="Cerca" type="Node2D" parent="."]
 

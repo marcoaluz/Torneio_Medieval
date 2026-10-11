@@ -257,6 +257,7 @@ func _despachar(eventos: Array[Dictionary]) -> void:
 
 func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 	var cam := arena.camera
+	_animar_cavaleiros(nova)
 	match nova:
 		JustaFases.Fase.APRESENTACAO:
 			arena.posicionar_nas_pontas()
@@ -277,6 +278,21 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 			var meio := (arena.jogador.centro() + arena.rival.centro()) * 0.5
 			cam.focar(meio, zoom_impacto)
 	_atualizar_visual()
+
+## Galope na Corrida (no ritmo da velocidade) e em câmera lenta na Mira e no
+## Impacto; parado nas pontas e no fim.
+func _animar_cavaleiros(f: JustaFases.Fase) -> void:
+	for lado: Array in [[arena.jogador, justa.jogador], [arena.rival, justa.rival]]:
+		var cav: Cavaleiro = lado[0]
+		var g: Galope = lado[1]
+		var ritmo := float(g.velocidade) / maxf(float(g.velocidade_nominal), 1.0)
+		match f:
+			JustaFases.Fase.CORRIDA:
+				cav.animar("galope", ritmo)
+			JustaFases.Fase.MIRA, JustaFases.Fase.IMPACTO:
+				cav.animar("galope", ritmo * camera_lenta)
+			_:
+				cav.animar("parado")
 
 ## No fim da Corrida, divide o que falta até o encontro na proporção das
 ## velocidades: a Mira (câmera lenta) leva cada um até o ponto de encontro.
