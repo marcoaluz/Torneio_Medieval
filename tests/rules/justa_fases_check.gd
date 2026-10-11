@@ -60,6 +60,8 @@ func _rodar(cfg: Dictionary, acoes: Array, pedaco: int) -> Array:
 						ms -= p
 			"pular":
 				_anotar(saida, j.pular())
+			"encerrar_corrida":
+				_anotar(saida, j.encerrar_corrida())
 			"resultado":
 				var lado := JustaFases.NOMES_LADO.find(a.get("derrubado", "nenhum"))
 				j.registrar_resultado(int(a["jogador"]), int(a["rival"]), lado)

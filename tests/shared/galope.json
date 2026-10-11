@@ -1,0 +1,883 @@
+{
+	"versao": 1,
+	"descricao": "Galope de um cavaleiro (game/scripts/rules/galope.gd) e avaliacao da largada, com os dados de game/data/balance/galope.json embutidos em config. Acoes: [passada, qualidade] | [avancar, ms] | [tocar]. Eventos: toque/perdido = resultado:batida:desvio:v<velocidade>:f<folego>@t.",
+	"config": {
+		"versao": 1,
+		"largada": {
+			"bandeira_ms": 250,
+			"bandeira_variacao_ms": 350,
+			"perfeita_ms": 150,
+			"boa_ms": 350,
+			"velocidade_inicial_pct": {
+				"perfeita": 115,
+				"boa": 100,
+				"ruim": 85
+			},
+			"bonus_precisao_pct": {
+				"perfeita": 10,
+				"boa": 0,
+				"ruim": 0
+			}
+		},
+		"pista": {
+			"distancia_total": 1000,
+			"distancia_mira": 150
+		},
+		"galope": {
+			"compasso_ms": 500,
+			"janela_base_ms": 70,
+			"janela_por_temperamento_milesimos": 1000,
+			"janela_max_ms": 180,
+			"velocidade_base": 80,
+			"velocidade_por_ponto_milesimos": 300,
+			"velocidade_min_pct": 80,
+			"velocidade_max_pct": 120,
+			"velocidade_max_cansado_pct": 100,
+			"ganho_pct": 4,
+			"perda_perdido_pct": 4,
+			"perda_sem_folego_pct": 5
+		},
+		"folego": {
+			"base": 60,
+			"por_ponto_milesimos": 800,
+			"custo_por_passada": 10,
+			"custo_erro": 6
+		},
+		"cavalo_padrao": {
+			"velocidade": 50,
+			"folego": 50,
+			"temperamento": 50
+		}
+	},
+	"aleatorio": [
+		{
+			"semente": 1,
+			"primeiros": [
+				270369,
+				67634689,
+				2647435461,
+				307599695,
+				2398689233,
+				745495504
+			]
+		},
+		{
+			"semente": 42,
+			"primeiros": [
+				11355432,
+				2836018348,
+				476557059,
+				3648046016,
+				3759983556,
+				1441438134
+			]
+		},
+		{
+			"semente": 0,
+			"primeiros": [
+				1359758873,
+				3761132862,
+				2075758394,
+				25405621,
+				3862129951,
+				4186559031
+			]
+		},
+		{
+			"semente": 123456789,
+			"primeiros": [
+				2714967881,
+				2238813396,
+				1250077441,
+				3820100336,
+				3177519686,
+				3684138832
+			]
+		},
+		{
+			"semente": 4294967295,
+			"primeiros": [
+				253983,
+				4228382207,
+				1958451267,
+				4056713434,
+				2049502865,
+				2560970988
+			]
+		}
+	],
+	"largada": [
+		{
+			"tocou": true,
+			"reacao_ms": 0,
+			"esperado": "perfeita"
+		},
+		{
+			"tocou": true,
+			"reacao_ms": 150,
+			"esperado": "perfeita"
+		},
+		{
+			"tocou": true,
+			"reacao_ms": 151,
+			"esperado": "boa"
+		},
+		{
+			"tocou": true,
+			"reacao_ms": 350,
+			"esperado": "boa"
+		},
+		{
+			"tocou": true,
+			"reacao_ms": 351,
+			"esperado": "ruim"
+		},
+		{
+			"tocou": true,
+			"reacao_ms": -1,
+			"esperado": "ruim"
+		},
+		{
+			"tocou": false,
+			"reacao_ms": 0,
+			"esperado": "ruim"
+		},
+		{
+			"tocou": true,
+			"reacao_ms": 900,
+			"esperado": "ruim"
+		}
+	],
+	"casos": [
+		{
+			"nome": "toques no tempo aumentam a velocidade",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"no_tempo:1:0:v98:f90@500",
+				"no_tempo:2:0:v101:f90@1000",
+				"no_tempo:3:0:v104:f90@1500",
+				"no_tempo:4:0:v107:f90@2000",
+				"no_tempo:5:0:v110:f90@2500",
+				"no_tempo:6:0:v113:f90@3000",
+				"no_tempo:7:0:v114:f90@3500",
+				"no_tempo:8:0:v114:f90@4000",
+				"fim:d478000:ritmo1000"
+			]
+		},
+		{
+			"nome": "toque no inicio da janela conta",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					380
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					400
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"no_tempo:1:-120:v98:f90@380",
+				"fim:d75300:ritmo1000"
+			]
+		},
+		{
+			"nome": "toque no ultimo ms da janela conta e nao vira perdido",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					620
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					400
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"no_tempo:1:120:v98:f90@620",
+				"fim:d98100:ritmo1000"
+			]
+		},
+		{
+			"nome": "batida perdida um ms depois do fim da janela",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					621
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					10
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"perdido:1:0:v92:f90@621",
+				"fora_do_tempo:1:121:v92:f84@621",
+				"fim:d59915:ritmo0"
+			]
+		},
+		{
+			"nome": "toque um ms fora da janela erra e gasta folego",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					379
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					300
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"fora_do_tempo:1:-121:v95:f84@379",
+				"perdido:1:0:v92:f84@621",
+				"fim:d64331:ritmo0"
+			]
+		},
+		{
+			"nome": "sem toques perde velocidade a cada batida",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					4500
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"perdido:1:0:v92:f90@621",
+				"perdido:2:0:v89:f90@1121",
+				"perdido:3:0:v86:f90@1621",
+				"perdido:4:0:v83:f90@2121",
+				"perdido:5:0:v80:f90@2621",
+				"perdido:6:0:v77:f90@3121",
+				"perdido:7:0:v76:f90@3621",
+				"perdido:8:0:v76:f90@4121",
+				"fim:d379299:ritmo0"
+			]
+		},
+		{
+			"nome": "dois toques na mesma batida: rapido demais",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					30
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					10
+				],
+				[
+					"tocar"
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"no_tempo:1:0:v98:f90@500",
+				"rapido_demais:1:30:v98:f84@530",
+				"rapido_demais:1:40:v98:f78@540",
+				"fim:d51420:ritmo1000"
+			]
+		},
+		{
+			"nome": "toque antes da primeira batida e fora do tempo",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					100
+				],
+				[
+					"tocar"
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:boa:v95:f90",
+				"fora_do_tempo:0:100:v95:f84@100",
+				"fim:d9500:ritmo0"
+			]
+		},
+		{
+			"nome": "folego acaba e erros passam a tirar velocidade",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"perfeita"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					37
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					2000
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:perfeita:v109:f90",
+				"fora_do_tempo:0:37:v109:f84@37",
+				"fora_do_tempo:0:74:v109:f78@74",
+				"fora_do_tempo:0:111:v109:f72@111",
+				"fora_do_tempo:0:148:v109:f66@148",
+				"fora_do_tempo:0:185:v109:f60@185",
+				"fora_do_tempo:0:222:v109:f54@222",
+				"fora_do_tempo:1:-241:v109:f48@259",
+				"fora_do_tempo:1:-204:v109:f42@296",
+				"fora_do_tempo:1:-167:v109:f36@333",
+				"fora_do_tempo:1:-130:v109:f30@370",
+				"no_tempo:1:-93:v112:f30@407",
+				"rapido_demais:1:-56:v112:f24@444",
+				"rapido_demais:1:-19:v112:f18@481",
+				"rapido_demais:1:18:v112:f12@518",
+				"rapido_demais:1:55:v112:f6@555",
+				"rapido_demais:1:92:v112:f0@592",
+				"rapido_demais:1:129:v95:f0@629",
+				"rapido_demais:1:166:v91:f0@666",
+				"rapido_demais:1:203:v87:f0@703",
+				"rapido_demais:1:240:v83:f0@740",
+				"perdido:2:0:v80:f0@1121",
+				"perdido:3:0:v77:f0@1621",
+				"perdido:4:0:v76:f0@2121",
+				"perdido:5:0:v76:f0@2621",
+				"fim:d236495:ritmo200"
+			]
+		},
+		{
+			"nome": "temperamento alto alarga a janela",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 100
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					330
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					1000
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela170:folego100",
+				"passada:boa:v95:f90",
+				"no_tempo:1:-170:v98:f90@330",
+				"perdido:2:0:v95:f90@1171",
+				"fim:d128873:ritmo500"
+			]
+		},
+		{
+			"nome": "janela nunca passa do teto",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 300
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					319
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					1
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela180:folego100",
+				"passada:boa:v95:f90",
+				"fora_do_tempo:1:-181:v95:f84@319",
+				"fim:d30400:ritmo0"
+			]
+		},
+		{
+			"nome": "temperamento zero estreita a janela",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 0
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"avancar",
+					420
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					1000
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela70:folego100",
+				"passada:boa:v95:f90",
+				"fora_do_tempo:1:-80:v95:f84@420",
+				"perdido:1:0:v92:f84@571",
+				"perdido:2:0:v89:f84@1071",
+				"fim:d131306:ritmo0"
+			]
+		},
+		{
+			"nome": "cavalo rapido e largada perfeita",
+			"cavalo": {
+				"velocidade": 100,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"perfeita"
+				],
+				[
+					"avancar",
+					530
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				],
+				[
+					"tocar"
+				],
+				[
+					"avancar",
+					500
+				]
+			],
+			"esperado": [
+				"inicio:nominal110:janela120:folego100",
+				"passada:perfeita:v126:f90",
+				"no_tempo:1:30:v130:f90@530",
+				"no_tempo:2:30:v132:f90@1030",
+				"no_tempo:3:30:v132:f90@1530",
+				"no_tempo:4:30:v132:f90@2030",
+				"fim:d329780:ritmo1000"
+			]
+		},
+		{
+			"nome": "largada ruim comeca devagar",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 50,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"ruim"
+				],
+				[
+					"avancar",
+					1000
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego100",
+				"passada:ruim:v80:f90",
+				"perdido:1:0:v77:f90@621",
+				"fim:d78863:ritmo0"
+			]
+		},
+		{
+			"nome": "folego cai a cada passada",
+			"cavalo": {
+				"velocidade": 50,
+				"folego": 0,
+				"temperamento": 50
+			},
+			"acoes": [
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				],
+				[
+					"passada",
+					"boa"
+				]
+			],
+			"esperado": [
+				"inicio:nominal95:janela120:folego60",
+				"passada:boa:v95:f50",
+				"passada:boa:v95:f40",
+				"passada:boa:v95:f30",
+				"passada:boa:v95:f20",
+				"passada:boa:v95:f10",
+				"passada:boa:v95:f0",
+				"passada:boa:v95:f0",
+				"passada:boa:v95:f0",
+				"fim:d0:ritmo0"
+			]
+		}
+	]
+}

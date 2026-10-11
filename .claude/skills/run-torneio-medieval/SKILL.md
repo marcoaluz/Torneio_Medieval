@@ -25,6 +25,7 @@ bash tests/rodar_testes.sh
 # Arena (prompt 1.1)
 timeout 60 bash $D script res://tests/arena/arena_check.gd    # montagem + 3 planos da câmera; espera "ARENA TUDO OK"
 TM_CAMERA=seguir bash $D shot res://tests/arena/arena_camera_demo.tscn 60 /tmp/out/seguir.png  # aberto | seguir | focar
+bash $D shot res://tests/arena/justa_robo_demo.tscn 170 /tmp/out/corrida.png   # justa com robô tocando (log ROBO)
 ```
 
 - `import`: termina com exit 0 se o projeto abre. Cria `.godot/` (ignorado pelo git) e os `.import` dos assets (esses entram no git).

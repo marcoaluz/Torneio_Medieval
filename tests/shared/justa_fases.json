@@ -786,6 +786,74 @@
 			"esperado": [
 				"fase:apresentacao:1@0"
 			]
+		},
+		{
+			"nome": "chegada encerra a corrida antes do teto",
+			"acoes": [
+				{
+					"acao": "avancar",
+					"ms": 4500
+				},
+				{
+					"acao": "encerrar_corrida"
+				},
+				{
+					"acao": "avancar",
+					"ms": 2000
+				},
+				{
+					"acao": "resultado",
+					"jogador": 1,
+					"rival": 0,
+					"derrubado": "nenhum"
+				},
+				{
+					"acao": "avancar",
+					"ms": 2000
+				},
+				{
+					"acao": "avancar",
+					"ms": 1
+				}
+			],
+			"esperado": [
+				"fase:apresentacao:1@0",
+				"fase:largada:1@2000",
+				"fase:corrida:1@3000",
+				"fase:mira:1@4500",
+				"fase:impacto:1@6500",
+				"passada:1:1-0:nenhum@8500",
+				"fase:apresentacao:2@8500"
+			]
+		},
+		{
+			"nome": "encerrar corrida fora da corrida nao faz nada",
+			"acoes": [
+				{
+					"acao": "avancar",
+					"ms": 1000
+				},
+				{
+					"acao": "encerrar_corrida"
+				},
+				{
+					"acao": "avancar",
+					"ms": 6500
+				},
+				{
+					"acao": "encerrar_corrida"
+				},
+				{
+					"acao": "avancar",
+					"ms": 1
+				}
+			],
+			"esperado": [
+				"fase:apresentacao:1@0",
+				"fase:largada:1@2000",
+				"fase:corrida:1@3000",
+				"fase:mira:1@7000"
+			]
 		}
 	]
 }

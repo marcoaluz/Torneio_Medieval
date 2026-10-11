@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/scripts/presentation/barra_distancia.gd" id="1"]
+
+[node name="BarraDistancia" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="IconeJogador" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 22.0
+offset_bottom = 14.0
+mouse_filter = 2
+color = Color(0.17, 0.23, 0.35, 1)
+
+[node name="IconeRival" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 22.0
+offset_bottom = 14.0
+mouse_filter = 2
+color = Color(0.48, 0.14, 0.15, 1)

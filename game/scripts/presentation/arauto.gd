@@ -1,0 +1,39 @@
+@tool
+class_name Arauto
+extends Node2D
+## Arauto com a bandeira da largada (apresentação). Encaixes para sprites:
+## Corpo e Bandeira (a bandeira gira em volta do ombro, a origem do nó).
+## levantar() no começo da Largada, baixar() quando a regra manda.
+
+@export var angulo_levantada := -150.0
+@export var angulo_baixada := -20.0
+@export var duracao_baixar := 0.08
+
+var levantada := true
+var _tween: Tween
+
+func _ready() -> void:
+	levantar()
+
+func levantar() -> void:
+	levantada = true
+	_girar(angulo_levantada, 0.0)
+
+func baixar() -> void:
+	levantada = false
+	_girar(angulo_baixada, duracao_baixar)
+
+func esta_levantada() -> bool:
+	return levantada
+
+func _girar(graus: float, duracao: float) -> void:
+	var b := get_node_or_null("Bandeira") as Node2D
+	if b == null:
+		return
+	if _tween:
+		_tween.kill()
+	if duracao <= 0.0 or not is_inside_tree():
+		b.rotation_degrees = graus
+		return
+	_tween = create_tween()
+	_tween.tween_property(b, "rotation_degrees", graus, duracao).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)

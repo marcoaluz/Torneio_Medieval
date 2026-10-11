@@ -111,6 +111,14 @@ func pular() -> Array[Dictionary]:
 		_fim_da_fase(eventos)
 	return eventos
 
+## Termina a Corrida antes do teto de tempo (os cavaleiros chegaram ao
+## ponto da Mira). Fora da Corrida, não faz nada.
+func encerrar_corrida() -> Array[Dictionary]:
+	var eventos: Array[Dictionary] = []
+	if fase == Fase.CORRIDA:
+		_fim_da_fase(eventos)
+	return eventos
+
 ## Resultado da passada atual, calculado pela regra do impacto. Só vale na
 ## Mira ou no Impacto; devolve false (e ignora) fora delas ou com valores
 ## inválidos. Registrar de novo na mesma passada substitui o anterior.

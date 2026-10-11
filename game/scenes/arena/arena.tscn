@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/arena.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/retangulo_provisorio.gd" id="2"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://game/scenes/arena/cavaleiro.tscn" id="5"]
 [ext_resource type="Script" path="res://game/scripts/presentation/camera_arena.gd" id="6"]
 [ext_resource type="Script" path="res://game/scripts/presentation/controlador_justa.gd" id="7"]
+[ext_resource type="PackedScene" path="res://game/scenes/arena/arauto.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://game/scenes/ui/barra_distancia.tscn" id="9"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1")
@@ -46,6 +48,9 @@ position = Vector2(-160, 292)
 script = ExtResource("2")
 tamanho = Vector2(1280, 248)
 cor = Color(0.57, 0.49, 0.37, 1)
+
+[node name="Arauto" parent="." instance=ExtResource("8")]
+position = Vector2(480, 206)
 
 [node name="Pistas" type="Node2D" parent="."]
 
@@ -88,6 +93,21 @@ limit_right = 1120
 limit_bottom = 540
 script = ExtResource("6")
 
-[node name="Justa" type="Node" parent="." node_paths=PackedStringArray("arena")]
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="BarraDistancia" parent="Interface" instance=ExtResource("9")]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 160.0
+offset_top = -40.0
+offset_right = -160.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Justa" type="Node" parent="." node_paths=PackedStringArray("arena", "barra")]
 script = ExtResource("7")
 arena = NodePath("..")
+barra = NodePath("../Interface/BarraDistancia")

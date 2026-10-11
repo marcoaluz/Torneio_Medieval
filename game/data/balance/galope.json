@@ -1,0 +1,36 @@
+{
+	"versao": 1,
+	"largada": {
+		"bandeira_ms": 250,
+		"bandeira_variacao_ms": 350,
+		"perfeita_ms": 150,
+		"boa_ms": 350,
+		"velocidade_inicial_pct": { "perfeita": 115, "boa": 100, "ruim": 85 },
+		"bonus_precisao_pct": { "perfeita": 10, "boa": 0, "ruim": 0 }
+	},
+	"pista": {
+		"distancia_total": 1000,
+		"distancia_mira": 150
+	},
+	"galope": {
+		"compasso_ms": 500,
+		"janela_base_ms": 70,
+		"janela_por_temperamento_milesimos": 1000,
+		"janela_max_ms": 180,
+		"velocidade_base": 80,
+		"velocidade_por_ponto_milesimos": 300,
+		"velocidade_min_pct": 80,
+		"velocidade_max_pct": 120,
+		"velocidade_max_cansado_pct": 100,
+		"ganho_pct": 4,
+		"perda_perdido_pct": 4,
+		"perda_sem_folego_pct": 5
+	},
+	"folego": {
+		"base": 60,
+		"por_ponto_milesimos": 800,
+		"custo_por_passada": 10,
+		"custo_erro": 6
+	},
+	"cavalo_padrao": { "velocidade": 50, "folego": 50, "temperamento": 50 }
+}

@@ -26,3 +26,10 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Câmera lenta da Mira é só visual** (os cavaleiros andam a 0.3 da velocidade); o tempo de jogo da Mira continua 2 s reais.
 - **2026-10-11 · Entrada por toque:** `emulate_touch_from_mouse=true`; o jogo só trata eventos de toque, e o mouse do desktop vira toque.
 - **2026-10-11 · Pedido do usuário: executar todos os prompts do Pacote em sequência**, parando só antes de gasto de crédito ou serviço externo.
+- **2026-10-11 · Corrida termina pela distância** (GDD: Velocidade do cavalo muda o tempo da corrida): fim quando a soma das distâncias chega ao ponto da Mira, com `fases_ms.corrida` como teto (6 s). O tempo normal sai em 4–5 s.
+- **2026-10-11 · Galope integrado a cada 1 ms, em inteiros** (distância em milésimos, velocidade em unidades/s). Assim é exato e igual no TypeScript, e a justa inteira roda em milissegundos de CPU.
+- **2026-10-11 · Gerador da regra: xorshift32 próprio** (`Aleatorio`), não o RandomNumberGenerator do Godot, para o TypeScript produzir a mesma sequência. Vetores em `tests/shared/galope.json`.
+- **2026-10-11 · Janela da batida inclusiva nos dois lados** (k·compasso ± janela); a batida só conta como perdida no ms seguinte ao fim da janela.
+- **2026-10-11 · Um toque, uma ação por fase:** pula (Apresentação), larga (Largada, só o primeiro toque), galopa (Corrida). Tocar antes da bandeira queima a largada (ruim).
+- **2026-10-11 · Barra de distância mostra a pista inteira**, e os ícones se encontram onde os cavaleiros se encontram (quem corre mais anda mais), em vez de supor o encontro no meio.
+- **2026-10-11 · Referência compartilhada gravada pelo GDScript** (`justa_referencia.json`) para a justa completa; as peças menores têm oráculo Python independente.
