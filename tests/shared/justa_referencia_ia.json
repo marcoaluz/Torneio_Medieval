@@ -44,7 +44,7 @@
 			"versao": 2.0
 		},
 		"impacto": {
-			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos).",
+			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida).",
 			"bloqueio": {
 				"base_milesimos": 50.0,
 				"teto_milesimos": 400.0,
@@ -90,6 +90,7 @@
 				"penalidade_pontos": 2.0,
 				"zona": "cavalo"
 			},
+			"habilidade_carga_ms": 1000.0,
 			"habilidades": {
 				"bloqueio": {
 					"bloqueio_milesimos": 700.0,

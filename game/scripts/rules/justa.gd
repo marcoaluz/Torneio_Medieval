@@ -10,7 +10,8 @@ extends RefCounted
 ##   Apresentação: tocar() pula
 ##   Largada: tocar() larga (só o primeiro toque conta)
 ##   Corrida: tocar() galopa; ativar_habilidade() liga a habilidade ativa
-##            (Investida, Golpe Pesado) nesta passada, uma vez por justa
+##            (Investida, Golpe Pesado) nesta passada, uma vez por justa,
+##            depois de `impacto.habilidade_carga_ms` de Corrida (carrega)
 ##   Mira: mirar(ponto) segura e move a ponta da lança; soltar() trava o golpe.
 ##         Se ainda estiver segurando quando a Mira acaba, o golpe sai onde a
 ##         ponta estiver (automatico); se nunca segurou, o golpe é "erro".
@@ -108,6 +109,15 @@ static func validar(cfg: Dictionary) -> String:
 		return "a bandeira precisa baixar antes do fim da Largada"
 	return ""
 
+## Lado a partir de padrao.json: {cavaleiro, cavalo, equipamento, habilidade}.
+static func lado_padrao(padrao: Dictionary) -> Dictionary:
+	var lado := {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
+	if padrao.has("equipamento"):
+		lado["equipamento"] = padrao["equipamento"]
+	if padrao.has("habilidade"):
+		lado["habilidade"] = padrao["habilidade"]
+	return lado.duplicate(true)
+
 ## Lê as configurações de game/data/balance/ (para o jogo; os testes montam
 ## a sua). Devolve {} e avisa se faltar arquivo.
 static func carregar_configuracao() -> Dictionary:
@@ -157,7 +167,7 @@ func zonas_efetivas() -> Array[Dictionary]:
 ## Liga a habilidade ativa do jogador nesta passada (só na Corrida, uma vez
 ## por justa, e só se a habilidade equipada for do tipo "ativa").
 func ativar_habilidade() -> Array[Dictionary]:
-	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_jogador:
+	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_jogador or not habilidade_carregada(true):
 		return []
 	var nome := _habilidade_de(lado_jogador)
 	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
@@ -166,9 +176,27 @@ func ativar_habilidade() -> Array[Dictionary]:
 	habilidade_na_passada_jogador = true
 	return [{"tipo": "habilidade", "passada": fases.passada, "lado": "jogador", "nome": nome, "t": fases.tempo_total_ms}]
 
+## Fração da carga da habilidade nesta Corrida (0 a 1; 0 fora da Corrida).
+func carga_habilidade(do_jogador: bool) -> float:
+	if fases.fase != JustaFases.Fase.CORRIDA:
+		return 0.0
+	var carga := int(_cfg["impacto"]["habilidade_carga_ms"])
+	var t := (jogador if do_jogador else rival).t_ms
+	return 1.0 if carga <= 0 else minf(float(t) / carga, 1.0)
+
+func habilidade_carregada(do_jogador: bool) -> bool:
+	return (jogador if do_jogador else rival).t_ms >= int(_cfg["impacto"]["habilidade_carga_ms"])
+
+## Habilidade ativa equipada por um lado ("" se não tem ou é passiva).
+func habilidade_ativa_de(do_jogador: bool) -> String:
+	var nome := _habilidade_de(lado_jogador if do_jogador else lado_rival)
+	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
+		return ""
+	return nome
+
 ## O mesmo para o rival (chamado pela IA).
 func rival_ativar_habilidade() -> Array[Dictionary]:
-	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_rival:
+	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_rival or not habilidade_carregada(false):
 		return []
 	var nome := _habilidade_de(lado_rival)
 	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":

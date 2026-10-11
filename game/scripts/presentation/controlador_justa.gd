@@ -44,6 +44,10 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 
 @export var arena: Arena
 @export var barra: BarraDistancia
+## Interface (para não tratar como jogo o toque que cai no botão).
+@export var interface: InterfaceJusta
+## Segundos depois do fim até um toque começar outra justa.
+@export var espera_para_recomecar := 1.0
 @export var iniciar_sozinho := true
 ## Perfil da IA do rival (game/data/balance/ia_rival.json); vazio = rival sem IA.
 @export var perfil_rival := "equilibrado"
@@ -72,6 +76,7 @@ var _encontro_r := 0.0
 var _cfg: Dictionary
 var _base_mira := Vector2.ZERO  ## ponta sem a oscilação, décimos de px do quadro do rival
 var _tempo_mira := 0.0
+var _tempo_desde_fim := 0.0
 
 func _ready() -> void:
 	if iniciar_sozinho:
@@ -90,9 +95,9 @@ func iniciar(semente_fixa := -1) -> void:
 		set_process(false)
 		return
 	if lado_jogador.is_empty():
-		lado_jogador = {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
+		lado_jogador = Justa.lado_padrao(padrao)
 	if lado_rival.is_empty():
-		lado_rival = {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
+		lado_rival = Justa.lado_padrao(padrao)
 	var perfil := {}
 	if perfil_rival != "":
 		var ia_cfg := Balanceamento.carregar("ia_rival")
@@ -107,6 +112,7 @@ func iniciar(semente_fixa := -1) -> void:
 	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)
 	_px_por_mil = vao / float(justa.distancia_total_mil())
 	_resto_ms = 0.0
+	_tempo_desde_fim = 0.0
 	set_process(true)
 	_despachar(justa.iniciar())
 
@@ -149,7 +155,10 @@ func fase() -> JustaFases.Fase:
 	return justa.fases.fase if justa else JustaFases.Fase.FIM
 
 func _process(delta: float) -> void:
-	if justa == null or justa.terminou():
+	if justa == null:
+		return
+	if justa.terminou():
+		_tempo_desde_fim += delta
 		return
 	_resto_ms += delta * 1000.0
 	var ms := int(_resto_ms)
@@ -163,6 +172,13 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if justa == null:
+		return
+	if event is InputEventScreenTouch and interface and interface.contem_ponto(event.position):
+		return
+	if justa.terminou():
+		if event is InputEventScreenTouch and event.pressed and _tempo_desde_fim >= espera_para_recomecar:
+			get_viewport().set_input_as_handled()
+			iniciar()
 		return
 	if fase() == JustaFases.Fase.MIRA:
 		if event is InputEventScreenTouch:
@@ -277,8 +293,8 @@ func distancias_px() -> Vector2:
 	return Vector2.ZERO
 
 func _atualizar_visual() -> void:
-	if justa == null:
-		return
+	if justa == null or justa.terminou():
+		return  # no fim, os cavaleiros ficam onde pararam
 	var d := distancias_px()
 	arena.jogador.global_position = arena.inicio_jogador.global_position + Vector2(d.x, 0)
 	arena.rival.global_position = arena.inicio_rival.global_position - Vector2(d.y, 0)

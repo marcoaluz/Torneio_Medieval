@@ -1,6 +1,35 @@
 {
-	"versao": 1,
-	"_nota": "Atributos (0 a 100) usados enquanto nao existem dados do jogador (2.4) e para o rival sem perfil.",
-	"cavaleiro": { "forca": 50, "precisao": 50, "equilibrio": 50 },
-	"cavalo": { "velocidade": 50, "folego": 50, "temperamento": 50 }
+	"versao": 2,
+	"_nota": "Lado usado enquanto nao existem dados do jogador (2.4) e para o rival sem perfil: atributos (0 a 100), equipamento inicial e habilidade.",
+	"cavaleiro": {
+		"forca": 50,
+		"precisao": 50,
+		"equilibrio": 50
+	},
+	"cavalo": {
+		"velocidade": 50,
+		"folego": 50,
+		"temperamento": 50
+	},
+	"equipamento": {
+		"elmo": {
+			"defesa": 8,
+			"durabilidade": 60
+		},
+		"peitoral": {
+			"defesa": 8,
+			"durabilidade": 60
+		},
+		"escudo": {
+			"defesa": 5,
+			"bloqueio_milesimos": 40,
+			"durabilidade": 60
+		},
+		"lanca": {
+			"poder": 5,
+			"precisao": 0,
+			"durabilidade": 40
+		}
+	},
+	"habilidade": "investida"
 }

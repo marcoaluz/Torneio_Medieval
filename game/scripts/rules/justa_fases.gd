@@ -76,6 +76,10 @@ func _init(config: Dictionary) -> void:
 	for i in Fase.FIM:
 		_duracao_ms.append(int(config["fases_ms"][NOMES_FASE[i]]))
 
+## Passadas regulares (sem as extras).
+func total_passadas() -> int:
+	return _passadas
+
 func duracao_ms(f: Fase) -> int:
 	return _duracao_ms[f] if f < Fase.FIM else 0
 

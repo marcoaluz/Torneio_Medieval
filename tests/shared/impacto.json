@@ -3,7 +3,7 @@
 	"descricao": "Regra do impacto (game/scripts/rules/impacto.gd). Cada caso: Impacto.resolver(config, entrada, Aleatorio(semente)) == esperado. Config embutida.",
 	"config": {
 		"versao": 1,
-		"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos).",
+		"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida).",
 		"pontos": {
 			"capacete": 3,
 			"peito": 2,
@@ -79,7 +79,8 @@
 				"dano_bonus_pct": 0,
 				"bloqueio_milesimos": 700
 			}
-		}
+		},
+		"habilidade_carga_ms": 1000
 	},
 	"suave": [
 		{

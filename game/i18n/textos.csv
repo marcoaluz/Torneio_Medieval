@@ -1,2 +1,31 @@
 keys,pt_BR,en
 JOGO_TITULO,Torneio Medieval,Medieval Tournament
+JUSTA_PASSADA,Passada {atual}/{total},Pass {atual}/{total}
+JUSTA_PASSADA_EXTRA,Passada extra,Extra pass
+JUSTA_NOME_JOGADOR,Você,You
+RIVAL_NOVATO,Escudeiro Novato,Novice Squire
+RIVAL_EQUILIBRADO,Cavaleiro da Planície,Knight of the Plains
+RIVAL_AGRESSIVO,Cavaleiro Rubro,Crimson Knight
+LARGADA_PERFEITA,Largada perfeita!,Perfect start!
+LARGADA_BOA,Boa largada,Good start
+LARGADA_RUIM,Largada lenta,Slow start
+LARGADA_QUEIMADA,Queimou a largada!,False start!
+HABILIDADE_INVESTIDA,Investida,Charge
+HABILIDADE_GOLPE_PESADO,Golpe Pesado,Heavy Blow
+HABILIDADE_BLOQUEIO,Bloqueio,Block
+GOLPE_CAPACETE,Capacete,Helm
+GOLPE_PEITO,Peito,Chest
+GOLPE_ESCUDO,Escudo,Shield
+GOLPE_ERRO,Errou,Missed
+GOLPE_FALTA,Falta! Acertou o cavalo,Foul! Hit the horse
+GOLPE_BLOQUEADO,Bloqueado,Blocked
+GOLPE_DERRUBOU,Derrubou!,Unhorsed!
+GOLPE_CAIU,Você caiu!,You fell!
+RESULTADO_VITORIA,Vitória!,Victory!
+RESULTADO_DERROTA,Derrota,Defeat
+RESULTADO_EMPATE,Empate,Draw
+MOTIVO_PONTOS,Por pontos,On points
+MOTIVO_DERRUBADA,Por derrubada,By unhorsing
+MOTIVO_DESCLASSIFICACAO,Por desclassificação,By disqualification
+MOTIVO_EMPATE,Ninguém venceu,Nobody won
+JUSTA_TOQUE_DE_NOVO,Toque para justar de novo,Tap to joust again

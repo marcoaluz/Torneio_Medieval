@@ -48,8 +48,9 @@ static func validar(cfg: Dictionary) -> String:
 		for k: String in grupos[g]:
 			if not cfg[g].has(k):
 				return "falta \"%s.%s\"" % [g, k]
-	if not cfg.has("teto_suave_joelho_pct"):
-		return "falta \"teto_suave_joelho_pct\""
+	for k in ["teto_suave_joelho_pct", "habilidade_carga_ms"]:
+		if not cfg.has(k):
+			return "falta \"%s\"" % k
 	for z in ["capacete", "peito", "escudo", "cavalo", ERRO]:
 		if not cfg["pontos"].has(z):
 			return "falta \"pontos.%s\"" % z

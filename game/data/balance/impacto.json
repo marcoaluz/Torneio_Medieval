@@ -1,7 +1,13 @@
 {
 	"versao": 1,
-	"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos).",
-	"pontos": { "capacete": 3, "peito": 2, "escudo": 1, "cavalo": 0, "erro": 0 },
+	"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida).",
+	"pontos": {
+		"capacete": 3,
+		"peito": 2,
+		"escudo": 1,
+		"cavalo": 0,
+		"erro": 0
+	},
 	"falta": {
 		"zona": "cavalo",
 		"penalidade_pontos": 2,
@@ -9,13 +15,20 @@
 	},
 	"teto_suave_joelho_pct": 70,
 	"bloqueio": {
-		"zonas": ["capacete", "peito"],
+		"zonas": [
+			"capacete",
+			"peito"
+		],
 		"vira_zona": "escudo",
 		"base_milesimos": 50,
 		"teto_milesimos": 400
 	},
 	"derrubada": {
-		"base_por_zona_milesimos": { "capacete": 120, "peito": 90, "escudo": 30 },
+		"base_por_zona_milesimos": {
+			"capacete": 120,
+			"peito": 90,
+			"escudo": 30
+		},
 		"forca_menos_equilibrio_milesimos": 3,
 		"velocidade_por_pct_milesimos": 4,
 		"ritmo_max_milesimos": 40,
@@ -24,16 +37,45 @@
 		"teto_milesimos": 450
 	},
 	"dano": {
-		"base_por_zona": { "capacete": 20, "peito": 15, "escudo": 10, "cavalo": 8 },
-		"peca_por_zona": { "capacete": "elmo", "peito": "peitoral", "escudo": "escudo", "cavalo": "peitoral_cavalo" },
+		"base_por_zona": {
+			"capacete": 20,
+			"peito": 15,
+			"escudo": 10,
+			"cavalo": 8
+		},
+		"peca_por_zona": {
+			"capacete": "elmo",
+			"peito": "peitoral",
+			"escudo": "escudo",
+			"cavalo": "peitoral_cavalo"
+		},
 		"velocidade_por_pct_milesimos": 10,
 		"defesa_reduz_por_ponto_milesimos": 500,
 		"minimo": 1,
 		"lanca_por_contato": 4
 	},
 	"habilidades": {
-		"investida": { "tipo": "ativa", "vence": "bloqueio", "derrubada_bonus_milesimos": 80, "dano_bonus_pct": 0, "bloqueio_milesimos": 0 },
-		"golpe_pesado": { "tipo": "ativa", "vence": "investida", "derrubada_bonus_milesimos": 40, "dano_bonus_pct": 50, "bloqueio_milesimos": 0 },
-		"bloqueio": { "tipo": "passiva", "vence": "golpe_pesado", "derrubada_bonus_milesimos": 0, "dano_bonus_pct": 0, "bloqueio_milesimos": 700 }
-	}
+		"investida": {
+			"tipo": "ativa",
+			"vence": "bloqueio",
+			"derrubada_bonus_milesimos": 80,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 0
+		},
+		"golpe_pesado": {
+			"tipo": "ativa",
+			"vence": "investida",
+			"derrubada_bonus_milesimos": 40,
+			"dano_bonus_pct": 50,
+			"bloqueio_milesimos": 0
+		},
+		"bloqueio": {
+			"tipo": "passiva",
+			"vence": "golpe_pesado",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 700
+		}
+	},
+	"habilidade_carga_ms": 1000
 }

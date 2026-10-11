@@ -80,6 +80,7 @@ func _initialize() -> void:
 	com_hab["habilidade"] = "investida"
 	var hab := _jogar(5, com_hab, {"habilidade": true})
 	_checa("investida aciona uma vez por justa (%d)" % hab["habilidades"], hab["habilidades"] == 1)
+	_checa("habilidade antes da carga nao aciona", _jogar(5, com_hab, {"habilidade": true, "t_habilidade": 500})["habilidades"] == 0)
 	var sem_hab := _jogar(5, _lado, {"habilidade": true})
 	_checa("sem habilidade equipada nao aciona", sem_hab["habilidades"] == 0)
 	var passiva := _lado.duplicate(true)
@@ -128,6 +129,7 @@ func _initialize() -> void:
 func _jogar(semente: int, lado: Dictionary, op: Dictionary) -> Dictionary:
 	var j := Justa.new(_cfg, lado, op.get("lado_rival", lado), semente)
 	var usa_hab: bool = op.get("habilidade", false)
+	var t_hab: int = op.get("t_habilidade", 1250)
 	var rival_mira: Variant = op.get("rival_mira", null)
 	var largada: Variant = op.get("largada", 100)
 	var galope: Variant = op.get("galope", 0)
@@ -149,7 +151,7 @@ func _jogar(semente: int, lado: Dictionary, op: Dictionary) -> Dictionary:
 				and (j.jogador.t_ms - int(galope)) % j.jogador.compasso_ms() == 0:
 			entradas.append([t, "tocar", 0, 0])
 			_anotar(eventos, j.tocar(), res)
-		elif usa_hab and f == JustaFases.Fase.CORRIDA and j.jogador.t_ms == 1250:
+		elif usa_hab and f == JustaFases.Fase.CORRIDA and j.jogador.t_ms == t_hab:
 			entradas.append([t, "habilidade", 0, 0])
 			_anotar(eventos, j.ativar_habilidade(), res)
 		elif rival_mira != null and f == JustaFases.Fase.MIRA and j.fases.tempo_na_fase_ms == 50:

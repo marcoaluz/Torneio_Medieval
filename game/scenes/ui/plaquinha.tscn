@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/scripts/presentation/ui/plaquinha.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="fundo"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.08, 0.07, 0.85)
+border_width_bottom = 2
+border_color = Color(0.35, 0.28, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="armadura"]
+bg_color = Color(0.62, 0.66, 0.72, 1)
+
+[sub_resource type="StyleBoxFlat" id="folego"]
+bg_color = Color(0.45, 0.62, 0.33, 1)
+
+[node name="Plaquinha" type="PanelContainer"]
+custom_minimum_size = Vector2(240, 0)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("fundo")
+script = ExtResource("1")
+
+[node name="Linha" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Retrato" type="Control" parent="Linha"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Provisorio" type="ColorRect" parent="Linha/Retrato"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="Dados" type="VBoxContainer" parent="Linha"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="Nome" type="Label" parent="Linha/Dados"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "—"
+clip_text = true
+
+[node name="Armadura" type="ProgressBar" parent="Linha/Dados"]
+custom_minimum_size = Vector2(0, 7)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("armadura")
+max_value = 1.0
+step = 0.0
+value = 1.0
+show_percentage = false
+
+[node name="Folego" type="ProgressBar" parent="Linha/Dados"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/fill = SubResource("folego")
+max_value = 1.0
+step = 0.0
+value = 1.0
+show_percentage = false
