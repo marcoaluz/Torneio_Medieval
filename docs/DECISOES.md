@@ -79,3 +79,7 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Supabase pela API REST com `HTTPRequest`** (sem SDK de terceiros), com transporte injetável para teste. Save na nuvem = o JSON do jogador inteiro com `revisao` controlada por gatilho; nuvem vence em celular novo ou revisão maior.
 - **2026-10-11 · Projeto Supabase não criado sem autorização** (custo e ação externa); migrações e cliente prontos localmente, jogo funciona offline sem configuração.
 - **2026-10-11 · Métricas em fila local enviada em lotes**; o app só insere, não lê. Desligadas em headless para os testes não poluírem a fila real.
+- **2026-10-11 · Simulação da economia por modelo de chance**, não pela justa real: cada justa vira chance = 0,55 + 0,02 × diferença de poder (+ habilidade); poder = média dos atributos / 2 + poder das peças (raridade + melhoria). Rápido (40 sementes × 7 perfis em segundos) e lê os mesmos JSON do jogo.
+- **2026-10-11 · Liga +20/−16 e rival = 40 + 0,1 × pontos (faixa ±15 de poder)**: com +25/−12 a expectativa era sempre positiva e todos chegavam a Campeão em 2 semanas; agora cada liga corresponde a uma faixa de poder e o jogador estabiliza vencendo ~44%.
+- **2026-10-11 · Vaga de treino do VIP = a do campo de treino nível 3 (não somam)**, lendo o GDD ("VIP dá a 2ª vaga; o grátis ganha pelo nível do prédio").
+- **2026-10-11 · Teto de melhoria = 2 × nível do armeiro** (GDD: "o teto de melhoria segue o nível do armeiro").

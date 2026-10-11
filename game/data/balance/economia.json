@@ -1,0 +1,117 @@
+{
+	"versao": 1,
+	"_nota": "Parametros da economia usados pela simulacao (tools/simular_economia.gd, prompt 3.12) e pelos sistemas da Parte 3 (baus 3.14, forja 3.15, ligas 3.17, loja/VIP/passe 3.18, anuncios 3.19, missoes 3.21). Os sistemas leem DAQUI; ajuste os numeros e rode a simulacao de novo. Poder = media dos atributos do cavaleiro e do cavalo / 2 + soma do poder das 6 pecas.",
+	"perfis": {
+		"gratis": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 0, "vip": false, "passe": false, "habilidade": 0.0 },
+		"gratis_anuncios": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 5, "vip": false, "passe": false, "habilidade": 0.0 },
+		"pagante": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 0, "vip": true, "passe": true, "habilidade": 0.0 },
+		"gratis_habilidoso": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 0, "vip": false, "passe": false, "habilidade": 0.15, "so_teste": true },
+		"pagante_ruim": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 0, "vip": true, "passe": true, "habilidade": -0.15, "so_teste": true },
+		"so_vip": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 0, "vip": true, "passe": false, "habilidade": 0.0, "so_teste": true },
+		"so_passe": { "minutos_dia": 15, "sessoes_dia": 2, "anuncios_dia": 0, "vip": false, "passe": true, "habilidade": 0.0, "so_teste": true }
+	},
+	"justa": {
+		"minutos_por_justa": 1.5,
+		"prob_base": 0.55,
+		"prob_por_poder": 0.02,
+		"prob_min": 0.05,
+		"prob_max": 0.95,
+		"tres_estrelas_dada_vitoria": 0.35,
+		"justas_com_folego": 4,
+		"penalidade_cansado": 0.08,
+		"ouro_conserto_por_justa": 6
+	},
+	"poder_raridade": { "comum": 3, "incomum": 5, "raro": 8, "epico": 12, "lendario": 17 },
+	"poder_por_melhoria": 1,
+	"espacos_conjunto": ["elmo", "peitoral", "ombreiras", "escudo", "lanca", "caparacao"],
+	"conjuntos": [
+		{ "nome": "escudeiro", "raridade": "comum" },
+		{ "nome": "vigia", "raridade": "incomum" },
+		{ "nome": "cavaleiro_andante", "raridade": "incomum" },
+		{ "nome": "ferro_negro", "raridade": "raro" },
+		{ "nome": "guarda_real", "raridade": "raro" },
+		{ "nome": "dragao", "raridade": "epico" },
+		{ "nome": "rei_sol", "raridade": "lendario" }
+	],
+	"regioes": [
+		{ "nome": "feiras", "ouro_torneio": 60, "xp_torneio": 40, "torneios": 5, "disputas": 4, "nivel_minimo": 2, "poder_inicial": 32, "poder_final": 66, "ouro_vitoria": 16, "xp_vitoria": 14, "projeto_campeao": "vigia" },
+		{ "nome": "condado", "ouro_torneio": 110, "xp_torneio": 70, "torneios": 6, "disputas": 4, "nivel_minimo": 5, "poder_inicial": 66, "poder_final": 106, "ouro_vitoria": 26, "xp_vitoria": 22, "projeto_campeao": "ferro_negro" },
+		{ "nome": "ducado", "ouro_torneio": 170, "xp_torneio": 110, "torneios": 6, "disputas": 5, "nivel_minimo": 8, "poder_inicial": 106, "poder_final": 126, "ouro_vitoria": 40, "xp_vitoria": 32, "projeto_campeao": "guarda_real" },
+		{ "nome": "reino", "ouro_torneio": 260, "xp_torneio": 160, "torneios": 7, "disputas": 5, "nivel_minimo": 10, "poder_inicial": 126, "poder_final": 144, "ouro_vitoria": 60, "xp_vitoria": 45, "projeto_campeao": "dragao" },
+		{ "nome": "grande_torneio", "ouro_torneio": 380, "xp_torneio": 230, "torneios": 8, "disputas": 5, "nivel_minimo": 12, "poder_inicial": 144, "poder_final": 160, "ouro_vitoria": 90, "xp_vitoria": 60, "projeto_campeao": "rei_sol" }
+	],
+	"ligas": {
+		"nomes": ["bronze", "prata", "ouro", "platina", "diamante", "campeao"],
+		"divisoes": ["III", "II", "I"],
+		"pontos_por_divisao": 100,
+		"vitoria": 20,
+		"derrota": -16,
+		"defesa_vencida": 4,
+		"defesas_por_dia": 3,
+		"ouro_vitoria": 14,
+		"ouro_por_liga": 8,
+		"xp_vitoria": 16,
+		"recompensa_temporada": ["ferro", "ferro", "ouro", "ouro", "real", "real"],
+		"poder_rival_base": 40,
+		"poder_rival_por_ponto": 0.1,
+		"faixa_poder": 15,
+		"temporada_dias": 28,
+		"reinicio_pct": 50
+	},
+	"baus": {
+		"espacos": 4,
+		"tipos": {
+			"madeira": { "segundos": 300, "ouro": [20, 40], "itens": 1, "fragmentos": [1, 2], "raridade": { "comum": 75, "incomum": 22, "raro": 3 } },
+			"ferro": { "segundos": 3600, "ouro": [60, 100], "itens": 2, "fragmentos": [2, 4], "raridade": { "comum": 40, "incomum": 40, "raro": 17, "epico": 3 } },
+			"ouro": { "segundos": 14400, "ouro": [150, 250], "itens": 3, "fragmentos": [4, 7], "raridade": { "incomum": 45, "raro": 40, "epico": 13, "lendario": 2 } },
+			"real": { "segundos": 43200, "ouro": [400, 600], "itens": 4, "fragmentos": [8, 12], "raridade": { "raro": 55, "epico": 37, "lendario": 8 } }
+		},
+		"chance_madeira_por_vitoria": 0.5,
+		"ferro_por_tres_estrelas": true,
+		"ouro_por_campeao": true,
+		"garantia_raro_a_cada": 10,
+		"fragmentos_por_repetida": 4
+	},
+	"melhoria": {
+		"nivel_max": 10,
+		"garantido_ate": 5,
+		"teto_por_nivel_armeiro": 2,
+		"chance_sucesso_pct": [100, 100, 100, 100, 100, 80, 65, 50, 35, 25],
+		"custo_fragmentos": [10, 15, 22, 32, 45, 65, 90, 125, 170, 230],
+		"custo_ouro": [45, 75, 120, 180, 270, 390, 540, 750, 1050, 1400]
+	},
+	"forja": {
+		"lingote_por_sucata": 4,
+		"sucata_por_vitoria": 2,
+		"peca_lingotes": 12,
+		"peca_ouro": 150,
+		"peca_segundos": 7200,
+		"variacao_status_pct": 10
+	},
+	"vila_crescimento_poder": 1,
+	"vip": { "_nota": "vaga_treino_extra: a mesma vaga que o campo de treino libera (GDD: VIP da a 2a vaga, que o gratis ganha pelo nivel do predio); nao soma com ela.", "timer_reducao_pct": 20, "vaga_treino_extra": 1, "folego_recuperacao_extra_pct": 50, "beneficio_anuncios": true, "gemas_mes": 150, "gemas_por_hora_bau": 10 },
+	"passe": {
+		"xp_por_justa": 10,
+		"xp_por_nivel": 120,
+		"niveis": 30,
+		"gratis": { "ouro_por_nivel": 30, "bau_ferro_a_cada": 6 },
+		"premium": { "ouro_por_nivel": 50, "bau_ferro_a_cada": 5, "bau_ouro_a_cada": 15, "fragmentos_por_nivel": 3, "projeto_nos_niveis": [15, 30] }
+	},
+	"anuncios": { "limite_dia": 5, "cortar_minutos": 30, "dobrar_vitoria": 2, "bau_madeira_extra": 1 },
+	"missoes": { "ouro_dia": 60, "fragmentos_dia": 3, "chave_semana": 1 },
+	"simulacao": {
+		"_nota": "Comportamento do jogador simulado (tools/simular_economia.gd). Nao e balanceamento do jogo, e a estrategia do modelo.",
+		"dias": 90,
+		"sementes": 40,
+		"semente_base": 7001,
+		"limiar_pve": 0.45,
+		"reserva_ouro": 40,
+		"anuncios_uso": { "bau_madeira_extra": 1, "dobrar_vitoria": 2, "cortar_timer": 2 },
+		"_nota_metas": "PROPOSTA (confirmar com o design): ritmo desejado (dia em que o marco chega). gratis = jogador gratis de 15 min/dia; pagante = VIP + passe. Ausente = nao precisa chegar em 90 dias. A simulacao compara as medianas com estas metas (tolerancia em %).",
+		"tolerancia_pct": 25,
+		"metas": {
+			"gratis": { "regiao_condado": 7, "regiao_ducado": 25, "regiao_reino": 50, "regiao_grande_torneio": 80, "liga_prata": 9, "liga_ouro": 20, "liga_platina": 45, "conjunto_incomum": 15, "conjunto_raro": 45, "nivel_10": 25, "nivel_15": 60 },
+			"pagante": { "regiao_condado": 6, "regiao_ducado": 18, "regiao_reino": 38, "regiao_grande_torneio": 60, "liga_prata": 9, "liga_ouro": 15, "liga_platina": 35, "liga_diamante": 60, "conjunto_incomum": 10, "conjunto_raro": 25, "nivel_10": 22, "nivel_15": 50 }
+		}
+	}
+}
