@@ -17,14 +17,16 @@ D=.claude/skills/run-torneio-medieval/driver.sh
 bash $D import                                   # importa e valida o projeto (headless)
 bash $D script res://tests/smoke/headless_check.gd   # roda script de teste (headless)
 bash $D shot res://tests/smoke/smoke.tscn 10 /tmp/out/smoke.png   # renderiza e salva PNG
+SIZE=1600x720 bash $D shot res://tests/smoke/smoke.tscn 10 /tmp/out/s209.png   # mesma coisa em 20:9
 ```
 
 - `import`: termina com exit 0 se o projeto abre. Cria `.godot/` (ignorado pelo git) e os `.import` dos assets (esses entram no git).
 - `script <res://x.gd>`: o script precisa `extends SceneTree`, fazer o trabalho em `_init()` e chamar `quit(codigo)`. É o caminho para testes da regra pura da justa (sem cena). Saída de teste: `print("... OK")` e exit code.
 - `shot [cena] [quadros] [png]`: roda a cena de verdade (janela real, GPU) com o Movie Maker do Godot, grava os quadros e copia o último para o PNG pedido. Padrão: `smoke.tscn`, 10 quadros, `$TMPDIR/tm_shot.png`. **Olhe o PNG** (Read na imagem) para confirmar.
-- Cena de fumaça `tests/smoke/smoke.tscn`: imprime no log `SMOKE viewport=960x540`, `SMOKE renderer=gl_compatibility`, `SMOKE filter=0` e injeta um toque em (480,270) que volta como `SMOKE touch=480,270`. Se esses quatro prints sumirem, a configuração de exibição ou a entrada quebrou.
+- `SIZE=LxA`: abre a janela nesse tamanho via `override.cfg` temporário (apagado no fim; o driver recusa rodar se já existir um). Use para testar proporções: 1600x720 (20:9) deve dar `SMOKE viewport=1200x540`.
+- Cena de fumaça `tests/smoke/smoke.tscn`: imprime `SMOKE viewport=960x540`, `SMOKE window=... screen=...`, `SMOKE renderer=gl_compatibility`, `SMOKE filter=0` e injeta um toque em (480,270) que volta como `SMOKE touch=480,270`. Se algum print sumir ou mudar, a configuração de exibição ou a entrada quebrou.
 
-Para tocar na tela de uma cena nova, injete eventos no próprio script de teste da cena com `Input.parse_input_event(InputEventScreenTouch ...)`, como o `smoke.gd` faz, e imprima o resultado com um prefixo fácil de filtrar (`| grep PREFIXO`).
+Para tocar na tela de uma cena nova, injete eventos com `get_viewport().push_input(evento, true)` (coordenadas do viewport), como o `smoke.gd` faz, e imprima o resultado com um prefixo fácil de filtrar (`| grep PREFIXO`).
 
 ## Caminho humano
 
@@ -34,6 +36,10 @@ Abra a pasta do projeto no editor do Godot e use F5/F6. Inútil para agente: abr
 
 - O PNG do `shot` sai em **1280×720**, não 960×540: o `project.godot` tem `window_width_override=1280`/`height=720` para facilitar o teste no desktop, e `--resolution` não muda o tamanho do filme. O viewport lógico continua 960×540 (o smoke imprime isso). A escala 1,33× não é inteira, então bordas de 1 px podem aparecer com espessuras diferentes na captura; não é bug.
 - `shot` abre uma janela de verdade por 1 a 2 segundos na tela do usuário. Não funciona com `--headless` (sem renderização).
+- `Input.parse_input_event` usa coordenadas da **janela**: em 20:9 o toque em (480,270) chegou como (244,137). Use `get_viewport().push_input(ev, true)` para coordenadas do viewport.
+- `--resolution` não muda o tamanho da janela (o `window_width_override` do projeto vence); por isso o `SIZE` usa `override.cfg`.
+- Janela maior que o monitor é cortada pelo Windows (2400x1080 virou 2400x1061 num monitor 2560x1080, viewport 1221x540 e captura deslocada). Use tamanhos que caibam na tela: 1600x720 para 20:9.
+- Com `aspect=expand` e sem câmera, a sobra de largura aparece à **direita** (origem no canto superior esquerdo). Com `Camera2D`, a sobra se divide pelos dois lados.
 - `--quit-after N` conta quadros, não segundos. Com `--fixed-fps 30`, 10 quadros ≈ 0,3 s de jogo.
 - O Movie Maker também grava um `.wav` ao lado; o driver apaga a pasta temporária.
 - Cena de teste em `res://` obrigatoriamente: o Godot não carrega `.tscn` fora do projeto.

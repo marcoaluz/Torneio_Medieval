@@ -1,6 +1,5 @@
 # Godot 4+
 .godot/
-*.translation
 .import/
 export.cfg
 export_credentials.cfg
@@ -14,3 +13,4 @@ build/
 # Local
 .claude/settings.local.json
 *.tmp
+override.cfg

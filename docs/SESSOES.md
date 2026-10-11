@@ -7,3 +7,4 @@ Uma linha por sessão: data · conta · o que foi feito · próximo passo.
 - 2026-10-11 · conta marcoluz1994@outlook.com · GDD recebido (renomeado para docs/GDD.md) e conferido contra a estrutura, sem divergências · Próximo: /run-skill-generator e prompt 1.1.
 - 2026-10-11 · conta marcoluz1994@outlook.com · /run-skill-generator: skill run-torneio-medieval com driver.sh (import/script/shot) e cena de fumaça; plugin godot-prompter instalado após auditoria · Próximo: conferir skills do plugin, prompt 1.1.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Criadas as skills estilo-arte, som, balanceamento, regra-da-justa e supabase-jogo · Próximo: prompt 1.1 (cena da arena).
+- 2026-10-11 · conta marcoluz1994@outlook.com · Revisão do 1.0 (Opus): traduções CSV pt_BR/en registradas e testadas; teste de 20:9 (driver ganhou SIZE via override.cfg); fundos passam a 1280 de largura · Próximo: prompt 1.1.

@@ -32,7 +32,7 @@ Para prédios e vila (vista de cima) troque "side view facing right" por "top-do
 
 ## Tamanhos de quadro
 
-Resolução base do jogo: **960×540** (ver `docs/DECISOES.md`).
+Resolução base do jogo: **960×540** (ver `docs/DECISOES.md`). Em celulares mais largos a altura fica 540 e a largura cresce (20:9 → 1200, 21:9 → ~1260): o que é essencial cabe em 960×540, mas fundos e cenários precisam se estender até 1280 de largura.
 
 | Uso | Quadro | Obs. |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ Resolução base do jogo: **960×540** (ver `docs/DECISOES.md`).
 | Ícone de peça | 64×64 | fundo transparente |
 | Prédio da vila | 192×192 | 4 a 5 estágios |
 | Retrato de NPC | 128×128 | 2 a 3 expressões |
-| Fundo da arena | **960×540** | o Pacote diz 640×360; foi trocado, gere em 960×540 |
+| Fundo da arena | **1280×540** | 960×540 é a área segura; celulares até 21:9 mostram até ~1260 de largura. O Pacote dizia 640×360 |
 
 Se o plano do PixelLab limitar o tamanho, gere no maior permitido mantendo a proporção. Confirme o máximo antes de gerar lotes.
 
