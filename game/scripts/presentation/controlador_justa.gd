@@ -46,6 +46,8 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var barra: BarraDistancia
 ## Interface (para não tratar como jogo o toque que cai no botão).
 @export var interface: InterfaceJusta
+## Painel de ajuste (só em desenvolvimento; some no release).
+@export var painel: PainelAjuste
 ## Segundos depois do fim até um toque começar outra justa.
 @export var espera_para_recomecar := 1.0
 @export var iniciar_sozinho := true
@@ -146,6 +148,16 @@ func soltar_mira() -> void:
 func ponta_no_mundo() -> Vector2:
 	return arena.rival.visual().to_global(Vector2(justa.ponta) / 10.0)
 
+## Painel de ajuste: troca o conteúdo da configuração `arquivo` no lugar, para
+## a justa em andamento já ler os números novos (o que é calculado no começo
+## da justa, como durações das fases, vale ao recomeçar).
+func aplicar_ajuste(arquivo: String, dados: Dictionary) -> void:
+	if not _cfg.has(arquivo):
+		return
+	var alvo: Dictionary = _cfg[arquivo]
+	alvo.clear()
+	alvo.merge(dados.duplicate(true))
+
 ## Botão de habilidade (Corrida): liga a habilidade ativa nesta passada.
 func ativar_habilidade() -> void:
 	if justa and not justa.terminou():
@@ -174,6 +186,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if justa == null:
 		return
 	if event is InputEventScreenTouch and interface and interface.contem_ponto(event.position):
+		return
+	if event is InputEventScreenTouch and is_instance_valid(painel) and painel.contem_ponto(event.position):
 		return
 	if justa.terminou():
 		if event is InputEventScreenTouch and event.pressed and _tempo_desde_fim >= espera_para_recomecar:

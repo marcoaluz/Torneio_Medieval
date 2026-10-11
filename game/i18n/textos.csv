@@ -30,3 +30,9 @@ MOTIVO_DESCLASSIFICACAO,Por desclassificação,By disqualification
 MOTIVO_EMPATE,Ninguém venceu,Nobody won
 JUSTA_TOQUE_DE_NOVO,Toque para justar de novo,Tap to joust again
 DEPURACAO_FPS,FPS {fps},FPS {fps}
+PAINEL_ABRIR,Ajuste,Tuning
+PAINEL_SALVAR,Salvar,Save
+PAINEL_RECOMECAR,Recomeçar,Restart
+PAINEL_FECHAR,Fechar,Close
+PAINEL_SALVO,Salvo nos arquivos de dados,Saved to the data files
+PAINEL_ERRO_SALVAR,Erro ao salvar {arquivo}: {erro},Could not save {arquivo}: {erro}
