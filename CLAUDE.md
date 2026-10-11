@@ -45,6 +45,11 @@ Executável (não está no PATH): `D:\DEV\Godot\Godot_v4.7.2-stable_win64.exe`
 ## Rodar e validar
 Use a skill `/run-torneio-medieval` (`.claude/skills/run-torneio-medieval/driver.sh`): `import`, `script <res://x.gd>` para testes headless, `shot <cena>` para PNG da cena real.
 
+## GodotPrompter
+- Antes de implementar qualquer sistema Godot (câmera, entrada, máquina de estados, UI, animação, save etc.), procure a skill `godot-prompter:*` correspondente e siga-a. Vale também para subagentes.
+- Diga qual padrão escolheu e qual alternativa descartou, e por quê, antes de construir.
+- Se o plugin não estiver instalado nesta conta: `claude plugins marketplace add jame581/skillsmith` e `claude plugins install godot-prompter@skillsmith`.
+
 ## Nunca
 - Colocar texto ou número de balanceamento fixo no código.
 - Dar à regra da justa dependência de cena, nó ou tempo real.

@@ -21,6 +21,7 @@
 - `Godot_v4.7.2 --headless --path . --import` abre e importa o projeto sem erros (exit 0). Ainda não há cena principal, então nada foi executado visualmente nem testado em celular.
 
 ## Pendências / bugs
+- Seção `## GodotPrompter` adicionada ao CLAUDE.md (aceita pelo usuário em 2026-10-11).
 - GDD agora em `docs/GDD.md` (renomeado do arquivo exportado). Conferido contra a estrutura: sem divergências; pastas, tamanhos de sprite (justa 128-160 px, Equipamentos ~256 px) e 960×540 batem.
 - Pendências abertas do próprio GDD (seção Plano de produção e pendências): nome do jogo e do protagonista, enredo, planilha de economia (será a 3.12), mecânica da mêlée, quantidade de formas/símbolos/cores do editor de brasão, divisão PixelLab × Claude Code, lista de habilidades especiais do lançamento.
 - Pastas vazias têm `.gitkeep`; remover conforme forem ocupadas.
@@ -30,7 +31,6 @@
 - Rival em escala 0.85 (não inteira): com sprites de verdade, os pixels do rival podem ficar irregulares. Se incomodar, gerar o rival já no tamanho final ou usar 0.875 (140/160).
 - Os escudos dos dois estão do mesmo lado do desenho, porque o GDD pede só espelhar. Na justa real, o escudo fica do lado da cerca; rever no polimento.
 - Os cavaleiros ainda não se movem na arena (o movimento só existe no demo de teste); a corrida entra no 1.2/1.3.
-- Oferta do GodotPrompter (adicionar uma seção `## GodotPrompter` ao CLAUDE.md) feita ao usuário nesta sessão; aguardando resposta.
 
 ## Próximo passo
 Prompt 1.2 do Pacote (Fases da passada), Opus 5.5, medium: máquina de estados Apresentação → Largada → Corrida → Mira → Impacto, com durações em `game/data/balance/` (arquivo versionado), 3 passadas e uma passada extra no empate, e um sinal por fase. A câmera usa `CameraArena`: aberto (Apresentação/Largada), `seguir(jogador)` (Corrida), `focar(rival.ponto_alvo(...))` (Mira/Impacto). Os cavaleiros saem dos marcadores `Inicio` para os `Fim`. Validar com `arena_check.gd` e `driver.sh shot`.
