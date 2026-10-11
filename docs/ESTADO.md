@@ -19,7 +19,8 @@
 - Pendências abertas do próprio GDD (seção Plano de produção e pendências): nome do jogo e do protagonista, enredo, planilha de economia (será a 3.12), mecânica da mêlée, quantidade de formas/símbolos/cores do editor de brasão, divisão PixelLab × Claude Code, lista de habilidades especiais do lançamento.
 - Pastas vazias têm `.gitkeep`; remover conforme forem ocupadas.
 - Traduções ainda não registradas no `project.godot` (criar `game/i18n/` CSV no primeiro prompt que tiver texto, 1.2 ou 1.7).
-- Não instaladas ainda: skill-creator (`/plugin install skill-creator@claude-plugins-official`) e as skills do projeto `estilo-arte`, `som`, `balanceamento`, `regra-da-justa`, `supabase-jogo`.
+- Skills do projeto criadas em `.claude/skills/`: `estilo-arte`, `som`, `balanceamento`, `regra-da-justa`, `supabase-jogo` (referência, sem benchmark; valores marcados com (*) em `som` e convenções de nomes em `estilo-arte` são propostas minhas). O skill-creator usado foi o que já vem disponível na conta; o plugin `skill-creator@claude-plugins-official` não foi instalado.
+- O script de simulação citado em `balanceamento` e os testes compartilhados citados em `regra-da-justa` ainda não existem (nascem em 3.12 e 1.5).
 
 ## Próximo passo
 1. Na próxima sessão, confirmar que as skills `godot-prompter:*` aparecem e responder à oferta de adicionar a seção ao CLAUDE.md.
