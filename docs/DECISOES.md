@@ -71,3 +71,8 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Pré-visualização no primeiro toque** (no celular não existe passar o mouse por cima): tocar na peça veste o retrato, e só o botão confirma.
 - **2026-10-11 · Estágio de dano como sufixo da variante de arte** (`<variante>_dN`), com volta para a peça inteira quando falta a arte; segue a convenção `_d1.._d3` da skill estilo-arte.
 - **2026-10-11 · Durabilidade das peças 180/240** (era 60/80): com a regra do impacto atual, 60 quebrava o elmo em uma justa contra o agressivo. Ajuste fino na simulação de economia (3.12).
+- **2026-10-11 · Torneio = chave de disputas em sequência; perder repete a mesma disputa** (sem voltar ao começo). Estrelas por disputa; prêmio do torneio só na primeira vez que fecha.
+- **2026-10-11 · Automático = a mesma `Justa` com IA no lugar do jogador** (`perfil_ia_jogador`, semente própria), paga 60%; o servidor pode refazer igual. Campeão sempre manual.
+- **2026-10-11 · Estrelas como regra pura** (`RegraPve`), porque decidem recompensa e o servidor repete.
+- **2026-10-11 · O tutorial leva ao nível 2 (que abre a arena)**, e quem pula recebe a mesma recompensa; senão o jogador ficaria sem como subir de nível. Primeiro dia: timers limitados a 15 s (`inicio.json`).
+- **2026-10-11 · Roteamento por `Fluxo` e passo salvo**; as telas só avisam `concluiu(etapa)`. A justa tem modos (livre, disputa, exibicao, tutorial) no mesmo controlador.
