@@ -1,0 +1,7 @@
+{
+	"versao": 1,
+	"_nota": "Nomes para o botao de sortear da criacao de personagem (nomes proprios, iguais em todas as linguas).",
+	"femininos": ["Isolda", "Beatriz", "Leonor", "Matilde", "Urraca", "Inês", "Brites", "Teresa", "Mafalda", "Constança", "Aldonça", "Branca"],
+	"masculinos": ["Afonso", "Rodrigo", "Gonçalo", "Mem", "Egas", "Martim", "Nuno", "Fernão", "Vasco", "Pero", "Godofredo", "Tristão"],
+	"casas": ["Casa de Valcorvo", "Casa Ferreira", "Casa de Montenegro", "Casa Lobato", "Casa de Altaroca", "Casa Pardal", "Casa de Ribanegra", "Casa Torralva", "Casa de Pedra Alta", "Casa Vilarinho"]
+}

@@ -1,0 +1,11 @@
+{
+	"versao": 1,
+	"_nota": "Opcoes da tela de criacao de personagem. Os valores precisam ter arte (camadas.json) ou cor (paletas.json). Acrescente rostos e cabelos aqui quando a arte chegar.",
+	"corpos": ["feminino", "masculino"],
+	"rostos": ["1"],
+	"cabelos": ["1", "2"],
+	"cores_cabelo": ["preto", "castanho", "ruivo", "loiro", "grisalho", "branco"],
+	"peles": ["palida", "clara", "media", "morena", "escura"],
+	"cores_casa": ["azul_real", "vermelho_sangue", "verde_floresta", "ouro_velho", "prata", "preto_carvao", "purpura", "branco_osso"],
+	"pelagens": ["alazao", "preto", "branco"]
+}

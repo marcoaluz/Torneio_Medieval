@@ -36,3 +36,47 @@ PAINEL_RECOMECAR,Recomeçar,Restart
 PAINEL_FECHAR,Fechar,Close
 PAINEL_SALVO,Salvo nos arquivos de dados,Saved to the data files
 PAINEL_ERRO_SALVAR,Erro ao salvar {arquivo}: {erro},Could not save {arquivo}: {erro}
+CRIACAO_TITULO,Seu cavaleiro,Your knight
+CRIACAO_NOME,Nome,Name
+CRIACAO_CASA,Nome da casa,House name
+CRIACAO_CORPO,Corpo,Body
+CRIACAO_ROSTO,Rosto,Face
+CRIACAO_CABELO,Cabelo,Hair
+CRIACAO_COR_CABELO,Cor do cabelo,Hair color
+CRIACAO_PELE,Tom de pele,Skin tone
+CRIACAO_COR_PRINCIPAL,Cor principal da casa,House main color
+CRIACAO_COR_SECUNDARIA,Cor secundária da casa,House secondary color
+CRIACAO_PELAGEM,Pelagem do cavalo,Horse coat
+CRIACAO_OPCAO,Opção {n},Option {n}
+CRIACAO_SORTEAR,Sortear,Randomize
+CRIACAO_CONFIRMAR,Confirmar,Confirm
+CORPO_FEMININO,Feminino,Female
+CORPO_MASCULINO,Masculino,Male
+PELAGEM_ALAZAO,Alazão,Chestnut
+PELAGEM_PRETO,Preto,Black
+PELAGEM_BRANCO,Branco,White
+COR_AZUL_REAL,Azul real,Royal blue
+COR_VERMELHO_SANGUE,Vermelho sangue,Blood red
+COR_VERDE_FLORESTA,Verde floresta,Forest green
+COR_OURO_VELHO,Ouro velho,Old gold
+COR_PRATA,Prata,Silver
+COR_PRETO_CARVAO,Preto carvão,Charcoal black
+COR_PURPURA,Púrpura,Purple
+COR_BRANCO_OSSO,Branco osso,Bone white
+PELE_PALIDA,Pálida,Pale
+PELE_CLARA,Clara,Fair
+PELE_MEDIA,Média,Medium
+PELE_MORENA,Morena,Tan
+PELE_ESCURA,Escura,Dark
+CABELO_PRETO,Preto,Black
+CABELO_CASTANHO,Castanho,Brown
+CABELO_RUIVO,Ruivo,Red
+CABELO_LOIRO,Loiro,Blond
+CABELO_GRISALHO,Grisalho,Grey
+CABELO_BRANCO,Branco,White
+ERRO_NOME_CURTO,O nome é curto demais.,The name is too short.
+ERRO_NOME_LONGO,O nome é longo demais.,The name is too long.
+ERRO_NOME_CARACTERES,"Use só letras, espaço, hífen e apóstrofo.","Use only letters, spaces, hyphens and apostrophes."
+ERRO_NOME_OFENSIVO,Escolha outro nome.,Please choose another name.
+ERRO_FALTA_NOME,Dê um nome ao seu cavaleiro.,Give your knight a name.
+ERRO_FALTA_NOME_CASA,Dê um nome à sua casa.,Give your house a name.
