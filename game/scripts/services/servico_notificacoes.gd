@@ -28,7 +28,7 @@ var _acumulado := 0.0
 var _plugin: Object
 
 func _ready() -> void:
-	_cfg = JSON.parse_string(FileAccess.get_file_as_string(DADOS))
+	_cfg = Balanceamento.ler_json(DADOS)
 	_jog = get_node_or_null("/root/Jogador")
 	if _jog:
 		_jog.mudou.connect(func(_s): reagendar())

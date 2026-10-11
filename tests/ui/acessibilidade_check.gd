@@ -73,6 +73,13 @@ func _initialize() -> void:
 	jog.definir_config("vibracao", false)
 	_checa("vibracao desligada", not ac.vibracao())
 
+	# Economia de bateria (3.25)
+	var bat: Dictionary = ac.cfg["bateria"]
+	jog.definir_config("economia_bateria", true)
+	_checa("bateria: menos quadros e particulas", Engine.max_fps == int(bat["fps_economia"]) and is_equal_approx(ac.fator_particulas(), float(bat["particulas_pct"]) / 100.0))
+	jog.definir_config("economia_bateria", false)
+	_checa("bateria desligada: normal", Engine.max_fps == int(bat["fps_normal"]) and ac.fator_particulas() == 1.0)
+
 	for arq in ["jogador.json", "jogador.json.bak"]:
 		DirAccess.remove_absolute("user://teste_acess/" + arq)
 	print("ACESS %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))

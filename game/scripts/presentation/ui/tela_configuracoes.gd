@@ -34,6 +34,7 @@ func montar() -> void:
 	_escolha(tr("CONFIG_TEXTO"), "texto", a["ordem_tamanhos"], func(v): return tr("TEXTO_" + str(v).to_upper()))
 	_opcao(tr("CONFIG_CANHOTO"), "canhoto")
 	_opcao(tr("CONFIG_VIBRACAO"), "vibracao")
+	_opcao(tr("CONFIG_BATERIA"), "economia_bateria")
 	_secao(tr("CONFIG_NOTIFICACOES"))
 	_chave(tr("CONFIG_NOTIF_TODAS"), "todas")
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ServicoNotificacoes.DADOS))

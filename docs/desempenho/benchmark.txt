@@ -1,0 +1,17 @@
+versao Godot 4.7.2-stable (official), renderer opengl3, janela (1280, 720)
+micro Balanceamento.carregar(pve)         333.9 us
+micro Balanceamento.carregar(impacto)      39.0 us
+micro jog.missoes()                        46.4 us
+micro jog.baus()+bau_pronto                 1.3 us
+micro jog.lado_para_justa()               199.2 us
+micro jog.folego_cavalo()                  17.7 us
+micro jog.config_valor()                    2.1 us
+micro jog.proxima_cena()                    3.8 us
+justa carregar 206.4 ms
+justa quadros 11036 em 8.0 s = 1380 fps (sem vsync)
+justa tempo do quadro: media 0.72 ms, p95 0.90 ms, pior 43.36 ms
+justa chamadas de desenho (max) 57, objetos 2203, memoria 42.9 MB (+1.7 MB na cena)
+vila carregar 392.1 ms
+vila quadros 8498 em 8.0 s = 1062 fps (sem vsync)
+vila tempo do quadro: media 0.94 ms, p95 1.12 ms, pior 3.29 ms
+vila chamadas de desenho (max) 129, objetos 2170, memoria 48.9 MB (+0.3 MB na cena)

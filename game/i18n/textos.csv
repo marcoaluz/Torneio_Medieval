@@ -649,3 +649,4 @@ TEXTO_GRANDE,Grande,Large
 TEXTO_MUITO_GRANDE,Muito grande,Extra large
 ERRO_OPCAO_INEXISTENTE,Opção desconhecida.,Unknown option.
 ERRO_OPCAO_INVALIDA,Valor inválido.,Invalid value.
+CONFIG_BATERIA,"Economia de bateria (30 quadros, menos partículas)","Battery saver (30 fps, fewer particles)"

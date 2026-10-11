@@ -123,6 +123,32 @@ func tocar(nome: String, forcar := false) -> void:
 		mat.set_shader_parameter("mascara", load(base + "_mascara.png") if tem_mascara else null)
 	_mostrar_quadro()
 
+## Carrega antes as texturas de todas as animações deste tamanho (3.25): sem
+## isso, a primeira troca de animação (ex.: parado -> galope na corrida) lê
+## os PNGs no meio do jogo e trava um quadro. Guarda as referências para o
+## cache não soltar.
+var _reservadas: Array[Resource] = []
+
+func pre_carregar() -> void:
+	var guardar := animacao
+	for nome: String in _tam["animacoes"]:
+		for s in _camadas:
+			var def: Dictionary = s.get_meta("def")
+			var base := _caminho_animacao(def, nome)
+			if not ResourceLoader.exists(base + ".png"):
+				base = _sem_dano(base)
+			for arq in [base + ".png", base + "_mascara.png"]:
+				if ResourceLoader.exists(arq):
+					_reservadas.append(load(arq))
+	animacao = guardar
+
+func _caminho_animacao(def: Dictionary, nome: String) -> String:
+	var antes := animacao
+	animacao = nome
+	var c := _caminho(def)
+	animacao = antes
+	return c
+
 func camada(nome: String) -> Sprite2D:
 	for s in _camadas:
 		if s.get_meta("def")["nome"] == nome:
@@ -193,9 +219,6 @@ func _aplicar_cores() -> void:
 		mat.set_shader_parameter("cores", PackedColorArray(cores))
 		mat.set_shader_parameter("material_padrao", maxi(nomes.find(s.get_meta("def")["material"]), 0))
 
+## Leitura com cache (3.25: cada personagem relia camadas, pontos e paletas).
 static func _ler_json(caminho: String) -> Dictionary:
-	var v: Variant = JSON.parse_string(FileAccess.get_file_as_string(caminho))
-	if not v is Dictionary:
-		push_error("CamadasPersonagem: não consegui ler %s" % caminho)
-		return {}
-	return v
+	return Balanceamento.ler_json(caminho)

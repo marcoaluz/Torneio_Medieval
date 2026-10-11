@@ -107,7 +107,7 @@ func reagir_torcida(forte: bool) -> void:
 	f.name = "Flamulas"
 	f.one_shot = true
 	f.explosiveness = 0.8
-	f.amount = maxi(1, int(t["flamulas_por_nivel"]) * nivel)
+	f.amount = maxi(1, roundi(int(t["flamulas_por_nivel"]) * nivel * OpcoesAcessibilidade.fator(self)))
 	f.lifetime = 1.4
 	f.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	f.emission_rect_extents = Vector2(600, 20)
@@ -161,6 +161,7 @@ func _golpe(res: Dictionary, atacante: Cavaleiro, alvo: Cavaleiro) -> float:
 	return forca
 
 func _particulas(cena: PackedScene, ponto: Vector2, direcao: Vector2, quantidade: int) -> void:
+	quantidade = maxi(1, roundi(quantidade * OpcoesAcessibilidade.fator(self)))
 	var p := cena.instantiate() as CPUParticles2D
 	p.amount = maxi(quantidade, 1)
 	p.direction = direcao

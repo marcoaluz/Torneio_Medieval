@@ -89,7 +89,7 @@ func _criar_chuva() -> void:
 	img.fill(Color(0.75, 0.8, 0.9, 0.6))
 	_chuva = CPUParticles2D.new()
 	_chuva.texture = ImageTexture.create_from_image(img)
-	_chuva.amount = int(_cfg["clima"]["chuva_gotas"])
+	_chuva.amount = maxi(1, roundi(int(_cfg["clima"]["chuva_gotas"]) * OpcoesAcessibilidade.fator(self)))
 	_chuva.lifetime = 0.7
 	_chuva.preprocess = 1.0
 	_chuva.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE

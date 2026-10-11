@@ -29,7 +29,18 @@ var _acumulado := 0.0
 @onready var _fechar: Button = $Interface/Painel/Coluna/Botoes/Fechar
 @onready var _letreiro: Label = $Interface/Letreiro
 @onready var tela_treino: TelaTreino = $Interface/TelaTreino
-@onready var tela_equipamentos: TelaEquipamentos = $Interface/TelaEquipamentos
+## Tela de Equipamentos criada só na primeira vez que é usada (3.25: os
+## retratos grandes custavam ~80 ms na abertura da vila).
+const CENA_EQUIPAMENTOS := preload("res://game/scenes/ui/tela_equipamentos.tscn")
+var _tela_equipamentos: TelaEquipamentos
+var tela_equipamentos: TelaEquipamentos:
+	get:
+		if _tela_equipamentos == null:
+			_tela_equipamentos = CENA_EQUIPAMENTOS.instantiate()
+			_tela_equipamentos.visible = false
+			$Interface.add_child(_tela_equipamentos)
+			$Interface.move_child(_tela_equipamentos, $Interface/TelaTreino.get_index() + 1)
+		return _tela_equipamentos
 @onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
 @onready var tela_baus: TelaBaus = $Interface/TelaBaus
 @onready var tela_forja: TelaForja = $Interface/TelaForja
@@ -101,7 +112,7 @@ func _process(delta: float) -> void:
 		atualizar()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if tela_equipamentos.visible or tela_treino.visible or tela_torneios.visible:
+	if (_tela_equipamentos and _tela_equipamentos.visible) or tela_treino.visible or tela_torneios.visible:
 		return
 	if event is InputEventScreenTouch and event.pressed:
 		var nome := predio_em(get_canvas_transform().affine_inverse() * event.position)

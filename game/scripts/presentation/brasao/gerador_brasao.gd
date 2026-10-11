@@ -124,5 +124,4 @@ static func _cor(nome: String) -> Color:
 	return Color(_paleta.get(nome, "ff00ff"))
 
 static func _ler(caminho: String) -> Dictionary:
-	var v: Variant = JSON.parse_string(FileAccess.get_file_as_string(caminho))
-	return v if v is Dictionary else {}
+	return Balanceamento.ler_json(caminho)

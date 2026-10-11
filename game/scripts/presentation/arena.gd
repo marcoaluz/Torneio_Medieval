@@ -32,6 +32,10 @@ func _ready() -> void:
 	rival.escala = escala_rival
 	posicionar_nas_pontas()
 	camera.plano_aberto(true)
+	# Carrega já as animações (galope etc.) para a corrida não travar (3.25).
+	for c: Cavaleiro in [jogador, rival]:
+		if c.camadas():
+			c.camadas().pre_carregar()
 
 ## Aparência do cavaleiro do jogador a partir dos dados do jogador (se houver).
 func vestir_jogador() -> void:

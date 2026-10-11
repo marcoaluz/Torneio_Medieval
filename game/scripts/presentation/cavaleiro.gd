@@ -34,7 +34,7 @@ const COR_REALCE_FALTA := Color(1.3, 0.85, 0.8)
 ## Cor principal da casa (para a interface, como o retrato da plaquinha).
 var cor_casa: Color:
 	get:
-		var pal: Variant = JSON.parse_string(FileAccess.get_file_as_string(CamadasPersonagem.PALETAS))
+		var pal: Variant = Balanceamento.ler_json(CamadasPersonagem.PALETAS)
 		if pal is Dictionary and pal["cores_casa"].has(casa_principal):
 			return Color(pal["cores_casa"][casa_principal])
 		return Color.GRAY

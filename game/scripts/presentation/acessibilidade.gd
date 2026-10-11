@@ -6,7 +6,9 @@ extends Node
 ##   - tamanho do texto: todo Label/Button/CheckButton/RichTextLabel que entra
 ##     na árvore tem o tamanho de fonte multiplicado pela escala (o tamanho
 ##     base de cada um fica guardado em metadado, para trocar de escala);
-##   - canhoto: as telas chamam `espelhar(controle)` para trocar de lado.
+##   - canhoto: as telas chamam `espelhar(controle)` para trocar de lado;
+##   - economia de bateria (3.25): limita os quadros por segundo; quem cria
+##     partículas multiplica a quantidade por `fator_particulas()`.
 ## Escalas e padrões em game/data/ui/acessibilidade.json.
 
 const DADOS := "res://game/data/ui/acessibilidade.json"
@@ -36,6 +38,8 @@ func aplicar() -> void:
 	var idioma: String = opcao("idioma")
 	TranslationServer.set_locale(idioma if idioma != "" else _idioma_aparelho)
 	escala = float(cfg["tamanhos_texto"].get(str(opcao("texto")), 1.0))
+	var b: Dictionary = cfg["bateria"]
+	Engine.max_fps = int(b["fps_economia"] if economia_bateria() else b["fps_normal"])
 	if is_inside_tree():
 		_percorrer(get_tree().root)
 
@@ -44,6 +48,18 @@ func canhoto() -> bool:
 
 func vibracao() -> bool:
 	return bool(opcao("vibracao"))
+
+func economia_bateria() -> bool:
+	return bool(opcao("economia_bateria"))
+
+## Quantas partículas criar (1.0 normal; menos na economia de bateria).
+func fator_particulas() -> float:
+	return float(cfg["bateria"]["particulas_pct"]) / 100.0 if economia_bateria() else 1.0
+
+## Atalho para quem não tem o autoload à mão (testes, ferramentas).
+static func fator(no: Node) -> float:
+	var ac := no.get_node_or_null("/root/Acessibilidade") as OpcoesAcessibilidade
+	return ac.fator_particulas() if ac else 1.0
 
 ## Espelha um controle na horizontal (âncoras e margens): o que estava à
 ## direita vai para a esquerda e vice-versa.

@@ -1,8 +1,34 @@
 {
 	"versao": 1,
-	"_nota": "Acessibilidade (GDD O que acrescentar; Pacote 3.24): tamanho do texto (multiplica o tamanho de cada texto da interface), idiomas oferecidos ('' = o do aparelho) e os padroes das opcoes salvas em estado.config.",
-	"tamanhos_texto": { "pequeno": 0.85, "normal": 1.0, "grande": 1.2, "muito_grande": 1.4 },
-	"ordem_tamanhos": ["pequeno", "normal", "grande", "muito_grande"],
-	"idiomas": ["", "pt_BR", "en"],
-	"padrao": { "canhoto": false, "vibracao": true, "texto": "normal", "idioma": "" }
+	"_nota": "Acessibilidade (GDD O que acrescentar; Pacote 3.24): tamanho do texto (multiplica o tamanho de cada texto da interface), idiomas oferecidos ('' = o do aparelho) e os padroes das opcoes salvas em estado.config. economia_bateria: ver \"bateria\".",
+	"tamanhos_texto": {
+		"pequeno": 0.85,
+		"normal": 1.0,
+		"grande": 1.2,
+		"muito_grande": 1.4
+	},
+	"ordem_tamanhos": [
+		"pequeno",
+		"normal",
+		"grande",
+		"muito_grande"
+	],
+	"idiomas": [
+		"",
+		"pt_BR",
+		"en"
+	],
+	"padrao": {
+		"canhoto": false,
+		"vibracao": true,
+		"texto": "normal",
+		"idioma": "",
+		"economia_bateria": false
+	},
+	"bateria": {
+		"_nota": "Modo economia de bateria (3.25): limita os quadros por segundo e reduz as particulas (chuva da vila, faiscas, lascas, flamulas da torcida) a particulas_pct.",
+		"fps_normal": 60,
+		"fps_economia": 30,
+		"particulas_pct": 40
+	}
 }

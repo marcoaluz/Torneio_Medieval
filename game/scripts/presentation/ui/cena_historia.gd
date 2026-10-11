@@ -67,7 +67,7 @@ func _mostrar() -> void:
 	if quem == "jogador":
 		_nome.text = _jog.cavaleiro().get("nome", "")
 		# Retrato do jogador na cor principal da casa (paletas.json).
-		var pal: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CamadasPersonagem.PALETAS))
+		var pal: Dictionary = Balanceamento.ler_json(CamadasPersonagem.PALETAS)
 		_retrato.color = Color(pal["cores_casa"].get(_jog.casa()["cores"]["principal"], "2c3a5a"))
 		_inicial.text = str(_nome.text).left(1)
 	else:

@@ -7,15 +7,35 @@ extends RefCounted
 ##
 ## Painel de ajuste (só em desenvolvimento): definir() troca a tabela em
 ## memória para as próximas leituras, e salvar() grava o JSON de volta.
+##
+## Desempenho (3.25): cada arquivo é lido e interpretado uma vez só e fica em
+## cache, travado contra escrita em todos os níveis (make_read_only).
+##   ler(nome) / ler_json(caminho): o dado compartilhado, SEM cópia — para
+##     caminhos quentes que só leem (mudar dá erro na hora).
+##   carregar(nome): uma cópia que pode ser mudada à vontade.
 
 const PASTA := "res://game/data/balance/"
 
 static var _sobrescritas := {}
+static var _cache := {}
 
 static func carregar(nome: String) -> Dictionary:
+	return ler(nome).duplicate(true)
+
+## Tabela de balanceamento compartilhada (somente leitura).
+static func ler(nome: String) -> Dictionary:
 	if _sobrescritas.has(nome):
-		return (_sobrescritas[nome] as Dictionary).duplicate(true)
-	var caminho := PASTA + nome + ".json"
+		return _sobrescritas[nome]
+	var d := ler_json(PASTA + nome + ".json")
+	if not d.is_empty() and not d.has("versao"):
+		push_error("Balanceamento: %s sem campo \"versao\"" % nome)
+		return {}
+	return d
+
+## Qualquer arquivo JSON de dados, com cache (somente leitura).
+static func ler_json(caminho: String) -> Dictionary:
+	if _cache.has(caminho):
+		return _cache[caminho]
 	var texto := FileAccess.get_file_as_string(caminho)
 	if texto.is_empty():
 		push_error("Balanceamento: não consegui ler %s (%s)" % [caminho, error_string(FileAccess.get_open_error())])
@@ -24,14 +44,29 @@ static func carregar(nome: String) -> Dictionary:
 	if not dados is Dictionary:
 		push_error("Balanceamento: %s não é um objeto JSON válido" % caminho)
 		return {}
-	if not (dados as Dictionary).has("versao"):
-		push_error("Balanceamento: %s sem campo \"versao\"" % caminho)
-		return {}
+	_travar(dados)
+	_cache[caminho] = dados
 	return dados
+
+## Esquece o cache (testes que trocam arquivos; o painel usa definir()).
+static func limpar_cache() -> void:
+	_cache.clear()
+
+static func _travar(v: Variant) -> void:
+	if v is Dictionary:
+		for k in v:
+			_travar(v[k])
+		(v as Dictionary).make_read_only()
+	elif v is Array:
+		for x in v:
+			_travar(x)
+		(v as Array).make_read_only()
 
 ## Troca a tabela em memória (as próximas leituras de `nome` devolvem esta).
 static func definir(nome: String, dados: Dictionary) -> void:
-	_sobrescritas[nome] = dados.duplicate(true)
+	var copia := dados.duplicate(true)
+	_travar(copia)
+	_sobrescritas[nome] = copia
 
 ## Volta a ler do arquivo.
 static func esquecer(nome: String) -> void:

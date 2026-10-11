@@ -57,7 +57,7 @@ func folego_cavalo(id := "") -> int:
 	var c := cavalo_ativo() if id == "" else cavalo(id)
 	if c.is_empty():
 		return 0
-	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var f: Dictionary = Balanceamento.ler("treino")["folego_cavalo"]
 	var maximo := int(f["maximo"])
 	var base := int(c.get("folego", maximo))
 	var desde := maxi(ServicoTempo.agora() - int(c.get("folego_em", ServicoTempo.agora())), 0)
@@ -66,16 +66,16 @@ func folego_cavalo(id := "") -> int:
 ## Cavalo cansado: fôlego abaixo do limite. Corre mesmo assim, com
 ## penalidade de velocidade (GDD: nunca existe energia que impede de jogar).
 func cavalo_cansado(id := "") -> bool:
-	return folego_cavalo(id) < int(Balanceamento.carregar("treino")["folego_cavalo"]["cansado_abaixo_de"])
+	return folego_cavalo(id) < int(Balanceamento.ler("treino")["folego_cavalo"]["cansado_abaixo_de"])
 
 ## Horário em que o cavalo estará com o fôlego cheio.
 func descansado_em(id := "") -> int:
-	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var f: Dictionary = Balanceamento.ler("treino")["folego_cavalo"]
 	var falta := int(f["maximo"]) - folego_cavalo(id)
 	return ServicoTempo.agora() + (falta * 3600 + _recuperacao_por_hora() - 1) / maxi(_recuperacao_por_hora(), 1)
 
 func _recuperacao_por_hora() -> int:
-	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var f: Dictionary = Balanceamento.ler("treino")["folego_cavalo"]
 	var bonus := int(f["bonus_recupera_por_nivel_estabulo_pct"]) * maxi(predio_nivel("estabulo") - 1, 0)
 	bonus += bonus_companheiros("folego_recupera_pct")
 	return int(f["recupera_por_hora"]) * (100 + bonus) / 100
@@ -108,7 +108,7 @@ func equipado(espaco: String) -> Dictionary:
 ## Variante de arte de cada espaço, já com o guarda-roupa (visual) aplicado
 ## e com o estágio de dano da peça equipada (sufixo _d1, _d2, _d3).
 func visual_das_pecas() -> Dictionary:
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var saida := {}
 	for espaco: String in estado["equipamento"]:
 		var id: String = estado["visual"].get(espaco, estado["equipamento"][espaco])
@@ -124,12 +124,12 @@ func estagio_dano(id: String) -> int:
 	var it := item(id)
 	if it.is_empty():
 		return 0
-	var maximo := int(Balanceamento.carregar("itens")["modelos"][it["modelo"]]["durabilidade_max"])
+	var maximo := int(Balanceamento.ler("itens")["modelos"][it["modelo"]]["durabilidade_max"])
 	if maximo <= 0:
 		return 0
 	var pct := int(it["durabilidade"]) * 100 / maximo
 	var e := 0
-	for limite in Balanceamento.carregar("desgaste")["estagios_pct"]:
+	for limite in Balanceamento.ler("desgaste")["estagios_pct"]:
 		if pct < int(limite):
 			e += 1
 	return e
@@ -139,7 +139,7 @@ func estagio_dano(id: String) -> int:
 ## regra ignora os bônus dela. Os atributos do cavaleiro já levam o bônus de
 ## conjunto (2 peças), sem passar do teto.
 func lado_para_justa() -> Dictionary:
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var equip := {}
 	for espaco: String in ESPACOS_REGRA:
 		var it := equipado(espaco)
@@ -151,11 +151,11 @@ func lado_para_justa() -> Dictionary:
 	var cav := cavalo_ativo()
 	var atr_cavalo: Dictionary = cav.get("atributos", {}).duplicate()
 	if cavalo_cansado():
-		var pen := int(Balanceamento.carregar("treino")["folego_cavalo"]["penalidade_velocidade_cansado_pct"])
+		var pen := int(Balanceamento.ler("treino")["folego_cavalo"]["penalidade_velocidade_cansado_pct"])
 		atr_cavalo["velocidade"] = int(atr_cavalo.get("velocidade", 0)) * (100 - pen) / 100
 	var cav_atr: Dictionary = estado["cavaleiro"]["atributos"].duplicate()
 	var bonus: Dictionary = efeito_conjuntos()["atributos"]
-	var teto := int(Balanceamento.carregar("treino")["teto_atributo"])
+	var teto := int(Balanceamento.ler("treino")["teto_atributo"])
 	for k: String in bonus:
 		if cav_atr.has(k):
 			cav_atr[k] = mini(int(cav_atr[k]) + int(bonus[k]), teto)
@@ -179,21 +179,21 @@ func efeito_conjuntos() -> Dictionary:
 		var it := item(estado["equipamento"][esp])
 		if not it.is_empty():
 			modelos_eq.append(it["modelo"])
-	return RegraConjuntos.efeito(modelos_eq, Balanceamento.carregar("itens"))
+	return RegraConjuntos.efeito(modelos_eq, Balanceamento.ler("itens"))
 
 ## Habilidades que o cavaleiro pode equipar agora: as de base e as dos
 ## conjuntos completos equipados.
 func habilidades_conhecidas() -> Array:
-	var r: Array = (Balanceamento.carregar("progressao")["habilidades"]["base"] as Array).duplicate()
+	var r: Array = (Balanceamento.ler("progressao")["habilidades"]["base"] as Array).duplicate()
 	for h: String in efeito_conjuntos()["habilidades"]:
 		if not r.has(h):
 			r.append(h)
 	return r
 
 func espacos_habilidade() -> int:
-	var cfg: Dictionary = Balanceamento.carregar("progressao")["habilidades"]
+	var cfg: Dictionary = Balanceamento.ler("progressao")["habilidades"]
 	var n := int(cfg["espacos_iniciais"])
-	var ligas: Array = Balanceamento.carregar("economia")["ligas"]["nomes"]
+	var ligas: Array = Balanceamento.ler("economia")["ligas"]["nomes"]
 	var melhor := str(estado.get("liga", {}).get("melhor", ""))
 	var por_liga := melhor != "" and ligas.find(melhor) >= ligas.find(cfg["segundo_espaco_liga"])
 	if por_liga or int(estado["cavaleiro"]["nivel"]) >= int(cfg["segundo_espaco_nivel"]):
@@ -220,7 +220,7 @@ func equipar_habilidades(lista: Array) -> Dictionary:
 	if lista.size() > espacos_habilidade():
 		return _erro("sem_espaco_habilidade")
 	var conhecidas := habilidades_conhecidas()
-	var defs: Dictionary = Balanceamento.carregar("impacto")["habilidades"]
+	var defs: Dictionary = Balanceamento.ler("impacto")["habilidades"]
 	var grupos := {}
 	for h: String in lista:
 		if not conhecidas.has(h) or not defs.has(h):
@@ -274,7 +274,7 @@ func equipar(id: String) -> Dictionary:
 	var it := item(id)
 	if it.is_empty():
 		return _erro("item_inexistente")
-	var modelo: Dictionary = Balanceamento.carregar("itens")["modelos"].get(it["modelo"], {})
+	var modelo: Dictionary = Balanceamento.ler("itens")["modelos"].get(it["modelo"], {})
 	if modelo.is_empty():
 		return _erro("modelo_inexistente")
 	estado["equipamento"][modelo["espaco"]] = id
@@ -288,7 +288,7 @@ func definir_visual(espaco: String, id_visual: String) -> Dictionary:
 		var it := item(id_visual)
 		if it.is_empty():
 			return _erro("item_inexistente")
-		if Balanceamento.carregar("itens")["modelos"][it["modelo"]]["espaco"] != espaco:
+		if Balanceamento.ler("itens")["modelos"][it["modelo"]]["espaco"] != espaco:
 			return _erro("espaco_errado")
 		estado["visual"][espaco] = id_visual
 	return _concluir("equipamento")
@@ -303,13 +303,13 @@ func predio_nivel(nome: String) -> int:
 	return 1 if predio_liberado(nome) else 0
 
 func predio_liberado(nome: String) -> bool:
-	var p: Dictionary = Balanceamento.carregar("vila")["predios"].get(nome, {})
+	var p: Dictionary = Balanceamento.ler("vila")["predios"].get(nome, {})
 	return not p.is_empty() and int(estado["cavaleiro"]["nivel"]) >= int(p["libera_nivel"])
 
 ## Teto de nível: a casa senhorial vai até o máximo dela; os outros, até o
 ## nível da casa senhorial (GDD: ela define o teto dos outros prédios).
 func teto_predio(nome: String) -> int:
-	var p: Dictionary = Balanceamento.carregar("vila")["predios"][nome]
+	var p: Dictionary = Balanceamento.ler("vila")["predios"][nome]
 	if nome == "casa_senhorial":
 		return int(p["nivel_max"])
 	return mini(int(p["nivel_max"]), predio_nivel("casa_senhorial"))
@@ -331,7 +331,7 @@ func timers() -> Array:
 
 ## Se dá para melhorar e quanto custa: {ok, erro, ouro, segundos}.
 func pode_melhorar(nome: String) -> Dictionary:
-	var vila := Balanceamento.carregar("vila")
+	var vila := Balanceamento.ler("vila")
 	if not vila["predios"].has(nome):
 		return _erro("predio_inexistente")
 	if not predio_liberado(nome):
@@ -369,7 +369,7 @@ func concluir_timer(id: String) -> Dictionary:
 			continue
 		if not ServicoTempo.pronto(int(t["termina_em"])):
 			return _erro("timer_nao_terminou")
-		var tr_cfg := Balanceamento.carregar("treino")
+		var tr_cfg := Balanceamento.ler("treino")
 		var extra := {}
 		match t["tipo"]:
 			"melhoria":
@@ -379,7 +379,7 @@ func concluir_timer(id: String) -> Dictionary:
 				var a: Dictionary = estado["cavaleiro"]["atributos"]
 				a[t["atributo"]] = mini(int(a[t["atributo"]]) + int(tr_cfg["ganho_pontos"]), int(tr_cfg["teto_atributo"]))
 			"conserto":
-				var maximo := int(Balanceamento.carregar("itens")["modelos"][item(t["item"])["modelo"]]["durabilidade_max"])
+				var maximo := int(Balanceamento.ler("itens")["modelos"][item(t["item"])["modelo"]]["durabilidade_max"])
 				for it: Dictionary in estado["inventario"]["itens"]:
 					if it["id"] == t["item"]:
 						it["durabilidade"] = maximo
@@ -404,7 +404,7 @@ func concluir_timer(id: String) -> Dictionary:
 
 ## Vagas de treino de um prédio (campo de treino ou estábulo).
 func vagas_treino(predio: String) -> int:
-	var v: Dictionary = Balanceamento.carregar("treino")["vagas"]
+	var v: Dictionary = Balanceamento.ler("treino")["vagas"]
 	return int(v["base"]) + (1 if predio_nivel(predio) >= int(v["extra_no_nivel_do_predio"]) else 0)
 
 func treinos_em(predio: String) -> Array:
@@ -412,10 +412,10 @@ func treinos_em(predio: String) -> Array:
 
 ## Duração e custo do treino pelo nível do cavaleiro (curva dos dados).
 func duracao_treino() -> int:
-	return _da_curva(Balanceamento.carregar("treino")["duracao_por_nivel"])
+	return _da_curva(Balanceamento.ler("treino")["duracao_por_nivel"])
 
 func custo_treino() -> int:
-	return _da_curva(Balanceamento.carregar("treino")["custo_ouro_por_nivel"])
+	return _da_curva(Balanceamento.ler("treino")["custo_ouro_por_nivel"])
 
 func _da_curva(curva: Array) -> int:
 	var nivel := int(estado["cavaleiro"]["nivel"])
@@ -428,7 +428,7 @@ func _da_curva(curva: Array) -> int:
 ## Treina um atributo do cavaleiro (ocupa uma vaga do campo de treino, não o
 ## cavaleiro: ele continua disputando).
 func treinar_cavaleiro(atributo: String) -> Dictionary:
-	var cfg := Balanceamento.carregar("treino")
+	var cfg := Balanceamento.ler("treino")
 	if not cfg["atributos_cavaleiro"].has(atributo):
 		return _erro("atributo_invalido")
 	if not predio_liberado("campo_treino"):
@@ -442,7 +442,7 @@ func treinar_cavaleiro(atributo: String) -> Dictionary:
 ## Treina um atributo de um cavalo (ocupa uma vaga do estábulo; cavalo em
 ## treino não corre, então o cavalo ativo não pode treinar).
 func treinar_cavalo(id: String, atributo: String) -> Dictionary:
-	var cfg := Balanceamento.carregar("treino")
+	var cfg := Balanceamento.ler("treino")
 	var c := cavalo(id)
 	if c.is_empty():
 		return _erro("cavalo_inexistente")
@@ -481,7 +481,7 @@ func usar_cavalo(id: String) -> Dictionary:
 
 ## Novo cavalo no estábulo (recompensa ou compra; na Parte 3 vem do servidor).
 func adicionar_cavalo(pelagem: String, atributos: Dictionary) -> Dictionary:
-	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var f: Dictionary = Balanceamento.ler("treino")["folego_cavalo"]
 	var id := _novo_id(estado, "c")
 	estado["cavalos"].append({"id": id, "nome": "", "pelagem": pelagem, "atributos": atributos.duplicate(),
 		"folego": int(f["maximo"]), "folego_em": ServicoTempo.agora()})
@@ -499,7 +499,7 @@ func registrar_justa(resultado: Dictionary) -> Dictionary:
 		for it: Dictionary in estado["inventario"]["itens"]:
 			if it["id"] == id and fim[espaco].has("durabilidade"):
 				it["durabilidade"] = clampi(int(fim[espaco]["durabilidade"]), 0, int(it["durabilidade"]))
-	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
+	var f: Dictionary = Balanceamento.ler("treino")["folego_cavalo"]
 	for c: Dictionary in estado["cavalos"]:
 		if c["id"] == estado["cavalo_ativo"] and resultado.get("gasta_folego", true):
 			c["folego"] = maxi(folego_cavalo(c["id"]) - int(f["gasto_por_justa"]), 0)
@@ -519,10 +519,10 @@ func item_em_conserto(id: String) -> Dictionary:
 ## mais) e tempo pelo nível do cavaleiro. {ouro, material, quantidade, segundos, dano}.
 func custo_conserto(id: String) -> Dictionary:
 	var it := item(id)
-	var c: Dictionary = Balanceamento.carregar("desgaste")["conserto"]
+	var c: Dictionary = Balanceamento.ler("desgaste")["conserto"]
 	if it.is_empty():
 		return {}
-	var maximo := int(Balanceamento.carregar("itens")["modelos"][it["modelo"]]["durabilidade_max"])
+	var maximo := int(Balanceamento.ler("itens")["modelos"][it["modelo"]]["durabilidade_max"])
 	var dano := maxi(maximo - int(it["durabilidade"]), 0)
 	var ouro_c := dano * int(c["ouro_por_ponto_milesimos"]) / 1000
 	var qtd := (dano + int(c["pontos_por_material"]) - 1) / int(c["pontos_por_material"])
@@ -541,7 +541,7 @@ func pode_consertar(id: String) -> Dictionary:
 		return _erro("predio_bloqueado")
 	if not item_em_conserto(id).is_empty():
 		return _erro("ja_em_conserto")
-	var v: Dictionary = Balanceamento.carregar("desgaste")["conserto"]["vagas"]
+	var v: Dictionary = Balanceamento.ler("desgaste")["conserto"]["vagas"]
 	var vagas := int(v["base"]) + (1 if predio_nivel("armeiro") >= int(v["extra_no_nivel_do_predio"]) else 0)
 	if timers_do_predio("armeiro").filter(func(t): return t["tipo"] == "conserto").size() >= vagas:
 		return _erro("sem_vaga")
@@ -575,7 +575,7 @@ func _ganhar(ouro_ganho: int, xp_ganho: int) -> Array[int]:
 	estado["inventario"]["ouro"] = ouro() + maxi(ouro_ganho, 0)
 	var cav: Dictionary = estado["cavaleiro"]
 	cav["xp"] = int(cav["xp"]) + maxi(xp_ganho, 0)
-	var tabela: Array = Balanceamento.carregar("progressao")["xp_por_nivel"]
+	var tabela: Array = Balanceamento.ler("progressao")["xp_por_nivel"]
 	var novos: Array[int] = []
 	while int(cav["nivel"]) < tabela.size() and int(cav["xp"]) >= int(tabela[int(cav["nivel"])]):
 		cav["nivel"] = int(cav["nivel"]) + 1
@@ -584,7 +584,7 @@ func _ganhar(ouro_ganho: int, xp_ganho: int) -> Array[int]:
 
 ## XP que falta para o próximo nível (0 no nível máximo).
 func xp_para_proximo() -> int:
-	var tabela: Array = Balanceamento.carregar("progressao")["xp_por_nivel"]
+	var tabela: Array = Balanceamento.ler("progressao")["xp_por_nivel"]
 	var n := int(estado["cavaleiro"]["nivel"])
 	return 0 if n >= tabela.size() else maxi(int(tabela[n]) - int(estado["cavaleiro"]["xp"]), 0)
 
@@ -597,7 +597,7 @@ func xp_para_proximo() -> int:
 # RegraForja com a semente do save; na Parte 3 viram Edge Function.
 
 func cfg_forja() -> Dictionary:
-	return Balanceamento.carregar("economia")["forja"]
+	return Balanceamento.ler("economia")["forja"]
 
 func materiais() -> Dictionary:
 	return (estado["inventario"]["materiais"] as Dictionary).duplicate()
@@ -611,12 +611,12 @@ func status_do_item(id: String) -> Dictionary:
 	var it := item(id)
 	if it.is_empty():
 		return {}
-	var base: Dictionary = it.get("status", Balanceamento.carregar("itens")["modelos"][it["modelo"]]["status"])
+	var base: Dictionary = it.get("status", Balanceamento.ler("itens")["modelos"][it["modelo"]]["status"])
 	return RegraForja.status_com_nivel(base, int(it.get("nivel", 0)), int(cfg_forja()["bonus_status_por_nivel_pct"]))
 
 ## Peças que um projeto permite forjar (modelos do conjunto, em ordem).
 func pecas_do_projeto(conjunto: String) -> Array:
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var r: Array = []
 	for m: String in modelos:
 		if modelos[m]["conjunto"] == conjunto:
@@ -629,7 +629,7 @@ func projetos() -> Array:
 
 ## Receita de um modelo (a da raridade dele): {materiais, ouro, segundos}.
 func receita(modelo: String) -> Dictionary:
-	var rar: String = Balanceamento.carregar("itens")["modelos"][modelo]["raridade"]
+	var rar: String = Balanceamento.ler("itens")["modelos"][modelo]["raridade"]
 	return (cfg_forja()["receitas"][rar] as Dictionary).duplicate(true)
 
 func vagas_forja() -> int:
@@ -640,7 +640,7 @@ func forja_em_andamento() -> Array:
 	return estado["timers"].filter(func(t): return t["tipo"] == "forja").map(func(t): return t.duplicate())
 
 func pode_forjar(modelo: String) -> Dictionary:
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	if not modelos.has(modelo):
 		return _erro("modelo_inexistente")
 	if not predio_liberado("armeiro"):
@@ -672,7 +672,7 @@ func forjar(modelo: String) -> Dictionary:
 	return _concluir("inventario")
 
 func _entregar_forja(modelo: String) -> Dictionary:
-	var m: Dictionary = Balanceamento.carregar("itens")["modelos"][modelo]
+	var m: Dictionary = Balanceamento.ler("itens")["modelos"][modelo]
 	var st := RegraForja.variar_status(m["status"], int(cfg_forja()["variacao_status_pct"]), _semente_servico())
 	var id := _novo_id(estado, "i")
 	estado["inventario"]["itens"].append({"id": id, "modelo": modelo, "nivel": 0, "durabilidade": int(m["durabilidade_max"]), "status": st})
@@ -681,7 +681,7 @@ func _entregar_forja(modelo: String) -> Dictionary:
 
 ## Teto de melhoria pelo nível do armeiro (0 se fechado).
 func teto_melhoria() -> int:
-	var m: Dictionary = Balanceamento.carregar("economia")["melhoria"]
+	var m: Dictionary = Balanceamento.ler("economia")["melhoria"]
 	if not predio_liberado("armeiro"):
 		return 0
 	return mini(int(m["nivel_max"]), maxi(predio_nivel("armeiro"), 1) * int(m["teto_por_nivel_armeiro"]))
@@ -691,7 +691,7 @@ func custo_melhoria(id: String) -> Dictionary:
 	var it := item(id)
 	if it.is_empty():
 		return {}
-	var m: Dictionary = Balanceamento.carregar("economia")["melhoria"]
+	var m: Dictionary = Balanceamento.ler("economia")["melhoria"]
 	var n := int(it.get("nivel", 0))
 	if n >= int(m["nivel_max"]):
 		return {"nivel": n, "teto": teto_melhoria(), "maximo": true}
@@ -726,7 +726,7 @@ func melhorar_peca(id: String) -> Dictionary:
 		return p
 	estado["inventario"]["ouro"] = ouro() - int(p["ouro"])
 	_gastar_materiais({"fragmentos": int(p["fragmentos"]), "lingote_ferro": int(p["lingotes"])})
-	var sucesso := RegraForja.melhoria_deu_certo(int(p["nivel"]), Balanceamento.carregar("economia")["melhoria"], _semente_servico())
+	var sucesso := RegraForja.melhoria_deu_certo(int(p["nivel"]), Balanceamento.ler("economia")["melhoria"], _semente_servico())
 	var nivel := int(p["nivel"])
 	if sucesso:
 		nivel += 1
@@ -734,7 +734,7 @@ func melhorar_peca(id: String) -> Dictionary:
 			if it["id"] == id:
 				it["nivel"] = nivel
 		_evento("melhoria_peca")
-		if nivel >= int(Balanceamento.carregar("economia")["melhoria"]["nivel_max"]):
+		if nivel >= int(Balanceamento.ler("economia")["melhoria"]["nivel_max"]):
 			_evento("melhoria_10")
 	var r := _concluir("inventario")
 	r.merge({"sucesso": sucesso, "nivel": nivel}, true)
@@ -797,7 +797,7 @@ static func _metas_novas() -> Dictionary:
 		"contadores": {}, "sequencia": 0, "conquistas": [], "titulos": [], "titulo": "", "novas": []}
 
 func cfg_metas() -> Dictionary:
-	return Balanceamento.carregar("metas")
+	return Balanceamento.ler("metas")
 
 func dia_atual() -> int:
 	return (ServicoTempo.agora() - int(cfg_metas()["virada_hora_utc"]) * 3600) / 86400
@@ -989,11 +989,11 @@ func notificacao_ligada(tipo: String) -> bool:
 ## Opções de acessibilidade (3.24): canhoto, vibracao, texto, idioma
 ## (padrões em game/data/ui/acessibilidade.json).
 func config_valor(chave: String) -> Variant:
-	var padrao: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/data/ui/acessibilidade.json"))["padrao"]
+	var padrao: Dictionary = Balanceamento.ler_json("res://game/data/ui/acessibilidade.json")["padrao"]
 	return estado.get("config", {}).get(chave, padrao.get(chave))
 
 func definir_config(chave: String, valor: Variant) -> Dictionary:
-	var a: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/data/ui/acessibilidade.json"))
+	var a: Dictionary = Balanceamento.ler_json("res://game/data/ui/acessibilidade.json")
 	if not a["padrao"].has(chave):
 		return _erro("opcao_inexistente")
 	if chave == "texto" and not a["tamanhos_texto"].has(str(valor)):
@@ -1019,7 +1019,7 @@ func definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
 # bônus (renome, forno do ferreiro, fôlego do cavalo).
 
 func cfg_historia() -> Dictionary:
-	return JSON.parse_string(FileAccess.get_file_as_string("res://game/data/historia/historia.json"))
+	return Balanceamento.ler_json("res://game/data/historia/historia.json")
 
 ## A próxima cena a tocar ("" se nenhuma).
 func proxima_cena() -> String:
@@ -1075,7 +1075,7 @@ static func _baus_novos(criado_em: int, chaves_iniciais: int) -> Dictionary:
 		"semente": hash(str(criado_em)) & 0x7FFFFFFF}
 
 func cfg_baus() -> Dictionary:
-	return Balanceamento.carregar("economia")["baus"]
+	return Balanceamento.ler("economia")["baus"]
 
 ## Espaços de baú: [{id, tipo, abre_em (0 = fechado; senão o horário em que fica pronto)}].
 func baus() -> Array:
@@ -1150,7 +1150,7 @@ func abrir_bau(id: String, com_chave := false) -> Dictionary:
 	elif not bau_pronto(id):
 		return _erro("bau_fechado")
 	var cfg := cfg_baus()
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var possui: Array = []
 	for it: Dictionary in estado["inventario"]["itens"]:
 		possui.append(it["modelo"])
@@ -1182,7 +1182,7 @@ func _sorteio_milesimos(chance: int) -> bool:
 # ---------------------------------------------------------------------- PvE
 
 func pve() -> Dictionary:
-	return Balanceamento.carregar("pve")
+	return Balanceamento.ler("pve")
 
 ## Progresso de um torneio: {proxima (índice da próxima disputa), concluido,
 ## estrelas: {índice (texto): melhor}}.
@@ -1286,7 +1286,7 @@ func _rival_de(r: Dictionary, rival_id: String, regiao := "") -> Dictionary:
 	if regiao != "" and r.get("por_regiao", {}).has(regiao):
 		r = r.duplicate()
 		r.merge(r["por_regiao"][regiao], true)
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var bonus := int(r.get("cresce_por_encontro", 0)) * int(estado["pve"].get("encontros", {}).get(rival_id, 0))
 	if r.has("cresce_max"):
 		bonus = mini(bonus, int(r["cresce_max"]))
@@ -1300,7 +1300,7 @@ func _rival_de(r: Dictionary, rival_id: String, regiao := "") -> Dictionary:
 		equip[modelos[m]["espaco"]] = st
 	var lado := {"cavaleiro": cav, "cavalo": (r["cavalo"] as Dictionary).duplicate(), "equipamento": equip,
 		"habilidade": r.get("habilidade", "")}
-	var perfil := RegraPve.ajustar_perfil(Balanceamento.carregar("ia_rival")["perfis"][r["perfil"]], r.get("perfil_ajuste", {}))
+	var perfil := RegraPve.ajustar_perfil(Balanceamento.ler("ia_rival")["perfis"][r["perfil"]], r.get("perfil_ajuste", {}))
 	return {"id": rival_id, "lado": lado, "perfil_nome": r["perfil"], "perfil": perfil, "provocacao": r.get("provocacao", ""),
 		"casa": {"principal": r["casa"][0], "secundaria": r["casa"][1]},
 		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(r.get("brasao", ""), {}),
@@ -1412,7 +1412,7 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 	# Metas (3.21): eventos para missões e conquistas, renome e sequência.
 	var metas: Dictionary = estado["metas"]
 	var renome_g := 0
-	var ganho: Dictionary = Balanceamento.carregar("metas")["renome"]["ganho"]
+	var ganho: Dictionary = Balanceamento.ler("metas")["renome"]["ganho"]
 	if est > 0:
 		_evento("vitoria")
 		renome_g += int(ganho["vitoria"])
@@ -1450,7 +1450,7 @@ func disputa_automatica(torneio: String, indice: int, semente: int) -> Dictionar
 		return p
 	var dados := pve()
 	var prep := preparar_disputa(torneio, indice)
-	var perfil_auto: Dictionary = Balanceamento.carregar("ia_rival")["perfis"][dados["perfil_automatico"]]
+	var perfil_auto: Dictionary = Balanceamento.ler("ia_rival")["perfis"][dados["perfil_automatico"]]
 	var sim := RegraPve.simular(prep["cfg"], prep["lado_jogador"], prep["rival"]["lado"], semente, prep["rival"]["perfil"], perfil_auto)
 	registrar_justa({"equipamento_final": sim["equipamento_final"], "gasta_folego": prep["gasta_folego"]})
 	var r := concluir_disputa(torneio, indice, sim["eventos"], true)
@@ -1460,7 +1460,7 @@ func disputa_automatica(torneio: String, indice: int, semente: int) -> Dictionar
 ## Duração real de um timer. No primeiro dia (GDD: regra do tutorial) todo
 ## timer termina em segundos; aqui é o ponto único onde isso entra.
 func duracao_timer(segundos: int) -> int:
-	var pd: Dictionary = Balanceamento.carregar("inicio")["primeiro_dia"]
+	var pd: Dictionary = Balanceamento.ler("inicio")["primeiro_dia"]
 	if ServicoTempo.agora() - int(estado.get("criado_em", 0)) < int(pd["duracao_s"]):
 		return mini(segundos, int(pd["timer_max_s"]))
 	return segundos
@@ -1490,12 +1490,12 @@ func recompensa_tutorial() -> Dictionary:
 	var t: Dictionary = estado["tutorial"]
 	if t.get("recompensa_dada", false):
 		return {"ok": true, "erro": "", "item": t.get("item_bau", ""), "modelo": "", "niveis": []}
-	var cfg: Dictionary = Balanceamento.carregar("inicio")["tutorial"]
+	var cfg: Dictionary = Balanceamento.ler("inicio")["tutorial"]
 	var modelo: String = cfg["item_bau"]
-	var maximo := int(Balanceamento.carregar("itens")["modelos"][modelo]["durabilidade_max"])
+	var maximo := int(Balanceamento.ler("itens")["modelos"][modelo]["durabilidade_max"])
 	var id := _novo_id(estado, "i")
 	estado["inventario"]["itens"].append({"id": id, "modelo": modelo, "nivel": 0, "durabilidade": maximo})
-	estado["equipamento"][Balanceamento.carregar("itens")["modelos"][modelo]["espaco"]] = id
+	estado["equipamento"][Balanceamento.ler("itens")["modelos"][modelo]["espaco"]] = id
 	var niveis := _ganhar(int(cfg["ouro"]), int(cfg["xp"]))
 	t["recompensa_dada"] = true
 	t["item_bau"] = id
@@ -1505,7 +1505,7 @@ func recompensa_tutorial() -> Dictionary:
 
 ## Rival fraco da primeira justa (dados do tutorial).
 func rival_tutorial() -> Dictionary:
-	return _rival_de(Balanceamento.carregar("inicio")["tutorial"]["rival_primeira_justa"], "tutorial")
+	return _rival_de(Balanceamento.ler("inicio")["tutorial"]["rival_primeira_justa"], "tutorial")
 
 func _garantir_predio(nome: String) -> void:
 	if not estado["vila"]["predios"].has(nome):
@@ -1514,7 +1514,7 @@ func _garantir_predio(nome: String) -> void:
 # ------------------------------------------------------------ persistência
 
 func novo_estado() -> Dictionary:
-	var ini := Balanceamento.carregar("inicio")
+	var ini := Balanceamento.ler("inicio")
 	var e := {
 		"versao": VERSAO,
 		"criado_em": ServicoTempo.agora(),
@@ -1540,9 +1540,9 @@ func novo_estado() -> Dictionary:
 	e["config"] = {"notificacoes": {}}
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
-		"folego": int(Balanceamento.carregar("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
+		"folego": int(Balanceamento.ler("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
 	e["cavalo_ativo"] = cid
-	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var por_modelo := {}
 	for m: String in ini["itens"]:
 		var id := _novo_id(e, "i")
