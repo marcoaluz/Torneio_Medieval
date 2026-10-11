@@ -1,8 +1,16 @@
 {
 	"versao": 1,
-	"_nota": "Sistema de personagem em camadas. Cada camada e uma folha de quadros (todos os quadros lado a lado, mesmo tamanho) em <pasta>/<tamanho>/<arquivo>_<animacao>.png, com mascara opcional <...>_mascara.png (R principal, G secundaria, B metal). {chave} no arquivo vem das pecas escolhidas (CamadasPersonagem.pecas). Ordem da lista = ordem de desenho dentro do mesmo encaixe. encaixe = no (a partir da raiz do personagem) onde a camada fica; sem encaixe, fica dentro do proprio CamadasPersonagem. Pontos de encaixe por quadro (brasao) em pontos.json, extraidos da folha de pontos (tools/extrair_pontos.gd).",
+	"_nota": "Sistema de personagem em camadas. Cada camada e uma folha de quadros (todos os quadros lado a lado, mesmo tamanho) em <pasta>/<tamanho>/<arquivo>_<animacao>.png, com mascara opcional <...>_mascara.png (R principal, G secundaria, B metal). {chave} no arquivo vem das pecas escolhidas (CamadasPersonagem.pecas). Ordem da lista = ordem de desenho dentro do mesmo encaixe. encaixe = no (a partir da raiz do personagem) onde a camada fica; sem encaixe, fica dentro do proprio CamadasPersonagem. Pontos de encaixe por quadro (brasao) em pontos.json, extraidos da folha de pontos (tools/extrair_pontos.gd). pontos_nos: no que segue cada ponto de encaixe (brasao no escudo, na sobreveste e na caparacao).",
 	"pasta": "res://game/art/sprites/personagem",
-	"materiais": ["original", "principal", "secundaria", "metal", "neutro", "pele", "cabelo"],
+	"materiais": [
+		"original",
+		"principal",
+		"secundaria",
+		"metal",
+		"neutro",
+		"pele",
+		"cabelo"
+	],
 	"pecas_padrao": {
 		"pelagem": "alazao",
 		"corpo": "masculino",
@@ -19,56 +27,199 @@
 	},
 	"tamanhos": {
 		"justa": {
-			"quadro": [160, 160],
-			"origem": [80, 160],
+			"quadro": [
+				160,
+				160
+			],
+			"origem": [
+				80,
+				160
+			],
 			"animacoes": {
-				"parado": { "quadros": 1, "fps": 1 },
-				"galope": { "quadros": 4, "fps": 10 }
+				"parado": {
+					"quadros": 1,
+					"fps": 1
+				},
+				"galope": {
+					"quadros": 4,
+					"fps": 10
+				}
 			},
 			"camadas": [
-				{ "nome": "cavalo", "arquivo": "cavalo_{pelagem}", "material": "original", "encaixe": "Visual/Cavalo" },
-				{ "nome": "caparacao", "arquivo": "caparacao_{caparacao}", "material": "principal", "encaixe": "Visual/Cavalo/Manta" },
-				{ "nome": "corpo", "arquivo": "corpo_{corpo}", "material": "neutro", "encaixe": "Visual/Cavaleiro/Corpo" },
-				{ "nome": "pernas", "arquivo": "pernas_{pernas}", "material": "metal", "encaixe": "Visual/Cavaleiro/Corpo" },
-				{ "nome": "peitoral", "arquivo": "peitoral_{peitoral}", "material": "metal", "encaixe": "Visual/Cavaleiro/Peito" },
-				{ "nome": "sobreveste", "arquivo": "sobreveste_{sobreveste}", "material": "principal", "encaixe": "Visual/Cavaleiro/Peito" },
-				{ "nome": "elmo", "arquivo": "elmo_{elmo}", "material": "metal", "encaixe": "Visual/Cavaleiro/Capacete" },
-				{ "nome": "cimeira", "arquivo": "cimeira_{cimeira}", "material": "principal", "encaixe": "Visual/Cavaleiro/Capacete" },
-				{ "nome": "escudo", "arquivo": "escudo_{escudo}", "material": "principal", "encaixe": "Visual/Cavaleiro/Escudo" },
-				{ "nome": "lanca", "arquivo": "lanca_{lanca}", "material": "neutro", "encaixe": "Visual/Lanca", "quadro": [320, 160] }
+				{
+					"nome": "cavalo",
+					"arquivo": "cavalo_{pelagem}",
+					"material": "original",
+					"encaixe": "Visual/Cavalo"
+				},
+				{
+					"nome": "caparacao",
+					"arquivo": "caparacao_{caparacao}",
+					"material": "principal",
+					"encaixe": "Visual/Cavalo/Manta"
+				},
+				{
+					"nome": "corpo",
+					"arquivo": "corpo_{corpo}",
+					"material": "neutro",
+					"encaixe": "Visual/Cavaleiro/Corpo"
+				},
+				{
+					"nome": "pernas",
+					"arquivo": "pernas_{pernas}",
+					"material": "metal",
+					"encaixe": "Visual/Cavaleiro/Corpo"
+				},
+				{
+					"nome": "peitoral",
+					"arquivo": "peitoral_{peitoral}",
+					"material": "metal",
+					"encaixe": "Visual/Cavaleiro/Peito"
+				},
+				{
+					"nome": "sobreveste",
+					"arquivo": "sobreveste_{sobreveste}",
+					"material": "principal",
+					"encaixe": "Visual/Cavaleiro/Peito"
+				},
+				{
+					"nome": "elmo",
+					"arquivo": "elmo_{elmo}",
+					"material": "metal",
+					"encaixe": "Visual/Cavaleiro/Capacete"
+				},
+				{
+					"nome": "cimeira",
+					"arquivo": "cimeira_{cimeira}",
+					"material": "principal",
+					"encaixe": "Visual/Cavaleiro/Capacete"
+				},
+				{
+					"nome": "escudo",
+					"arquivo": "escudo_{escudo}",
+					"material": "principal",
+					"encaixe": "Visual/Cavaleiro/Escudo"
+				},
+				{
+					"nome": "lanca",
+					"arquivo": "lanca_{lanca}",
+					"material": "neutro",
+					"encaixe": "Visual/Lanca",
+					"quadro": [
+						320,
+						160
+					]
+				}
 			]
 		},
 		"vila": {
-			"quadro": [96, 96],
-			"origem": [48, 96],
+			"quadro": [
+				96,
+				96
+			],
+			"origem": [
+				48,
+				96
+			],
 			"animacoes": {
-				"parado": { "quadros": 1, "fps": 1 },
-				"andar": { "quadros": 4, "fps": 8 }
+				"parado": {
+					"quadros": 1,
+					"fps": 1
+				},
+				"andar": {
+					"quadros": 4,
+					"fps": 8
+				}
 			},
 			"camadas": [
-				{ "nome": "corpo", "arquivo": "corpo_{corpo}", "material": "neutro" },
-				{ "nome": "pernas", "arquivo": "pernas_{pernas}", "material": "metal" },
-				{ "nome": "peitoral", "arquivo": "peitoral_{peitoral}", "material": "metal" },
-				{ "nome": "sobreveste", "arquivo": "sobreveste_{sobreveste}", "material": "principal" },
-				{ "nome": "elmo", "arquivo": "elmo_{elmo}", "material": "metal" },
-				{ "nome": "escudo", "arquivo": "escudo_{escudo}", "material": "principal" }
+				{
+					"nome": "corpo",
+					"arquivo": "corpo_{corpo}",
+					"material": "neutro"
+				},
+				{
+					"nome": "pernas",
+					"arquivo": "pernas_{pernas}",
+					"material": "metal"
+				},
+				{
+					"nome": "peitoral",
+					"arquivo": "peitoral_{peitoral}",
+					"material": "metal"
+				},
+				{
+					"nome": "sobreveste",
+					"arquivo": "sobreveste_{sobreveste}",
+					"material": "principal"
+				},
+				{
+					"nome": "elmo",
+					"arquivo": "elmo_{elmo}",
+					"material": "metal"
+				},
+				{
+					"nome": "escudo",
+					"arquivo": "escudo_{escudo}",
+					"material": "principal"
+				}
 			]
 		},
 		"equipamentos": {
-			"quadro": [256, 256],
-			"origem": [128, 256],
+			"quadro": [
+				256,
+				256
+			],
+			"origem": [
+				128,
+				256
+			],
 			"animacoes": {
-				"parado": { "quadros": 1, "fps": 1 },
-				"respirar": { "quadros": 2, "fps": 1 }
+				"parado": {
+					"quadros": 1,
+					"fps": 1
+				},
+				"respirar": {
+					"quadros": 2,
+					"fps": 1
+				}
 			},
 			"camadas": [
-				{ "nome": "corpo", "arquivo": "corpo_{corpo}", "material": "neutro" },
-				{ "nome": "rosto", "arquivo": "rosto_{rosto}", "material": "pele" },
-				{ "nome": "cabelo", "arquivo": "cabelo_{cabelo}", "material": "cabelo" },
-				{ "nome": "peitoral", "arquivo": "peitoral_{peitoral}", "material": "metal" },
-				{ "nome": "sobreveste", "arquivo": "sobreveste_{sobreveste}", "material": "principal" },
-				{ "nome": "escudo", "arquivo": "escudo_{escudo}", "material": "principal" }
+				{
+					"nome": "corpo",
+					"arquivo": "corpo_{corpo}",
+					"material": "neutro"
+				},
+				{
+					"nome": "rosto",
+					"arquivo": "rosto_{rosto}",
+					"material": "pele"
+				},
+				{
+					"nome": "cabelo",
+					"arquivo": "cabelo_{cabelo}",
+					"material": "cabelo"
+				},
+				{
+					"nome": "peitoral",
+					"arquivo": "peitoral_{peitoral}",
+					"material": "metal"
+				},
+				{
+					"nome": "sobreveste",
+					"arquivo": "sobreveste_{sobreveste}",
+					"material": "principal"
+				},
+				{
+					"nome": "escudo",
+					"arquivo": "escudo_{escudo}",
+					"material": "principal"
+				}
 			]
 		}
+	},
+	"pontos_nos": {
+		"brasao": "Visual/Cavaleiro/Escudo/Brasao",
+		"brasao_peito": "Visual/Cavaleiro/Peito/BrasaoPeito",
+		"brasao_manta": "Visual/Cavalo/Manta/BrasaoManta"
 	}
 }

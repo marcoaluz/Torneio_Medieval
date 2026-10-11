@@ -37,7 +37,7 @@ var _tam: Dictionary
 var _pontos: Dictionary
 var _camadas: Array[Sprite2D] = []
 var _tempo := 0.0
-var _brasao: Node2D
+var _nos_pontos := {}  ## nome do ponto -> nó que o segue
 
 func _ready() -> void:
 	_dados = _ler_json(DADOS)
@@ -48,7 +48,12 @@ func _ready() -> void:
 		definir_casa(_ler_json(PALETAS)["casa_padrao"])
 	if raiz == null:
 		raiz = get_parent()
-	_brasao = raiz.get_node_or_null("Visual/Cavaleiro/Escudo/Brasao") if raiz else null
+	if raiz:
+		var nos: Dictionary = _dados.get("pontos_nos", {})
+		for ponto: String in nos:
+			var n := raiz.get_node_or_null(nos[ponto]) as Node2D
+			if n:
+				_nos_pontos[ponto] = n
 	montar()
 
 ## (Re)cria as camadas com as peças atuais.
@@ -137,21 +142,23 @@ func _mostrar_quadro() -> void:
 	for s in _camadas:
 		if s.texture:
 			s.frame = mini(quadro, s.hframes - 1)
-	_posicionar_brasao()
+	_posicionar_pontos()
 	quadro_mudou.emit(animacao, quadro)
 
-## Brasão no ponto de encaixe do quadro atual (coordenadas a partir da origem
-## do quadro), convertido para o pai do Brasao.
-func _posicionar_brasao() -> void:
-	if _brasao == null:
+## Brasões (escudo, sobreveste, caparação) no ponto de encaixe do quadro
+## atual (coordenadas a partir da origem do quadro), convertidos para o pai.
+func _posicionar_pontos() -> void:
+	if _nos_pontos.is_empty():
 		return
-	var pts: Variant = _pontos.get(tamanho, {}).get(animacao, {}).get("brasao")
-	if not pts is Array or pts.is_empty():
-		return
-	var p: Array = pts[mini(quadro, pts.size() - 1)]
 	var visual := raiz.get_node("Visual") as Node2D
-	var global_ponto := visual.to_global(Vector2(float(p[0]), float(p[1])))
-	_brasao.position = (_brasao.get_parent() as Node2D).to_local(global_ponto)
+	var da_anim: Dictionary = _pontos.get(tamanho, {}).get(animacao, {})
+	for ponto: String in _nos_pontos:
+		var pts: Variant = da_anim.get(ponto)
+		if not pts is Array or pts.is_empty():
+			continue
+		var p: Array = pts[mini(quadro, pts.size() - 1)]
+		var no: Node2D = _nos_pontos[ponto]
+		no.position = (no.get_parent() as Node2D).to_local(visual.to_global(Vector2(float(p[0]), float(p[1]))))
 
 ## A origem do quadro fica na origem do personagem (Visual), mesmo com a
 ## camada dentro de um encaixe deslocado.

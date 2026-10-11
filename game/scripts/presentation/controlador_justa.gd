@@ -111,6 +111,7 @@ func iniciar(semente_fixa := -1) -> void:
 			set_process(false)
 			return
 		perfil = ia_cfg["perfis"][perfil_rival]
+	arena.vestir_rival(perfil_rival)
 	semente = semente_fixa if semente_fixa >= 0 else randi()
 	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente, perfil)
 	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)

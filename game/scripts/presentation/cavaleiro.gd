@@ -46,6 +46,7 @@ func _ready() -> void:
 	_aplicar_orientacao()
 	if not Engine.is_editor_hint():
 		definir_casa({"principal": casa_principal, "secundaria": casa_secundaria, "metal": casa_metal})
+		definir_brasao({"cor1": casa_principal, "cor2": casa_secundaria, "cor_simbolo": casa_secundaria})
 	var lanca := get_node_or_null("Visual/Lanca") as Node2D
 	if lanca:
 		_posicao_lanca = lanca.position
@@ -76,6 +77,21 @@ func visual() -> Node2D:
 
 func brasao() -> Node2D:
 	return get_node_or_null("Visual/Cavaleiro/Escudo/Brasao")
+
+## Tamanho (px) do brasão em cada lugar onde aparece.
+const LUGARES_BRASAO := {
+	"Visual/Cavaleiro/Escudo/Brasao": Vector2i(12, 16),
+	"Visual/Cavaleiro/Peito/BrasaoPeito": Vector2i(10, 12),
+	"Visual/Cavalo/Manta/BrasaoManta": Vector2i(14, 16),
+}
+
+## Brasão da casa ({forma, divisao, cor1, cor2, simbolo, posicao, cor_simbolo})
+## no escudo, na sobreveste e na caparação.
+func definir_brasao(dados: Dictionary) -> void:
+	for caminho: String in LUGARES_BRASAO:
+		var img := get_node_or_null(caminho + "/Imagem") as Sprite2D
+		if img:
+			img.texture = GeradorBrasao.textura(dados, LUGARES_BRASAO[caminho])
 
 ## Centro do quadro de 160×160 (cavalo e cavaleiro), já com a escala.
 func centro() -> Vector2:
@@ -152,7 +168,9 @@ func _aplicar_orientacao() -> void:
 	if v == null:
 		return
 	v.scale = Vector2(direcao * escala, escala)
-	var b := brasao()
-	if b != null:
-		b.scale.x = direcao
+	# Os brasões desfazem o espelho (nunca saem invertidos).
+	for caminho: String in LUGARES_BRASAO:
+		var b := get_node_or_null(caminho) as Node2D
+		if b != null:
+			b.scale.x = direcao
 

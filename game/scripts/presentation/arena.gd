@@ -46,6 +46,15 @@ func vestir_jogador() -> void:
 	pecas["pelagem"] = jog.cavalo_ativo().get("pelagem", "alazao")
 	pecas["corpo"] = cav.get("corpo", "masculino")
 	jogador.camadas().vestir(pecas)
+	var b: Dictionary = jog.casa().get("brasao", {})
+	if b.is_empty():
+		b = {"cor1": cores["principal"], "cor2": cores["secundaria"], "cor_simbolo": cores["secundaria"]}
+	jogador.definir_brasao(b)
+
+## Brasão do rival pelo perfil da IA (game/data/crests/brasao.json, "rivais").
+func vestir_rival(perfil: String) -> void:
+	var rivais: Dictionary = GeradorBrasao.opcoes().get("rivais", {})
+	rival.definir_brasao(rivais.get(perfil, {}))
 
 ## Coloca os dois cavaleiros parados no começo das pistas (Apresentação).
 func posicionar_nas_pontas() -> void:

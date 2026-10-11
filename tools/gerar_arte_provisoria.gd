@@ -68,9 +68,12 @@ func _justa() -> void:
 			c.caixa(8, -120 + dy, 120, 4, 0.6)
 			c.caixa(4, -125 + dy, 5, 14, 0.6, B)
 			c.caixa(128, -120 + dy, 5, 4, 0.7, B))
-		# Pontos de encaixe: centro do escudo (brasão) em vermelho.
+		# Pontos de encaixe: brasão no escudo (vermelho), na sobreveste (azul)
+		# e na caparação (amarelo).
 		_folha("justa", "pontos_%s" % anim, Vector2i(160, 160), o, bobs, func(c: Desenho, _i: int, dy: int):
-			c.pixel_puro(14, -108 + dy, R), false)
+			c.pixel_puro(14, -108 + dy, R)
+			c.pixel_puro(0, -100 + dy, B)
+			c.pixel_puro(-4, -71 + dy, Color(1, 1, 0)), false)
 
 ## Pernas do cavalo por quadro: (x, _, quanto a pata está levantada).
 func _pernas_cavalo(anim: String, i: int) -> Array[Vector3i]:

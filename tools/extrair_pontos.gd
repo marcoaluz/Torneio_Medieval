@@ -2,14 +2,16 @@ extends SceneTree
 ## Lê as folhas de pontos (game/art/sprites/personagem/<tamanho>/pontos_<anim>.png)
 ## e grava game/data/personagem/pontos.json: para cada tamanho e animação, a
 ## posição por quadro de cada ponto de encaixe, a partir da origem do quadro.
-## Cor do pixel -> ponto: vermelho puro = brasao, verde puro = ponta_lanca.
+## Cor do pixel -> ponto: vermelho puro = brasao (escudo), azul puro =
+## brasao_peito (sobreveste), amarelo puro = brasao_manta (caparação),
+## verde puro = ponta_lanca.
 ## O artista pinta esses pixels numa camada a mais no PixelLab/Aseprite e
 ## exporta como folha igual às outras. Rode depois de importar arte nova:
 ##   bash .claude/skills/run-torneio-medieval/driver.sh script res://tools/extrair_pontos.gd
 
 const CAMADAS := "res://game/data/personagem/camadas.json"
 const SAIDA := "res://game/data/personagem/pontos.json"
-const CORES := {"brasao": Color(1, 0, 0), "ponta_lanca": Color(0, 1, 0)}
+const CORES := {"brasao": Color(1, 0, 0), "brasao_peito": Color(0, 0, 1), "brasao_manta": Color(1, 1, 0), "ponta_lanca": Color(0, 1, 0)}
 
 func _initialize() -> void:
 	var dados: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(CAMADAS))

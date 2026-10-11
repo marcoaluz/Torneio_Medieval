@@ -80,3 +80,30 @@ ERRO_NOME_CARACTERES,"Use só letras, espaço, hífen e apóstrofo.","Use only l
 ERRO_NOME_OFENSIVO,Escolha outro nome.,Please choose another name.
 ERRO_FALTA_NOME,Dê um nome ao seu cavaleiro.,Give your knight a name.
 ERRO_FALTA_NOME_CASA,Dê um nome à sua casa.,Give your house a name.
+BRASAO_TITULO,Brasão da casa,House coat of arms
+BRASAO_FORMA,Formato do escudo,Shield shape
+BRASAO_DIVISAO,Divisão do campo,Field division
+BRASAO_COR1,Primeira cor do campo,First field color
+BRASAO_COR2,Segunda cor do campo,Second field color
+BRASAO_SIMBOLO,Símbolo,Charge
+BRASAO_POSICAO,Posição do símbolo,Charge position
+BRASAO_COR_SIMBOLO,Cor do símbolo,Charge color
+BRASAO_FORMA_CLASSICO,Clássico,Heater
+BRASAO_FORMA_REDONDO,Redondo,Round
+BRASAO_FORMA_LOSANGO,Losango,Lozenge
+BRASAO_FORMA_PIPA,Pipa,Kite
+BRASAO_DIVISAO_LISO,Liso,Plain
+BRASAO_DIVISAO_PARTIDO,Partido,Per pale
+BRASAO_DIVISAO_CORTADO,Cortado,Per fess
+BRASAO_DIVISAO_ESQUARTELADO,Esquartelado,Quarterly
+BRASAO_DIVISAO_BANDADO,Talhado,Per bend
+BRASAO_SIMBOLO_NENHUM,Nenhum,None
+BRASAO_SIMBOLO_CRUZ,Cruz,Cross
+BRASAO_SIMBOLO_ESTRELA,Estrela,Mullet
+BRASAO_SIMBOLO_TORRE,Torre,Tower
+BRASAO_SIMBOLO_LUA,Crescente,Crescent
+BRASAO_SIMBOLO_ESPADA,Espada,Sword
+BRASAO_SIMBOLO_COROA,Coroa,Crown
+BRASAO_POSICAO_CENTRO,Centro,Center
+BRASAO_POSICAO_CHEFE,Chefe (alto),Chief (top)
+BRASAO_POSICAO_PONTA,Ponta (baixo),Base (bottom)

@@ -1,0 +1,50 @@
+{
+	"versao": 1,
+	"_nota": "Opcoes do editor de brasao. Coordenadas de 0 a 1 dentro da caixa (formas: a caixa do escudo; simbolos: a caixa quadrada do simbolo). Primitivas: poligono [[x,y],...] ou circulo [cx, cy, r]; furo=true recorta. Simbolo tambem pode ser 'arquivo': PNG em game/data/crests/simbolos/ (o alfa e a mascara). Cores = nomes de paletas.json/cores_casa. Os nomes viram textos BRASAO_<GRUPO>_<NOME>.",
+	"formas": {
+		"classico": [{ "poligono": [[0.0, 0.0], [1.0, 0.0], [1.0, 0.55], [0.93, 0.72], [0.8, 0.86], [0.5, 1.0], [0.2, 0.86], [0.07, 0.72], [0.0, 0.55]] }],
+		"redondo": [{ "circulo": [0.5, 0.5, 0.5] }],
+		"losango": [{ "poligono": [[0.5, 0.0], [1.0, 0.5], [0.5, 1.0], [0.0, 0.5]] }],
+		"pipa": [{ "poligono": [[0.2, 0.0], [0.8, 0.0], [1.0, 0.15], [1.0, 0.4], [0.5, 1.0], [0.0, 0.4], [0.0, 0.15]] }]
+	},
+	"divisoes": ["liso", "partido", "cortado", "esquartelado", "bandado"],
+	"simbolos": {
+		"nenhum": [],
+		"cruz": [
+			{ "poligono": [[0.4, 0.05], [0.6, 0.05], [0.6, 0.95], [0.4, 0.95]] },
+			{ "poligono": [[0.1, 0.32], [0.9, 0.32], [0.9, 0.52], [0.1, 0.52]] }
+		],
+		"estrela": [{ "poligono": [[0.5, 0.02], [0.618, 0.358], [0.976, 0.365], [0.69, 0.582], [0.794, 0.925], [0.5, 0.72], [0.206, 0.925], [0.31, 0.582], [0.024, 0.365], [0.382, 0.358]] }],
+		"torre": [
+			{ "poligono": [[0.22, 0.3], [0.78, 0.3], [0.78, 0.95], [0.22, 0.95]] },
+			{ "poligono": [[0.15, 0.1], [0.32, 0.1], [0.32, 0.32], [0.15, 0.32]] },
+			{ "poligono": [[0.41, 0.1], [0.59, 0.1], [0.59, 0.32], [0.41, 0.32]] },
+			{ "poligono": [[0.68, 0.1], [0.85, 0.1], [0.85, 0.32], [0.68, 0.32]] },
+			{ "poligono": [[0.42, 0.68], [0.58, 0.68], [0.58, 0.95], [0.42, 0.95]], "furo": true }
+		],
+		"lua": [
+			{ "circulo": [0.5, 0.5, 0.42] },
+			{ "circulo": [0.66, 0.42, 0.36], "furo": true }
+		],
+		"espada": [
+			{ "poligono": [[0.45, 0.02], [0.55, 0.02], [0.55, 0.7], [0.45, 0.7]] },
+			{ "poligono": [[0.2, 0.66], [0.8, 0.66], [0.8, 0.76], [0.2, 0.76]] },
+			{ "poligono": [[0.46, 0.76], [0.54, 0.76], [0.54, 0.9], [0.46, 0.9]] },
+			{ "circulo": [0.5, 0.93, 0.07] }
+		],
+		"coroa": [{ "poligono": [[0.08, 0.85], [0.08, 0.3], [0.3, 0.55], [0.5, 0.15], [0.7, 0.55], [0.92, 0.3], [0.92, 0.85]] }]
+	},
+	"posicoes": {
+		"centro": { "x": 0.5, "y": 0.45, "tamanho": 0.62 },
+		"chefe": { "x": 0.5, "y": 0.26, "tamanho": 0.42 },
+		"ponta": { "x": 0.5, "y": 0.64, "tamanho": 0.42 }
+	},
+	"cores": ["azul_real", "vermelho_sangue", "verde_floresta", "ouro_velho", "prata", "preto_carvao", "purpura", "branco_osso"],
+	"cor_contorno": "1a1512",
+	"padrao": { "forma": "classico", "divisao": "liso", "cor1": "azul_real", "cor2": "ouro_velho", "simbolo": "estrela", "posicao": "centro", "cor_simbolo": "ouro_velho" },
+	"rivais": {
+		"novato": { "forma": "classico", "divisao": "cortado", "cor1": "verde_floresta", "cor2": "branco_osso", "simbolo": "nenhum", "posicao": "centro", "cor_simbolo": "ouro_velho" },
+		"equilibrado": { "forma": "classico", "divisao": "partido", "cor1": "vermelho_sangue", "cor2": "preto_carvao", "simbolo": "torre", "posicao": "centro", "cor_simbolo": "ouro_velho" },
+		"agressivo": { "forma": "pipa", "divisao": "liso", "cor1": "vermelho_sangue", "cor2": "preto_carvao", "simbolo": "espada", "posicao": "centro", "cor_simbolo": "branco_osso" }
+	}
+}
