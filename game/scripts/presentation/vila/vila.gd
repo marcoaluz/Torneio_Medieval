@@ -30,6 +30,7 @@ var _acumulado := 0.0
 @onready var _letreiro: Label = $Interface/Letreiro
 @onready var tela_treino: TelaTreino = $Interface/TelaTreino
 @onready var tela_equipamentos: TelaEquipamentos = $Interface/TelaEquipamentos
+@onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
@@ -44,7 +45,7 @@ func _ready() -> void:
 	_melhorar.pressed.connect(func(): melhorar(aberto))
 	_fechar.pressed.connect(fechar_painel)
 	_fechar.text = tr("PAINEL_FECHAR")
-	_acao.pressed.connect(func(): abrir_justa.emit())
+	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	var notif := get_node_or_null("/root/Notificacoes") as ServicoNotificacoes
@@ -77,7 +78,7 @@ func _process(delta: float) -> void:
 		atualizar()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if tela_equipamentos.visible or tela_treino.visible:
+	if tela_equipamentos.visible or tela_treino.visible or tela_torneios.visible:
 		return
 	if event is InputEventScreenTouch and event.pressed:
 		var nome := predio_em(get_canvas_transform().affine_inverse() * event.position)

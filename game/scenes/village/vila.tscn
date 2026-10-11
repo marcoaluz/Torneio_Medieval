@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vila.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/chao_vila_provisorio.gd" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/ambiente_vila.gd" id="5"]
 [ext_resource type="PackedScene" path="res://game/scenes/village/tela_treino.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_equipamentos.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://game/scenes/village/tela_torneios.tscn" id="8"]
 
 [node name="Vila" type="Node2D"]
 script = ExtResource("1")
@@ -121,3 +122,5 @@ focus_mode = 0
 
 [node name="TelaEquipamentos" parent="Interface" instance=ExtResource("7")]
 visible = false
+
+[node name="TelaTorneios" parent="Interface" instance=ExtResource("8")]

@@ -92,8 +92,7 @@ func _ao_comecar_passada(numero: int) -> void:
 	_armadura_inicial_jogador = _soma_armadura(j.lado_jogador)
 	_armadura_inicial_rival = _soma_armadura(j.lado_rival)
 	plaquinha_jogador.definir(tr("JUSTA_NOME_JOGADOR"), controlador.arena.jogador.cor_casa)
-	var nome_rival := tr("RIVAL_" + controlador.perfil_rival.to_upper()) if controlador.perfil_rival != "" else ""
-	plaquinha_rival.definir(nome_rival, controlador.arena.rival.cor_casa)
+	plaquinha_rival.definir(tr(controlador.nome_rival) if controlador.nome_rival != "" else "", controlador.arena.rival.cor_casa)
 
 func _ao_avaliar_largada(_p: int, qualidade: String, _reacao: int, queimada: bool) -> void:
 	mostrar_letreiro(tr("LARGADA_QUEIMADA") if queimada else tr("LARGADA_" + qualidade.to_upper()))
@@ -125,6 +124,18 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 		_: resultado_titulo.text = tr("RESULTADO_EMPATE")
 	resultado_motivo.text = tr("MOTIVO_" + motivo.to_upper())
 	resultado_dica.text = tr("JUSTA_TOQUE_DE_NOVO")
+	var r: Dictionary = controlador.resultado_disputa
+	if not r.is_empty():
+		var linhas: Array[String] = [tr("MOTIVO_" + motivo.to_upper())]
+		if r.get("venceu", false):
+			linhas.append("★".repeat(int(r["estrelas"])) + "☆".repeat(3 - int(r["estrelas"])))
+			linhas.append(tr("PVE_RECOMPENSA").format({"ouro": r["ouro"], "xp": r["xp"]}))
+		for n: int in r.get("niveis", []):
+			linhas.append(tr("PVE_SUBIU_NIVEL").format({"nivel": n}))
+		if r.get("torneio_concluido", false):
+			linhas.append(tr("PVE_TORNEIO_VENCIDO"))
+		resultado_motivo.text = "\n".join(linhas)
+		resultado_dica.text = tr("PVE_TOQUE_PARA_VOLTAR")
 	resultado.visible = true
 
 func mostrar_letreiro(texto: String) -> void:

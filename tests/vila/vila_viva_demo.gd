@@ -22,5 +22,11 @@ func _ready() -> void:
 	amb.clima_forcado = OS.get_environment("TM_CLIMA")
 	add_child(vila)
 	jog.adicionar_cavalo("branco", {"velocidade": 55, "folego": 45, "temperamento": 60, "vinculo": 0})
-	if OS.get_environment("TM_TELA") != "":
-		vila.tela_treino.abrir.call_deferred(OS.get_environment("TM_TELA"))
+	jog.estado["pve"]["torneios"]["feira_moinho"] = {"proxima": 2, "concluido": false, "estrelas": {"0": 3, "1": 2}}
+	var tela := OS.get_environment("TM_TELA")
+	if tela == "torneios":
+		vila.tela_torneios.abrir.call_deferred()
+		vila.tela_torneios.set.call_deferred("torneio", "feira_moinho")
+		vila.tela_torneios.montar.call_deferred()
+	elif tela != "":
+		vila.tela_treino.abrir.call_deferred(tela)

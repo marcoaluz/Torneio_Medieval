@@ -481,6 +481,150 @@ func consertar(id: String) -> Dictionary:
 		"inicio_em": agora, "termina_em": agora + duracao_timer(int(p["segundos"]))})
 	return _concluir("inventario")
 
+# ---------------------------------------------------------------- progresso
+
+## Ganha ouro e XP; sobe de nível pela tabela de progressao.json.
+## Devolve os níveis ganhos (vazio se nenhum).
+func _ganhar(ouro_ganho: int, xp_ganho: int) -> Array[int]:
+	estado["inventario"]["ouro"] = ouro() + maxi(ouro_ganho, 0)
+	var cav: Dictionary = estado["cavaleiro"]
+	cav["xp"] = int(cav["xp"]) + maxi(xp_ganho, 0)
+	var tabela: Array = Balanceamento.carregar("progressao")["xp_por_nivel"]
+	var novos: Array[int] = []
+	while int(cav["nivel"]) < tabela.size() and int(cav["xp"]) >= int(tabela[int(cav["nivel"])]):
+		cav["nivel"] = int(cav["nivel"]) + 1
+		novos.append(int(cav["nivel"]))
+	return novos
+
+## XP que falta para o próximo nível (0 no nível máximo).
+func xp_para_proximo() -> int:
+	var tabela: Array = Balanceamento.carregar("progressao")["xp_por_nivel"]
+	var n := int(estado["cavaleiro"]["nivel"])
+	return 0 if n >= tabela.size() else maxi(int(tabela[n]) - int(estado["cavaleiro"]["xp"]), 0)
+
+# ---------------------------------------------------------------------- PvE
+
+func pve() -> Dictionary:
+	return Balanceamento.carregar("pve")
+
+## Progresso de um torneio: {proxima (índice da próxima disputa), concluido,
+## estrelas: {índice (texto): melhor}}.
+func progresso_torneio(id: String) -> Dictionary:
+	var t: Dictionary = estado["pve"]["torneios"].get(id, {})
+	return {"proxima": int(t.get("proxima", 0)), "concluido": t.get("concluido", false),
+		"estrelas": (t.get("estrelas", {}) as Dictionary).duplicate()}
+
+## Liberado: nível mínimo e o torneio anterior da região concluído.
+func torneio_liberado(id: String) -> bool:
+	var dados := pve()
+	var t: Dictionary = dados["torneios"].get(id, {})
+	if t.is_empty() or int(estado["cavaleiro"]["nivel"]) < int(t["nivel_minimo"]):
+		return false
+	var lista: Array = dados["regioes"][estado["pve"]["regiao"]]["torneios"]
+	var i := lista.find(id)
+	return i <= 0 or progresso_torneio(lista[i - 1])["concluido"]
+
+## Pode jogar a disputa `indice` do torneio (a próxima, ou uma já vencida).
+func pode_disputar(torneio: String, indice: int) -> Dictionary:
+	if not torneio_liberado(torneio):
+		return _erro("torneio_bloqueado")
+	var rivais: Array = pve()["torneios"][torneio]["rivais"]
+	if indice < 0 or indice >= rivais.size():
+		return _erro("disputa_inexistente")
+	if indice > progresso_torneio(torneio)["proxima"]:
+		return _erro("disputa_bloqueada")
+	return {"ok": true, "erro": ""}
+
+## Automático: só disputa já vencida com 3 estrelas e que não seja de campeão.
+func pode_automatico(torneio: String, indice: int) -> Dictionary:
+	var p := pode_disputar(torneio, indice)
+	if not p["ok"]:
+		return p
+	var dados := pve()
+	var rival: String = dados["torneios"][torneio]["rivais"][indice]
+	if dados["rivais"][rival].get("campeao", false):
+		return _erro("campeao_manual")
+	if int(progresso_torneio(torneio)["estrelas"].get(str(indice), 0)) < 3:
+		return _erro("precisa_tres_estrelas")
+	return {"ok": true, "erro": ""}
+
+## Tudo que a justa precisa do rival: {lado, perfil, casa, brasao, nome_chave}.
+## O nêmesis cresce a cada encontro (atributos + cresce_por_encontro).
+func rival_para_justa(rival_id: String) -> Dictionary:
+	var r: Dictionary = pve()["rivais"][rival_id]
+	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var bonus := int(r.get("cresce_por_encontro", 0)) * int(estado["pve"].get("encontros", {}).get(rival_id, 0))
+	var cav := {}
+	for k: String in r["cavaleiro"]:
+		cav[k] = mini(int(r["cavaleiro"][k]) + bonus, 100)
+	var equip := {}
+	for m: String in r["equipamento"]:
+		var st: Dictionary = (modelos[m]["status"] as Dictionary).duplicate()
+		st["durabilidade"] = int(modelos[m]["durabilidade_max"])
+		equip[modelos[m]["espaco"]] = st
+	var lado := {"cavaleiro": cav, "cavalo": (r["cavalo"] as Dictionary).duplicate(), "equipamento": equip,
+		"habilidade": r.get("habilidade", "")}
+	var perfil: Dictionary = Balanceamento.carregar("ia_rival")["perfis"][r["perfil"]]
+	return {"id": rival_id, "lado": lado, "perfil_nome": r["perfil"], "perfil": perfil,
+		"casa": {"principal": r["casa"][0], "secundaria": r["casa"][1]},
+		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(r.get("brasao", ""), {}),
+		"nome_chave": "RIVAL_" + rival_id.to_upper(), "nemesis": r.get("nemesis", false), "campeao": r.get("campeao", false)}
+
+## Fim de uma disputa (manual ou automática), a partir dos eventos da justa:
+## estrelas, avanço na chave, recompensa da disputa e, na primeira vez que o
+## torneio fecha, a do torneio; XP e nível. {ok, estrelas, ouro, xp, niveis,
+## torneio_concluido, venceu}.
+func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico := false) -> Dictionary:
+	var p := pode_disputar(torneio, indice)
+	if not p["ok"]:
+		return p
+	var dados := pve()
+	var t: Dictionary = dados["torneios"][torneio]
+	var rival: String = t["rivais"][indice]
+	var est := RegraPve.estrelas(eventos)
+	var reg: Dictionary = estado["pve"]["torneios"].get(torneio, {"proxima": 0, "concluido": false, "estrelas": {}})
+	estado["pve"]["torneios"][torneio] = reg
+	var enc: Dictionary = estado["pve"].get("encontros", {})
+	enc[rival] = int(enc.get(rival, 0)) + 1
+	estado["pve"]["encontros"] = enc
+	var ouro_g := 0
+	var xp_g := 0
+	var fechou := false
+	if est > 0:
+		var r: Dictionary = dados["recompensa_disputa"]
+		ouro_g = int(r["ouro_base"]) + est * int(r["ouro_por_estrela"])
+		xp_g = int(r["xp_base"]) + est * int(r["xp_por_estrela"])
+		if automatico:
+			ouro_g = ouro_g * int(dados["recompensa_automatico_pct"]) / 100
+			xp_g = xp_g * int(dados["recompensa_automatico_pct"]) / 100
+		reg["estrelas"][str(indice)] = maxi(int(reg["estrelas"].get(str(indice), 0)), est)
+		if indice == int(reg["proxima"]):
+			reg["proxima"] = indice + 1
+			if int(reg["proxima"]) >= (t["rivais"] as Array).size() and not reg["concluido"]:
+				reg["concluido"] = true
+				fechou = true
+				ouro_g += int(t["recompensa"]["ouro"])
+				xp_g += int(t["recompensa"]["xp"])
+	var niveis := _ganhar(ouro_g, xp_g)
+	var res := _concluir("pve")
+	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0}, true)
+	return res
+
+## Disputa no automático: a mesma regra, com uma IA de precisão média no
+## lugar do jogador. Gasta fôlego e equipamento como a manual.
+func disputa_automatica(torneio: String, indice: int, semente: int) -> Dictionary:
+	var p := pode_automatico(torneio, indice)
+	if not p["ok"]:
+		return p
+	var dados := pve()
+	var rv := rival_para_justa(dados["torneios"][torneio]["rivais"][indice])
+	var perfil_auto: Dictionary = Balanceamento.carregar("ia_rival")["perfis"][dados["perfil_automatico"]]
+	var sim := RegraPve.simular(Justa.carregar_configuracao(), lado_para_justa(), rv["lado"], semente, rv["perfil"], perfil_auto)
+	registrar_justa({"equipamento_final": sim["equipamento_final"]})
+	var r := concluir_disputa(torneio, indice, sim["eventos"], true)
+	r["eventos"] = sim["eventos"]
+	return r
+
 ## Duração real de um timer. No primeiro dia (tutorial, 2.11) os timers
 ## terminam em segundos; aqui é o ponto único onde isso entra.
 func duracao_timer(segundos: int) -> int:

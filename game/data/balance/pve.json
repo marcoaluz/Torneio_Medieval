@@ -1,0 +1,47 @@
+{
+	"versao": 1,
+	"_nota": "Circuito PvE (GDD Disputas PvE). Regiao = torneios em ordem; torneio = chave de rivais enfrentados em sequencia (perder repete a mesma disputa). Estrelas por disputa: 1 vitoria, +1 sem errar (nenhum golpe do jogador em erro ou falta), +1 vitoria por derrubada. Com 3 estrelas a disputa pode ser repetida no automatico, exceto campeao e a primeira luta (sempre manuais). O automatico joga pelo jogador com o perfil de IA perfil_automatico. Recompensas: por disputa (manual e automatico; o manual paga mais) e por torneio (na primeira vez que fecha). Rivais: perfil da IA, atributos, equipamento (modelos de itens.json), habilidade, cores e brasao.",
+	"perfil_automatico": "equilibrado",
+	"recompensa_automatico_pct": 60,
+	"regioes": {
+		"feiras": {
+			"torneios": ["feira_moinho", "feira_ponte", "feira_mercado", "feira_colheita", "feira_grande"],
+			"nemesis": "nemesis_corvo"
+		}
+	},
+	"torneios": {
+		"feira_moinho": { "nivel_minimo": 2, "rivais": ["camponio_bruno", "escudeiro_tiago", "escudeira_ines"], "recompensa": { "ouro": 60, "xp": 40 } },
+		"feira_ponte": { "nivel_minimo": 2, "rivais": ["escudeiro_tiago", "nemesis_corvo", "cavaleiro_duarte"], "recompensa": { "ouro": 80, "xp": 55 } },
+		"feira_mercado": { "nivel_minimo": 3, "rivais": ["escudeira_ines", "cavaleiro_duarte", "cavaleira_leonor", "nemesis_corvo"], "recompensa": { "ouro": 110, "xp": 70 } },
+		"feira_colheita": { "nivel_minimo": 3, "rivais": ["cavaleira_leonor", "cavaleiro_duarte", "nemesis_corvo", "cavaleiro_negro"], "recompensa": { "ouro": 140, "xp": 90 } },
+		"feira_grande": { "nivel_minimo": 4, "rivais": ["cavaleiro_duarte", "cavaleira_leonor", "nemesis_corvo", "cavaleiro_negro", "campeao_valdemar"], "recompensa": { "ouro": 220, "xp": 140 }, "campeao": "campeao_valdemar" }
+	},
+	"recompensa_disputa": { "ouro_base": 12, "ouro_por_estrela": 4, "xp_base": 10, "xp_por_estrela": 3 },
+	"rivais": {
+		"camponio_bruno": { "perfil": "novato", "casa": ["verde_floresta", "branco_osso"], "brasao": "novato",
+			"cavaleiro": { "forca": 20, "precisao": 20, "equilibrio": 25 }, "cavalo": { "velocidade": 30, "folego": 40, "temperamento": 30 },
+			"equipamento": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro"], "habilidade": "" },
+		"escudeiro_tiago": { "perfil": "novato", "casa": ["azul_real", "ouro_velho"], "brasao": "novato",
+			"cavaleiro": { "forca": 28, "precisao": 25, "equilibrio": 30 }, "cavalo": { "velocidade": 35, "folego": 40, "temperamento": 35 },
+			"equipamento": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro"], "habilidade": "" },
+		"escudeira_ines": { "perfil": "equilibrado", "casa": ["purpura", "prata"], "brasao": "equilibrado",
+			"cavaleiro": { "forca": 30, "precisao": 35, "equilibrio": 32 }, "cavalo": { "velocidade": 40, "folego": 45, "temperamento": 40 },
+			"equipamento": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro"], "habilidade": "bloqueio" },
+		"cavaleiro_duarte": { "perfil": "equilibrado", "casa": ["vermelho_sangue", "preto_carvao"], "brasao": "equilibrado",
+			"cavaleiro": { "forca": 38, "precisao": 38, "equilibrio": 38 }, "cavalo": { "velocidade": 45, "folego": 45, "temperamento": 45 },
+			"equipamento": ["elmo_vigia", "peitoral_escudeiro", "escudo_vigia", "lanca_escudeiro"], "habilidade": "investida" },
+		"cavaleira_leonor": { "perfil": "agressivo", "casa": ["ouro_velho", "vermelho_sangue"], "brasao": "agressivo",
+			"cavaleiro": { "forca": 42, "precisao": 40, "equilibrio": 36 }, "cavalo": { "velocidade": 50, "folego": 45, "temperamento": 45 },
+			"equipamento": ["elmo_vigia", "peitoral_vigia", "escudo_escudeiro", "lanca_vigia"], "habilidade": "golpe_pesado" },
+		"cavaleiro_negro": { "perfil": "agressivo", "casa": ["preto_carvao", "prata"], "brasao": "agressivo",
+			"cavaleiro": { "forca": 48, "precisao": 44, "equilibrio": 44 }, "cavalo": { "velocidade": 52, "folego": 50, "temperamento": 48 },
+			"equipamento": ["elmo_vigia", "peitoral_vigia", "escudo_vigia", "lanca_vigia"], "habilidade": "investida" },
+		"nemesis_corvo": { "perfil": "agressivo", "nemesis": true, "casa": ["preto_carvao", "vermelho_sangue"], "brasao": "agressivo",
+			"cavaleiro": { "forca": 44, "precisao": 42, "equilibrio": 40 }, "cavalo": { "velocidade": 50, "folego": 50, "temperamento": 45 },
+			"equipamento": ["elmo_vigia", "peitoral_vigia", "escudo_vigia", "lanca_vigia"], "habilidade": "golpe_pesado",
+			"cresce_por_encontro": 2 },
+		"campeao_valdemar": { "perfil": "agressivo", "campeao": true, "casa": ["ouro_velho", "azul_real"], "brasao": "equilibrado",
+			"cavaleiro": { "forca": 55, "precisao": 50, "equilibrio": 52 }, "cavalo": { "velocidade": 58, "folego": 55, "temperamento": 52 },
+			"equipamento": ["elmo_vigia", "peitoral_vigia", "escudo_vigia", "lanca_vigia"], "habilidade": "bloqueio" }
+	}
+}

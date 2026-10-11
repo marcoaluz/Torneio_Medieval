@@ -25,6 +25,9 @@ extends RefCounted
 ## larga, galopa, mira e aciona a habilidade sozinha, nos instantes que ela
 ## planeja. Sem perfil, o rival corre na velocidade nominal e só golpeia se
 ## alguém chamar rival_mirar().
+## Modo automático (PvE, 2.10): com `perfil_ia_jogador`, outra IA (semente
+## própria) faz as entradas do jogador pelos mesmos caminhos (tocar, mirar,
+## soltar, ativar_habilidade). Ordem num mesmo ms: bandeira, rival, jogador.
 ##
 ## Configuração: {justa, galope, mira, impacto} (os JSON de game/data/balance/).
 ## Cada lado: {cavaleiro: {forca, precisao, equilibrio}, cavalo: {velocidade,
@@ -79,11 +82,15 @@ var ultimo_impacto: Dictionary
 ## Largada do rival nesta passada.
 var qualidade_largada_rival := ""
 var ia: IaRival
+var ia_jogador: IaRival
 
 var _rival_largada_ms := -1  ## instante (na Largada) do toque do rival; -1 = não toca
 var _rival_largou := false
 var _plano_rival: Array[int] = []
 var _plano_ix := 0
+var _jog_largada_ms := -1
+var _plano_jogador: Array[int] = []
+var _plano_jog_ix := 0
 
 var _cfg: Dictionary
 var _rng: Aleatorio
@@ -126,7 +133,7 @@ static func carregar_configuracao() -> Dictionary:
 		cfg[nome] = Balanceamento.carregar(nome)
 	return cfg
 
-func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int, perfil_ia := {}) -> void:
+func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int, perfil_ia := {}, perfil_ia_jogador := {}) -> void:
 	_cfg = cfg
 	lado_jogador = lado_j.duplicate(true)
 	lado_rival = lado_r.duplicate(true)
@@ -136,6 +143,8 @@ func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int
 	rival.automatico = perfil_ia.is_empty()
 	if not perfil_ia.is_empty():
 		ia = IaRival.new(perfil_ia, IaRival.semente_da_justa(semente))
+	if not perfil_ia_jogador.is_empty():
+		ia_jogador = IaRival.new(perfil_ia_jogador, IaRival.semente_da_justa(semente ^ 0x2545F491))
 	_rng = Aleatorio.new(semente)
 	precisao_jogador = Impacto.precisao_efetiva(lado_jogador)
 	precisao_rival = Impacto.precisao_efetiva(lado_rival)
@@ -235,6 +244,8 @@ func avancar(ms: int) -> Array[Dictionary]:
 					passo = mini(passo, bandeira_ms - fases.tempo_na_fase_ms)
 				if not _rival_largou and _rival_largada_ms >= 0:
 					passo = mini(passo, _rival_largada_ms - fases.tempo_na_fase_ms)
+				if ia_jogador and not tocou_largada and _jog_largada_ms >= 0:
+					passo = mini(passo, _jog_largada_ms - fases.tempo_na_fase_ms)
 				if passo > 0:
 					ms -= passo
 					eventos.append_array(_observar(fases.avancar(passo)))
@@ -244,6 +255,8 @@ func avancar(ms: int) -> Array[Dictionary]:
 						eventos.append({"tipo": "bandeira", "passada": fases.passada, "t": fases.tempo_total_ms})
 					if not _rival_largou and _rival_largada_ms >= 0 and fases.tempo_na_fase_ms >= _rival_largada_ms:
 						eventos.append(_rival_larga())
+					if ia_jogador and not tocou_largada and _jog_largada_ms >= 0 and fases.tempo_na_fase_ms >= _jog_largada_ms:
+						eventos.append_array(tocar())
 			_:
 				var ate_fase := fases.duracao_ms(fases.fase) - fases.tempo_na_fase_ms
 				var passo := mini(ms, ate_fase)
@@ -300,6 +313,14 @@ func _corrida_1ms() -> Array[Dictionary]:
 		var hb := ia.batida_habilidade()
 		if hb > 0 and rival.t_ms == hb * rival.compasso_ms():
 			eventos.append_array(rival_ativar_habilidade())
+	if ia_jogador:
+		while _plano_jog_ix < _plano_jogador.size() and _plano_jogador[_plano_jog_ix] <= jogador.t_ms:
+			if _plano_jogador[_plano_jog_ix] == jogador.t_ms:
+				eventos.append_array(tocar())
+			_plano_jog_ix += 1
+		var hbj := ia_jogador.batida_habilidade()
+		if hbj > 0 and jogador.t_ms == hbj * jogador.compasso_ms():
+			eventos.append_array(ativar_habilidade())
 	var perdido := jogador.avancar_1ms()
 	var perdido_rival := rival.avancar_1ms()
 	if not perdido.is_empty():
@@ -352,6 +373,11 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 					var tr := maxi(bandeira_ms + ia.reacao_largada_ms(), 0)
 					if tr < fases.duracao_ms(JustaFases.Fase.LARGADA):
 						_rival_largada_ms = tr
+				_jog_largada_ms = -1
+				if ia_jogador:
+					var tj := maxi(bandeira_ms + ia_jogador.reacao_largada_ms(), 0)
+					if tj < fases.duracao_ms(JustaFases.Fase.LARGADA):
+						_jog_largada_ms = tj
 			JustaFases.Fase.CORRIDA:
 				if not tocou_largada:
 					qualidade_largada = Galope.avaliar_largada(_cfg["galope"], false, 0)
@@ -368,6 +394,9 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 					_plano_ix = 0
 				else:
 					rival.nova_passada("boa")
+				if ia_jogador:
+					_plano_jogador = ia_jogador.plano_galope(jogador.compasso_ms(), fases.duracao_ms(JustaFases.Fase.CORRIDA))
+					_plano_jog_ix = 0
 			JustaFases.Fase.MIRA:
 				ponta = Mira.ponta_inicial(_cfg["mira"])
 				segurando = false
@@ -378,6 +407,9 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 				precisao_rival = Impacto.precisao_efetiva(lado_rival)
 				if ia:
 					rival_mirar(ia.ponto_mira(_cfg["mira"]))
+				if ia_jogador:
+					mirar(ia_jogador.ponto_mira(_cfg["mira"]))
+					saida.append_array(soltar())
 	return saida
 
 func _avaliar_golpe(t: int) -> Dictionary:

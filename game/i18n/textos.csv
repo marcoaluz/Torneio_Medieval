@@ -230,3 +230,37 @@ ERRO_JA_EM_CONSERTO,Já está no armeiro.,Already at the armorer.
 ERRO_MATERIAL_INSUFICIENTE,Material insuficiente.,Not enough material.
 ERRO_ITEM_INEXISTENTE,Peça desconhecida.,Unknown piece.
 NOTIF_CONSERTO,Uma peça foi consertada.,A piece has been repaired.
+REGIAO_FEIRAS,Feiras de vila,Village fairs
+TORNEIO_FEIRA_MOINHO,Feira do Moinho,Mill Fair
+TORNEIO_FEIRA_PONTE,Feira da Ponte,Bridge Fair
+TORNEIO_FEIRA_MERCADO,Feira do Mercado,Market Fair
+TORNEIO_FEIRA_COLHEITA,Feira da Colheita,Harvest Fair
+TORNEIO_FEIRA_GRANDE,Grande Feira,Great Fair
+RIVAL_CAMPONIO_BRUNO,Bruno do Moinho,Bruno of the Mill
+RIVAL_ESCUDEIRO_TIAGO,Escudeiro Tiago,Squire Tiago
+RIVAL_ESCUDEIRA_INES,Escudeira Inês,Squire Inês
+RIVAL_CAVALEIRO_DUARTE,Sir Duarte,Sir Duarte
+RIVAL_CAVALEIRA_LEONOR,Dama Leonor,Dame Leonor
+RIVAL_CAVALEIRO_NEGRO,O Cavaleiro Negro,The Black Knight
+RIVAL_NEMESIS_CORVO,Corvo de Ribanegra,Raven of Ribanegra
+RIVAL_CAMPEAO_VALDEMAR,"Valdemar, o Campeão","Valdemar, the Champion"
+PVE_PROGRESSO,{feitas}/{total} vencidas,{feitas}/{total} won
+PVE_CONCLUIDO,vencido,won
+PVE_BLOQUEADO,abre no nível {nivel},opens at level {nivel}
+PVE_CAMPEAO,(campeão),(champion)
+PVE_NEMESIS,(nêmesis),(nemesis)
+PVE_AUTOMATICO,Automático,Auto
+PVE_VOLTAR,Voltar,Back
+PVE_JUSTA_LIVRE,Justa de treino,Practice joust
+PVE_RECOMPENSA_TORNEIO,Prêmio do torneio: {ouro} ouro e {xp} XP,Tournament prize: {ouro} gold and {xp} XP
+PVE_RECOMPENSA,+{ouro} ouro · +{xp} XP,+{ouro} gold · +{xp} XP
+PVE_SUBIU_NIVEL,Você chegou ao nível {nivel}!,You reached level {nivel}!
+PVE_TORNEIO_VENCIDO,Torneio vencido!,Tournament won!
+PVE_TOQUE_PARA_VOLTAR,Toque para voltar à vila,Tap to return to the village
+PVE_AUTO_VENCEU,"Vitória no automático: {estrelas} estrelas, +{ouro} ouro, +{xp} XP","Auto win: {estrelas} stars, +{ouro} gold, +{xp} XP"
+PVE_AUTO_PERDEU,Derrota no automático. Tente no manual.,Auto loss. Try it by hand.
+ERRO_TORNEIO_BLOQUEADO,Torneio ainda bloqueado.,Tournament still locked.
+ERRO_DISPUTA_INEXISTENTE,Disputa desconhecida.,Unknown match.
+ERRO_DISPUTA_BLOQUEADA,Vença a disputa anterior primeiro.,Win the previous match first.
+ERRO_CAMPEAO_MANUAL,Campeões só no manual.,Champions are manual only.
+ERRO_PRECISA_TRES_ESTRELAS,O automático precisa de 3 estrelas nesta disputa.,Auto needs 3 stars in this match.

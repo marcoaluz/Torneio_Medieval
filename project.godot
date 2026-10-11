@@ -15,6 +15,7 @@ config/icon="res://icon.svg"
 
 Jogador="*res://game/scripts/services/servico_jogador.gd"
 Notificacoes="*res://game/scripts/services/servico_notificacoes.gd"
+Fluxo="*res://game/scripts/presentation/fluxo.gd"
 Depuracao="*res://game/scenes/common/depuracao.tscn"
 
 [display]
