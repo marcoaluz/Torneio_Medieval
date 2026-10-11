@@ -36,6 +36,7 @@ func _initialize() -> void:
 	_checa("textura em cache", GeradorBrasao.textura({"simbolo": "torre"}, tam) == GeradorBrasao.textura({"simbolo": "torre"}, tam))
 
 	# Editor
+	await process_frame  # o _ready do autoload Jogador roda antes de mexermos nele
 	var jog: ServicoJogador = root.get_node("Jogador")
 	DirAccess.make_dir_recursive_absolute("user://teste_brasao/")
 	jog.caminho_save = "user://teste_brasao/jogador.json"

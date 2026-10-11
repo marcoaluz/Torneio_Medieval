@@ -107,3 +107,34 @@ BRASAO_SIMBOLO_COROA,Coroa,Crown
 BRASAO_POSICAO_CENTRO,Centro,Center
 BRASAO_POSICAO_CHEFE,Chefe (alto),Chief (top)
 BRASAO_POSICAO_PONTA,Ponta (baixo),Base (bottom)
+PREDIO_CASA_SENHORIAL,Casa senhorial,Manor house
+PREDIO_ESTABULO,Estábulo,Stable
+PREDIO_CAMPO_TREINO,Campo de treino,Training yard
+PREDIO_FERREIRO,Ferreiro,Smithy
+PREDIO_ARENA,Arena de torneios,Tournament arena
+PREDIO_ARMEIRO,Armeiro,Armorer
+PREDIO_DESC_CASA_SENHORIAL,O nível da vila. Define até onde os outros prédios podem crescer.,The village level. Sets how high the other buildings can grow.
+PREDIO_DESC_ESTABULO,"Guarda os cavalos, recupera o fôlego e treina os cavalos.","Keeps horses, restores stamina and trains horses."
+PREDIO_DESC_CAMPO_TREINO,Treina o cavaleiro sem tirá-lo das disputas.,Trains your knight without keeping them from jousting.
+PREDIO_DESC_FERREIRO,"Lanças, ferraduras e lingotes.","Lances, horseshoes and ingots."
+PREDIO_DESC_ARENA,Disputas e o circuito de torneios.,Jousts and the tournament circuit.
+PREDIO_DESC_ARMEIRO,"Cria, melhora e conserta armaduras.","Crafts, upgrades and repairs armor."
+VILA_TOPO,{nome} · nível {nivel} · {casa},{nome} · level {nivel} · {casa}
+VILA_OURO,Ouro: {ouro},Gold: {ouro}
+VILA_NIVEL,Nível {nivel} de {teto},Level {nivel} of {teto}
+VILA_MELHORAR,Melhorar ({ouro} ouro · {tempo}),Upgrade ({ouro} gold · {tempo})
+VILA_EM_OBRA,Em obra: falta {tempo},Under construction: {tempo} left
+VILA_MELHORIA_PRONTA,{predio} chegou ao nível {nivel}!,{predio} reached level {nivel}!
+VILA_BLOQUEADO,{predio} abre no nível {nivel},{predio} opens at level {nivel}
+VILA_JUSTAR,Justar,Joust
+TEMPO_SEGUNDOS,{s} s,{s} s
+TEMPO_MINUTOS,{m}:{s},{m}:{s}
+TEMPO_HORAS,{h} h {m} min,{h} h {m} min
+ERRO_PREDIO_INEXISTENTE,Prédio desconhecido.,Unknown building.
+ERRO_PREDIO_BLOQUEADO,Ainda bloqueado.,Still locked.
+ERRO_PREDIO_OCUPADO,Já está em obra.,Already under construction.
+ERRO_PREDIO_NO_TETO,Melhore a casa senhorial primeiro.,Upgrade the manor house first.
+ERRO_PREDIO_NO_MAXIMO,Nível máximo.,Maximum level.
+ERRO_OURO_INSUFICIENTE,Ouro insuficiente.,Not enough gold.
+ERRO_TIMER_NAO_TERMINOU,Ainda não terminou.,Not finished yet.
+ERRO_TIMER_INEXISTENTE,Nada para concluir.,Nothing to finish.

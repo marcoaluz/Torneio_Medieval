@@ -1,0 +1,19 @@
+{
+	"versao": 1,
+	"_nota": "Predios da vila (GDD, A vila). libera_nivel = nivel do cavaleiro que abre o predio. A casa senhorial define o teto de nivel dos outros. melhoria[i] = custo e tempo para ir do nivel i+1 ao i+2 (tempos da tabela Timers e ritmo do GDD: niveis 1 a 5 = 2 a 10 min). estagios = quantos visuais o predio tem (o estagio cresce com o nivel). posicao em px no mapa da vila (960x540, area segura).",
+	"predios": {
+		"casa_senhorial": { "libera_nivel": 1, "nivel_max": 5, "estagios": 5, "posicao": [480, 150], "tamanho": [150, 96], "cor_telhado": "5c2a22",
+			"melhoria": [ { "ouro": 80, "segundos": 120 }, { "ouro": 160, "segundos": 240 }, { "ouro": 320, "segundos": 360 }, { "ouro": 640, "segundos": 480 } ] },
+		"estabulo": { "libera_nivel": 1, "nivel_max": 5, "estagios": 4, "posicao": [215, 255], "tamanho": [130, 80], "cor_telhado": "6b4a2e",
+			"melhoria": [ { "ouro": 50, "segundos": 120 }, { "ouro": 100, "segundos": 240 }, { "ouro": 200, "segundos": 360 }, { "ouro": 400, "segundos": 480 } ] },
+		"campo_treino": { "libera_nivel": 1, "nivel_max": 5, "estagios": 4, "posicao": [745, 255], "tamanho": [140, 80], "cor_telhado": "4a5a2e",
+			"melhoria": [ { "ouro": 50, "segundos": 120 }, { "ouro": 100, "segundos": 240 }, { "ouro": 200, "segundos": 360 }, { "ouro": 400, "segundos": 480 } ] },
+		"ferreiro": { "libera_nivel": 1, "nivel_max": 5, "estagios": 4, "posicao": [255, 420], "tamanho": [110, 76], "cor_telhado": "3e3e44",
+			"melhoria": [ { "ouro": 60, "segundos": 120 }, { "ouro": 120, "segundos": 240 }, { "ouro": 240, "segundos": 360 }, { "ouro": 480, "segundos": 480 } ] },
+		"arena": { "libera_nivel": 2, "nivel_max": 5, "estagios": 5, "posicao": [480, 400], "tamanho": [170, 100], "cor_telhado": "7a2326",
+			"melhoria": [ { "ouro": 100, "segundos": 180 }, { "ouro": 200, "segundos": 300 }, { "ouro": 400, "segundos": 420 }, { "ouro": 800, "segundos": 600 } ] },
+		"armeiro": { "libera_nivel": 3, "nivel_max": 5, "estagios": 4, "posicao": [710, 420], "tamanho": [120, 80], "cor_telhado": "2c3a5a",
+			"melhoria": [ { "ouro": 80, "segundos": 150 }, { "ouro": 160, "segundos": 270 }, { "ouro": 320, "segundos": 390 }, { "ouro": 640, "segundos": 540 } ] }
+	},
+	"ordem": ["casa_senhorial", "estabulo", "campo_treino", "ferreiro", "arena", "armeiro"]
+}

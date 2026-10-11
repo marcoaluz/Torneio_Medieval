@@ -6,6 +6,7 @@ var _falhas := 0
 
 func _initialize() -> void:
 	TranslationServer.set_locale("pt_BR")
+	await process_frame  # o _ready do autoload Jogador roda antes de mexermos nele
 	var jog: ServicoJogador = root.get_node("Jogador")
 	DirAccess.make_dir_recursive_absolute("user://teste_criacao/")
 	jog.caminho_save = "user://teste_criacao/jogador.json"

@@ -62,3 +62,4 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Dados do jogador num autoload de serviço com comandos `{ok, erro}`**, leitura por cópia e save local atômico com `.bak` e migração por versão. Na Parte 3 os comandos de economia viram Edge Functions com a mesma assinatura e o save local vira cache.
 - **2026-10-11 · Filtro de nomes por raízes normalizadas** (sem acento, leetspeak trocado), com lista em dados; o servidor repete a validação na Parte 3.
 - **2026-10-11 · Brasão desenhado por código no tamanho de cada uso**, a partir de primitivas em dados (e PNG de máscara quando houver arte), em vez de sprites prontos: as combinações são muitas, e reduzir pixel art borra.
+- **2026-10-11 · Prédio liberado pelo nível do cavaleiro começa no nível 1 sem precisar construir**; a casa senhorial é o teto dos outros. Melhoria cobra na hora e cria timer por horário de término; concluir é um comando (vira Edge Function).

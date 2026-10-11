@@ -22,3 +22,4 @@ Uma linha por sessão: data · conta · o que foi feito · próximo passo.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.4 (antes do 2.2): autoload Jogador (modelo versionado, comandos {ok, erro}, save atômico com .bak), ServicoTempo, ServicoNomes, inicio.json/itens.json; justa e arena usando os dados do jogador · Próximo: 2.2.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.2: tela de criação de personagem (prévia ao vivo, seletores, amostras de cor, sortear, filtro de nomes), tema_jogo.tres · Próximo: 2.3.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.3: editor de brasão com gerador pixel a pixel por dados, brasão no escudo/sobreveste/caparação seguindo pontos por quadro, brasões dos rivais · Próximo: 2.5.
+- 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.5: vila vista de cima (6 prédios, estágios, balão de timer, pronto, cadeado, painel com melhoria/justar), melhoria de prédio como comando do serviço, vila.json · Próximo: 2.6.

@@ -156,6 +156,93 @@ func definir_visual(espaco: String, id_visual: String) -> Dictionary:
 		estado["visual"][espaco] = id_visual
 	return _concluir("equipamento")
 
+# --------------------------------------------------------------------- vila
+
+## Nível do prédio (0 = ainda não liberado). Prédio liberado pelo nível do
+## cavaleiro e ainda sem registro começa no nível 1.
+func predio_nivel(nome: String) -> int:
+	if estado["vila"]["predios"].has(nome):
+		return int(estado["vila"]["predios"][nome]["nivel"])
+	return 1 if predio_liberado(nome) else 0
+
+func predio_liberado(nome: String) -> bool:
+	var p: Dictionary = Balanceamento.carregar("vila")["predios"].get(nome, {})
+	return not p.is_empty() and int(estado["cavaleiro"]["nivel"]) >= int(p["libera_nivel"])
+
+## Teto de nível: a casa senhorial vai até o máximo dela; os outros, até o
+## nível da casa senhorial (GDD: ela define o teto dos outros prédios).
+func teto_predio(nome: String) -> int:
+	var p: Dictionary = Balanceamento.carregar("vila")["predios"][nome]
+	if nome == "casa_senhorial":
+		return int(p["nivel_max"])
+	return mini(int(p["nivel_max"]), predio_nivel("casa_senhorial"))
+
+## Timer em andamento (ou já pronto, esperando concluir) de um prédio; {} se não tem.
+func timer_do_predio(nome: String) -> Dictionary:
+	for t: Dictionary in estado["timers"]:
+		if t["alvo"] == nome:
+			return t.duplicate()
+	return {}
+
+func timers() -> Array:
+	return estado["timers"].duplicate(true)
+
+## Se dá para melhorar e quanto custa: {ok, erro, ouro, segundos}.
+func pode_melhorar(nome: String) -> Dictionary:
+	var vila := Balanceamento.carregar("vila")
+	if not vila["predios"].has(nome):
+		return _erro("predio_inexistente")
+	if not predio_liberado(nome):
+		return _erro("predio_bloqueado")
+	if not timer_do_predio(nome).is_empty():
+		return _erro("predio_ocupado")
+	var nivel := predio_nivel(nome)
+	if nivel >= teto_predio(nome):
+		return _erro("predio_no_teto" if nome != "casa_senhorial" and nivel < int(vila["predios"][nome]["nivel_max"]) else "predio_no_maximo")
+	var m: Dictionary = vila["predios"][nome]["melhoria"][nivel - 1]
+	if ouro() < int(m["ouro"]):
+		return {"ok": false, "erro": "ouro_insuficiente", "ouro": int(m["ouro"]), "segundos": int(m["segundos"])}
+	return {"ok": true, "erro": "", "ouro": int(m["ouro"]), "segundos": int(m["segundos"])}
+
+## Começa a melhoria: cobra o ouro e cria o timer (horário de término).
+func melhorar_predio(nome: String) -> Dictionary:
+	var p := pode_melhorar(nome)
+	if not p["ok"]:
+		return p
+	estado["inventario"]["ouro"] = ouro() - int(p["ouro"])
+	var agora := ServicoTempo.agora()
+	estado["timers"].append({"id": _novo_id(estado, "t"), "tipo": "melhoria", "alvo": nome,
+		"inicio_em": agora, "termina_em": agora + duracao_timer(int(p["segundos"])), "nivel_novo": predio_nivel(nome) + 1})
+	_garantir_predio(nome)
+	var r := _concluir("vila")
+	r["ouro"] = p["ouro"]
+	return r
+
+## Conclui um timer que já terminou (aplica o efeito e tira da lista).
+func concluir_timer(id: String) -> Dictionary:
+	for i in estado["timers"].size():
+		var t: Dictionary = estado["timers"][i]
+		if t["id"] != id:
+			continue
+		if not ServicoTempo.pronto(int(t["termina_em"])):
+			return _erro("timer_nao_terminou")
+		match t["tipo"]:
+			"melhoria":
+				_garantir_predio(t["alvo"])
+				estado["vila"]["predios"][t["alvo"]]["nivel"] = int(t["nivel_novo"])
+		estado["timers"].remove_at(i)
+		return _concluir("vila")
+	return _erro("timer_inexistente")
+
+## Duração real de um timer. No primeiro dia (tutorial, 2.11) os timers
+## terminam em segundos; aqui é o ponto único onde isso entra.
+func duracao_timer(segundos: int) -> int:
+	return segundos
+
+func _garantir_predio(nome: String) -> void:
+	if not estado["vila"]["predios"].has(nome):
+		estado["vila"]["predios"][nome] = {"nivel": 1}
+
 # ------------------------------------------------------------ persistência
 
 func novo_estado() -> Dictionary:
