@@ -1,0 +1,16 @@
+# Godot 4+
+.godot/
+*.translation
+.import/
+export.cfg
+export_credentials.cfg
+
+# Builds
+build/
+*.apk
+*.aab
+*.keystore
+
+# Local
+.claude/settings.local.json
+*.tmp
