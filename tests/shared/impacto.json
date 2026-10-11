@@ -1,0 +1,1856 @@
+{
+	"versao": 1,
+	"descricao": "Regra do impacto (game/scripts/rules/impacto.gd). Cada caso: Impacto.resolver(config, entrada, Aleatorio(semente)) == esperado. Config embutida.",
+	"config": {
+		"versao": 1,
+		"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos).",
+		"pontos": {
+			"capacete": 3,
+			"peito": 2,
+			"escudo": 1,
+			"cavalo": 0,
+			"erro": 0
+		},
+		"falta": {
+			"zona": "cavalo",
+			"penalidade_pontos": 2,
+			"faltas_para_desclassificar": 2
+		},
+		"teto_suave_joelho_pct": 70,
+		"bloqueio": {
+			"zonas": [
+				"capacete",
+				"peito"
+			],
+			"vira_zona": "escudo",
+			"base_milesimos": 50,
+			"teto_milesimos": 400
+		},
+		"derrubada": {
+			"base_por_zona_milesimos": {
+				"capacete": 120,
+				"peito": 90,
+				"escudo": 30
+			},
+			"forca_menos_equilibrio_milesimos": 3,
+			"velocidade_por_pct_milesimos": 4,
+			"ritmo_max_milesimos": 40,
+			"poder_lanca_milesimos": 2,
+			"defesa_peca_milesimos": 2,
+			"teto_milesimos": 450
+		},
+		"dano": {
+			"base_por_zona": {
+				"capacete": 20,
+				"peito": 15,
+				"escudo": 10,
+				"cavalo": 8
+			},
+			"peca_por_zona": {
+				"capacete": "elmo",
+				"peito": "peitoral",
+				"escudo": "escudo",
+				"cavalo": "peitoral_cavalo"
+			},
+			"velocidade_por_pct_milesimos": 10,
+			"defesa_reduz_por_ponto_milesimos": 500,
+			"minimo": 1,
+			"lanca_por_contato": 4
+		},
+		"habilidades": {
+			"investida": {
+				"tipo": "ativa",
+				"vence": "bloqueio",
+				"derrubada_bonus_milesimos": 80,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 0
+			},
+			"golpe_pesado": {
+				"tipo": "ativa",
+				"vence": "investida",
+				"derrubada_bonus_milesimos": 40,
+				"dano_bonus_pct": 50,
+				"bloqueio_milesimos": 0
+			},
+			"bloqueio": {
+				"tipo": "passiva",
+				"vence": "golpe_pesado",
+				"derrubada_bonus_milesimos": 0,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 700
+			}
+		}
+	},
+	"suave": [
+		{
+			"valor": 0,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 0
+		},
+		{
+			"valor": -5,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 0
+		},
+		{
+			"valor": 100,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 100
+		},
+		{
+			"valor": 280,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 280
+		},
+		{
+			"valor": 281,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 280
+		},
+		{
+			"valor": 400,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 340
+		},
+		{
+			"valor": 1000,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 382
+		},
+		{
+			"valor": 100000,
+			"teto": 400,
+			"joelho_pct": 70,
+			"esperado": 399
+		},
+		{
+			"valor": 50,
+			"teto": 0,
+			"joelho_pct": 70,
+			"esperado": 0
+		},
+		{
+			"valor": 300,
+			"teto": 300,
+			"joelho_pct": 100,
+			"esperado": 300
+		}
+	],
+	"casos": [
+		{
+			"nome": "erro dos dois lados",
+			"semente": 1,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "capacete vale 3",
+			"semente": 1,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 120,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "peito vale 2",
+			"semente": 2,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "escudo vale 1",
+			"semente": 3,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "escudo",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "escudo",
+					"zona_final": "escudo",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "cavalo e falta e desconta",
+			"semente": 4,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "cavalo",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "cavalo",
+					"zona_final": "cavalo",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": true,
+					"pontos": -2,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral_cavalo": 8
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "os dois acertam no mesmo choque",
+			"semente": 5,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 120,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "escudo forte bloqueia e vira escudo",
+			"semente": 6,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"equipamento": {
+						"escudo": {
+							"bloqueio_milesimos": 900,
+							"durabilidade": 50
+						}
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "escudo",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "escudo quebrado nao bloqueia mais que a base",
+			"semente": 6,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"equipamento": {
+						"escudo": {
+							"bloqueio_milesimos": 900,
+							"durabilidade": 0
+						}
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 120,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "forca alta contra equilibrio baixo derruba mais",
+			"semente": 7,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 100,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 114,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 1000
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 0
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 399,
+					"derrubou": true,
+					"habilidade": "",
+					"dano": {
+						"elmo": 24
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "equilibrio alto quase nao cai",
+			"semente": 7,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 0,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 100
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "teto suave segura a chance de derrubar",
+			"semente": 8,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 100,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 200,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 1000,
+					"equipamento": {
+						"lanca": {
+							"poder": 40,
+							"precisao": 10,
+							"durabilidade": 60
+						}
+					},
+					"habilidade": {
+						"nome": "investida",
+						"ativa": true
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 0
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 429,
+					"derrubou": true,
+					"habilidade": "investida",
+					"dano": {
+						"elmo": 42
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "velocidade abaixo da nominal reduz a chance",
+			"semente": 9,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 76,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 10,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "elmo com defesa reduz dano e chance",
+			"semente": 10,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"equipamento": {
+						"elmo": {
+							"defesa": 30,
+							"durabilidade": 80
+						}
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 60,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 5
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "lanca com poder aumenta a chance",
+			"semente": 10,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"equipamento": {
+						"lanca": {
+							"poder": 40,
+							"precisao": 10,
+							"durabilidade": 60
+						}
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 200,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "golpe pesado aumenta o dano",
+			"semente": 11,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "golpe_pesado",
+						"ativa": true
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 130,
+					"derrubou": false,
+					"habilidade": "golpe_pesado",
+					"dano": {
+						"peitoral": 22
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "bloqueio da habilidade desvia o golpe",
+			"semente": 12,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "bloqueio",
+						"ativa": true
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "bloqueio",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "investida vence bloqueio (bloqueio anulado)",
+			"semente": 12,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "investida",
+						"ativa": true
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "bloqueio",
+						"ativa": true
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 170,
+					"derrubou": false,
+					"habilidade": "investida",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "bloqueio vence golpe pesado (golpe pesado anulado)",
+			"semente": 13,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "golpe_pesado",
+						"ativa": true
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "bloqueio",
+						"ativa": true
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "bloqueio",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "golpe pesado vence investida",
+			"semente": 14,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "golpe_pesado",
+						"ativa": true
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "investida",
+						"ativa": true
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 130,
+					"derrubou": false,
+					"habilidade": "golpe_pesado",
+					"dano": {
+						"peitoral": 22
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "habilidade inativa nao conta",
+			"semente": 15,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "investida",
+						"ativa": false
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "habilidade desconhecida e ignorada",
+			"semente": 15,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidade": {
+						"nome": "voadora",
+						"ativa": true
+					}
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "falta no cavalo nao derruba nem bloqueia",
+			"semente": 16,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 100,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "cavalo",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 0
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"equipamento": {
+						"escudo": {
+							"bloqueio_milesimos": 900,
+							"durabilidade": 50
+						}
+					}
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "cavalo",
+					"zona_final": "cavalo",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": true,
+					"pontos": -2,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"peitoral_cavalo": 8
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio da derrubada semente 21",
+			"semente": 21,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 80,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 110,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 900
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 30
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 352,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio da derrubada semente 22",
+			"semente": 22,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 80,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 110,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 900
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 30
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 352,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio da derrubada semente 23",
+			"semente": 23,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 80,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 110,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 900
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 30
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 352,
+					"derrubou": true,
+					"habilidade": "",
+					"dano": {
+						"elmo": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio da derrubada semente 24",
+			"semente": 24,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 80,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 110,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 900
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 30
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 352,
+					"derrubou": true,
+					"habilidade": "",
+					"dano": {
+						"elmo": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio da derrubada semente 25",
+			"semente": 25,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 80,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 110,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 900
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 30
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 352,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio da derrubada semente 26",
+			"semente": 26,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 80,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 110,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 900
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 30
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 352,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {
+						"elmo": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		}
+	]
+}

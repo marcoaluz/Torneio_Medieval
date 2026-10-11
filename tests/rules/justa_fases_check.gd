@@ -64,7 +64,8 @@ func _rodar(cfg: Dictionary, acoes: Array, pedaco: int) -> Array:
 				_anotar(saida, j.encerrar_corrida())
 			"resultado":
 				var lado := JustaFases.NOMES_LADO.find(a.get("derrubado", "nenhum"))
-				j.registrar_resultado(int(a["jogador"]), int(a["rival"]), lado)
+				var dq := JustaFases.NOMES_LADO.find(a.get("desclassificado", "nenhum"))
+				j.registrar_resultado(int(a["jogador"]), int(a["rival"]), lado, dq)
 	return saida
 
 func _anotar(saida: Array, eventos: Array[Dictionary]) -> void:
@@ -73,8 +74,8 @@ func _anotar(saida: Array, eventos: Array[Dictionary]) -> void:
 			"fase":
 				saida.append("fase:%s:%d@%d" % [JustaFases.NOMES_FASE[e["fase"]], e["passada"], e["t"]])
 			"passada":
-				saida.append("passada:%d:%d-%d:%s@%d" % [e["passada"], e["pontos_jogador"], e["pontos_rival"],
-					JustaFases.NOMES_LADO[e["derrubado"]], e["t"]])
+				saida.append("passada:%d:%d-%d:%s:%s@%d" % [e["passada"], e["pontos_jogador"], e["pontos_rival"],
+					JustaFases.NOMES_LADO[e["derrubado"]], JustaFases.NOMES_LADO[e["desclassificado"]], e["t"]])
 			"fim":
 				saida.append("fim:%s:%s:%d-%d@%d" % [JustaFases.NOMES_LADO[e["vencedor"]], e["motivo"],
 					e["placar_jogador"], e["placar_rival"], e["t"]])

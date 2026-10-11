@@ -33,6 +33,12 @@ signal corrida_terminou(passada: int, velocidade_jogador: int, ritmo_milesimos: 
 signal golpe_solto(passada: int)
 ## Golpe avaliado no choque: zona "capacete", "peito", "escudo", "cavalo" ou "erro".
 signal golpe_avaliado(passada: int, zona: String, automatico: bool, sem_golpe: bool)
+## Choque resolvido pela regra do impacto. `jogador`/`rival` = resultado do
+## golpe daquele lado (ver Impacto): zona_final, pontos, falta, bloqueado,
+## derrubou, dano... `derrubado`/`desclassificado` são JustaFases.Lado.
+signal impacto_resolvido(passada: int, jogador: Dictionary, rival: Dictionary, derrubado: JustaFases.Lado, desclassificado: JustaFases.Lado)
+## Habilidade ativa acionada ("jogador" ou "rival").
+signal habilidade_ativada(passada: int, lado: String, nome: String)
 signal passada_terminou(passada: int, pontos_jogador: int, pontos_rival: int, derrubado: JustaFases.Lado)
 signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador: int, placar_rival: int)
 
@@ -123,9 +129,10 @@ func soltar_mira() -> void:
 func ponta_no_mundo() -> Vector2:
 	return arena.rival.visual().to_global(Vector2(justa.ponta) / 10.0)
 
-## Resultado da passada atual (vem da regra do impacto, prompt 1.5).
-func registrar_resultado(pontos_jogador: int, pontos_rival: int, derrubado := JustaFases.Lado.NENHUM) -> bool:
-	return justa != null and justa.fases.registrar_resultado(pontos_jogador, pontos_rival, derrubado)
+## Botão de habilidade (Corrida): liga a habilidade ativa nesta passada.
+func ativar_habilidade() -> void:
+	if justa and not justa.terminou():
+		_despachar(justa.ativar_habilidade())
 
 func fase() -> JustaFases.Fase:
 	return justa.fases.fase if justa else JustaFases.Fase.FIM
@@ -198,6 +205,10 @@ func _despachar(eventos: Array[Dictionary]) -> void:
 				golpe_solto.emit(p)
 			"golpe":
 				golpe_avaliado.emit(p, e["zona"], e["automatico"], e["sem_golpe"])
+			"impacto":
+				impacto_resolvido.emit(p, e["jogador"], e["rival"], e["derrubado"], e["desclassificado"])
+			"habilidade":
+				habilidade_ativada.emit(p, e["lado"], e["nome"])
 			"passada":
 				passada_terminou.emit(p, e["pontos_jogador"], e["pontos_rival"], e["derrubado"])
 			"fim":

@@ -3,24 +3,27 @@ extends RefCounted
 ## Sequência de fases de uma justa (regra pura, ver skill regra-da-justa).
 ## Uma passada: Apresentação → Largada → Corrida → Mira → Impacto.
 ## Uma justa: `passadas` passadas; empate depois delas leva a passadas extras
-## (até `passadas_extras_max`); derrubada encerra a justa ao fim da passada.
+## (até `passadas_extras_max`); derrubada ou desclassificação encerra a justa
+## ao fim da passada. Ordem no fim da passada: desclassificação (os dois =
+## empate), depois derrubada (os dois caem = segue pelos pontos), depois pontos.
 ##
 ## Tempo em milissegundos inteiros, passado de fora por avancar(ms): sem
 ## relógio, sem nós, sem sinais. Cada chamada devolve a lista de eventos que
 ## aconteceram, em ordem, cada um com o instante exato "t" (ms desde o início):
 ##   {tipo:"fase", fase, anterior, passada, t}
-##   {tipo:"passada", passada, pontos_jogador, pontos_rival, derrubado, t}
+##   {tipo:"passada", passada, pontos_jogador, pontos_rival, derrubado, desclassificado, t}
 ##   {tipo:"fim", vencedor, motivo, placar_jogador, placar_rival, t}
-## O resultado de cada passada (pontos, derrubada) vem de fora, pela regra do
-## impacto, via registrar_resultado() durante a Mira ou o Impacto. Sem
-## resultado registrado, a passada vale 0 a 0.
+## O resultado de cada passada (pontos, derrubada, desclassificação) vem de
+## fora, pela regra do impacto, via registrar_resultado() durante a Mira ou o
+## Impacto. Pontos podem ser negativos (falta). Sem resultado registrado, a
+## passada vale 0 a 0.
 ## Espelho em TypeScript na Parte 3; casos em tests/shared/justa_fases.json.
 
 enum Fase { APRESENTACAO, LARGADA, CORRIDA, MIRA, IMPACTO, FIM }
-enum Lado { NENHUM, JOGADOR, RIVAL }
+enum Lado { NENHUM, JOGADOR, RIVAL, AMBOS }
 
 const NOMES_FASE: Array[String] = ["apresentacao", "largada", "corrida", "mira", "impacto", "fim"]
-const NOMES_LADO: Array[String] = ["nenhum", "jogador", "rival"]
+const NOMES_LADO: Array[String] = ["nenhum", "jogador", "rival", "ambos"]
 
 var fase := Fase.FIM
 var passada := 0
@@ -29,7 +32,7 @@ var tempo_na_fase_ms := 0
 var placar_jogador := 0
 var placar_rival := 0
 var vencedor := Lado.NENHUM
-## "pontos", "derrubada" ou "empate"; vazio enquanto a justa não termina.
+## "pontos", "derrubada", "desclassificacao" ou "empate"; vazio enquanto a justa não termina.
 var motivo := ""
 
 var _passadas := 0
@@ -38,6 +41,7 @@ var _duracao_ms: Array[int] = []
 var _pontos_passada_jogador := 0
 var _pontos_passada_rival := 0
 var _derrubado := Lado.NENHUM
+var _desclassificado := Lado.NENHUM
 
 ## Devolve "" se a configuração (o JSON de justa) estiver completa, senão a
 ## descrição do problema.
@@ -120,16 +124,16 @@ func encerrar_corrida() -> Array[Dictionary]:
 	return eventos
 
 ## Resultado da passada atual, calculado pela regra do impacto. Só vale na
-## Mira ou no Impacto; devolve false (e ignora) fora delas ou com valores
-## inválidos. Registrar de novo na mesma passada substitui o anterior.
-func registrar_resultado(pontos_jogador: int, pontos_rival: int, derrubado := Lado.NENHUM) -> bool:
+## Mira ou no Impacto; devolve false (e ignora) fora delas. Registrar de novo
+## na mesma passada substitui o anterior.
+func registrar_resultado(pontos_jogador: int, pontos_rival: int, derrubado := Lado.NENHUM,
+		desclassificado := Lado.NENHUM) -> bool:
 	if fase != Fase.MIRA and fase != Fase.IMPACTO:
-		return false
-	if pontos_jogador < 0 or pontos_rival < 0:
 		return false
 	_pontos_passada_jogador = pontos_jogador
 	_pontos_passada_rival = pontos_rival
 	_derrubado = derrubado
+	_desclassificado = desclassificado
 	return true
 
 func _nova_passada(eventos: Array[Dictionary]) -> void:
@@ -137,6 +141,7 @@ func _nova_passada(eventos: Array[Dictionary]) -> void:
 	_pontos_passada_jogador = 0
 	_pontos_passada_rival = 0
 	_derrubado = Lado.NENHUM
+	_desclassificado = Lado.NENHUM
 	_entrar(Fase.APRESENTACAO, eventos)
 
 func _entrar(nova: Fase, eventos: Array[Dictionary]) -> void:
@@ -153,8 +158,14 @@ func _fim_da_fase(eventos: Array[Dictionary]) -> void:
 	placar_rival += _pontos_passada_rival
 	eventos.append({"tipo": "passada", "passada": passada,
 		"pontos_jogador": _pontos_passada_jogador, "pontos_rival": _pontos_passada_rival,
-		"derrubado": _derrubado, "t": tempo_total_ms})
-	if _derrubado == Lado.RIVAL:
+		"derrubado": _derrubado, "desclassificado": _desclassificado, "t": tempo_total_ms})
+	if _desclassificado == Lado.AMBOS:
+		_encerrar(Lado.NENHUM, "desclassificacao", eventos)
+	elif _desclassificado == Lado.JOGADOR:
+		_encerrar(Lado.RIVAL, "desclassificacao", eventos)
+	elif _desclassificado == Lado.RIVAL:
+		_encerrar(Lado.JOGADOR, "desclassificacao", eventos)
+	elif _derrubado == Lado.RIVAL:
 		_encerrar(Lado.JOGADOR, "derrubada", eventos)
 	elif _derrubado == Lado.JOGADOR:
 		_encerrar(Lado.RIVAL, "derrubada", eventos)

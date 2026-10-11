@@ -14,6 +14,7 @@ var _planos := {}
 var _toques := {}
 var _largadas: Array[String] = []
 var _golpes: Array[String] = []
+var _impactos := 0
 
 func _initialize() -> void:
 	var arena: Arena = load("res://game/scenes/arena/arena.tscn").instantiate()
@@ -31,6 +32,7 @@ func _initialize() -> void:
 	c.largada_avaliada.connect(func(_p, q, _r, _qm): _largadas.append(q))
 	c.toque_galope.connect(func(r, _d, _v, _f): _toques[r] = _toques.get(r, 0) + 1)
 	c.corrida_terminou.connect(func(p, _v, _r): _log.append("corrida_fim:%d" % p))
+	c.impacto_resolvido.connect(func(_p, _j, _r, _d, _q): _impactos += 1)
 	c.golpe_avaliado.connect(func(_p, z, a, s): _golpes.append("%s%s%s" % [z, ":auto" if a else "", ":sem" if s else ""]))
 	c.passada_terminou.connect(func(p, pj, pr, _d): _log.append("passada:%d:%d-%d" % [p, pj, pr]))
 	c.justa_terminou.connect(func(v, m, pj, pr): _log.append("fim:%s:%s:%d-%d" % [JustaFases.NOMES_LADO[v], m, pj, pr]))
@@ -73,20 +75,18 @@ func _initialize() -> void:
 		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.IMPACTO and dist_fim_mira < 0.0:
 			dist_fim_mira = absf(arena.jogador.global_position.x - arena.rival.global_position.x)
 			barra_fim_mira = absf(c.barra.posicao_jogador - c.barra.posicao_rival)
-		if c.fase() == JustaFases.Fase.MIRA and c.justa.fases.passada == 1:
-			c.registrar_resultado(2, 1)
 
 	_checa("justa termina", c.justa.terminou())
-	_checa("jogador vence 2-1 na primeira e empata o resto", _log.back() == "fim:jogador:pontos:2-1")
-	_checa("tres passadas", _log.count("sinal:corrida:3") == 1 and not _log.has("sinal:corrida:4"))
+	_checa("jogador vence (o rival nao mira ate a IA): %s" % _log.back(), _log.back().begins_with("fim:jogador:"))
+	_checa("impacto resolvido a cada passada (%d)" % _impactos, _impactos == _log.count("fase:impacto:1") + _log.count("fase:impacto:2") + _log.count("fase:impacto:3"))
 	_checa("um sinal por fase e na ordem", _log.slice(0, 11) == [
 		"fase:apresentacao:1", "sinal:apresentacao:1", "fase:largada:1", "sinal:largada:1", "bandeira:1",
 		"fase:corrida:1", "sinal:corrida:1", "corrida_fim:1", "fase:mira:1", "sinal:mira:1", "fase:impacto:1"])
 	_checa("bandeira baixa e o arauto mostra", bandeira_baixada_ok)
-	_checa("largadas do robo sao perfeitas %s" % [_largadas], _largadas.size() == 3 and _largadas.count("perfeita") == 3)
-	_checa("toques no compasso contam %s" % [_toques], _toques.get("no_tempo", 0) >= 18 and _toques.get("perdido", 0) == 0)
+	_checa("largadas do robo sao perfeitas %s" % [_largadas], _largadas.size() >= 1 and _largadas.count("perfeita") == _largadas.size())
+	_checa("toques no compasso contam %s" % [_toques], _toques.get("no_tempo", 0) >= 6 * _largadas.size() and _toques.get("perdido", 0) == 0)
 	_checa("brilho do compasso acende na corrida", brilho_max == 1.0)
-	_checa("robo arrasta ate o peito e acerta %s" % [_golpes], _golpes == ["peito", "peito", "peito"])
+	_checa("robo arrasta ate o peito e acerta %s" % [_golpes], _golpes.size() >= 1 and _golpes.count("peito") == _golpes.size())
 	_checa("ponta da lanca aparece na mira", ponta_visivel)
 	_checa("zona sob a ponta brilha no rival", realce_peito)
 	_checa("brilho apaga fora da mira", arena.rival.get_node("Visual/Cavaleiro/Peito").modulate == Color.WHITE and not arena.ponta_lanca.visible)
@@ -99,7 +99,8 @@ func _initialize() -> void:
 		_planos["mira"] == CameraArena.Plano.FOCO and _planos["impacto"] == CameraArena.Plano.FOCO)
 	_checa("camera volta ao aberto no fim", arena.camera.plano == CameraArena.Plano.ABERTO)
 	var segundos := quadros / 30.0
-	_checa("duracao da justa entre 30 e 36 s (%.2f s)" % segundos, segundos > 30.0 and segundos < 36.0)
+	_checa("duracao da passada entre 10 e 12 s (%.2f s em %d)" % [segundos, _largadas.size()],
+		segundos / _largadas.size() > 10.0 and segundos / _largadas.size() < 12.0)
 
 	# Toque pula a apresentação; na largada, larga em vez de pular.
 	c.iniciar(12)

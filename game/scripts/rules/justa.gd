@@ -1,25 +1,32 @@
 class_name Justa
 extends RefCounted
 ## A justa inteira como regra pura: junta as fases (JustaFases), a largada e
-## o galope dos dois lados (Galope), a mira (Mira) e o sorteio da bandeira
-## (Aleatorio). O jogador só manda entradas no instante atual: tocar(),
+## o galope dos dois lados (Galope), a mira (Mira), o impacto (Impacto) e os
+## sorteios (Aleatorio: bandeira e impacto, nessa ordem de uso). O jogador só manda entradas no instante atual: tocar(),
 ## mirar(ponto) e soltar(). O servidor refaz a justa com a mesma semente e
 ## as mesmas entradas nos mesmos instantes.
 ##
 ## Entradas por fase:
 ##   Apresentação: tocar() pula
 ##   Largada: tocar() larga (só o primeiro toque conta)
-##   Corrida: tocar() galopa
+##   Corrida: tocar() galopa; ativar_habilidade() liga a habilidade ativa
+##            (Investida, Golpe Pesado) nesta passada, uma vez por justa
 ##   Mira: mirar(ponto) segura e move a ponta da lança; soltar() trava o golpe.
 ##         Se ainda estiver segurando quando a Mira acaba, o golpe sai onde a
 ##         ponta estiver (automatico); se nunca segurou, o golpe é "erro".
 ## A Corrida termina quando a soma das distâncias chega ao ponto da Mira
 ## (pista.distancia_total - pista.distancia_mira) ou no teto fases_ms.corrida.
 ## O golpe é avaliado no choque (fim da Mira), não no instante em que solta.
+## No choque, a regra do impacto resolve os dois golpes; falta conta para a
+## desclassificação (impacto.falta.faltas_para_desclassificar) e o dano gasta
+## a durabilidade das peças, que vale para as passadas seguintes.
+## O golpe do rival vem de rival_mirar(ponto) (IA, 1.6); sem ele, o rival erra.
 ##
-## Configuração: {justa, galope, mira} (os JSON de game/data/balance/).
+## Configuração: {justa, galope, mira, impacto} (os JSON de game/data/balance/).
 ## Cada lado: {cavaleiro: {forca, precisao, equilibrio}, cavalo: {velocidade,
-## folego, temperamento}}.
+## folego, temperamento}, equipamento?: {peca: {...}}, habilidade?: nome}.
+## Habilidade passiva (Bloqueio) vale em todas as passadas; ativa só quando
+## acionada.
 ##
 ## Eventos (além dos de JustaFases), todos com "t":
 ##   {tipo:"bandeira", passada}
@@ -30,6 +37,9 @@ extends RefCounted
 ##   {tipo:"soltou", passada, x, y, t_mira_ms}
 ##   {tipo:"golpe", passada, zona, x, y, t_mira_ms, automatico, sem_golpe}
 ##        (x, y em décimos de px do quadro do rival; vem logo antes da fase Impacto)
+##   {tipo:"habilidade", passada, lado, nome}  (ativa acionada)
+##   {tipo:"impacto", passada, jogador, rival, faltas_jogador, faltas_rival,
+##        derrubado, desclassificado}  (jogador/rival = resultado de Impacto.resolver)
 
 var fases: JustaFases
 var jogador: Galope
@@ -45,12 +55,27 @@ var segurando := false
 var solto := false
 var t_soltou_ms := 0
 var precisao_jogador := 0
+var precisao_rival := 0
+## Golpe do rival nesta passada (da IA): ponto no quadro do jogador.
+var ponta_rival := Vector2i.ZERO
+var rival_mirou := false
+## Lados com o equipamento sendo gasto ao longo da justa (cópias).
+var lado_jogador: Dictionary
+var lado_rival: Dictionary
+var faltas_jogador := 0
+var faltas_rival := 0
+var habilidade_usada_jogador := false
+var habilidade_usada_rival := false
+var habilidade_na_passada_jogador := false
+var habilidade_na_passada_rival := false
+## Último resultado do impacto (para a apresentação).
+var ultimo_impacto: Dictionary
 
 var _cfg: Dictionary
 var _rng: Aleatorio
 
 static func validar(cfg: Dictionary) -> String:
-	for nome in ["justa", "galope", "mira"]:
+	for nome in ["justa", "galope", "mira", "impacto"]:
 		if not cfg.get(nome) is Dictionary:
 			return "falta a configuração \"%s\"" % nome
 	var erro := JustaFases.validar(cfg["justa"])
@@ -62,6 +87,9 @@ static func validar(cfg: Dictionary) -> String:
 	erro = Mira.validar(cfg["mira"])
 	if erro != "":
 		return "mira.json: " + erro
+	erro = Impacto.validar(cfg["impacto"])
+	if erro != "":
+		return "impacto.json: " + erro
 	var l: Dictionary = cfg["galope"]["largada"]
 	if int(l["bandeira_ms"]) + int(l["bandeira_variacao_ms"]) >= int(cfg["justa"]["fases_ms"]["largada"]):
 		return "a bandeira precisa baixar antes do fim da Largada"
@@ -71,18 +99,21 @@ static func validar(cfg: Dictionary) -> String:
 ## a sua). Devolve {} e avisa se faltar arquivo.
 static func carregar_configuracao() -> Dictionary:
 	var cfg := {}
-	for nome in ["justa", "galope", "mira"]:
+	for nome in ["justa", "galope", "mira", "impacto"]:
 		cfg[nome] = Balanceamento.carregar(nome)
 	return cfg
 
-func _init(cfg: Dictionary, lado_jogador: Dictionary, lado_rival: Dictionary, semente: int) -> void:
+func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int) -> void:
 	_cfg = cfg
+	lado_jogador = lado_j.duplicate(true)
+	lado_rival = lado_r.duplicate(true)
 	fases = JustaFases.new(cfg["justa"])
 	jogador = Galope.new(cfg["galope"], lado_jogador["cavalo"])
 	rival = Galope.new(cfg["galope"], lado_rival["cavalo"])
 	rival.automatico = true
-	precisao_jogador = int(lado_jogador["cavaleiro"]["precisao"])
 	_rng = Aleatorio.new(semente)
+	precisao_jogador = Impacto.precisao_efetiva(lado_jogador)
+	precisao_rival = Impacto.precisao_efetiva(lado_rival)
 
 func iniciar() -> Array[Dictionary]:
 	return _observar(fases.iniciar())
@@ -107,6 +138,45 @@ func bonus_precisao_pct() -> int:
 ## Zonas efetivas do rival para o jogador nesta passada (para o realce na tela).
 func zonas_efetivas() -> Array[Dictionary]:
 	return Mira.zonas_efetivas(_cfg["mira"], precisao_jogador, bonus_precisao_pct())
+
+## Liga a habilidade ativa do jogador nesta passada (só na Corrida, uma vez
+## por justa, e só se a habilidade equipada for do tipo "ativa").
+func ativar_habilidade() -> Array[Dictionary]:
+	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_jogador:
+		return []
+	var nome := _habilidade_de(lado_jogador)
+	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
+		return []
+	habilidade_usada_jogador = true
+	habilidade_na_passada_jogador = true
+	return [{"tipo": "habilidade", "passada": fases.passada, "lado": "jogador", "nome": nome, "t": fases.tempo_total_ms}]
+
+## O mesmo para o rival (chamado pela IA).
+func rival_ativar_habilidade() -> Array[Dictionary]:
+	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_rival:
+		return []
+	var nome := _habilidade_de(lado_rival)
+	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
+		return []
+	habilidade_usada_rival = true
+	habilidade_na_passada_rival = true
+	return [{"tipo": "habilidade", "passada": fases.passada, "lado": "rival", "nome": nome, "t": fases.tempo_total_ms}]
+
+## Golpe do rival (IA): ponto no quadro do jogador, em décimos de px. Só na
+## Mira; o último antes do choque vale.
+func rival_mirar(ponto: Vector2i) -> void:
+	if fases.fase != JustaFases.Fase.MIRA:
+		return
+	ponta_rival = Mira.limitar(_cfg["mira"], ponto)
+	rival_mirou = true
+
+## Equipamento de um lado depois do desgaste desta justa (para salvar, 2.9).
+func equipamento_final(do_jogador: bool) -> Dictionary:
+	return (lado_jogador if do_jogador else lado_rival).get("equipamento", {}).duplicate(true)
+
+static func _habilidade_de(lado: Dictionary) -> String:
+	var h: Variant = lado.get("habilidade", "")
+	return h if h is String else ""
 
 func avancar(ms: int) -> Array[Dictionary]:
 	var eventos: Array[Dictionary] = []
@@ -193,11 +263,16 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 				"distancia_jogador_mil": jogador.distancia_mil, "distancia_rival_mil": rival.distancia_mil,
 				"t": e["t"]})
 		if e["tipo"] == "fase" and e["anterior"] == JustaFases.Fase.MIRA:
-			saida.append(_avaliar_golpe(e["t"]))
+			var golpe := _avaliar_golpe(e["t"])
+			saida.append(golpe)
+			saida.append(_resolver_impacto(golpe, e["t"]))
 		saida.append(e)
 		if e["tipo"] != "fase":
 			continue
 		match e["fase"]:
+			JustaFases.Fase.APRESENTACAO:
+				habilidade_na_passada_jogador = false
+				habilidade_na_passada_rival = false
 			JustaFases.Fase.LARGADA:
 				var l: Dictionary = _cfg["galope"]["largada"]
 				bandeira_ms = int(l["bandeira_ms"]) + _rng.inteiro(0, int(l["bandeira_variacao_ms"]))
@@ -216,6 +291,9 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 				segurando = false
 				solto = false
 				t_soltou_ms = 0
+				rival_mirou = false
+				precisao_jogador = Impacto.precisao_efetiva(lado_jogador)
+				precisao_rival = Impacto.precisao_efetiva(lado_rival)
 	return saida
 
 func _avaliar_golpe(t: int) -> Dictionary:
@@ -227,6 +305,69 @@ func _avaliar_golpe(t: int) -> Dictionary:
 	segurando = false
 	return {"tipo": "golpe", "passada": fases.passada, "zona": zona, "x": ponta.x, "y": ponta.y,
 		"t_mira_ms": t_mira, "automatico": automatico, "sem_golpe": sem_golpe, "t": t}
+
+## Resolve o choque com a regra do impacto, conta faltas, gasta o
+## equipamento e registra o resultado da passada.
+func _resolver_impacto(golpe: Dictionary, t: int) -> Dictionary:
+	var zona_rival := Mira.ERRO
+	if rival_mirou:
+		zona_rival = Mira.zona_no_ponto(_cfg["mira"], ponta_rival, precisao_rival, 0)
+	var entrada := {
+		"jogador": _golpeador(lado_jogador, golpe["zona"], jogador, habilidade_na_passada_jogador),
+		"rival": _golpeador(lado_rival, zona_rival, rival, habilidade_na_passada_rival),
+	}
+	var res := Impacto.resolver(_cfg["impacto"], entrada, _rng)
+	ultimo_impacto = res
+	var rj: Dictionary = res["jogador"]
+	var rr: Dictionary = res["rival"]
+	if rj["falta"]:
+		faltas_jogador += 1
+	if rr["falta"]:
+		faltas_rival += 1
+	# O golpe do jogador gasta as peças do rival, e vice-versa; cada lança gasta no contato.
+	_gastar(lado_rival, rj["dano"])
+	_gastar(lado_jogador, rr["dano"])
+	_gastar(lado_jogador, {"lanca": rj["dano_lanca"]})
+	_gastar(lado_rival, {"lanca": rr["dano_lanca"]})
+	var limite := int(_cfg["impacto"]["falta"]["faltas_para_desclassificar"])
+	var dq := _lado_de(faltas_jogador >= limite, faltas_rival >= limite)
+	var derrubado := _lado_de(rr["derrubou"], rj["derrubou"])
+	fases.registrar_resultado(int(rj["pontos"]), int(rr["pontos"]), derrubado, dq)
+	return {"tipo": "impacto", "passada": fases.passada, "jogador": rj, "rival": rr,
+		"faltas_jogador": faltas_jogador, "faltas_rival": faltas_rival,
+		"derrubado": derrubado, "desclassificado": dq, "t": t}
+
+## Lado afetado: o jogador, o rival, os dois ou nenhum.
+static func _lado_de(jogador_afetado: bool, rival_afetado: bool) -> JustaFases.Lado:
+	if jogador_afetado and rival_afetado:
+		return JustaFases.Lado.AMBOS
+	if jogador_afetado:
+		return JustaFases.Lado.JOGADOR
+	if rival_afetado:
+		return JustaFases.Lado.RIVAL
+	return JustaFases.Lado.NENHUM
+
+func _golpeador(lado: Dictionary, zona: String, g: Galope, ativa_na_passada: bool) -> Dictionary:
+	var nome := _habilidade_de(lado)
+	var em_efeito := false
+	if nome != "" and _cfg["impacto"]["habilidades"].has(nome):
+		em_efeito = _cfg["impacto"]["habilidades"][nome]["tipo"] == "passiva" or ativa_na_passada
+	return {"cavaleiro": lado["cavaleiro"], "equipamento": lado.get("equipamento", {}),
+		"habilidade": {"nome": nome, "ativa": em_efeito}, "zona": zona,
+		"velocidade": g.velocidade, "velocidade_nominal": g.velocidade_nominal,
+		"ritmo_milesimos": g.ritmo_milesimos()}
+
+## Tira o dano da durabilidade das peças (nunca abaixo de 0).
+static func _gastar(lado: Dictionary, dano: Dictionary) -> void:
+	var equip: Variant = lado.get("equipamento")
+	if not equip is Dictionary:
+		return
+	var nomes: Array = dano.keys()
+	nomes.sort()
+	for peca: String in nomes:
+		if equip.has(peca):
+			var p: Dictionary = equip[peca]
+			p["durabilidade"] = maxi(int(p.get("durabilidade", 0)) - int(dano[peca]), 0)
 
 func _evento_largada() -> Dictionary:
 	return {"tipo": "largada", "passada": fases.passada, "qualidade": qualidade_largada,

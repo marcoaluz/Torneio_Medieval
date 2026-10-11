@@ -38,3 +38,8 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Golpe avaliado no choque (fim da Mira)**, não no instante em que solta; segurar até o fim golpeia sozinho; nunca tocar = erro.
 - **2026-10-11 · Atributos padrão em `padrao.json`** e lados como `{cavaleiro, cavalo}`; `Justa` recebe um pacote de configurações `{justa, galope, mira}`.
 - **2026-10-11 · `basis_xform_inv` não serve para nós com escala** (usa a transposta); para converter do mundo para o quadro do rival, use `affine_inverse().basis_xform()`.
+- **2026-10-11 · Impacto: chances em milésimos com teto suave** (`Impacto.suave`: passa inteiro até 70% do teto e depois se aproxima do teto sem passar), atendendo a "perto do teto, cada ponto rende menos". Tetos: bloqueio 40%, derrubada 45%.
+- **2026-10-11 · Ordem fixa dos sorteios do impacto** (golpe do jogador e depois o do rival; bloqueio da habilidade, bloqueio do escudo e derrubada) e sorteio sempre que a zona permite, mesmo com chance 0. Motivo: paridade exata com o TypeScript.
+- **2026-10-11 · Golpe bloqueado vira golpe no escudo** (1 ponto, dano no escudo, chance de derrubar do escudo). Os dois caindo = segue pelos pontos; os dois desclassificados = empate; desclassificação vale mais que derrubada. Pendente de confirmação.
+- **2026-10-11 · Desgaste dentro da justa:** o dano gasta a durabilidade das cópias do equipamento na `Justa`, e peça zerada perde o bônus já nas passadas seguintes; `equipamento_final()` entrega o estado para salvar (2.9).
+- **2026-10-11 · Habilidades:** "ativa" (Investida, Golpe Pesado) por botão na Corrida, uma vez por justa; "passiva" (Bloqueio) vale em todas as passadas, com chance própria de 70%. O ciclo anula a habilidade vencida, sem combinação perfeita.
