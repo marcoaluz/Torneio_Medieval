@@ -50,6 +50,8 @@ loja: vip_ate, passe {temporada, premium, xp, gratis [n],              (v9, 3.18
       premium_resgatados [n]}, compras [{produto, quando, teste}],
       cosmeticos [id], frase, vitoria, compras_dia {dia, material: n},
       ofertas [{id, ate, vista}], ultima_oferta {gatilho: quando}
+anuncios: dia, usados, timers [id já cortado], ultima_vitoria          (v10, 3.19)
+          {ouro, quando, usada}
 ```
 
 - `lado_para_justa()` monta o lado da regra (`{cavaleiro, cavalo, equipamento, habilidade}`) a partir das peças equipadas: o `status` do modelo mais a durabilidade atual (peça com 0 perde os bônus na regra).

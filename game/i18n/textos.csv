@@ -742,3 +742,16 @@ ERRO_LIMITE_DIARIO,Limite de hoje atingido.,Today's limit reached.
 ERRO_COSMETICO_BLOQUEADO,Compre primeiro.,Buy it first.
 ERRO_NIVEL_DO_PASSE_BLOQUEADO,Ainda não chegou nesse nível.,You have not reached that level yet.
 ERRO_PASSE_SEM_PREMIUM,Só com a trilha premium.,Premium track only.
+ANUNCIO_CORTAR,−30 min,−30 min
+ANUNCIO_BAU,Baú de madeira grátis,Free wooden chest
+ANUNCIO_DOBRAR,Dobrar o ouro,Double the gold
+ANUNCIO_VIP,VIP:,VIP:
+ANUNCIO_DOBROU,+{ouro} ouro!,+{ouro} gold!
+ERRO_LIMITE_ANUNCIOS,Acabaram os anúncios de hoje.,No more ads today.
+ERRO_TIMER_JA_CORTADO,Esse timer já foi encurtado.,That timer was already shortened.
+ERRO_SEM_VITORIA_PARA_DOBRAR,Nada para dobrar agora.,Nothing to double right now.
+ERRO_ESPACOS_CHEIOS,Os espaços de baú estão cheios.,Chest slots are full.
+ERRO_ANUNCIO_INEXISTENTE,Benefício desconhecido.,Unknown reward.
+ERRO_ANUNCIO_INDISPONIVEL,Anúncios indisponíveis agora.,Ads unavailable right now.
+ERRO_ANUNCIO_NAO_ASSISTIDO,O anúncio não foi até o fim.,The ad did not finish.
+ERRO_ANUNCIO_SEM_COMPROVANTE,Sem confirmação do anúncio.,No ad confirmation.

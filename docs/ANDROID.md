@@ -64,3 +64,8 @@ O Godot não tem notificação local nativa no Android. O serviço `Notificacoes
 ## Release (mais tarde, Parte 3)
 
 Release precisa de um keystore próprio (`keytool -genkeypair -v -keystore torneio.keystore -alias torneio -keyalg RSA -keysize 2048 -validity 10000`), guardado fora do repositório. As senhas vão em variáveis de ambiente (`GODOT_ANDROID_KEYSTORE_RELEASE_PATH`, `..._USER`, `..._PASSWORD`), nunca no `export_presets.cfg`. A Play Store pede AAB (`gradle_build/use_gradle_build=true` e `export_format=1`), o que exige instalar o template de build do Android no projeto.
+
+## Anúncios premiados (3.19)
+
+O autoload `Anuncios` (`game/scripts/services/servico_anuncios.gd`) procura um plugin de anúncios com singleton `AdMob` ou `GodotAdMob`, que tenha `show_rewarded(tipo)` e o sinal `rewarded(token)`. Ajuste os nomes conforme o plugin escolhido (por exemplo, o Godot AdMob plugin da Poing Studios), no preset Android com o build Gradle. Sem plugin, ele usa um provedor de **teste**, que só funciona em build de depuração. A recompensa só sai depois do "servidor" confirmar: hoje é `Jogador.recompensa_anuncio`; na Parte 3, uma Edge Function confere o token com o callback de verificação do AdMob (SSV). Consentimento de anúncios por região (GDPR/UMP) é da 3.9.
+

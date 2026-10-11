@@ -22,6 +22,7 @@ Nuvem="*res://game/scripts/services/servico_nuvem.gd"
 Notificacoes="*res://game/scripts/services/servico_notificacoes.gd"
 Metricas="*res://game/scripts/services/servico_metricas.gd"
 Acessibilidade="*res://game/scripts/presentation/acessibilidade.gd"
+Anuncios="*res://game/scripts/services/servico_anuncios.gd"
 Fluxo="*res://game/scripts/presentation/fluxo.gd"
 Depuracao="*res://game/scenes/common/depuracao.tscn"
 

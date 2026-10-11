@@ -54,6 +54,17 @@ func _process(delta: float) -> void:
 
 func montar() -> void:
 	_info.text = tr("BAUS_INFO").format({"chaves": _jog.chaves(), "fragmentos": _jog.fragmentos()})
+	# Baú de madeira extra por anúncio (opcional; VIP ganha sem assistir).
+	var extra := get_node_or_null("Coluna/AnuncioBau") as Button
+	if extra == null:
+		extra = Button.new()
+		extra.name = "AnuncioBau"
+		extra.focus_mode = Control.FOCUS_NONE
+		extra.pressed.connect(func(): _anuncio("bau_madeira_extra", ""))
+		$Coluna.add_child(extra)
+		$Coluna.move_child(extra, 2)
+	extra.text = TelaBaus.texto_anuncio(_jog, "ANUNCIO_BAU")
+	extra.visible = _jog.pode_recompensa_anuncio("bau_madeira_extra")["ok"] and not _chances.visible
 	_ver_chances.text = tr("BAUS_VOLTAR") if _chances.visible else tr("BAUS_PROBABILIDADES")
 	if _chances.visible:
 		_chances.text = texto_probabilidades()
@@ -89,6 +100,12 @@ func montar() -> void:
 			agora_b.text = tr("LOJA_TERMINAR_AGORA").format({"n": _jog.custo_pular(ServicoTempo.restante(int(bau["abre_em"])))})
 			agora_b.pressed.connect(func(): _resposta(_jog.pular_com_gemas(id)))
 			caixa.add_child(agora_b)
+			if _jog.pode_recompensa_anuncio("cortar_timer", id)["ok"]:
+				var ad := Button.new()
+				ad.focus_mode = Control.FOCUS_NONE
+				ad.text = TelaBaus.texto_anuncio(_jog, "ANUNCIO_CORTAR")
+				ad.pressed.connect(func(): _anuncio("cortar_timer", id))
+				caixa.add_child(ad)
 		else:
 			var seg := _jog.duracao_timer(int(_jog.cfg_baus()["tipos"][bau["tipo"]]["segundos"]))
 			b.text = "%s\n\n%s" % [nome, tr("BAUS_TOQUE_ABRIR").format({"tempo": Vila.formatar_tempo(seg)})
@@ -179,6 +196,19 @@ static func cor_raridade(raridade: String) -> Color:
 
 func _cor_bau(tipo: String) -> Color:
 	return Color(Balanceamento.carregar("itens").get("cores_bau", {}).get(tipo, "8a5a2b"))
+
+## Pede um benefício de anúncio (o autoload mostra; VIP não assiste).
+func _anuncio(tipo: String, alvo: String) -> void:
+	var an := get_node_or_null("/root/Anuncios") as ServicoAnuncios
+	if an == null:
+		return
+	var r: Dictionary = await an.assistir(tipo, alvo)
+	_resposta(r)
+
+## Texto de um botão de anúncio: "▶ ..." (ou "VIP: ...") com quantos restam hoje.
+static func texto_anuncio(jog: ServicoJogador, chave: String) -> String:
+	var prefixo: String = TranslationServer.translate("ANUNCIO_VIP") if jog.anuncio_sem_assistir() else "▶"
+	return "%s %s (%d)" % [prefixo, TranslationServer.translate(chave), jog.anuncios_restantes()]
 
 func _resposta(r: Dictionary) -> void:
 	_mensagem.text = "" if r["ok"] else tr("ERRO_" + str(r["erro"]).to_upper())

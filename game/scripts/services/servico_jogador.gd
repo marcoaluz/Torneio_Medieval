@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 9
+const VERSAO := 10
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -1153,6 +1153,8 @@ func concluir_pvp(eventos: Array) -> Dictionary:
 		disparar_oferta("derrota_por_pouco")
 	if int(pos["liga"]) > int(pos_antes["liga"]):
 		disparar_oferta("subiu_liga")
+	if venceu and ouro_g > 0:
+		_guardar_vitoria(ouro_g)
 	var niveis := _ganhar(ouro_g, xp_g)
 	var r := _concluir("liga")
 	r.merge({"venceu": venceu, "estrelas": 1 if venceu else 0, "pontos_antes": antes, "pontos": int(lg["pontos"]), "ouro": ouro_g, "xp": xp_g,
@@ -1563,6 +1565,92 @@ func _derrota_por_pouco(eventos: Array) -> bool:
 			return e["vencedor"] == JustaFases.Lado.RIVAL and e.get("motivo", "") == "pontos" \
 				and int(e["placar_rival"]) - int(e["placar_jogador"]) <= int(cfg_loja()["derrota_por_pouco_pontos"])
 	return false
+
+# ----------------------------------------------------------------- anúncios
+# Anúncios premiados (3.19; o autoload Anuncios mostra; aqui a recompensa).
+# Limite diário em economia.json > anuncios. Na Parte 3 isto vira a Edge
+# Function que confere o token do provedor antes de entregar.
+
+func cfg_anuncios() -> Dictionary:
+	return Balanceamento.ler("economia")["anuncios"]
+
+## VIP: benefício sem assistir (economia.json > vip > beneficio_anuncios).
+func anuncio_sem_assistir() -> bool:
+	return vip_ativo() and bool(Balanceamento.ler("economia")["vip"]["beneficio_anuncios"])
+
+func anuncios_restantes() -> int:
+	var a: Dictionary = estado["anuncios"]
+	var usados := int(a["usados"]) if int(a["dia"]) == dia_atual() else 0
+	return maxi(0, int(cfg_anuncios()["limite_dia"]) - usados)
+
+func _guardar_vitoria(ouro_g: int) -> void:
+	estado["anuncios"]["ultima_vitoria"] = {"ouro": ouro_g, "quando": ServicoTempo.agora(), "usada": false}
+
+## Dá para pedir este benefício agora? tipo: cortar_timer (alvo = id do timer
+## ou do baú abrindo; uma vez por timer), dobrar_vitoria (a última vitória,
+## em até 10 min), bau_madeira_extra.
+func pode_recompensa_anuncio(tipo: String, alvo := "") -> Dictionary:
+	if anuncios_restantes() <= 0:
+		return _erro("limite_anuncios")
+	match tipo:
+		"cortar_timer":
+			if (estado["anuncios"]["timers"] as Array).has(alvo):
+				return _erro("timer_ja_cortado")
+			var achou := false
+			for t: Dictionary in estado["timers"]:
+				achou = achou or (t["id"] == alvo and not ServicoTempo.pronto(int(t["termina_em"])))
+			var b := _bau(alvo)
+			achou = achou or (not b.is_empty() and int(b["abre_em"]) > ServicoTempo.agora())
+			if not achou:
+				return _erro("timer_inexistente")
+		"dobrar_vitoria":
+			var v: Dictionary = estado["anuncios"]["ultima_vitoria"]
+			if v.is_empty() or v.get("usada", false) or ServicoTempo.agora() - int(v["quando"]) > 600:
+				return _erro("sem_vitoria_para_dobrar")
+		"bau_madeira_extra":
+			if baus().size() >= int(cfg_baus()["espacos"]):
+				return _erro("espacos_cheios")
+		_:
+			return _erro("anuncio_inexistente")
+	return {"ok": true, "erro": ""}
+
+## Entrega o benefício (depois do anúncio assistido, ou direto para o VIP).
+## `token` é o comprovante do provedor (o servidor vai conferir). {ok, recompensa}.
+func recompensa_anuncio(tipo: String, alvo: String, token: String) -> Dictionary:
+	var p := pode_recompensa_anuncio(tipo, alvo)
+	if not p["ok"]:
+		return p
+	if token == "":
+		return _erro("anuncio_sem_comprovante")
+	var a: Dictionary = estado["anuncios"]
+	if int(a["dia"]) != dia_atual():
+		a["dia"] = dia_atual()
+		a["usados"] = 0
+	a["usados"] = int(a["usados"]) + 1
+	var cfg := cfg_anuncios()
+	var rec := {}
+	match tipo:
+		"cortar_timer":
+			var corte := int(cfg["cortar_minutos"]) * 60
+			(a["timers"] as Array).append(alvo)
+			for t: Dictionary in estado["timers"]:
+				if t["id"] == alvo:
+					t["termina_em"] = maxi(ServicoTempo.agora(), int(t["termina_em"]) - corte)
+			var b := _bau(alvo)
+			if not b.is_empty():
+				b["abre_em"] = maxi(ServicoTempo.agora(), int(b["abre_em"]) - corte)
+			rec = {"minutos": int(cfg["cortar_minutos"])}
+		"dobrar_vitoria":
+			var v: Dictionary = a["ultima_vitoria"]
+			var extra := int(v["ouro"]) * (int(cfg["dobrar_vitoria"]) - 1)
+			v["usada"] = true
+			_ganhar(extra, 0)
+			rec = {"ouro": extra}
+		"bau_madeira_extra":
+			rec = {"bau_ganho": _guardar_bau("madeira")}
+	var r := _concluir("anuncios")
+	r["recompensa"] = rec
+	return r
 
 # ------------------------------------------------------------- configurações
 # Preferências do jogador (3.23): notificações por tipo (game/data/
@@ -2026,6 +2114,8 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 		renome_g += int(ganho["regiao_vencida"])
 	renome_g = renome_g * (100 + bonus_companheiros("renome_pct")) / 100
 	metas["renome"] = int(metas["renome"]) + renome_g
+	if est > 0 and ouro_g > 0:
+		_guardar_vitoria(ouro_g)
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
 	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0,
@@ -2132,6 +2222,7 @@ func novo_estado() -> Dictionary:
 	e["config"] = {"notificacoes": {}}
 	e["liga"] = _liga_nova(int(e["criado_em"]))
 	e["loja"] = _loja_nova()
+	e["anuncios"] = {"dia": -1, "usados": 0, "timers": [], "ultima_vitoria": {}}
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.ler("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -2227,6 +2318,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("loja"):
 			d["loja"] = _loja_nova()
 		v = 9
+	if v < 10:
+		# 3.19: anúncios premiados (limite diário, timers já cortados, última vitória).
+		if not d.has("anuncios"):
+			d["anuncios"] = {"dia": -1, "usados": 0, "timers": [], "ultima_vitoria": {}}
+		v = 10
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

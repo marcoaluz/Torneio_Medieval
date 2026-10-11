@@ -199,7 +199,27 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 			linhas.append(tr("PVE_REGIAO_LIBERADA").format({"regiao": tr("REGIAO_" + str(r["regiao_nova"]).to_upper())}))
 		resultado_motivo.text = "\n".join(linhas)
 		resultado_dica.text = tr("PVE_TOQUE_PARA_VOLTAR")
+	_botao_dobrar(r if not r.is_empty() else {})
 	resultado.visible = true
+
+## Dobrar o ouro da vitória com um anúncio (3.19; opcional, nunca forçado).
+func _botao_dobrar(r: Dictionary) -> void:
+	var b := get_node_or_null("Resultado/Coluna/Dobrar") as Button
+	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	if b == null:
+		b = Button.new()
+		b.name = "Dobrar"
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(func():
+			var an := get_node_or_null("/root/Anuncios") as ServicoAnuncios
+			if an:
+				var res: Dictionary = await an.assistir("dobrar_vitoria")
+				b.visible = false
+				resultado_dica.text = tr("ANUNCIO_DOBROU").format({"ouro": res["recompensa"]["ouro"]}) if res["ok"] else tr("ERRO_" + str(res["erro"]).to_upper()))
+		$Resultado/Coluna.add_child(b)
+	b.visible = jog != null and r.get("venceu", false) and int(r.get("ouro", 0)) > 0 and jog.pode_recompensa_anuncio("dobrar_vitoria")["ok"]
+	if b.visible:
+		b.text = TelaBaus.texto_anuncio(jog, "ANUNCIO_DOBRAR")
 
 func mostrar_letreiro(texto: String) -> void:
 	letreiro.text = texto

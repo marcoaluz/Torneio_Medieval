@@ -108,3 +108,4 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Cuidado com números do JSON**: o Godot lê tudo como float; `[6.0].has(6)` é falso. Comparar com `int(x) == n`.
 - **2026-10-11 · Compras com dinheiro só pelo provedor de teste em build de depuração** até a validação de recibo no servidor (3.7): em build de lançamento a loja recusa, para nunca entregar nada sem pagamento. Compras com gemas valem localmente (as gemas vêm das compras/VIP). Prédio Loja entrou na vila (GDD: nível 4). Save v9: `loja`.
 - **2026-10-11 · Passe preso à temporada da liga** (zera quando a temporada muda); XP a cada justa registrada (inclusive treino e automático).
+- **2026-10-11 · Anúncios: camada própria com provedor trocável** (plugin AdMob quando houver; teste em depuração; falso nos testes). A recompensa exige o anúncio assistido até o fim e um comprovante, e passa pelo serviço (depois, Edge Function com SSV). VIP pula o anúncio. Save v10: `anuncios`.

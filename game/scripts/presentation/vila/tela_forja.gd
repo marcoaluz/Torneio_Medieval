@@ -14,6 +14,7 @@ var aba := "criar"
 var _jog: ServicoJogador
 var _martelo: Tween
 var _agora: Button
+var _anuncio_b: Button
 var _agora_id := ""
 var _acumulado := 0.0
 
@@ -43,6 +44,15 @@ func _ready() -> void:
 	_agora.visible = false
 	_agora.pressed.connect(func(): _mostrar(_jog.pular_com_gemas(_agora_id)))
 	$Coluna/Oficina.add_child(_agora)
+	# Cortar 30 min com anúncio (3.19; opcional).
+	_anuncio_b = Button.new()
+	_anuncio_b.focus_mode = Control.FOCUS_NONE
+	_anuncio_b.visible = false
+	_anuncio_b.pressed.connect(func():
+		var an := get_node_or_null("/root/Anuncios") as ServicoAnuncios
+		if an:
+			_mostrar(await an.assistir("cortar_timer", _agora_id)))
+	$Coluna/Oficina.add_child(_anuncio_b)
 	_melhorar_predio.pressed.connect(func(): _mostrar(_jog.melhorar_predio(predio)))
 	_jog.mudou.connect(func(_s): if visible: montar())
 
@@ -201,6 +211,7 @@ func _montar_oficina() -> void:
 	_pegar.visible = false
 	if ts.is_empty():
 		_agora.visible = false
+		_anuncio_b.visible = false
 		_status.text = tr("FORJA_LIVRE" if tipo == "forja" else "FORJA_FORNO_LIVRE")
 		_parar_martelo()
 		return
@@ -218,6 +229,8 @@ func _montar_oficina() -> void:
 	_agora.visible = not pronto
 	_agora.text = tr("LOJA_TERMINAR_AGORA").format({"n": _jog.custo_pular(ServicoTempo.restante(int(t["termina_em"])))})
 	_agora_id = t["id"]
+	_anuncio_b.visible = not pronto and _jog.pode_recompensa_anuncio("cortar_timer", t["id"])["ok"]
+	_anuncio_b.text = TelaBaus.texto_anuncio(_jog, "ANUNCIO_CORTAR")
 	if pronto:
 		_parar_martelo()
 	else:
