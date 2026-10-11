@@ -55,7 +55,7 @@ Abra a pasta do projeto no editor do Godot e use F5/F6. Inútil para agente: abr
 - **Erro de script em teste headless trava o Godot** (imprime `SCRIPT ERROR` e não chama `quit`). Rode com `timeout 60 bash $D script ...` e não filtre a saída com `grep` sem timeout, senão parece que não saiu nada.
 - Em script `extends SceneTree`, o `_ready` de uma cena adicionada em `_initialize()` só roda depois de `await process_frame`.
 - O mesmo vale para os autoloads (`Jogador`): o `_ready` deles roda depois do `_initialize`. Dê `await process_frame` antes de trocar `Jogador.caminho_save`/`estado`, senão o `_ready` recria o estado por cima. Teste que salva usa uma pasta própria em `user://teste_*/` (nunca o save real).
-- O heredoc do Bash às vezes estraga barras invertidas e aspas (`\p` virou `\p`; comandos com `'''` falharam no parse). Para arquivos com regex, CSV com aspas ou muito texto, use a ferramenta Write e só rode pelo shell.
+- O heredoc do Bash às vezes estraga barras invertidas e aspas (uma barra dupla antes de `p` num regex virou barra simples; comandos com três aspas simples seguidas falharam no parse). Para arquivos com regex, CSV com aspas ou muito texto, use a ferramenta Write e só rode pelo shell.
 
 ## Troubleshooting
 
