@@ -104,7 +104,8 @@ func item(id: String) -> Dictionary:
 func equipado(espaco: String) -> Dictionary:
 	return item(estado["equipamento"].get(espaco, ""))
 
-## Variante de arte de cada espaço, já com o guarda-roupa (visual) aplicado.
+## Variante de arte de cada espaço, já com o guarda-roupa (visual) aplicado
+## e com o estágio de dano da peça equipada (sufixo _d1, _d2, _d3).
 func visual_das_pecas() -> Dictionary:
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
 	var saida := {}
@@ -112,8 +113,25 @@ func visual_das_pecas() -> Dictionary:
 		var id: String = estado["visual"].get(espaco, estado["equipamento"][espaco])
 		var it := item(id)
 		if not it.is_empty():
-			saida[espaco] = modelos[it["modelo"]]["visual"]
+			var e := estagio_dano(estado["equipamento"][espaco])
+			saida[espaco] = str(modelos[it["modelo"]]["visual"]) + ("_d%d" % e if e > 0 else "")
 	return saida
+
+## Estágio de dano da peça (0 inteira, 1 riscada, 2 amassada, 3 rachada),
+## pela porcentagem de durabilidade (limites em desgaste.json).
+func estagio_dano(id: String) -> int:
+	var it := item(id)
+	if it.is_empty():
+		return 0
+	var maximo := int(Balanceamento.carregar("itens")["modelos"][it["modelo"]]["durabilidade_max"])
+	if maximo <= 0:
+		return 0
+	var pct := int(it["durabilidade"]) * 100 / maximo
+	var e := 0
+	for limite in Balanceamento.carregar("desgaste")["estagios_pct"]:
+		if pct < int(limite):
+			e += 1
+	return e
 
 ## Lado do jogador para a regra da justa: {cavaleiro, cavalo, equipamento,
 ## habilidade}. Peça quebrada (durabilidade 0) vai com durabilidade 0 e a
@@ -284,6 +302,11 @@ func concluir_timer(id: String) -> Dictionary:
 			"treino_cavaleiro":
 				var a: Dictionary = estado["cavaleiro"]["atributos"]
 				a[t["atributo"]] = mini(int(a[t["atributo"]]) + int(tr_cfg["ganho_pontos"]), int(tr_cfg["teto_atributo"]))
+			"conserto":
+				var maximo := int(Balanceamento.carregar("itens")["modelos"][item(t["item"])["modelo"]]["durabilidade_max"])
+				for it: Dictionary in estado["inventario"]["itens"]:
+					if it["id"] == t["item"]:
+						it["durabilidade"] = maximo
 			"treino_cavalo":
 				for c: Dictionary in estado["cavalos"]:
 					if c["id"] == t["cavalo"]:
@@ -381,14 +404,82 @@ func adicionar_cavalo(pelagem: String, atributos: Dictionary) -> Dictionary:
 	r["id"] = id
 	return r
 
-## Depois de uma justa: gasta o fôlego do cavalo que correu (recompensas: 2.10).
-func registrar_justa(_resultado: Dictionary) -> Dictionary:
+## Depois de uma justa: gasta o fôlego do cavalo que correu e passa o
+## desgaste das peças (durabilidade final calculada pela regra, em
+## resultado.equipamento_final) para o inventário. Recompensas: 2.10.
+func registrar_justa(resultado: Dictionary) -> Dictionary:
+	var fim: Dictionary = resultado.get("equipamento_final", {})
+	for espaco: String in fim:
+		var id: String = estado["equipamento"].get(espaco, "")
+		for it: Dictionary in estado["inventario"]["itens"]:
+			if it["id"] == id and fim[espaco].has("durabilidade"):
+				it["durabilidade"] = clampi(int(fim[espaco]["durabilidade"]), 0, int(it["durabilidade"]))
 	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
 	for c: Dictionary in estado["cavalos"]:
 		if c["id"] == estado["cavalo_ativo"]:
 			c["folego"] = maxi(folego_cavalo(c["id"]) - int(f["gasto_por_justa"]), 0)
 			c["folego_em"] = ServicoTempo.agora()
 	return _concluir("cavalos")
+
+# ------------------------------------------------------------------ conserto
+
+func item_em_conserto(id: String) -> Dictionary:
+	for t: Dictionary in estado["timers"]:
+		if t["tipo"] == "conserto" and t.get("item", "") == id:
+			return t.duplicate()
+	return {}
+
+## Custo do conserto: ouro e material proporcionais ao dano (quebrada custa
+## mais) e tempo pelo nível do cavaleiro. {ouro, material, quantidade, segundos, dano}.
+func custo_conserto(id: String) -> Dictionary:
+	var it := item(id)
+	var c: Dictionary = Balanceamento.carregar("desgaste")["conserto"]
+	if it.is_empty():
+		return {}
+	var maximo := int(Balanceamento.carregar("itens")["modelos"][it["modelo"]]["durabilidade_max"])
+	var dano := maxi(maximo - int(it["durabilidade"]), 0)
+	var ouro_c := dano * int(c["ouro_por_ponto_milesimos"]) / 1000
+	var qtd := (dano + int(c["pontos_por_material"]) - 1) / int(c["pontos_por_material"])
+	if int(it["durabilidade"]) == 0 and maximo > 0:
+		ouro_c = ouro_c * int(c["quebrada_custo_pct"]) / 100
+		qtd = qtd * int(c["quebrada_custo_pct"]) / 100
+	return {"ouro": ouro_c, "material": c["material"], "quantidade": qtd, "segundos": _da_curva(c["segundos_por_nivel"]), "dano": dano}
+
+func pode_consertar(id: String) -> Dictionary:
+	var custo := custo_conserto(id)
+	if custo.is_empty():
+		return _erro("item_inexistente")
+	if int(custo["dano"]) == 0:
+		return _erro("item_inteiro")
+	if not predio_liberado("armeiro"):
+		return _erro("predio_bloqueado")
+	if not item_em_conserto(id).is_empty():
+		return _erro("ja_em_conserto")
+	var v: Dictionary = Balanceamento.carregar("desgaste")["conserto"]["vagas"]
+	var vagas := int(v["base"]) + (1 if predio_nivel("armeiro") >= int(v["extra_no_nivel_do_predio"]) else 0)
+	if timers_do_predio("armeiro").filter(func(t): return t["tipo"] == "conserto").size() >= vagas:
+		return _erro("sem_vaga")
+	if ouro() < int(custo["ouro"]):
+		return _erro("ouro_insuficiente")
+	if int(estado["inventario"]["materiais"].get(custo["material"], 0)) < int(custo["quantidade"]):
+		return _erro("material_insuficiente")
+	var r := custo.duplicate()
+	r["ok"] = true
+	r["erro"] = ""
+	return r
+
+## Manda a peça para o armeiro: cobra e cria o timer (horário de término).
+func consertar(id: String) -> Dictionary:
+	var p := pode_consertar(id)
+	if not p["ok"]:
+		return p
+	estado["inventario"]["ouro"] = ouro() - int(p["ouro"])
+	var mats: Dictionary = estado["inventario"]["materiais"]
+	mats[p["material"]] = int(mats.get(p["material"], 0)) - int(p["quantidade"])
+	var agora := ServicoTempo.agora()
+	estado["timers"].append({"id": _novo_id(estado, "t"), "tipo": "conserto", "alvo": "armeiro", "item": id,
+		"inicio_em": agora, "termina_em": agora + duracao_timer(int(p["segundos"]))})
+	return _concluir("inventario")
 
 ## Duração real de um timer. No primeiro dia (tutorial, 2.11) os timers
 ## terminam em segundos; aqui é o ponto único onde isso entra.

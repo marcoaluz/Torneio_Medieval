@@ -1,0 +1,13 @@
+{
+	"versao": 1,
+	"_nota": "Desgaste e conserto (GDD: toda peca se desgasta com os impactos; com durabilidade zero perde os bonus ate ser consertada; conserto custa ouro e um pouco de material, proporcional ao dano, e peca quebrada custa mais). estagios: % de durabilidade abaixo da qual a peca muda de aparencia (d1 riscada, d2 amassada, d3 rachada). Tempo de conserto pelo nivel do cavaleiro (GDD Timers: niveis 1-5 de 1 a 3 min, 6-10 de 5 a 15, 11-20 de 15 a 30, 21+ de 30 a 60).",
+	"estagios_pct": [75, 50, 25],
+	"conserto": {
+		"ouro_por_ponto_milesimos": 500,
+		"material": "sucata",
+		"pontos_por_material": 20,
+		"quebrada_custo_pct": 150,
+		"segundos_por_nivel": [[1, 60], [3, 120], [5, 180], [6, 300], [8, 600], [10, 900], [11, 900], [15, 1200], [20, 1800], [21, 1800], [30, 3600]],
+		"vagas": { "base": 1, "extra_no_nivel_do_predio": 3 }
+	}
+}

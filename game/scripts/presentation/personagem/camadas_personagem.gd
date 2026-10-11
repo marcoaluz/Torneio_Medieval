@@ -111,6 +111,8 @@ func tocar(nome: String, forcar := false) -> void:
 	for s in _camadas:
 		var def: Dictionary = s.get_meta("def")
 		var base := _caminho(def)
+		if not ResourceLoader.exists(base + ".png"):
+			base = _sem_dano(base)  # sem arte do estágio de dano, usa a peça inteira
 		var tex := load(base + ".png") as Texture2D if ResourceLoader.exists(base + ".png") else null
 		s.texture = tex
 		s.visible = tex != null
@@ -172,6 +174,11 @@ func _alinhar(s: Sprite2D, encaixe: Node2D, def: Dictionary) -> void:
 	var origem: Array = def.get("origem", _tam["origem"])
 	s.position = -desloc
 	s.offset = -Vector2(float(origem[0]), float(origem[1]))
+
+## "peitoral_ferro_d2_galope" -> "peitoral_ferro_galope".
+static func _sem_dano(base: String) -> String:
+	var r := RegEx.create_from_string(r"_d[1-3](_[a-z]+)$")
+	return r.sub(base, "$1")
 
 func _caminho(def: Dictionary) -> String:
 	var arquivo: String = def["arquivo"]

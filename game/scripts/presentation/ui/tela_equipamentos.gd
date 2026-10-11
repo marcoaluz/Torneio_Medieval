@@ -32,6 +32,7 @@ var _botoes_espaco := {}
 @onready var _equipar: Button = $Pecas/Coluna/Botoes/Equipar
 @onready var _aparencia: Button = $Pecas/Coluna/Botoes/Aparencia
 @onready var _restaurar: Button = $Pecas/Coluna/Botoes/Restaurar
+@onready var _consertar: Button = $Pecas/Coluna/Botoes/Consertar
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
@@ -49,6 +50,7 @@ func _ready() -> void:
 	_equipar.pressed.connect(func(): _aplicar(_jog.equipar(selecionado)))
 	_aparencia.pressed.connect(func(): _aplicar(_jog.definir_visual(espaco, selecionado)))
 	_restaurar.pressed.connect(func(): _aplicar(_jog.definir_visual(espaco, "")))
+	_consertar.pressed.connect(_ao_consertar)
 	_retrato.tocar("respirar")
 	_jog.mudou.connect(func(_s): if visible: montar())
 	mudar_aba("cavaleiro")
@@ -136,6 +138,7 @@ func _atualizar_detalhes() -> void:
 	_equipar.disabled = selecionado == "" or _jog.estado["equipamento"].get(espaco, "") == selecionado
 	_aparencia.disabled = selecionado == ""
 	_restaurar.disabled = not _jog.estado["visual"].has(espaco)
+	_atualizar_conserto()
 	if selecionado == "":
 		_detalhes.text = tr("EQUIP_TOQUE_UMA_PECA")
 		return
@@ -146,9 +149,42 @@ func _atualizar_detalhes() -> void:
 		partes.append(tr("STATUS_" + k.to_upper()).format({"v": int(m["status"][k])}))
 	if int(m["durabilidade_max"]) > 0:
 		partes.append(tr("EQUIP_DURABILIDADE").format({"atual": int(it["durabilidade"]), "max": int(m["durabilidade_max"])}))
+		var e := _jog.estagio_dano(selecionado)
+		if int(it["durabilidade"]) == 0:
+			partes.append(tr("DANO_QUEBRADA"))
+		elif e > 0:
+			partes.append(tr("DANO_%d" % e))
 	partes.append(tr("EQUIP_CONJUNTO").format({"conjunto": tr("CONJUNTO_" + str(m["conjunto"]).to_upper()),
 		"n": _pecas_do_conjunto_equipadas(str(m["conjunto"]))}))
 	_detalhes.text = "\n".join(partes)
+
+## Botão de conserto: custo e tempo; em conserto, o tempo; pronto, concluir.
+func _atualizar_conserto() -> void:
+	_consertar.visible = selecionado != ""
+	if selecionado == "":
+		return
+	var t := _jog.item_em_conserto(selecionado)
+	if not t.is_empty():
+		var pronto := ServicoTempo.pronto(int(t["termina_em"]))
+		_consertar.disabled = not pronto
+		_consertar.text = tr("CONSERTO_CONCLUIR") if pronto else tr("CONSERTO_EM_ANDAMENTO").format(
+			{"tempo": Vila.formatar_tempo(ServicoTempo.restante(int(t["termina_em"])))})
+		return
+	var p := _jog.pode_consertar(selecionado)
+	_consertar.disabled = not p["ok"]
+	if p.has("ouro"):
+		_consertar.text = tr("CONSERTO_CONSERTAR").format({"ouro": p["ouro"], "qtd": p["quantidade"],
+			"material": tr("MATERIAL_" + str(p["material"]).to_upper()), "tempo": Vila.formatar_tempo(_jog.duracao_timer(int(p["segundos"])))})
+	else:
+		_consertar.text = tr("ERRO_" + str(p["erro"]).to_upper())
+
+func _ao_consertar() -> void:
+	var t := _jog.item_em_conserto(selecionado)
+	var id := selecionado
+	var r := _jog.concluir_timer(t["id"]) if not t.is_empty() else _jog.consertar(selecionado)
+	_aplicar(r)
+	if r["ok"]:
+		selecionar(id)
 
 func _pecas_do_conjunto_equipadas(conjunto: String) -> int:
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]

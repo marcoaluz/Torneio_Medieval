@@ -146,3 +146,7 @@ focus_mode = 0
 [node name="Restaurar" type="Button" parent="Pecas/Coluna/Botoes"]
 layout_mode = 2
 focus_mode = 0
+
+[node name="Consertar" type="Button" parent="Pecas/Coluna/Botoes"]
+layout_mode = 2
+focus_mode = 0

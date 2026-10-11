@@ -215,3 +215,18 @@ ITEM_ELMO_VIGIA,Bacinete da vigia,Sentinel's bascinet
 ITEM_PEITORAL_VIGIA,Brigantina da vigia,Sentinel's brigandine
 ITEM_ESCUDO_VIGIA,Escudo da vigia,Sentinel's shield
 ITEM_LANCA_VIGIA,Lança pintada da vigia,Sentinel's painted lance
+DANO_1,Riscada,Scratched
+DANO_2,Amassada,Dented
+DANO_3,Rachada,Cracked
+DANO_QUEBRADA,Quebrada: sem bônus até consertar,Broken: no bonuses until repaired
+CONSERTO_CONSERTAR,Consertar ({ouro} ouro · {qtd} {material} · {tempo}),Repair ({ouro} gold · {qtd} {material} · {tempo})
+CONSERTO_EM_ANDAMENTO,No armeiro: falta {tempo},At the armorer: {tempo} left
+CONSERTO_CONCLUIR,Buscar a peça consertada,Collect the repaired piece
+MATERIAL_SUCATA,sucata,scrap
+MATERIAL_LINGOTE_FERRO,lingote de ferro,iron ingot
+MATERIAL_COURO,couro,leather
+ERRO_ITEM_INTEIRO,A peça está inteira.,The piece is intact.
+ERRO_JA_EM_CONSERTO,Já está no armeiro.,Already at the armorer.
+ERRO_MATERIAL_INSUFICIENTE,Material insuficiente.,Not enough material.
+ERRO_ITEM_INEXISTENTE,Peça desconhecida.,Unknown piece.
+NOTIF_CONSERTO,Uma peça foi consertada.,A piece has been repaired.

@@ -69,3 +69,5 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · O cavalo ativo não treina** (o jogador troca de cavalo antes); treinos ocupam vagas do prédio e não impedem melhorar o prédio.
 - **2026-10-11 · Notificações locais por serviço com fila e aviso no jogo**; o aviso do sistema depende de plugin Android (o Godot não tem nativo).
 - **2026-10-11 · Pré-visualização no primeiro toque** (no celular não existe passar o mouse por cima): tocar na peça veste o retrato, e só o botão confirma.
+- **2026-10-11 · Estágio de dano como sufixo da variante de arte** (`<variante>_dN`), com volta para a peça inteira quando falta a arte; segue a convenção `_d1.._d3` da skill estilo-arte.
+- **2026-10-11 · Durabilidade das peças 180/240** (era 60/80): com a regra do impacto atual, 60 quebrava o elmo em uma justa contra o agressivo. Ajuste fino na simulação de economia (3.12).

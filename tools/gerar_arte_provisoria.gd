@@ -225,6 +225,42 @@ func _folha(tamanho: String, nome: String, quadro: Vector2i, origem: Vector2i, b
 	if d.usou_mascara:
 		masc.save_png("%s/%s/%s_mascara.png" % [PASTA, tamanho, nome])
 		_arquivos += 1
+	# Armaduras ganham os três estágios de dano (d1 riscada, d2 amassada,
+	# d3 rachada), mesmo quadro e posição: <camada>_<variante>_dN_<anim>.
+	for prefixo in ["elmo_", "peitoral_", "escudo_"]:
+		if nome.begins_with(prefixo):
+			var anim := nome.get_slice("_", nome.get_slice_count("_") - 1)
+			var base := nome.trim_suffix("_" + anim)
+			for estagio in [1, 2, 3]:
+				var dano := _danificar(img, estagio, quadro.x)
+				dano.save_png("%s/%s/%s_d%d_%s.png" % [PASTA, tamanho, base, estagio, anim])
+				_arquivos += 1
+				if d.usou_mascara:
+					masc.save_png("%s/%s/%s_d%d_%s_mascara.png" % [PASTA, tamanho, base, estagio, anim])
+					_arquivos += 1
+
+## Cópia da folha com marcas de dano determinísticas sobre os pixels opacos.
+func _danificar(img: Image, estagio: int, largura_quadro: int) -> Image:
+	var out := img.duplicate() as Image
+	for y in out.get_height():
+		for x in out.get_width():
+			var c := out.get_pixel(x, y)
+			if c.a < 0.5:
+				continue
+			var h := hash(Vector2i(x % largura_quadro, y))
+			if estagio >= 1 and h % 19 == 0:
+				out.set_pixel(x, y, c.lightened(0.35))
+			if estagio >= 2 and h % 9 == 0:
+				out.set_pixel(x, y, c.darkened(0.45))
+			if estagio >= 3:
+				# Rachadura em zigue-zague e lascas faltando.
+				var xq := x % largura_quadro
+				var zigue := (y / 3) % 3 - 1
+				if xq == largura_quadro * 42 / 100 + zigue or xq == largura_quadro * 57 / 100 - zigue:
+					out.set_pixel(x, y, Color(0.05, 0.05, 0.05, 1))
+				elif h % 29 == 0:
+					out.set_pixel(x, y, Color(0, 0, 0, 0))
+	return out
 
 class Desenho:
 	var img: Image
