@@ -1,0 +1,28 @@
+{
+	"versao": 1,
+	"_nota": "Espacos de peca da tela de Equipamentos (GDD, Equipamentos e direcao de arte). lado: em que coluna o espaco aparece em volta do retrato. tipo: status (conta na justa) ou visual (so aparencia). Os nomes viram ESPACO_<NOME>. Espaco sem item no inventario aparece vazio.",
+	"cavaleiro": [
+		{ "espaco": "elmo", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "cimeira", "lado": "esquerda", "tipo": "visual" },
+		{ "espaco": "gorjal", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "peitoral", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "espaldares", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "bracais", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "manoplas", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "pernas", "lado": "direita", "tipo": "status" },
+		{ "espaco": "escarpes", "lado": "direita", "tipo": "status" },
+		{ "espaco": "sobreveste", "lado": "direita", "tipo": "visual" },
+		{ "espaco": "capa", "lado": "direita", "tipo": "visual" },
+		{ "espaco": "escudo", "lado": "direita", "tipo": "status" },
+		{ "espaco": "lanca", "lado": "direita", "tipo": "status" }
+	],
+	"cavalo": [
+		{ "espaco": "testeira", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "crineira", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "peitoral_cavalo", "lado": "esquerda", "tipo": "status" },
+		{ "espaco": "anca", "lado": "direita", "tipo": "status" },
+		{ "espaco": "caparacao", "lado": "direita", "tipo": "visual" },
+		{ "espaco": "sela", "lado": "direita", "tipo": "status" },
+		{ "espaco": "redeas", "lado": "direita", "tipo": "visual" }
+	]
+}

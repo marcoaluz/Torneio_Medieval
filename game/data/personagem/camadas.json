@@ -210,6 +210,11 @@
 					"material": "principal"
 				},
 				{
+					"nome": "elmo",
+					"arquivo": "elmo_{elmo}",
+					"material": "metal"
+				},
+				{
 					"nome": "escudo",
 					"arquivo": "escudo_{escudo}",
 					"material": "principal"

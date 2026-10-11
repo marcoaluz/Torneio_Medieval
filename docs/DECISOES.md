@@ -68,3 +68,4 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Fôlego do cavalo entre justas como valor + horário** (recuperação calculada na leitura, vale com o jogo fechado); cansado corre com penalidade de Velocidade aplicada no lado da justa, sem mexer na regra.
 - **2026-10-11 · O cavalo ativo não treina** (o jogador troca de cavalo antes); treinos ocupam vagas do prédio e não impedem melhorar o prédio.
 - **2026-10-11 · Notificações locais por serviço com fila e aviso no jogo**; o aviso do sistema depende de plugin Android (o Godot não tem nativo).
+- **2026-10-11 · Pré-visualização no primeiro toque** (no celular não existe passar o mouse por cima): tocar na peça veste o retrato, e só o botão confirma.

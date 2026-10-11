@@ -29,6 +29,7 @@ var _acumulado := 0.0
 @onready var _fechar: Button = $Interface/Painel/Coluna/Botoes/Fechar
 @onready var _letreiro: Label = $Interface/Letreiro
 @onready var tela_treino: TelaTreino = $Interface/TelaTreino
+@onready var tela_equipamentos: TelaEquipamentos = $Interface/TelaEquipamentos
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
@@ -76,6 +77,8 @@ func _process(delta: float) -> void:
 		atualizar()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if tela_equipamentos.visible or tela_treino.visible:
+		return
 	if event is InputEventScreenTouch and event.pressed:
 		var nome := predio_em(get_canvas_transform().affine_inverse() * event.position)
 		if nome != "":
@@ -102,6 +105,10 @@ func tocar_predio(nome: String) -> void:
 	if not t.is_empty() and ServicoTempo.pronto(int(t["termina_em"])):
 		if _jog.concluir_timer(t["id"])["ok"]:
 			mostrar_letreiro(tr("VILA_MELHORIA_PRONTA").format({"predio": tr("PREDIO_" + nome.to_upper()), "nivel": t["nivel_novo"]}))
+		return
+	if nome == "armeiro":
+		fechar_painel()
+		tela_equipamentos.abrir()
 		return
 	if nome in ["campo_treino", "estabulo"]:
 		fechar_painel()

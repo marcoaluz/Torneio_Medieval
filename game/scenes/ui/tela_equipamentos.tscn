@@ -1,0 +1,148 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/scripts/presentation/ui/tela_equipamentos.gd" id="1"]
+[ext_resource type="Theme" path="res://game/scenes/ui/tema_jogo.tres" id="2"]
+[ext_resource type="Script" path="res://game/scripts/presentation/personagem/camadas_personagem.gd" id="3"]
+
+[node name="TelaEquipamentos" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Fundo" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Titulo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = 300.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="Abas" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 8.0
+offset_right = 470.0
+offset_bottom = 40.0
+
+[node name="Cavaleiro" type="Button" parent="Abas"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+
+[node name="Cavalo" type="Button" parent="Abas"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+
+[node name="Fechar" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -100.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 40.0
+grow_horizontal = 0
+focus_mode = 0
+
+[node name="Esquerda" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 52.0
+offset_right = 166.0
+offset_bottom = 530.0
+theme_override_constants/separation = 3
+
+[node name="Centro" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 170.0
+offset_top = 50.0
+offset_right = 420.0
+offset_bottom = 530.0
+mouse_filter = 2
+
+[node name="Retrato" type="Node2D" parent="Centro"]
+position = Vector2(125, 400)
+script = ExtResource("3")
+tamanho = "equipamentos"
+
+[node name="RetratoCavalo" type="Node2D" parent="Centro"]
+visible = false
+position = Vector2(125, 360)
+scale = Vector2(1.5, 1.5)
+script = ExtResource("3")
+
+[node name="Direita" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 424.0
+offset_top = 52.0
+offset_right = 578.0
+offset_bottom = 530.0
+theme_override_constants/separation = 3
+
+[node name="Pecas" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -370.0
+offset_top = 48.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Coluna" type="VBoxContainer" parent="Pecas"]
+layout_mode = 2
+
+[node name="Titulo" type="Label" parent="Pecas/Coluna"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="Rolagem" type="ScrollContainer" parent="Pecas/Coluna"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Lista" type="VBoxContainer" parent="Pecas/Coluna/Rolagem"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Detalhes" type="Label" parent="Pecas/Coluna"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="Botoes" type="VBoxContainer" parent="Pecas/Coluna"]
+layout_mode = 2
+
+[node name="Equipar" type="Button" parent="Pecas/Coluna/Botoes"]
+layout_mode = 2
+focus_mode = 0
+
+[node name="Aparencia" type="Button" parent="Pecas/Coluna/Botoes"]
+layout_mode = 2
+focus_mode = 0
+
+[node name="Restaurar" type="Button" parent="Pecas/Coluna/Botoes"]
+layout_mode = 2
+focus_mode = 0

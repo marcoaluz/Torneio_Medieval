@@ -8,9 +8,9 @@
 		"escudo_escudeiro": { "espaco": "escudo", "raridade": "comum", "conjunto": "escudeiro", "visual": "provisorio", "durabilidade_max": 60, "status": { "defesa": 5, "bloqueio_milesimos": 40 } },
 		"lanca_escudeiro": { "espaco": "lanca", "raridade": "comum", "conjunto": "escudeiro", "visual": "provisorio", "durabilidade_max": 40, "status": { "poder": 5, "precisao": 0 } },
 		"caparacao_escudeiro": { "espaco": "caparacao", "raridade": "comum", "conjunto": "escudeiro", "visual": "provisorio", "durabilidade_max": 0, "status": {} },
-		"elmo_vigia": { "espaco": "elmo", "raridade": "incomum", "conjunto": "vigia", "visual": "provisorio", "durabilidade_max": 80, "status": { "defesa": 12 } },
-		"peitoral_vigia": { "espaco": "peitoral", "raridade": "incomum", "conjunto": "vigia", "visual": "provisorio", "durabilidade_max": 80, "status": { "defesa": 12 } },
-		"escudo_vigia": { "espaco": "escudo", "raridade": "incomum", "conjunto": "vigia", "visual": "provisorio", "durabilidade_max": 80, "status": { "defesa": 7, "bloqueio_milesimos": 70 } },
-		"lanca_vigia": { "espaco": "lanca", "raridade": "incomum", "conjunto": "vigia", "visual": "provisorio", "durabilidade_max": 50, "status": { "poder": 10, "precisao": 5 } }
+		"elmo_vigia": { "espaco": "elmo", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 80, "status": { "defesa": 12 } },
+		"peitoral_vigia": { "espaco": "peitoral", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 80, "status": { "defesa": 12 } },
+		"escudo_vigia": { "espaco": "escudo", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 80, "status": { "defesa": 7, "bloqueio_milesimos": 70 } },
+		"lanca_vigia": { "espaco": "lanca", "raridade": "incomum", "conjunto": "vigia", "visual": "vigia", "durabilidade_max": 50, "status": { "poder": 10, "precisao": 5 } }
 	}
 }

@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_justa()
 	_vila()
 	_equipamentos()
+	_conjunto_vigia()
 	print("ARTE gerados %d arquivos em %s" % [_arquivos, PASTA])
 	quit(0)
 
@@ -143,11 +144,68 @@ func _equipamentos() -> void:
 		_folha("equipamentos", "sobreveste_provisorio_%s" % anim, t, o, bobs, func(c: Desenho, _i: int, dy: int):
 			c.caixa(-50, -96 + dy, 100, 96, 0.5, R)
 			c.caixa(-6, -96 + dy, 12, 96, 0.55, G))
+		_folha("equipamentos", "elmo_provisorio_%s" % anim, t, o, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-28, -228, 56, 64, 0.66)
+			c.caixa(-16, -198 + dy, 36, 5, 0.08))
 		_folha("equipamentos", "escudo_provisorio_%s" % anim, t, o, bobs, func(c: Desenho, _i: int, dy: int):
 			c.caixa(44, -126 + dy, 64, 96, 0.6, B)
 			c.caixa(48, -122 + dy, 56, 88, 0.5, R))
 		_folha("equipamentos", "pontos_%s" % anim, t, o, bobs, func(c: Desenho, _i: int, dy: int):
 			c.pixel_puro(76, -82 + dy, R), false)
+
+# ------------------------------------------- conjunto "vigia" (segundo estilo)
+
+## Segundo conjunto provisório, com silhueta diferente, para a tela de
+## Equipamentos mostrar a troca de peça (bacinete arredondado, brigantina
+## rebitada, escudo maior e lança pintada).
+func _conjunto_vigia() -> void:
+	var o := Vector2i(80, 160)
+	for anim: String in {"parado": [0], "galope": [0, -2, -3, -1]}:
+		var bobs: Array = [0] if anim == "parado" else [0, -2, -3, -1]
+		_folha("justa", "elmo_vigia_%s" % anim, Vector2i(160, 160), o, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-10, -153 + dy, 20, 25, 0.7)
+			c.caixa(-8, -156 + dy, 16, 3, 0.75)
+			c.caixa(-11, -132 + dy, 22, 6, 0.45)
+			c.caixa(0, -144 + dy, 10, 2, 0.08))
+		_folha("justa", "peitoral_vigia_%s" % anim, Vector2i(160, 160), o, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-13, -128 + dy, 26, 42, 0.5, R)
+			for k in 3:
+				for m in 4:
+					c.ponto(-9 + m * 6, -124 + k * 9 + dy, 0.85))
+		_folha("justa", "escudo_vigia_%s" % anim, Vector2i(160, 160), o, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(4, -126 + dy, 20, 34, 0.62, B)
+			c.caixa(6, -124 + dy, 16, 30, 0.5, R))
+		_folha("justa", "lanca_vigia_%s" % anim, Vector2i(320, 160), o, bobs, func(c: Desenho, _i: int, dy: int):
+			for k in 12:
+				c.caixa(8 + k * 10, -120 + dy, 10, 4, 0.55 if k % 2 == 0 else 0.7, R if k % 2 == 0 else G)
+			c.caixa(2, -127 + dy, 7, 18, 0.65, B)
+			c.caixa(128, -121 + dy, 6, 6, 0.75, B))
+	for anim: String in ["parado", "andar"]:
+		var bobs: Array = [0] if anim == "parado" else [0, -1, 0, -1]
+		var t := Vector2i(96, 96)
+		_folha("vila", "elmo_vigia_%s" % anim, t, Vector2i(48, 96), bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-7, -74 + dy, 14, 17, 0.7))
+		_folha("vila", "peitoral_vigia_%s" % anim, t, Vector2i(48, 96), bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-10, -58 + dy, 20, 26, 0.5, R))
+		_folha("vila", "escudo_vigia_%s" % anim, t, Vector2i(48, 96), bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(5, -58 + dy, 13, 23, 0.62, B)
+			c.caixa(6, -57 + dy, 11, 21, 0.5, R))
+	for anim: String in ["parado", "respirar"]:
+		var bobs: Array = [0] if anim == "parado" else [0, -2]
+		var t := Vector2i(256, 256)
+		var oe := Vector2i(128, 256)
+		_folha("equipamentos", "elmo_vigia_%s" % anim, t, oe, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-28, -236 + dy, 56, 72, 0.7)
+			c.caixa(-32, -170 + dy, 64, 14, 0.45)
+			c.caixa(-4, -206 + dy, 26, 5, 0.08))
+		_folha("equipamentos", "peitoral_vigia_%s" % anim, t, oe, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(-60, -148 + dy, 120, 124, 0.5, R)
+			for k in 5:
+				for m in 7:
+					c.caixa(-48 + m * 16, -138 + k * 22 + dy, 3, 3, 0.85))
+		_folha("equipamentos", "escudo_vigia_%s" % anim, t, oe, bobs, func(c: Desenho, _i: int, dy: int):
+			c.caixa(38, -134 + dy, 76, 110, 0.62, B)
+			c.caixa(44, -128 + dy, 64, 98, 0.5, R))
 
 # --------------------------------------------------------------- utilidades
 

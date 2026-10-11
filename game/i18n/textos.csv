@@ -164,3 +164,54 @@ NOTIF_MELHORIA,Uma obra da vila terminou.,A village upgrade is done.
 NOTIF_TREINO_CAVALEIRO,O treino do seu cavaleiro terminou.,Your knight's training is done.
 NOTIF_TREINO_CAVALO,O treino do seu cavalo terminou.,Your horse's training is done.
 NOTIF_CAVALO_DESCANSADO,Seu cavalo está descansado.,Your horse is rested.
+EQUIP_TITULO,Equipamentos,Equipment
+EQUIP_ABA_CAVALEIRO,Cavaleiro,Knight
+EQUIP_ABA_CAVALO,Cavalo,Horse
+EQUIP_VAZIO,vazio,empty
+EQUIP_SEM_PECAS,Nenhuma peça para este espaço.,No pieces for this slot.
+EQUIP_TOQUE_UMA_PECA,Toque numa peça para ver no personagem.,Tap a piece to preview it.
+EQUIP_EQUIPAR,Equipar,Equip
+EQUIP_SO_APARENCIA,Usar só a aparência,Use appearance only
+EQUIP_RESTAURAR_APARENCIA,Restaurar a aparência,Reset appearance
+EQUIP_DURABILIDADE,Durabilidade {atual}/{max},Durability {atual}/{max}
+EQUIP_CONJUNTO,Conjunto {conjunto} ({n} equipadas),{conjunto} set ({n} equipped)
+ESPACO_ELMO,Elmo,Helm
+ESPACO_CIMEIRA,Cimeira,Crest
+ESPACO_GORJAL,Gorjal,Gorget
+ESPACO_PEITORAL,Peitoral,Breastplate
+ESPACO_ESPALDARES,Espaldares,Pauldrons
+ESPACO_BRACAIS,Braçais,Vambraces
+ESPACO_MANOPLAS,Manoplas,Gauntlets
+ESPACO_PERNAS,Coxotes e grevas,Cuisses and greaves
+ESPACO_ESCARPES,Escarpes,Sabatons
+ESPACO_SOBREVESTE,Sobreveste,Tabard
+ESPACO_CAPA,Capa,Cape
+ESPACO_ESCUDO,Escudo,Shield
+ESPACO_LANCA,Lança,Lance
+ESPACO_TESTEIRA,Testeira,Chanfron
+ESPACO_CRINEIRA,Crineira,Crinet
+ESPACO_PEITORAL_CAVALO,Peitoral do cavalo,Peytral
+ESPACO_ANCA,Anca de placa,Crupper
+ESPACO_CAPARACAO,Caparação,Caparison
+ESPACO_SELA,Sela,Saddle
+ESPACO_REDEAS,Rédeas,Reins
+RARIDADE_COMUM,Comum,Common
+RARIDADE_INCOMUM,Incomum,Uncommon
+RARIDADE_RARO,Rara,Rare
+RARIDADE_EPICO,Épica,Epic
+RARIDADE_LENDARIO,Lendária,Legendary
+STATUS_DEFESA,Defesa +{v},Defense +{v}
+STATUS_BLOQUEIO_MILESIMOS,Bloqueio +{v}‰,Block +{v}‰
+STATUS_PODER,Poder +{v},Power +{v}
+STATUS_PRECISAO,Precisão +{v},Precision +{v}
+CONJUNTO_ESCUDEIRO,Escudeiro,Squire
+CONJUNTO_VIGIA,Vigia,Sentinel
+ITEM_ELMO_ESCUDEIRO,Elmo do escudeiro,Squire's helm
+ITEM_PEITORAL_ESCUDEIRO,Peitoral do escudeiro,Squire's breastplate
+ITEM_ESCUDO_ESCUDEIRO,Escudo do escudeiro,Squire's shield
+ITEM_LANCA_ESCUDEIRO,Lança do escudeiro,Squire's lance
+ITEM_CAPARACAO_ESCUDEIRO,Caparação do escudeiro,Squire's caparison
+ITEM_ELMO_VIGIA,Bacinete da vigia,Sentinel's bascinet
+ITEM_PEITORAL_VIGIA,Brigantina da vigia,Sentinel's brigandine
+ITEM_ESCUDO_VIGIA,Escudo da vigia,Sentinel's shield
+ITEM_LANCA_VIGIA,Lança pintada da vigia,Sentinel's painted lance
