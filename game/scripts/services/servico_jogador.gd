@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 5
+const VERSAO := 6
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -77,6 +77,7 @@ func descansado_em(id := "") -> int:
 func _recuperacao_por_hora() -> int:
 	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
 	var bonus := int(f["bonus_recupera_por_nivel_estabulo_pct"]) * maxi(predio_nivel("estabulo") - 1, 0)
+	bonus += bonus_companheiros("folego_recupera_pct")
 	return int(f["recupera_por_hora"]) * (100 + bonus) / 100
 
 func cavalo_treinando(id: String) -> bool:
@@ -753,7 +754,8 @@ func pode_fundir(produto: String, quantidade: int) -> Dictionary:
 	var custo := quantidade * int(f["lingote_por_sucata"] if produto == "lingote_ferro" else f["aco_por_ferro"])
 	if material(origem) < custo:
 		return _erro("material_insuficiente")
-	return {"ok": true, "erro": "", "origem": origem, "custo": custo, "segundos": quantidade * int(f["fundir_segundos_por_lingote"])}
+	var seg := quantidade * int(f["fundir_segundos_por_lingote"]) * (100 + bonus_companheiros("fundicao_tempo_pct")) / 100
+	return {"ok": true, "erro": "", "origem": origem, "custo": custo, "segundos": maxi(seg, 1)}
 
 func fundir(produto: String, quantidade: int) -> Dictionary:
 	var p := pode_fundir(produto, quantidade)
@@ -973,6 +975,58 @@ func _dar_recompensa(r: Dictionary) -> Dictionary:
 		dado["bau_ganho"] = _guardar_bau(str(r["bau"]))
 	_ganhar(int(r.get("ouro", 0)), int(r.get("xp", 0)))
 	return dado
+
+# ----------------------------------------------------------------- história
+# Cenas curtas entre regiões e companheiros (3.22; enredo provisório em
+# game/data/historia/historia.json). Uma cena fica pendente quando a
+# condição (contadores das metas) foi atingida e ela ainda não foi vista; a
+# vila toca as pendentes na ordem. Companheiro entra com a cena dele e dá um
+# bônus (renome, forno do ferreiro, fôlego do cavalo).
+
+func cfg_historia() -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string("res://game/data/historia/historia.json"))
+
+## A próxima cena a tocar ("" se nenhuma).
+func proxima_cena() -> String:
+	var h := cfg_historia()
+	var vistas: Array = estado["historia"]["vistas"]
+	var cont: Dictionary = estado["metas"]["contadores"]
+	for id: String in h["ordem"]:
+		if vistas.has(id):
+			continue
+		var ok := true
+		var quando: Dictionary = h["cenas"][id]["quando"]
+		for ev: String in quando:
+			ok = ok and int(cont.get(ev, 0)) >= int(quando[ev])
+		if ok:
+			return id
+	return ""
+
+func marcar_cena_vista(id: String) -> Dictionary:
+	if not cfg_historia()["cenas"].has(id):
+		return _erro("cena_inexistente")
+	if not (estado["historia"]["vistas"] as Array).has(id):
+		estado["historia"]["vistas"].append(id)
+	return _concluir("historia")
+
+## Companheiros que já entraram (viram a cena deles).
+func companheiros() -> Array:
+	var h := cfg_historia()
+	var r: Array = []
+	for c: String in h["companheiros"]:
+		if (estado["historia"]["vistas"] as Array).has(h["companheiros"][c]["entra_na_cena"]):
+			r.append(c)
+	return r
+
+## Soma do bônus `tipo` dos companheiros presentes (em %).
+func bonus_companheiros(tipo: String) -> int:
+	if not estado.has("historia"):
+		return 0
+	var h := cfg_historia()
+	var t := 0
+	for c: String in companheiros():
+		t += int(h["companheiros"][c]["bonus"].get(tipo, 0))
+	return t
 
 # --------------------------------------------------------------------- baús
 # GDD Baús e itens: 4 espaços, um abrindo por vez, chave abre na hora,
@@ -1345,6 +1399,7 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 	if projeto != "":
 		_evento("regiao_vencida")
 		renome_g += int(ganho["regiao_vencida"])
+	renome_g = renome_g * (100 + bonus_companheiros("renome_pct")) / 100
 	metas["renome"] = int(metas["renome"]) + renome_g
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
@@ -1446,6 +1501,7 @@ func novo_estado() -> Dictionary:
 	e["inventario"]["materiais"]["fragmentos"] = int(e["inventario"]["materiais"].get("fragmentos", 0))
 	e["baus"] = _baus_novos(int(e["criado_em"]), int(ini.get("chaves", 0)))
 	e["metas"] = _metas_novas()
+	e["historia"] = {"vistas": []}
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.carregar("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -1521,6 +1577,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("metas"):
 			d["metas"] = _metas_novas()
 		v = 5
+	if v < 6:
+		# 3.22: cenas da história já vistas.
+		if not d.has("historia"):
+			d["historia"] = {"vistas": []}
+		v = 6
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

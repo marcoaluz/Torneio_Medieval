@@ -1,0 +1,54 @@
+{
+	"versao": 1,
+	"_nota": "ENREDO PROVISORIO (Pacote 3.22: 'preencher quando o enredo estiver decidido'). Estrutura pronta: troque falas em game/i18n/textos.csv (HIST_*), personagens e condicoes aqui. Cena: quando = {evento: n} dos contadores de metas (ex.: regiao_vencida 1 = venceu as feiras); falas = [{quem, texto (chave i18n), expressao}]; quem = id de personagens ou 'jogador'. Companheiro: entra quando a cena 'entra_na_cena' foi vista; bonus = {tipo: pct} (renome_pct: renome das disputas; fundicao_tempo_pct: tempo do forno do ferreiro, negativo = mais rapido; folego_recupera_pct: recuperacao do folego do cavalo). Retrato provisorio = quadro com a cor e a inicial; arte em game/art/sprites/retratos/{id}_{expressao}.png quando existir.",
+	"personagens": {
+		"arauto": { "nome": "PERSONAGEM_ARAUTO", "cor": "c9a227", "inicial": "B" },
+		"ferreira": { "nome": "PERSONAGEM_FERREIRA", "cor": "a23a2a", "inicial": "B" },
+		"escudeiro": { "nome": "PERSONAGEM_ESCUDEIRO", "cor": "3f6e3a", "inicial": "T" },
+		"nemesis": { "nome": "RIVAL_NEMESIS_CORVO", "cor": "2a2a30", "inicial": "C" },
+		"rei": { "nome": "RIVAL_REI_SANCHO_JUSTADOR", "cor": "d4a72c", "inicial": "S" }
+	},
+	"companheiros": {
+		"arauto": { "entra_na_cena": "comeco", "bonus": { "renome_pct": 20 }, "predio": "arena" },
+		"ferreira": { "entra_na_cena": "fim_feiras", "bonus": { "fundicao_tempo_pct": -25 }, "predio": "ferreiro" },
+		"escudeiro": { "entra_na_cena": "fim_condado", "bonus": { "folego_recupera_pct": 20 }, "predio": "estabulo" }
+	},
+	"cenas": {
+		"comeco": { "quando": { "vitoria": 1 }, "falas": [
+			{ "quem": "arauto", "texto": "HIST_COMECO_1", "expressao": "alegre" },
+			{ "quem": "jogador", "texto": "HIST_COMECO_2", "expressao": "neutro" },
+			{ "quem": "nemesis", "texto": "HIST_COMECO_3", "expressao": "debochado" },
+			{ "quem": "arauto", "texto": "HIST_COMECO_4", "expressao": "serio" }
+		] },
+		"fim_feiras": { "quando": { "regiao_vencida": 1 }, "falas": [
+			{ "quem": "arauto", "texto": "HIST_FIM_FEIRAS_1", "expressao": "alegre" },
+			{ "quem": "ferreira", "texto": "HIST_FIM_FEIRAS_2", "expressao": "neutro" },
+			{ "quem": "jogador", "texto": "HIST_FIM_FEIRAS_3", "expressao": "neutro" },
+			{ "quem": "nemesis", "texto": "HIST_FIM_FEIRAS_4", "expressao": "bravo" }
+		] },
+		"fim_condado": { "quando": { "regiao_vencida": 2 }, "falas": [
+			{ "quem": "escudeiro", "texto": "HIST_FIM_CONDADO_1", "expressao": "timido" },
+			{ "quem": "jogador", "texto": "HIST_FIM_CONDADO_2", "expressao": "neutro" },
+			{ "quem": "ferreira", "texto": "HIST_FIM_CONDADO_3", "expressao": "alegre" },
+			{ "quem": "nemesis", "texto": "HIST_FIM_CONDADO_4", "expressao": "debochado" }
+		] },
+		"fim_ducado": { "quando": { "regiao_vencida": 3 }, "falas": [
+			{ "quem": "arauto", "texto": "HIST_FIM_DUCADO_1", "expressao": "alegre" },
+			{ "quem": "nemesis", "texto": "HIST_FIM_DUCADO_2", "expressao": "bravo" },
+			{ "quem": "escudeiro", "texto": "HIST_FIM_DUCADO_3", "expressao": "serio" }
+		] },
+		"fim_reino": { "quando": { "regiao_vencida": 4 }, "falas": [
+			{ "quem": "arauto", "texto": "HIST_FIM_REINO_1", "expressao": "serio" },
+			{ "quem": "rei", "texto": "HIST_FIM_REINO_2", "expressao": "neutro" },
+			{ "quem": "nemesis", "texto": "HIST_FIM_REINO_3", "expressao": "serio" },
+			{ "quem": "jogador", "texto": "HIST_FIM_REINO_4", "expressao": "neutro" }
+		] },
+		"fim_grande": { "quando": { "regiao_vencida": 5 }, "falas": [
+			{ "quem": "rei", "texto": "HIST_FIM_GRANDE_1", "expressao": "alegre" },
+			{ "quem": "nemesis", "texto": "HIST_FIM_GRANDE_2", "expressao": "serio" },
+			{ "quem": "ferreira", "texto": "HIST_FIM_GRANDE_3", "expressao": "alegre" },
+			{ "quem": "arauto", "texto": "HIST_FIM_GRANDE_4", "expressao": "alegre" }
+		] }
+	},
+	"ordem": ["comeco", "fim_feiras", "fim_condado", "fim_ducado", "fim_reino", "fim_grande"]
+}

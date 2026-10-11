@@ -580,3 +580,40 @@ ERRO_MISSAO_INCOMPLETA,Ainda não terminou.,Not finished yet.
 ERRO_MISSAO_INEXISTENTE,Missão não encontrada.,Quest not found.
 ERRO_LOGIN_JA_RESGATADO,Volte amanhã.,Come back tomorrow.
 ERRO_TITULO_BLOQUEADO,Título ainda não conquistado.,Title not earned yet.
+PERSONAGEM_ARAUTO,"Bento, o arauto",Bento the herald
+PERSONAGEM_FERREIRA,"Brígida, a ferreira",Brígida the smith
+PERSONAGEM_ESCUDEIRO,"Tomé, o escudeiro",Tomé the squire
+HIST_PULAR,Pular,Skip
+HIST_TOQUE,toque para seguir,tap to continue
+HIST_COMECO_1,"Que golpe! Ninguém nesta feira esperava um plebeu na liça. Eu sou Bento, arauto. Daqui para frente, anuncio o seu nome.","What a blow! Nobody at this fair expected a commoner in the lists. I am Bento, a herald. From now on, I announce your name."
+HIST_COMECO_2,"Então anuncie alto, Bento. Quero que o reino inteiro ouça.","Then announce it loud, Bento. I want the whole kingdom to hear."
+HIST_COMECO_3,Um plebeu de lança emprestada? Aproveite a feira. É o mais longe que você vai chegar.,A commoner with a borrowed lance? Enjoy the fair. It is as far as you will go.
+HIST_COMECO_4,"Aquele é o Corvo de Ribanegra. Nobre, rico e rancoroso. Ele vai cruzar o seu caminho de novo.","That is the Raven of Ribanegra. Noble, rich and spiteful. He will cross your path again."
+HIST_FIM_FEIRAS_1,Campeão da Grande Feira! O condado inteiro já fala de você.,Champion of the Great Fair! The whole county is talking about you.
+HIST_FIM_FEIRAS_2,Vi a sua lança rachar no terceiro choque. Eu sou Brígida. Traga sucata para a minha forja e eu faço lingotes mais depressa que qualquer um.,I saw your lance crack on the third clash. I am Brígida. Bring scrap to my forge and I will smelt ingots faster than anyone.
+HIST_FIM_FEIRAS_3,"Uma ferreira de verdade na minha vila? Seja bem-vinda, Brígida.","A real smith in my village? Welcome, Brígida."
+HIST_FIM_FEIRAS_4,"Feiras são para camponeses. No condado, as lanças são de verdade. Lá eu espero você.",Fairs are for peasants. In the county the lances are real. I will be waiting there.
+HIST_FIM_CONDADO_1,Senhor... senhora... eu cuido de cavalos desde pequeno. Deixa eu ser seu escudeiro? Seu cavalo vai descansar como nunca.,My lord... my lady... I have tended horses since I was little. May I be your squire? Your horse will rest like never before.
+HIST_FIM_CONDADO_2,"Todo cavaleiro precisa de um bom escudeiro, Tomé. Fique.","Every knight needs a good squire, Tomé. Stay."
+HIST_FIM_CONDADO_3,"Agora sim, isto está virando uma casa de verdade.",Now this is becoming a real house.
+HIST_FIM_CONDADO_4,"O conde se curvou para você? Que seja. O duque é meu padrinho. No ducado, quem cai é você.","The count bowed to you? So be it. The duke is my sponsor. In the duchy, you are the one who falls."
+HIST_FIM_DUCADO_1,O duque em pessoa aplaudiu! Dizem que o rei vai abrir o Grande Torneio.,The duke himself applauded! They say the king will open the Grand Tournament.
+HIST_FIM_DUCADO_2,Sorte. Só pode ser sorte. Nos torneios do reino não existe sorte.,Luck. It can only be luck. In the kingdom tournaments there is no luck.
+HIST_FIM_DUCADO_3,Ele está com medo. Dá para ver no jeito que segura as rédeas.,He is afraid. You can see it in the way he holds the reins.
+HIST_FIM_REINO_1,Chegou um selo real. O nome da sua casa está na lista do Grande Torneio.,A royal seal arrived. Your house is on the list for the Grand Tournament.
+HIST_FIM_REINO_2,Venci todos os torneios da minha juventude. Veremos se um plebeu aguenta a liça do rei.,I won every tournament of my youth. We shall see if a commoner can endure the king's lists.
+HIST_FIM_REINO_3,Na final eu justo pelo rei. Desta vez não vou subestimar você.,In the final I ride for the king. This time I will not underestimate you.
+HIST_FIM_REINO_4,"Nem eu a você, Corvo.","Nor I you, Raven."
+HIST_FIM_GRANDE_1,O reino tem um novo campeão. E ele veio de uma vila que eu nem sabia que existia.,The kingdom has a new champion. And they came from a village I did not know existed.
+HIST_FIM_GRANDE_2,Eu ri de você na primeira feira. Não rio mais. Aceita a minha mão?,I laughed at you at the first fair. I laugh no more. Will you take my hand?
+HIST_FIM_GRANDE_3,Vou forjar uma placa com o seu brasão para a casa senhorial!,I will forge a plaque with your crest for the manor house!
+HIST_FIM_GRANDE_4,E eu vou anunciar o seu nome em todas as liças do mundo.,And I will announce your name in every list in the world.
+PROVOCACAO_NEMESIS_FEIRAS,"O Corvo nem olha para você: ""Lama de feira não suja a minha armadura.""","The Raven does not even look at you: ""Fair mud does not stain my armor."""
+PROVOCACAO_NEMESIS_CONDADO,"O Corvo aponta a lança: ""Aqui no condado, a lança é de verdade, plebeu.""","The Raven points his lance: ""Here in the county the lance is real, commoner."""
+PROVOCACAO_NEMESIS_DUCADO,"O Corvo sorri: ""O duque assiste. Vou derrubar você na frente dele.""","The Raven smiles: ""The duke is watching. I will unhorse you in front of him."""
+PROVOCACAO_NEMESIS_REINO,"O Corvo está sério: ""Sem sorte desta vez. Só ferro.""","The Raven is grim: ""No luck this time. Only iron."""
+PROVOCACAO_NEMESIS_GRANDE_TORNEIO,O Corvo baixa a viseira em silêncio. Ele está justando pelo rei.,The Raven lowers his visor in silence. He rides for the king.
+COMPANHEIRO_ARAUTO,Bento anuncia o seu nome: +{v}% de renome,Bento announces your name: +{v}% renown
+COMPANHEIRO_FERREIRA,Brígida no forno: lingotes {v}% mais rápidos,Brígida at the furnace: ingots {v}% faster
+COMPANHEIRO_ESCUDEIRO,Tomé cuida do cavalo: fôlego volta {v}% mais rápido,Tomé tends the horse: stamina returns {v}% faster
+VILA_COMPANHEIRO_ENTROU,{nome} entrou para a sua casa!,{nome} joined your house!

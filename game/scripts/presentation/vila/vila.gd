@@ -36,6 +36,7 @@ var _acumulado := 0.0
 @onready var tela_habilidades: TelaHabilidades = $Interface/TelaHabilidades
 @onready var tela_missoes: TelaMissoes = $Interface/TelaMissoes
 @onready var _botao_missoes: Button = $Interface/Topo/Linha/Missoes
+@onready var cena_historia: CenaHistoria = $Interface/CenaHistoria
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -58,6 +59,8 @@ func _ready() -> void:
 	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
+	cena_historia.terminou.connect(_ao_terminar_cena)
+	tocar_historia.call_deferred()
 	var notif := get_node_or_null("/root/Notificacoes") as ServicoNotificacoes
 	if notif:
 		notif.pronto.connect(func(t): mostrar_letreiro(tr("NOTIF_" + str(t["tipo"]).to_upper())))
@@ -113,6 +116,21 @@ func predio_em(ponto: Vector2) -> String:
 			achado = nome
 			y = p.position.y
 	return achado
+
+## Toca a próxima cena de história pendente (3.22), se houver.
+func tocar_historia() -> void:
+	var id := _jog.proxima_cena()
+	if id != "" and not cena_historia.visible:
+		fechar_painel()
+		cena_historia.tocar(id)
+
+## Ao terminar uma cena: avisa os companheiros que entraram e toca a próxima.
+func _ao_terminar_cena(id: String) -> void:
+	var h := _jog.cfg_historia()
+	for c: String in h["companheiros"]:
+		if h["companheiros"][c]["entra_na_cena"] == id:
+			mostrar_letreiro(tr("VILA_COMPANHEIRO_ENTROU").format({"nome": tr(h["personagens"][c]["nome"])}))
+	tocar_historia()
 
 func tocar_predio(nome: String) -> void:
 	if not _jog.predio_liberado(nome):

@@ -3,7 +3,8 @@ extends Node
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
-## TM_TITULO dá um título ao jogador na arena. Save em
+## TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
+## a vila tocando uma cena. Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -88,6 +89,26 @@ func _ready() -> void:
 		camada_m.add_child(tm)
 		var aba := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "diarias"
 		tm.abrir.call_deferred(aba)
+		return
+	if tela == "historia":
+		# Vila com a cena TM_CENA pendente (padrão: a do começo); TM_FALA avança falas.
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["tutorial"]["concluido"] = true
+		var cena_id := OS.get_environment("TM_CENA") if OS.get_environment("TM_CENA") != "" else "comeco"
+		var h := jog.cfg_historia()
+		for ev: String in h["cenas"][cena_id]["quando"]:
+			jog.estado["metas"]["contadores"][ev] = int(h["cenas"][cena_id]["quando"][ev])
+		for id: String in h["ordem"]:
+			if id == cena_id:
+				break
+			jog.estado["historia"]["vistas"].append(id)
+		var vila_h: Vila = load("res://game/scenes/village/vila.tscn").instantiate()
+		add_child(vila_h)
+		var falas := int(OS.get_environment("TM_FALA")) if OS.get_environment("TM_FALA") != "" else 0
+		(func():
+			for i in falas:
+				vila_h.cena_historia.avancar()
+				vila_h.cena_historia.avancar()).call_deferred()
 		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.
