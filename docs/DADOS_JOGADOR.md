@@ -21,10 +21,12 @@ cavalos: [{id, nome, pelagem, atributos {velocidade, folego, temperamento, vincu
 cavalo_ativo: id
 inventario: ouro, gemas, materiais {sucata, lingote_ferro, couro, ...},
             itens [{id, modelo, nivel, durabilidade}]     (modelo -> itens.json)
+            projetos [conjunto]          (v2, 3.13: projetos ganhos dos campeões de região)
 equipamento: {espaco: id}        visual (guarda-roupa): {espaco: id}
 vila: predios {nome: {nivel, ...}}                                     (2.5)
 timers: [{id, tipo, alvo, inicio_em, termina_em}]                      (2.7)
-pve: regiao, torneios {...}                                            (2.10)
+pve: regiao (a última aberta), torneios {id: {proxima, concluido,     (2.10, 3.13)
+     estrelas, falhou (desafio de uma chance perdido)}}, encontros {rival: n}
 tutorial: passo, concluido                                             (2.11)
 ```
 

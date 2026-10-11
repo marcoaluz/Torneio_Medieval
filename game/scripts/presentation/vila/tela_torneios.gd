@@ -1,14 +1,19 @@
 class_name TelaTorneios
 extends PanelContainer
-## Circuito PvE na arena da vila (Pacote 2.10): os torneios da região com
-## liberação e progresso; escolhido um, a chave de rivais com as estrelas de
-## cada disputa e os botões Justar (manual) e Automático (3 estrelas, nunca
-## o campeão). Também há a justa livre (treino, sem recompensa).
+## Circuito PvE na arena da vila (Pacote 2.10 e 3.13): as regiões abertas
+## (setas para trocar), os torneios da região com liberação, progresso e
+## desafios especiais; escolhido um, a chave de rivais com as estrelas de cada
+## disputa e os botões Justar (manual) e Automático (3 estrelas, nunca o
+## campeão). Também há a justa livre (treino, sem recompensa).
 
 var torneio := ""
+## Região mostrada ("" = a atual do jogador).
+var regiao := ""
 var _jog: ServicoJogador
 
-@onready var _titulo: Label = $Coluna/Titulo
+@onready var _titulo: Label = $Coluna/Cabecalho/Titulo
+@onready var _anterior: Button = $Coluna/Cabecalho/Anterior
+@onready var _proxima: Button = $Coluna/Cabecalho/Proxima
 @onready var _lista: VBoxContainer = $Coluna/Rolagem/Lista
 @onready var _info: Label = $Coluna/Info
 @onready var _voltar: Button = $Coluna/Botoes/Voltar
@@ -19,6 +24,10 @@ func _ready() -> void:
 	_jog = get_node("/root/Jogador")
 	visible = false
 	_voltar.text = tr("PVE_VOLTAR")
+	_anterior.text = tr("PVE_REGIAO_ANTERIOR")
+	_proxima.text = tr("PVE_REGIAO_PROXIMA")
+	_anterior.pressed.connect(func(): _trocar_regiao(-1))
+	_proxima.pressed.connect(func(): _trocar_regiao(1))
 	_livre.text = tr("PVE_JUSTA_LIVRE")
 	_fechar.text = tr("PAINEL_FECHAR")
 	_voltar.pressed.connect(func(): torneio = ""; montar())
@@ -28,6 +37,7 @@ func _ready() -> void:
 
 func abrir() -> void:
 	torneio = ""
+	regiao = _jog.estado["pve"]["regiao"]
 	_info.text = ""
 	visible = true
 	montar()
@@ -36,6 +46,13 @@ func montar() -> void:
 	for c in _lista.get_children():
 		c.queue_free()
 	_voltar.visible = torneio != ""
+	if regiao == "":
+		regiao = _jog.estado["pve"]["regiao"]
+	var abertas := _jog.regioes_liberadas()
+	_anterior.visible = torneio == ""
+	_proxima.visible = torneio == ""
+	_anterior.disabled = abertas.find(regiao) <= 0
+	_proxima.disabled = abertas.find(regiao) >= abertas.size() - 1
 	if torneio == "":
 		_montar_regiao()
 	else:
@@ -43,7 +60,6 @@ func montar() -> void:
 
 func _montar_regiao() -> void:
 	var dados := _jog.pve()
-	var regiao: String = _jog.estado["pve"]["regiao"]
 	_titulo.text = tr("REGIAO_" + regiao.to_upper())
 	for t: String in dados["regioes"][regiao]["torneios"]:
 		var p := _jog.progresso_torneio(t)
@@ -52,10 +68,19 @@ func _montar_regiao() -> void:
 		b.focus_mode = Control.FOCUS_NONE
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var estado_txt := tr("PVE_CONCLUIDO") if p["concluido"] else tr("PVE_PROGRESSO").format({"feitas": p["proxima"], "total": total})
+		if p["falhou"]:
+			estado_txt = tr("PVE_CHANCE_PERDIDA")
 		if not _jog.torneio_liberado(t):
-			estado_txt = tr("PVE_BLOQUEADO").format({"nivel": int(dados["torneios"][t]["nivel_minimo"])})
+			var nivel_min := int(dados["torneios"][t]["nivel_minimo"])
+			if int(_jog.cavaleiro()["nivel"]) < nivel_min:
+				estado_txt = tr("PVE_BLOQUEADO").format({"nivel": nivel_min})
+			else:
+				estado_txt = tr("PVE_BLOQUEADO_ANTERIOR")
 			b.disabled = true
-		b.text = "%s  ·  %s  ·  %s" % [tr("TORNEIO_" + t.to_upper()), estado_txt, _estrelas_total(t)]
+		var nome := tr("TORNEIO_" + t.to_upper())
+		if dados["torneios"][t].get("opcional", false):
+			nome += "  [%s]" % tr("PVE_OPCIONAL")
+		b.text = "%s  ·  %s  ·  %s" % [nome, estado_txt, _estrelas_total(t)]
 		b.pressed.connect(func(): torneio = t; montar())
 		_lista.add_child(b)
 
@@ -92,7 +117,15 @@ func _montar_chave() -> void:
 		auto.pressed.connect(func(): automatico(idx))
 		linha.add_child(auto)
 		_lista.add_child(linha)
-	_info.text = tr("PVE_RECOMPENSA_TORNEIO").format({"ouro": int(t["recompensa"]["ouro"]), "xp": int(t["recompensa"]["xp"])})
+	var info: Array[String] = [tr("PVE_RECOMPENSA_TORNEIO").format({"ouro": int(t["recompensa"]["ouro"]), "xp": int(t["recompensa"]["xp"])})]
+	for d: String in _jog.desafios_do_torneio(torneio):
+		info.append(tr("DESAFIO_" + d.to_upper()))
+	_info.text = "  ·  ".join(info)
+
+func _trocar_regiao(passo: int) -> void:
+	var abertas := _jog.regioes_liberadas()
+	regiao = abertas[clampi(abertas.find(regiao) + passo, 0, abertas.size() - 1)]
+	montar()
 
 ## Disputa no automático (mesma regra, IA de precisão média pelo jogador).
 func automatico(indice: int) -> void:

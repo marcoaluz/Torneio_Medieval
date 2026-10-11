@@ -82,6 +82,11 @@ var modo := "livre"
 ## Disputa do PvE desta justa ({} = livre) e o resultado dela no Jogador.
 var disputa := {}
 var resultado_disputa := {}
+## Disputa do PvE: provocação do campeão (chave de texto), desafios do
+## torneio e se o cavalo do jogador cansa (cavalo emprestado não).
+var provocacao := ""
+var desafios: Array = []
+var _gasta_folego := true
 
 var _resto_ms := 0.0
 var _desistencia_registrada := false
@@ -126,10 +131,20 @@ func iniciar(semente_fixa := -1) -> void:
 	nome_rival = "RIVAL_" + perfil_rival.to_upper() if perfil_rival != "" else ""
 	nome_jogador = ""
 	var rv := {}
+	provocacao = ""
+	desafios = []
+	_gasta_folego = true
 	match modo:
 		"disputa":
 			if not disputa.is_empty() and jog_d:
-				rv = jog_d.rival_para_justa(jog_d.pve()["torneios"][disputa["torneio"]]["rivais"][int(disputa["indice"])])
+				var prep := jog_d.preparar_disputa(disputa["torneio"], int(disputa["indice"]))
+				_cfg = prep["cfg"]
+				lado_jogador = prep["lado_jogador"]
+				rv = prep["rival"]
+				provocacao = rv.get("provocacao", "")
+				desafios = prep["desafios"]
+				_gasta_folego = prep["gasta_folego"]
+				arena.aplicar_ambiente(prep["visuais"])
 		"tutorial":
 			if jog_d:
 				rv = jog_d.rival_tutorial()
@@ -160,7 +175,7 @@ func iniciar(semente_fixa := -1) -> void:
 			push_error("ControladorJusta: perfil de IA \"%s\" inválido: %s" % [perfil_rival, e_ia])
 			set_process(false)
 			return
-		perfil = ia_cfg["perfis"][perfil_rival]
+		perfil = rv["perfil"] if rv.has("perfil") else ia_cfg["perfis"][perfil_rival]
 	if rv.is_empty():
 		arena.vestir_rival(perfil_rival)
 	else:
@@ -394,7 +409,8 @@ func _registrar_no_jogador(e: Dictionary) -> void:
 	if jog:
 		jog.registrar_justa({"vencedor": JustaFases.NOMES_LADO[e["vencedor"]], "motivo": e["motivo"],
 			"placar_jogador": e["placar_jogador"], "placar_rival": e["placar_rival"],
-			"equipamento_final": justa.equipamento_final(true), "perfil_rival": perfil_rival, "semente": semente})
+			"equipamento_final": justa.equipamento_final(true), "perfil_rival": perfil_rival, "semente": semente,
+			"gasta_folego": _gasta_folego})
 
 ## Galope na Corrida (no ritmo da velocidade) e em câmera lenta na Mira e no
 ## Impacto; parado nas pontas e no fim.

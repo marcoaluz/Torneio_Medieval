@@ -285,3 +285,137 @@ BAU_TITULO,Seu primeiro baú,Your first chest
 BAU_TOQUE_PARA_ABRIR,Toque no baú para abrir.,Tap the chest to open it.
 BAU_GANHOU,{item} ({raridade}): já equipado!,{item} ({raridade}): already equipped!
 BAU_SEGUIR,Seguir para a vila,Go to the village
+REGIAO_CONDADO,Torneios do condado,County tournaments
+RIVAL_SIR_AFONSO_VALBOM,Sir Afonso de Valbom,Sir Afonso of Valbom
+RIVAL_DAMA_BEATRIZ_TORRE,Dama Beatriz da Torre,Dame Beatriz of the Tower
+RIVAL_SIR_MENDO_ARCOS,Sir Mendo de Arcos,Sir Mendo of Arcos
+RIVAL_SIR_RUI_PENAMAR,Sir Rui de Penamar,Sir Rui of Penamar
+RIVAL_DAMA_TERESA_LIS,Dama Teresa de Lis,Dame Teresa of Lis
+RIVAL_SIR_GONCALO_FERREIRA,Sir Gonçalo Ferreira,Sir Gonçalo Ferreira
+RIVAL_MARTIM_MARTELO,"Martim, o Martelo",Martim the Hammer
+PROVOCACAO_MARTIM_MARTELO,"Martim bate na lança com o punho: ""Tua cabeça vai tocar o sino da capela!""","Martim pounds his lance: ""Your head will ring the chapel bell!"""
+RIVAL_DAMA_ISOLDA_GAVIAO,Dama Isolda Gavião,Dame Isolda Hawk
+PROVOCACAO_DAMA_ISOLDA_GAVIAO,"Isolda nem olha para você: ""O gavião não erra o voo.""","Isolda does not even look at you: ""The hawk never misses its dive."""
+RIVAL_SIR_EGAS_MURO,"Sir Egas, o Muro",Sir Egas the Wall
+PROVOCACAO_SIR_EGAS_MURO,"Egas ergue o escudo enorme: ""Ninguém passa por mim desde o inverno passado.""","Egas raises his huge shield: ""No one has got past me since last winter."""
+RIVAL_CONDE_RODRIGO_ALVAR,Conde Rodrigo de Alvar,Count Rodrigo of Alvar
+PROVOCACAO_CONDE_RODRIGO_ALVAR,"O conde sorri do alto do cavalo: ""Plebeus na minha liça? Que divertido.""","The count smiles from his saddle: ""Commoners in my lists? How amusing."""
+TORNEIO_TORNEIO_VALE_VERDE,Torneio do Vale Verde,Green Valley Tournament
+TORNEIO_TORNEIO_PONTE_VELHA,Torneio da Ponte Velha,Old Bridge Tournament
+TORNEIO_DESAFIO_RIBEIRA,Justa da Ribeira sob a chuva,Riverside Joust in the Rain
+TORNEIO_TORNEIO_CASTELO_ALVAR,Torneio do Castelo de Alvar,Alvar Castle Tournament
+TORNEIO_TORNEIO_FEIRA_CONDE,Feira do Conde,The Count's Fair
+TORNEIO_TORNEIO_CONDE,Torneio do Conde,The Count's Tournament
+REGIAO_DUCADO,Torneios do ducado,Duchy tournaments
+RIVAL_SIR_NUNO_BARBAS,Sir Nuno Barbas,Sir Nuno Barbas
+RIVAL_DAMA_JOANA_VIMAR,Dama Joana de Vimar,Dame Joana of Vimar
+RIVAL_SIR_PAIO_CORREIA,Sir Paio Correia,Sir Paio Correia
+RIVAL_SIR_ALVARO_MENDES,Sir Álvaro Mendes,Sir Álvaro Mendes
+RIVAL_DAMA_SANCHA_LOBOS,Dama Sancha de Lobos,Dame Sancha of Lobos
+RIVAL_SIR_VASCO_CUNHA,Sir Vasco Cunha,Sir Vasco Cunha
+RIVAL_SIR_HENRIQUE_LAMINA,Sir Henrique Lâmina,Sir Henrique Blade
+PROVOCACAO_SIR_HENRIQUE_LAMINA,"Henrique gira a lança no ar: ""Rápido como lâmina, e tão gentil quanto.""","Henrique twirls his lance: ""Swift as a blade, and just as gentle."""
+RIVAL_DAMA_MAFALDA_TORMENTA,Dama Mafalda Tormenta,Dame Mafalda Storm
+PROVOCACAO_DAMA_MAFALDA_TORMENTA,"Mafalda baixa a viseira: ""Reze para a tormenta passar depressa.""","Mafalda lowers her visor: ""Pray the storm passes quickly."""
+RIVAL_SIR_BERMUDO_TOURO,"Sir Bermudo, o Touro",Sir Bermudo the Bull
+PROVOCACAO_SIR_BERMUDO_TOURO,"Bermudo bufa mais alto que o cavalo: ""Já derrubei bois maiores que você.""","Bermudo snorts louder than his horse: ""I have toppled oxen bigger than you."""
+RIVAL_DUQUE_AFONSO_MONTARGIL,Duque Afonso de Montargil,Duke Afonso of Montargil
+PROVOCACAO_DUQUE_AFONSO_MONTARGIL,"O duque acena para a tribuna: ""Aplaudam o desafiante. Será breve.""","The duke waves to the stands: ""Applaud the challenger. This will be brief."""
+TORNEIO_TORNEIO_VIMAR,Torneio de Vimar,Vimar Tournament
+TORNEIO_TORNEIO_LOBOS,Torneio de Lobos,Lobos Tournament
+TORNEIO_DESAFIO_SEM_ESCUDO,Prova dos Sem-Escudo,Trial of the Shieldless
+TORNEIO_TORNEIO_PORTAS_MONTARGIL,Torneio das Portas de Montargil,Montargil Gates Tournament
+TORNEIO_DESAFIO_TOCHAS,Justa das Tochas,Joust of Torches
+TORNEIO_TORNEIO_DUQUE,Torneio do Duque,The Duke's Tournament
+REGIAO_REINO,Torneios do reino,Kingdom tournaments
+RIVAL_SIR_LOURENCO_VIEGAS,Sir Lourenço Viegas,Sir Lourenço Viegas
+RIVAL_DAMA_CONSTANCA_PIRES,Dama Constança Pires,Dame Constança Pires
+RIVAL_SIR_DIOGO_LOBATO,Sir Diogo Lobato,Sir Diogo Lobato
+RIVAL_SIR_ESTEVAO_ROCHA,Sir Estêvão da Rocha,Sir Estêvão of the Rock
+RIVAL_DAMA_ALDONCA_VAZ,Dama Aldonça Vaz,Dame Aldonça Vaz
+RIVAL_SIR_LOPO_FAGUNDES,Sir Lopo Fagundes,Sir Lopo Fagundes
+RIVAL_SIR_GIL_IMPLACAVEL,"Sir Gil, o Implacável",Sir Gil the Relentless
+PROVOCACAO_SIR_GIL_IMPLACAVEL,Gil não diz nada. Só aponta a lança para o seu elmo.,Gil says nothing. He just points his lance at your helm.
+RIVAL_DAMA_BRITES_ESCARPA,Dama Brites da Escarpa,Dame Brites of the Cliff
+PROVOCACAO_DAMA_BRITES_ESCARPA,"Brites ajeita as luvas: ""Da escarpa se vê quem cai primeiro.""","Brites adjusts her gauntlets: ""From the cliff you can see who falls first."""
+RIVAL_SIR_TRISTAO_FERRO_VELHO,Sir Tristão Ferro-Velho,Sir Tristão Old-Iron
+PROVOCACAO_SIR_TRISTAO_FERRO_VELHO,"Tristão ri, rouco: ""Vinte anos de liça. Você é só mais um.""","Tristão laughs hoarsely: ""Twenty years in the lists. You are just one more."""
+RIVAL_PRINCIPE_FERNANDO_AURORA,Príncipe Fernando de Aurora,Prince Fernando of Aurora
+PROVOCACAO_PRINCIPE_FERNANDO_AURORA,"O príncipe ergue a taça: ""Ao plebeu que chegou longe demais!""","The prince raises his cup: ""To the commoner who came too far!"""
+TORNEIO_TORNEIO_AURORA,Torneio de Aurora,Aurora Tournament
+TORNEIO_TORNEIO_ROCHA,Torneio da Rocha,Tournament of the Rock
+TORNEIO_DESAFIO_CAVALO_ESTRANHO,Prova do Cavalo Estranho,Trial of the Strange Horse
+TORNEIO_TORNEIO_LIS,Torneio de Lis,Lis Tournament
+TORNEIO_TORNEIO_MAR,Torneio do Mar,Tournament by the Sea
+TORNEIO_DESAFIO_UNICA_CHANCE,Juramento da Única Chance,Oath of the Single Chance
+TORNEIO_TORNEIO_PRINCIPE,Torneio do Príncipe,The Prince's Tournament
+REGIAO_GRANDE_TORNEIO,Grande Torneio,Grand Tournament
+RIVAL_SIR_RAMIRO_VALENTE,Sir Ramiro Valente,Sir Ramiro Valente
+RIVAL_DAMA_GUIOMAR_ALVA,Dama Guiomar Alva,Dame Guiomar Alva
+RIVAL_SIR_OSORIO_SANTARRA,Sir Osório de Santarra,Sir Osório of Santarra
+RIVAL_SIR_PERO_GALVAO,Sir Pero Galvão,Sir Pero Galvão
+RIVAL_DAMA_VIOLANTE_SERRA,Dama Violante Serra,Dame Violante Serra
+RIVAL_SIR_GARCIA_BRAVO,Sir Garcia Bravo,Sir Garcia Bravo
+RIVAL_SIR_AURELIO_INVICTO,"Sir Aurélio, o Invicto",Sir Aurélio the Unbeaten
+PROVOCACAO_SIR_AURELIO_INVICTO,"Aurélio mostra as cem fitas da lança: ""Nenhuma é de derrota.""","Aurélio shows the hundred ribbons on his lance: ""Not one is from a defeat."""
+RIVAL_DAMA_ELVIRA_SANGUE_REAL,Dama Elvira Sangue-Real,Dame Elvira Royal-Blood
+PROVOCACAO_DAMA_ELVIRA_SANGUE_REAL,"Elvira nem levanta a voz: ""Meu avô justou contra o seu? Ah, não. Ele não tinha avô.""","Elvira does not raise her voice: ""My grandfather jousted yours? Ah, no. Yours had none."""
+RIVAL_SIR_BALTASAR_ESCUDO_OURO,Sir Baltasar Escudo-de-Ouro,Sir Baltasar Goldshield
+PROVOCACAO_SIR_BALTASAR_ESCUDO_OURO,"Baltasar bate no escudo dourado: ""Ouro não amassa. Você vai ver.""","Baltasar knocks on his golden shield: ""Gold does not dent. You will see."""
+RIVAL_REI_SANCHO_JUSTADOR,"Rei Sancho, o Justador",King Sancho the Jouster
+PROVOCACAO_REI_SANCHO_JUSTADOR,"O rei desce da tribuna e pega a lança: ""Esta eu mesmo justo.""","The king steps down from the stands and takes a lance: ""This one I joust myself."""
+TORNEIO_GRANDE_PROVA_ESTANDARTES,Prova dos Estandartes,Trial of Banners
+TORNEIO_GRANDE_LICA_NORTE,Liça do Norte,Northern Lists
+TORNEIO_GRANDE_LICA_SUL,Liça do Sul,Southern Lists
+TORNEIO_GRANDE_DESAFIO_LUA,Juramento à Luz da Lua,Oath by Moonlight
+TORNEIO_GRANDE_QUARTAS,Quartas do Grande Torneio,Grand Tournament Quarterfinals
+TORNEIO_GRANDE_DESAFIO_TEMPESTADE,Tempestade Real,Royal Storm
+TORNEIO_GRANDE_SEMIFINAL,Semifinal do Grande Torneio,Grand Tournament Semifinal
+TORNEIO_GRANDE_FINAL,Final do Grande Torneio,Grand Tournament Final
+PROVOCACAO_CAMPEAO_VALDEMAR,"Valdemar acena para a vila inteira: ""Mais um que veio aprender a cair.""","Valdemar waves to the whole village: ""Another one come to learn how to fall."""
+PVE_REGIAO_ANTERIOR,◀,◀
+PVE_REGIAO_PROXIMA,▶,▶
+PVE_REGIAO_BLOQUEADA,Vença o último torneio da região anterior,Win the last tournament of the previous region
+PVE_OPCIONAL,desafio,challenge
+PVE_CHANCE_PERDIDA,chance perdida,chance lost
+PVE_PROJETO_GANHO,Projeto ganho: conjunto {conjunto}!,Blueprint won: {conjunto} set!
+PVE_REGIAO_LIBERADA,Nova região: {regiao}!,New region: {regiao}!
+DESAFIO_UMA_CHANCE,"Uma chance só: perdeu, acabou",One chance only: lose and it's over
+DESAFIO_CAVALO_EMPRESTADO,Cavalo emprestado,Borrowed horse
+DESAFIO_SEM_ESCUDO,Sem escudo,No shields
+DESAFIO_CHUVA,Chuva: compasso mais difícil,Rain: harder rhythm
+DESAFIO_NOTURNA,Justa noturna: mira tremida,Night joust: shaky aim
+ERRO_CHANCE_PERDIDA,Este desafio era de uma chance só.,This challenge had only one chance.
+ERRO_REGIAO_BLOQUEADA,Esta região ainda está fechada.,This region is still closed.
+CONJUNTO_CAVALEIRO_ANDANTE,Cavaleiro Andante,Knight-Errant
+CONJUNTO_FERRO_NEGRO,Ferro Negro,Black Iron
+CONJUNTO_GUARDA_REAL,Guarda Real,Royal Guard
+CONJUNTO_DRAGAO,Dragão,Dragon
+CONJUNTO_REI_SOL,Rei Sol,Sun King
+ITEM_ELMO_CAVALEIRO_ANDANTE,Elmo do cavaleiro andante,Knight-errant's helm
+ITEM_PEITORAL_CAVALEIRO_ANDANTE,Peitoral do cavaleiro andante,Knight-errant's breastplate
+ITEM_ESCUDO_CAVALEIRO_ANDANTE,Escudo do cavaleiro andante,Knight-errant's shield
+ITEM_LANCA_CAVALEIRO_ANDANTE,Lança do cavaleiro andante,Knight-errant's lance
+ITEM_CAPARACAO_CAVALEIRO_ANDANTE,Caparação do cavaleiro andante,Knight-errant's caparison
+ITEM_ELMO_FERRO_NEGRO,Elmo de ferro negro,Black iron helm
+ITEM_PEITORAL_FERRO_NEGRO,Peitoral de ferro negro,Black iron breastplate
+ITEM_ESCUDO_FERRO_NEGRO,Escudo de ferro negro,Black iron shield
+ITEM_LANCA_FERRO_NEGRO,Lança de ferro negro,Black iron lance
+ITEM_CAPARACAO_FERRO_NEGRO,Caparação de ferro negro,Black iron caparison
+ITEM_ELMO_GUARDA_REAL,Elmo da guarda real,Royal guard helm
+ITEM_PEITORAL_GUARDA_REAL,Peitoral da guarda real,Royal guard breastplate
+ITEM_ESCUDO_GUARDA_REAL,Escudo da guarda real,Royal guard shield
+ITEM_LANCA_GUARDA_REAL,Lança da guarda real,Royal guard lance
+ITEM_CAPARACAO_GUARDA_REAL,Caparação da guarda real,Royal guard caparison
+ITEM_ELMO_DRAGAO,Elmo do dragão,Dragon helm
+ITEM_PEITORAL_DRAGAO,Peitoral do dragão,Dragon breastplate
+ITEM_ESCUDO_DRAGAO,Escudo do dragão,Dragon shield
+ITEM_LANCA_DRAGAO,Lança do dragão,Dragon lance
+ITEM_CAPARACAO_DRAGAO,Caparação do dragão,Dragon caparison
+ITEM_ELMO_REI_SOL,Elmo do Rei Sol,Sun King's helm
+ITEM_PEITORAL_REI_SOL,Peitoral do Rei Sol,Sun King's breastplate
+ITEM_ESCUDO_REI_SOL,Escudo do Rei Sol,Sun King's shield
+ITEM_LANCA_REI_SOL,Lança do Rei Sol,Sun King's lance
+ITEM_CAPARACAO_REI_SOL,Caparação do Rei Sol,Sun King's caparison
+ARAUTO_PROVOCACAO,O arauto: {texto},The herald: {texto}
+PVE_BLOQUEADO_ANTERIOR,vença o torneio anterior,win the previous tournament

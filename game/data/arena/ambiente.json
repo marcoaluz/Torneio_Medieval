@@ -1,0 +1,6 @@
+{
+	"versao": 1,
+	"_nota": "Ambiente da arena nos desafios especiais do PvE (so visual; o efeito de jogo esta em balance/pve.json > desafios). cor_mundo multiplica a cor do mundo (CanvasModulate); a interface nao escurece.",
+	"noite": { "cor_mundo": "4a5a86" },
+	"chuva": { "cor_mundo": "a8b0bb", "gotas": 220, "cor_gota": "c8d4e6aa" }
+}

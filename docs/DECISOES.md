@@ -83,3 +83,6 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Liga +20/−16 e rival = 40 + 0,1 × pontos (faixa ±15 de poder)**: com +25/−12 a expectativa era sempre positiva e todos chegavam a Campeão em 2 semanas; agora cada liga corresponde a uma faixa de poder e o jogador estabiliza vencendo ~44%.
 - **2026-10-11 · Vaga de treino do VIP = a do campo de treino nível 3 (não somam)**, lendo o GDD ("VIP dá a 2ª vaga; o grátis ganha pelo nível do prédio").
 - **2026-10-11 · Teto de melhoria = 2 × nível do armeiro** (GDD: "o teto de melhoria segue o nível do armeiro").
+- **2026-10-11 · Conteúdo do PvE continua em JSON (não `.tres`)**: a Edge Function em TypeScript e os oráculos precisam ler os mesmos dados; `.tres` só o Godot lê. Formato compacto (um rival/torneio por linha) para editar à mão.
+- **2026-10-11 · Desafios especiais como transformação pura da configuração e dos lados antes da justa** (`RegraPve.aplicar_desafios`), não como regra nova dentro da justa: a justa não muda e o servidor só precisa aplicar a mesma transformação. Torneios de desafio são opcionais; "uma chance" também proíbe repetir disputa vencida.
+- **2026-10-11 · Save v2**: `inventario.projetos` (projetos dos campeões de região, para a forja do 3.15).

@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 1
+const VERSAO := 2
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -416,7 +416,7 @@ func registrar_justa(resultado: Dictionary) -> Dictionary:
 				it["durabilidade"] = clampi(int(fim[espaco]["durabilidade"]), 0, int(it["durabilidade"]))
 	var f: Dictionary = Balanceamento.carregar("treino")["folego_cavalo"]
 	for c: Dictionary in estado["cavalos"]:
-		if c["id"] == estado["cavalo_ativo"]:
+		if c["id"] == estado["cavalo_ativo"] and resultado.get("gasta_folego", true):
 			c["folego"] = maxi(folego_cavalo(c["id"]) - int(f["gasto_por_justa"]), 0)
 			c["folego_em"] = ServicoTempo.agora()
 	return _concluir("cavalos")
@@ -512,17 +512,53 @@ func pve() -> Dictionary:
 func progresso_torneio(id: String) -> Dictionary:
 	var t: Dictionary = estado["pve"]["torneios"].get(id, {})
 	return {"proxima": int(t.get("proxima", 0)), "concluido": t.get("concluido", false),
-		"estrelas": (t.get("estrelas", {}) as Dictionary).duplicate()}
+		"estrelas": (t.get("estrelas", {}) as Dictionary).duplicate(), "falhou": t.get("falhou", false)}
 
-## Liberado: nível mínimo e o torneio anterior da região concluído.
+## Região de um torneio ("" se não existe).
+func regiao_do_torneio(id: String) -> String:
+	var dados := pve()
+	for r: String in dados["ordem_regioes"]:
+		if (dados["regioes"][r]["torneios"] as Array).has(id):
+			return r
+	return ""
+
+## Regiões abertas, na ordem do circuito: da primeira até a atual (a última
+## liberada; vencer o último torneio obrigatório de uma região abre a seguinte).
+func regioes_liberadas() -> Array:
+	var ordem: Array = pve()["ordem_regioes"]
+	return ordem.slice(0, ordem.find(estado["pve"]["regiao"]) + 1)
+
+func regiao_liberada(regiao: String) -> bool:
+	return regioes_liberadas().has(regiao)
+
+## Desafios especiais do torneio (ids de pve.json > desafios).
+func desafios_do_torneio(id: String) -> Array:
+	return (pve()["torneios"].get(id, {}).get("desafios", []) as Array).duplicate()
+
+## Último torneio obrigatório da região: vencê-lo fecha a região.
+func torneio_final_da_regiao(regiao: String) -> String:
+	var dados := pve()
+	var lista: Array = dados["regioes"][regiao]["torneios"]
+	for i in range(lista.size() - 1, -1, -1):
+		if not dados["torneios"][lista[i]].get("opcional", false):
+			return lista[i]
+	return ""
+
+## Liberado: região aberta, nível mínimo e todos os torneios obrigatórios
+## antes dele (na ordem da região) concluídos. Os opcionais (desafios) não
+## bloqueiam os seguintes.
 func torneio_liberado(id: String) -> bool:
 	var dados := pve()
 	var t: Dictionary = dados["torneios"].get(id, {})
-	if t.is_empty() or int(estado["cavaleiro"]["nivel"]) < int(t["nivel_minimo"]):
+	var regiao := regiao_do_torneio(id)
+	if t.is_empty() or regiao == "" or not regiao_liberada(regiao) or int(estado["cavaleiro"]["nivel"]) < int(t["nivel_minimo"]):
 		return false
-	var lista: Array = dados["regioes"][estado["pve"]["regiao"]]["torneios"]
-	var i := lista.find(id)
-	return i <= 0 or progresso_torneio(lista[i - 1])["concluido"]
+	for anterior: String in dados["regioes"][regiao]["torneios"]:
+		if anterior == id:
+			return true
+		if not dados["torneios"][anterior].get("opcional", false) and not progresso_torneio(anterior)["concluido"]:
+			return false
+	return true
 
 ## Pode jogar a disputa `indice` do torneio (a próxima, ou uma já vencida).
 func pode_disputar(torneio: String, indice: int) -> Dictionary:
@@ -531,9 +567,20 @@ func pode_disputar(torneio: String, indice: int) -> Dictionary:
 	var rivais: Array = pve()["torneios"][torneio]["rivais"]
 	if indice < 0 or indice >= rivais.size():
 		return _erro("disputa_inexistente")
-	if indice > progresso_torneio(torneio)["proxima"]:
+	var prog := progresso_torneio(torneio)
+	if indice > prog["proxima"]:
 		return _erro("disputa_bloqueada")
+	# Uma chance só: perdeu, acabou; e nada de repetir disputa já vencida.
+	if _uma_chance(torneio) and (prog["falhou"] or prog["concluido"] or indice < prog["proxima"]):
+		return _erro("chance_perdida")
 	return {"ok": true, "erro": ""}
+
+func _uma_chance(torneio: String) -> bool:
+	var defs: Dictionary = pve().get("desafios", {})
+	for d: String in desafios_do_torneio(torneio):
+		if int(defs.get(d, {}).get("tentativas", 0)) == 1:
+			return true
+	return false
 
 ## Automático: só disputa já vencida com 3 estrelas e que não seja de campeão.
 func pode_automatico(torneio: String, indice: int) -> Dictionary:
@@ -550,12 +597,20 @@ func pode_automatico(torneio: String, indice: int) -> Dictionary:
 
 ## Tudo que a justa precisa do rival: {lado, perfil, casa, brasao, nome_chave}.
 ## O nêmesis cresce a cada encontro (atributos + cresce_por_encontro).
-func rival_para_justa(rival_id: String) -> Dictionary:
-	return _rival_de(pve()["rivais"][rival_id], rival_id)
+## Na `regiao`, o rival usa os dados de por_regiao (o nêmesis volta mais
+## forte em cada região); o crescimento por encontro para em cresce_max.
+## Campeões trazem perfil_ajuste (estilo de mira) e provocação.
+func rival_para_justa(rival_id: String, regiao := "") -> Dictionary:
+	return _rival_de(pve()["rivais"][rival_id], rival_id, regiao)
 
-func _rival_de(r: Dictionary, rival_id: String) -> Dictionary:
+func _rival_de(r: Dictionary, rival_id: String, regiao := "") -> Dictionary:
+	if regiao != "" and r.get("por_regiao", {}).has(regiao):
+		r = r.duplicate()
+		r.merge(r["por_regiao"][regiao], true)
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
 	var bonus := int(r.get("cresce_por_encontro", 0)) * int(estado["pve"].get("encontros", {}).get(rival_id, 0))
+	if r.has("cresce_max"):
+		bonus = mini(bonus, int(r["cresce_max"]))
 	var cav := {}
 	for k: String in r["cavaleiro"]:
 		cav[k] = mini(int(r["cavaleiro"][k]) + bonus, 100)
@@ -566,16 +621,39 @@ func _rival_de(r: Dictionary, rival_id: String) -> Dictionary:
 		equip[modelos[m]["espaco"]] = st
 	var lado := {"cavaleiro": cav, "cavalo": (r["cavalo"] as Dictionary).duplicate(), "equipamento": equip,
 		"habilidade": r.get("habilidade", "")}
-	var perfil: Dictionary = Balanceamento.carregar("ia_rival")["perfis"][r["perfil"]]
-	return {"id": rival_id, "lado": lado, "perfil_nome": r["perfil"], "perfil": perfil,
+	var perfil := RegraPve.ajustar_perfil(Balanceamento.carregar("ia_rival")["perfis"][r["perfil"]], r.get("perfil_ajuste", {}))
+	return {"id": rival_id, "lado": lado, "perfil_nome": r["perfil"], "perfil": perfil, "provocacao": r.get("provocacao", ""),
 		"casa": {"principal": r["casa"][0], "secundaria": r["casa"][1]},
 		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(r.get("brasao", ""), {}),
 		"nome_chave": "RIVAL_" + rival_id.to_upper(), "nemesis": r.get("nemesis", false), "campeao": r.get("campeao", false)}
 
+## Tudo para jogar uma disputa (manual ou automática), com os desafios do
+## torneio já aplicados pela regra: {cfg, lado_jogador, rival (como
+## rival_para_justa, com lado e perfil ajustados), desafios, visuais
+## (ex.: "chuva", "noite"), gasta_folego (cavalo emprestado não cansa o seu)}.
+func preparar_disputa(torneio: String, indice: int) -> Dictionary:
+	var dados := pve()
+	var rv := rival_para_justa(dados["torneios"][torneio]["rivais"][indice], regiao_do_torneio(torneio))
+	var ids := desafios_do_torneio(torneio)
+	var defs: Dictionary = dados.get("desafios", {})
+	var a := RegraPve.aplicar_desafios(Justa.carregar_configuracao(), lado_para_justa(), rv["lado"], rv["perfil"], ids, defs)
+	rv["lado"] = a["lado_rival"]
+	rv["perfil"] = a["perfil_rival"]
+	var visuais := []
+	var gasta := true
+	for id: String in ids:
+		if defs[id].has("visual"):
+			visuais.append(defs[id]["visual"])
+		if not defs[id].get("gasta_folego", true):
+			gasta = false
+	return {"cfg": a["cfg"], "lado_jogador": a["lado_jogador"], "rival": rv, "desafios": ids, "visuais": visuais, "gasta_folego": gasta}
+
 ## Fim de uma disputa (manual ou automática), a partir dos eventos da justa:
 ## estrelas, avanço na chave, recompensa da disputa e, na primeira vez que o
 ## torneio fecha, a do torneio; XP e nível. {ok, estrelas, ouro, xp, niveis,
-## torneio_concluido, venceu}.
+## torneio_concluido, venceu, projeto (conjunto ganho ao fechar a região),
+## regiao_nova (região que abriu)}. Perder um desafio de uma chance só marca
+## o torneio como falhou.
 func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico := false) -> Dictionary:
 	var p := pode_disputar(torneio, indice)
 	if not p["ok"]:
@@ -592,10 +670,16 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 	var ouro_g := 0
 	var xp_g := 0
 	var fechou := false
+	var regiao := regiao_do_torneio(torneio)
+	var pct := int(dados["regioes"][regiao].get("recompensa_pct", 100))
+	var projeto := ""
+	var regiao_nova := ""
+	if est == 0 and _uma_chance(torneio):
+		reg["falhou"] = true
 	if est > 0:
 		var r: Dictionary = dados["recompensa_disputa"]
-		ouro_g = int(r["ouro_base"]) + est * int(r["ouro_por_estrela"])
-		xp_g = int(r["xp_base"]) + est * int(r["xp_por_estrela"])
+		ouro_g = (int(r["ouro_base"]) + est * int(r["ouro_por_estrela"])) * pct / 100
+		xp_g = (int(r["xp_base"]) + est * int(r["xp_por_estrela"])) * pct / 100
 		if automatico:
 			ouro_g = ouro_g * int(dados["recompensa_automatico_pct"]) / 100
 			xp_g = xp_g * int(dados["recompensa_automatico_pct"]) / 100
@@ -607,9 +691,20 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 				fechou = true
 				ouro_g += int(t["recompensa"]["ouro"])
 				xp_g += int(t["recompensa"]["xp"])
+				if torneio == torneio_final_da_regiao(regiao):
+					projeto = str(dados["regioes"][regiao].get("recompensa_regiao", {}).get("projeto", ""))
+					var projetos: Array = estado["inventario"]["projetos"]
+					if projeto != "" and not projetos.has(projeto):
+						projetos.append(projeto)
+					var ordem: Array = dados["ordem_regioes"]
+					var i := ordem.find(regiao)
+					if i + 1 < ordem.size() and estado["pve"]["regiao"] == regiao:
+						regiao_nova = ordem[i + 1]
+						estado["pve"]["regiao"] = regiao_nova
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
-	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0}, true)
+	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0,
+		"projeto": projeto, "regiao_nova": regiao_nova}, true)
 	return res
 
 ## Disputa no automático: a mesma regra, com uma IA de precisão média no
@@ -619,10 +714,10 @@ func disputa_automatica(torneio: String, indice: int, semente: int) -> Dictionar
 	if not p["ok"]:
 		return p
 	var dados := pve()
-	var rv := rival_para_justa(dados["torneios"][torneio]["rivais"][indice])
+	var prep := preparar_disputa(torneio, indice)
 	var perfil_auto: Dictionary = Balanceamento.carregar("ia_rival")["perfis"][dados["perfil_automatico"]]
-	var sim := RegraPve.simular(Justa.carregar_configuracao(), lado_para_justa(), rv["lado"], semente, rv["perfil"], perfil_auto)
-	registrar_justa({"equipamento_final": sim["equipamento_final"]})
+	var sim := RegraPve.simular(prep["cfg"], prep["lado_jogador"], prep["rival"]["lado"], semente, prep["rival"]["perfil"], perfil_auto)
+	registrar_justa({"equipamento_final": sim["equipamento_final"], "gasta_folego": prep["gasta_folego"]})
 	var r := concluir_disputa(torneio, indice, sim["eventos"], true)
 	r["eventos"] = sim["eventos"]
 	return r
@@ -695,7 +790,7 @@ func novo_estado() -> Dictionary:
 		"casa": {"nome": "", "cores": {"principal": "azul_real", "secundaria": "ouro_velho", "metal": "ferro"}, "brasao": {}},
 		"cavalos": [],
 		"cavalo_ativo": "",
-		"inventario": {"ouro": int(ini["ouro"]), "gemas": int(ini["gemas"]), "materiais": ini["materiais"].duplicate(), "itens": []},
+		"inventario": {"ouro": int(ini["ouro"]), "gemas": int(ini["gemas"]), "materiais": ini["materiais"].duplicate(), "itens": [], "projetos": []},
 		"equipamento": {},
 		"visual": {},
 		"vila": {"predios": {}},
@@ -749,7 +844,12 @@ static func migrar(d: Dictionary) -> Dictionary:
 	var v := int(d.get("versao", 0))
 	if v > VERSAO:
 		push_warning("ServicoJogador: save de versão mais nova (%d)" % v)
-	# Exemplo do formato: if v < 2: d["novo_campo"] = ...; v = 2
+	if v < 2:
+		# 3.13: projetos ganhos dos campeões de região (forja, 3.15).
+		var inv: Dictionary = d.get("inventario", {})
+		if not inv.has("projetos"):
+			inv["projetos"] = []
+		v = 2
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

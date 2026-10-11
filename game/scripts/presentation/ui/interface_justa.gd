@@ -104,6 +104,15 @@ func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> 
 			dica.text = tr("ARAUTO_EXIBICAO_" + nome) if f != JustaFases.Fase.FIM else ""
 		"tutorial":
 			dica.text = tr("DICA_" + nome) if f != JustaFases.Fase.FIM else ""
+		"disputa":
+			# Na apresentação o arauto lê a provocação do campeão e os desafios.
+			var linhas: Array[String] = []
+			if f == JustaFases.Fase.APRESENTACAO and controlador.justa.fases.passada <= 1:
+				if controlador.provocacao != "":
+					linhas.append(tr("ARAUTO_PROVOCACAO").format({"texto": tr(controlador.provocacao)}))
+				for d: String in controlador.desafios:
+					linhas.append(tr("DESAFIO_" + d.to_upper()))
+			dica.text = "\n".join(linhas)
 		_:
 			dica.text = ""
 
@@ -151,6 +160,10 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 			linhas.append(tr("PVE_SUBIU_NIVEL").format({"nivel": n}))
 		if r.get("torneio_concluido", false):
 			linhas.append(tr("PVE_TORNEIO_VENCIDO"))
+		if str(r.get("projeto", "")) != "":
+			linhas.append(tr("PVE_PROJETO_GANHO").format({"conjunto": tr("CONJUNTO_" + str(r["projeto"]).to_upper())}))
+		if str(r.get("regiao_nova", "")) != "":
+			linhas.append(tr("PVE_REGIAO_LIBERADA").format({"regiao": tr("REGIAO_" + str(r["regiao_nova"]).to_upper())}))
 		resultado_motivo.text = "\n".join(linhas)
 		resultado_dica.text = tr("PVE_TOQUE_PARA_VOLTAR")
 	resultado.visible = true
