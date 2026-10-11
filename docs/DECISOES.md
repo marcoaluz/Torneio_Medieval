@@ -10,3 +10,5 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Estrutura: código e assets em `game/`**, testes em `tests/`, docs em `docs/`, na raiz só `project.godot`, `icon.svg`, `CLAUDE.md`.
 - **2026-10-11 · Regra da justa em `game/scripts/rules/`**, módulo puro e determinístico; casos de teste em `tests/shared/` para GDScript e TypeScript (Parte 3).
 - **2026-10-11 · Godot fora do PATH:** o caminho completo fica registrado no `CLAUDE.md`, sem alterar o PATH do Windows.
+- **2026-10-11 · Plugin GodotPrompter instalado por conta (escopo usuário).** Skills de plugin não ficam no repositório; cada conta roda os dois comandos de instalação. Conteúdo auditado antes (hook local, sem rede). Motivo: um só pacote Godot, como o Pacote recomenda.
+- **2026-10-11 · Validação visual por Movie Maker do Godot** (`--write-movie`), via `driver.sh shot`: janela real, sem depender de xvfb/Playwright (Windows). PNG sai em 1280×720 por causa de `window_width_override`.

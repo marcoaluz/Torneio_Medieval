@@ -10,6 +10,8 @@
 - Pacote de Prompts movido para `docs/PACOTE_DE_PROMPTS.md`.
 
 ## Funcionando e testado
+- Skill `run-torneio-medieval` (`.claude/skills/run-torneio-medieval/`): `driver.sh import | script | shot`, todos rodados e verificados nesta máquina. `shot` gerou PNG conferido visualmente (borda, cerca, toque injetado). Cena de fumaça em `tests/smoke/`.
+- Plugin GodotPrompter 1.15.0 instalado (escopo usuário, só nesta conta). Hook de SessionStart auditado: local, sem rede; oferece uma vez adicionar seção `## GodotPrompter` ao CLAUDE.md (só com concordância). Skills do plugin só aparecem a partir da próxima sessão.
 - `Godot_v4.7.2 --headless --path . --import` abre e importa o projeto sem erros (exit 0). Ainda não há cena principal, então nada foi executado visualmente nem testado em celular.
 
 ## Pendências / bugs
@@ -17,8 +19,9 @@
 - Pendências abertas do próprio GDD (seção Plano de produção e pendências): nome do jogo e do protagonista, enredo, planilha de economia (será a 3.12), mecânica da mêlée, quantidade de formas/símbolos/cores do editor de brasão, divisão PixelLab × Claude Code, lista de habilidades especiais do lançamento.
 - Pastas vazias têm `.gitkeep`; remover conforme forem ocupadas.
 - Traduções ainda não registradas no `project.godot` (criar `game/i18n/` CSV no primeiro prompt que tiver texto, 1.2 ou 1.7).
-- Não instaladas ainda: skills de terceiros (GodotPrompter, skill-creator) e as skills do projeto `estilo-arte`, `som`, `balanceamento`, `regra-da-justa`, `supabase-jogo`.
+- Não instaladas ainda: skill-creator (`/plugin install skill-creator@claude-plugins-official`) e as skills do projeto `estilo-arte`, `som`, `balanceamento`, `regra-da-justa`, `supabase-jogo`.
 
 ## Próximo passo
-1. Rodar `/run-skill-generator` uma vez (Godot em `D:\DEV\Godot\Godot_v4.7.2-stable_win64.exe`).
-2. Prompt 1.1 do Pacote (Cena da arena), Opus 5.5, medium. Resolução base 960×540. Ler antes a seção A justa do GDD.
+1. Na próxima sessão, confirmar que as skills `godot-prompter:*` aparecem e responder à oferta de adicionar a seção ao CLAUDE.md.
+2. Em cada outra conta do Claude: rodar `claude plugins marketplace add jame581/skillsmith` e `claude plugins install godot-prompter@skillsmith` (plugin é por conta, não vai no git).
+3. Prompt 1.1 do Pacote (Cena da arena), Opus 5.5, medium. Resolução base 960×540. Ler antes a seção A justa do `docs/GDD.md`. Ao terminar, validar com `driver.sh shot res://game/scenes/arena/<cena>.tscn`.

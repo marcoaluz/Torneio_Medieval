@@ -42,6 +42,9 @@ Executável (não está no PATH): `D:\DEV\Godot\Godot_v4.7.2-stable_win64.exe`
 - Rodar cena: `... --path . res://caminho/cena.tscn`
 - Rodar script de teste: `... --headless --path . -s res://tests/<script>.gd`
 
+## Rodar e validar
+Use a skill `/run-torneio-medieval` (`.claude/skills/run-torneio-medieval/driver.sh`): `import`, `script <res://x.gd>` para testes headless, `shot <cena>` para PNG da cena real.
+
 ## Nunca
 - Colocar texto ou número de balanceamento fixo no código.
 - Dar à regra da justa dependência de cena, nó ou tempo real.
