@@ -76,3 +76,5 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Estrelas como regra pura** (`RegraPve`), porque decidem recompensa e o servidor repete.
 - **2026-10-11 · O tutorial leva ao nível 2 (que abre a arena)**, e quem pula recebe a mesma recompensa; senão o jogador ficaria sem como subir de nível. Primeiro dia: timers limitados a 15 s (`inicio.json`).
 - **2026-10-11 · Roteamento por `Fluxo` e passo salvo**; as telas só avisam `concluiu(etapa)`. A justa tem modos (livre, disputa, exibicao, tutorial) no mesmo controlador.
+- **2026-10-11 · Supabase pela API REST com `HTTPRequest`** (sem SDK de terceiros), com transporte injetável para teste. Save na nuvem = o JSON do jogador inteiro com `revisao` controlada por gatilho; nuvem vence em celular novo ou revisão maior.
+- **2026-10-11 · Projeto Supabase não criado sem autorização** (custo e ação externa); migrações e cliente prontos localmente, jogo funciona offline sem configuração.

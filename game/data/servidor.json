@@ -1,0 +1,8 @@
+{
+	"versao": 1,
+	"_nota": "Servidor (Supabase). url = https://<ref>.supabase.co; chave_publica = a chave publicavel/anon do projeto (pode ir no app; NUNCA a de servico). Vazio = jogo so com save local (offline). Preencher quando o projeto existir (docs/NUVEM.md).",
+	"url": "",
+	"chave_publica": "",
+	"envio_atraso_s": 5,
+	"tentativas": 3
+}
