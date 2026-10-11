@@ -41,6 +41,7 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_brasao/")
 	jog.caminho_save = "user://teste_brasao/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 	var ed: EditorBrasao = load("res://game/scenes/ui/editor_brasao.tscn").instantiate()
 	root.add_child(ed)
 	await process_frame

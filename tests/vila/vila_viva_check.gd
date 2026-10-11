@@ -12,6 +12,7 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_vila_viva/")
 	jog.caminho_save = "user://teste_vila_viva/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 	var vila: Vila = load("res://game/scenes/village/vila.tscn").instantiate()
 	var amb: AmbienteVila = vila.get_node("Ambiente")
 	amb.hora_forcada = 13.0

@@ -42,6 +42,7 @@ func _ready() -> void:
 		controlador.habilidade_ativada.connect(_ao_ativar_habilidade)
 		controlador.impacto_resolvido.connect(_ao_resolver_impacto)
 		controlador.justa_terminou.connect(_ao_terminar)
+		controlador.fase_mudou.connect(_ao_mudar_fase)
 
 ## A interface ocupa este ponto da tela (para o jogo não tratar o toque)?
 func contem_ponto(ponto_tela: Vector2) -> bool:
@@ -69,7 +70,7 @@ func _process(delta: float) -> void:
 
 func _atualizar_botao(j: Justa) -> void:
 	var nome := j.habilidade_ativa_de(true)
-	botao.visible = nome != "" and not j.terminou()
+	botao.visible = nome != "" and not j.terminou() and controlador.modo != "exibicao"
 	if not botao.visible:
 		return
 	botao.text = tr("HABILIDADE_" + nome.to_upper())
@@ -91,8 +92,20 @@ func _ao_comecar_passada(numero: int) -> void:
 	resultado.visible = false
 	_armadura_inicial_jogador = _soma_armadura(j.lado_jogador)
 	_armadura_inicial_rival = _soma_armadura(j.lado_rival)
-	plaquinha_jogador.definir(tr("JUSTA_NOME_JOGADOR"), controlador.arena.jogador.cor_casa)
+	plaquinha_jogador.definir(tr(controlador.nome_jogador if controlador.nome_jogador != "" else "JUSTA_NOME_JOGADOR"), controlador.arena.jogador.cor_casa)
 	plaquinha_rival.definir(tr(controlador.nome_rival) if controlador.nome_rival != "" else "", controlador.arena.rival.cor_casa)
+
+## Exibição: o arauto explica cada fase. Tutorial: a dica da fase fica na tela.
+func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> void:
+	var dica: Label = $Dica
+	var nome := JustaFases.NOMES_FASE[f].to_upper()
+	match controlador.modo:
+		"exibicao":
+			dica.text = tr("ARAUTO_EXIBICAO_" + nome) if f != JustaFases.Fase.FIM else ""
+		"tutorial":
+			dica.text = tr("DICA_" + nome) if f != JustaFases.Fase.FIM else ""
+		_:
+			dica.text = ""
 
 func _ao_avaliar_largada(_p: int, qualidade: String, _reacao: int, queimada: bool) -> void:
 	mostrar_letreiro(tr("LARGADA_QUEIMADA") if queimada else tr("LARGADA_" + qualidade.to_upper()))
@@ -124,6 +137,10 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 		_: resultado_titulo.text = tr("RESULTADO_EMPATE")
 	resultado_motivo.text = tr("MOTIVO_" + motivo.to_upper())
 	resultado_dica.text = tr("JUSTA_TOQUE_DE_NOVO")
+	if controlador.modo in ["exibicao", "tutorial"]:
+		resultado_dica.text = tr("INICIO_TOQUE_PARA_SEGUIR")
+	if controlador.modo == "exibicao":
+		resultado_titulo.text = tr("EXIBICAO_FIM")
 	var r: Dictionary = controlador.resultado_disputa
 	if not r.is_empty():
 		var linhas: Array[String] = [tr("MOTIVO_" + motivo.to_upper())]

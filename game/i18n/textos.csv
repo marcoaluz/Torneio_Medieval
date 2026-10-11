@@ -264,3 +264,24 @@ ERRO_DISPUTA_INEXISTENTE,Disputa desconhecida.,Unknown match.
 ERRO_DISPUTA_BLOQUEADA,Vença a disputa anterior primeiro.,Win the previous match first.
 ERRO_CAMPEAO_MANUAL,Campeões só no manual.,Champions are manual only.
 ERRO_PRECISA_TRES_ESTRELAS,O automático precisa de 3 estrelas nesta disputa.,Auto needs 3 stars in this match.
+INICIO_COMECAR,Começar,Start
+INICIO_PULAR_TUTORIAL,Já joguei antes: pular o tutorial,Played before: skip the tutorial
+INICIO_TOQUE_PARA_SEGUIR,Toque para seguir,Tap to continue
+EXIBICAO_AZUL,Sir Afonso (veterano),Sir Afonso (veteran)
+EXIBICAO_VERMELHO,Sir Rodrigo (veterano),Sir Rodrigo (veteran)
+EXIBICAO_FIM,Assim se justa!,That is how you joust!
+ARAUTO_EXIBICAO_APRESENTACAO,"O arauto: Damas e senhores, dois veteranos à liça! Observem e aprendam.","The herald: Ladies and lords, two veterans take the lists! Watch and learn."
+ARAUTO_EXIBICAO_LARGADA,O arauto: A bandeira vai baixar. Quem parte na hora certa ganha velocidade e precisão!,The herald: The flag is about to drop. Whoever starts on time gains speed and precision!
+ARAUTO_EXIBICAO_CORRIDA,"O arauto: Agora o galope! Cada passada no compasso faz o cavalo correr mais. Fora do tempo, ele cansa.",The herald: Now the gallop! Every stride on the beat makes the horse faster. Off the beat it tires.
+ARAUTO_EXIBICAO_MIRA,"O arauto: A mira! O cavaleiro arrasta a ponta da lança até o alvo: capacete, peito ou escudo.","The herald: The aim! The knight drags the lance tip onto the target: helm, chest or shield."
+ARAUTO_EXIBICAO_IMPACTO,"O arauto: O choque! Capacete vale 3, peito 2, escudo 1. Acertar o cavalo é falta. Derrubar vence na hora!","The herald: The clash! Helm is worth 3, chest 2, shield 1. Hitting the horse is a foul. An unhorsing wins at once!"
+DICA_APRESENTACAO,Toque para pular a apresentação.,Tap to skip the introduction.
+DICA_LARGADA,Espere a bandeira baixar e toque logo em seguida!,Wait for the flag to drop and tap right after!
+DICA_CORRIDA,Toque quando a barra de baixo brilhar: esse é o compasso do galope.,Tap when the bottom bar glows: that is the gallop beat.
+DICA_MIRA,"Segure, arraste a ponta da lança até o peito ou o capacete e solte.","Hold, drag the lance tip to the chest or helm, and release."
+DICA_IMPACTO,O choque! Veja onde a lança acertou.,The clash! See where your lance hit.
+RIVAL_TUTORIAL,Escudeiro Simão,Squire Simão
+BAU_TITULO,Seu primeiro baú,Your first chest
+BAU_TOQUE_PARA_ABRIR,Toque no baú para abrir.,Tap the chest to open it.
+BAU_GANHOU,{item} ({raridade}): já equipado!,{item} ({raridade}): already equipped!
+BAU_SEGUIR,Seguir para a vila,Go to the village

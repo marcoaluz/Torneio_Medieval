@@ -75,6 +75,9 @@ func confirmar() -> void:
 		return
 	_erro.text = ""
 	personagem_criado.emit()
+	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
+	if f and not jog.tutorial_concluido():
+		f.concluiu("criacao")
 
 func atualizar_previa() -> void:
 	var casa := {"principal": escolha["cor_principal"], "secundaria": escolha["cor_secundaria"],

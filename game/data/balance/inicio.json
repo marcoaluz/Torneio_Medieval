@@ -1,12 +1,87 @@
 {
-	"versao": 1,
-	"_nota": "Estado inicial de um jogador novo (antes da criacao do personagem preencher nome, aparencia e casa).",
+	"versao": 2,
+	"_nota": "Estado inicial de um jogador novo e o inicio do jogo (GDD Inicio do jogo). primeiro_dia: na primeira duracao_s desde a criacao, todo timer termina em no maximo timer_max_s. tutorial: recompensa (leva ao nivel 2, que abre a arena), peca do primeiro bau (ja equipada), rival fraco da primeira justa e os veteranos da justa de exibicao.",
 	"ouro": 100,
 	"gemas": 0,
-	"materiais": { "sucata": 5, "lingote_ferro": 0, "couro": 0 },
-	"cavaleiro": { "nivel": 1, "xp": 0, "atributos": { "forca": 30, "precisao": 30, "equilibrio": 30 }, "habilidade": "investida" },
-	"cavalo": { "atributos": { "velocidade": 40, "folego": 40, "temperamento": 40, "vinculo": 0 } },
-	"itens": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro", "caparacao_escudeiro"],
-	"equipar": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro", "caparacao_escudeiro"],
-	"predios": { "casa_senhorial": 1, "estabulo": 1, "campo_treino": 1, "ferreiro": 1 }
+	"materiais": {
+		"sucata": 5,
+		"lingote_ferro": 0,
+		"couro": 0
+	},
+	"cavaleiro": {
+		"nivel": 1,
+		"xp": 0,
+		"atributos": {
+			"forca": 30,
+			"precisao": 30,
+			"equilibrio": 30
+		},
+		"habilidade": "investida"
+	},
+	"cavalo": {
+		"atributos": {
+			"velocidade": 40,
+			"folego": 40,
+			"temperamento": 40,
+			"vinculo": 0
+		}
+	},
+	"itens": [
+		"elmo_escudeiro",
+		"peitoral_escudeiro",
+		"escudo_escudeiro",
+		"lanca_escudeiro",
+		"caparacao_escudeiro"
+	],
+	"equipar": [
+		"elmo_escudeiro",
+		"peitoral_escudeiro",
+		"escudo_escudeiro",
+		"lanca_escudeiro",
+		"caparacao_escudeiro"
+	],
+	"predios": {
+		"casa_senhorial": 1,
+		"estabulo": 1,
+		"campo_treino": 1,
+		"ferreiro": 1
+	},
+	"primeiro_dia": {
+		"duracao_s": 86400,
+		"timer_max_s": 15
+	},
+	"tutorial": {
+		"xp": 60,
+		"ouro": 50,
+		"item_bau": "elmo_vigia",
+		"rival_primeira_justa": {
+			"perfil": "novato",
+			"casa": [
+				"verde_floresta",
+				"branco_osso"
+			],
+			"brasao": "novato",
+			"cavaleiro": {
+				"forca": 10,
+				"precisao": 5,
+				"equilibrio": 15
+			},
+			"cavalo": {
+				"velocidade": 25,
+				"folego": 40,
+				"temperamento": 20
+			},
+			"equipamento": [
+				"peitoral_escudeiro",
+				"escudo_escudeiro",
+				"lanca_escudeiro"
+			],
+			"habilidade": ""
+		},
+		"exibicao": {
+			"perfil_azul": "equilibrado",
+			"perfil_vermelho": "agressivo",
+			"semente": 1234
+		}
+	}
 }

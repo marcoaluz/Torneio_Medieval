@@ -72,8 +72,13 @@ var semente := 0
 
 ## Todos os eventos da justa atual (estrelas do PvE, envio ao servidor).
 var eventos_justa: Array[Dictionary] = []
-## Chave de tradução do nome do rival.
+## Chave de tradução do nome do rival e do jogador (vazio = "Você").
 var nome_rival := ""
+var nome_jogador := ""
+## "livre", "disputa" (PvE), "exibicao" (início do jogo: dois veteranos da IA,
+## câmera da arquibancada, arauto explicando) ou "tutorial" (primeira justa,
+## rival fraco, dicas por fase). Vem do Fluxo.
+var modo := "livre"
 ## Disputa do PvE desta justa ({} = livre) e o resultado dela no Jogador.
 var disputa := {}
 var resultado_disputa := {}
@@ -111,14 +116,38 @@ func iniciar(semente_fixa := -1) -> void:
 	if lado_rival.is_empty():
 		lado_rival = Justa.lado_padrao(padrao)
 	var perfil := {}
+	var perfil_jogador := {}
 	var fluxo := get_node_or_null("/root/Fluxo") as FluxoTelas
 	var jog_d := get_node_or_null("/root/Jogador") as ServicoJogador
+	modo = fluxo.modo_justa if fluxo else "livre"
 	disputa = fluxo.disputa.duplicate() if fluxo and fluxo.em_disputa() else {}
 	resultado_disputa = {}
 	nome_rival = "RIVAL_" + perfil_rival.to_upper() if perfil_rival != "" else ""
-	if not disputa.is_empty() and jog_d:
-		var rid: String = jog_d.pve()["torneios"][disputa["torneio"]]["rivais"][int(disputa["indice"])]
-		var rv := jog_d.rival_para_justa(rid)
+	nome_jogador = ""
+	var rv := {}
+	match modo:
+		"disputa":
+			if not disputa.is_empty() and jog_d:
+				rv = jog_d.rival_para_justa(jog_d.pve()["torneios"][disputa["torneio"]]["rivais"][int(disputa["indice"])])
+		"tutorial":
+			if jog_d:
+				rv = jog_d.rival_tutorial()
+				rv["nome_chave"] = "RIVAL_TUTORIAL"
+		"exibicao":
+			# Dois veteranos da IA; o jogador assiste da arquibancada.
+			var ex: Dictionary = Balanceamento.carregar("inicio")["tutorial"]["exibicao"]
+			var perfis_ex: Dictionary = Balanceamento.carregar("ia_rival")["perfis"]
+			lado_jogador = Justa.lado_padrao(padrao)
+			lado_rival = Justa.lado_padrao(padrao)
+			perfil_rival = ex["perfil_vermelho"]
+			perfil_jogador = perfis_ex[ex["perfil_azul"]]
+			semente_fixa = int(ex["semente"])
+			nome_jogador = "EXIBICAO_AZUL"
+			nome_rival = "EXIBICAO_VERMELHO"
+			arena.jogador.definir_casa({"principal": "azul_real", "secundaria": "prata"})
+			arena.jogador.camadas().vestir({"pelagem": "branco", "corpo": "masculino", "elmo": "vigia", "peitoral": "vigia", "escudo": "vigia", "lanca": "vigia"})
+			arena.jogador.definir_brasao({"cor1": "azul_real", "cor2": "prata", "simbolo": "cruz", "cor_simbolo": "prata"})
+	if not rv.is_empty():
 		lado_rival = rv["lado"]
 		perfil_rival = rv["perfil_nome"]
 		nome_rival = rv["nome_chave"]
@@ -131,13 +160,13 @@ func iniciar(semente_fixa := -1) -> void:
 			set_process(false)
 			return
 		perfil = ia_cfg["perfis"][perfil_rival]
-	if disputa.is_empty():
+	if rv.is_empty():
 		arena.vestir_rival(perfil_rival)
 	else:
-		arena.rival.definir_brasao(jog_d.rival_para_justa(jog_d.pve()["torneios"][disputa["torneio"]]["rivais"][int(disputa["indice"])])["brasao"])
+		arena.rival.definir_brasao(rv["brasao"])
 	eventos_justa.clear()
 	semente = semente_fixa if semente_fixa >= 0 else randi()
-	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente, perfil)
+	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente, perfil, perfil_jogador)
 	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)
 	_px_por_mil = vao / float(justa.distancia_total_mil())
 	_resto_ms = 0.0
@@ -220,11 +249,21 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventScreenTouch and event.pressed and _tempo_desde_fim >= espera_para_recomecar:
 			get_viewport().set_input_as_handled()
 			var fluxo := get_node_or_null("/root/Fluxo") as FluxoTelas
-			if not disputa.is_empty() and fluxo:
-				fluxo.ir_para_vila()
-			else:
-				iniciar()
+			match modo:
+				"disputa":
+					if fluxo:
+						fluxo.ir_para_vila()
+				"exibicao":
+					if fluxo:
+						fluxo.concluiu("exibicao")
+				"tutorial":
+					if fluxo:
+						fluxo.concluiu("primeira_justa")
+				_:
+					iniciar()
 		return
+	if modo == "exibicao":
+		return  # na exibição o jogador só assiste
 	if fase() == JustaFases.Fase.MIRA:
 		if event is InputEventScreenTouch:
 			if event.pressed:
@@ -291,6 +330,16 @@ func _despachar(eventos: Array[Dictionary]) -> void:
 func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 	var cam := arena.camera
 	_animar_cavaleiros(nova)
+	if modo == "exibicao":
+		# Vista da arquibancada: plano aberto o tempo todo.
+		if nova == JustaFases.Fase.APRESENTACAO:
+			arena.posicionar_nas_pontas()
+			arena.arauto.levantar()
+			cam.plano_aberto(true)
+		elif nova == JustaFases.Fase.LARGADA:
+			arena.arauto.levantar()
+		_atualizar_visual()
+		return
 	match nova:
 		JustaFases.Fase.APRESENTACAO:
 			arena.posicionar_nas_pontas()
@@ -316,6 +365,8 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 ## desgaste nos prompts seguintes). Na Parte 3 vira o envio dos toques ao
 ## servidor, que recalcula e paga.
 func _registrar_no_jogador(e: Dictionary) -> void:
+	if modo == "exibicao":
+		return  # a exibição não mexe nos dados do jogador
 	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
 	if jog and not disputa.is_empty():
 		resultado_disputa = jog.concluir_disputa(disputa["torneio"], int(disputa["indice"]), eventos_justa)

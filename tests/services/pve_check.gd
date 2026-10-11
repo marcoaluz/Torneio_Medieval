@@ -13,6 +13,7 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_pve/")
 	jog.caminho_save = "user://teste_pve/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 
 	# Estrelas
 	_checa("derrota = 0 estrelas", RegraPve.estrelas(_ev(false, "pontos", ["peito"])) == 0)
@@ -78,6 +79,7 @@ func _initialize() -> void:
 	# Arena de verdade numa disputa
 	var fluxo: FluxoTelas = root.get_node("Fluxo")
 	fluxo.disputa = {"torneio": "feira_moinho", "indice": 1}
+	fluxo.modo_justa = "disputa"
 	var arena: Arena = load("res://game/scenes/arena/arena.tscn").instantiate()
 	root.add_child(arena)
 	await process_frame

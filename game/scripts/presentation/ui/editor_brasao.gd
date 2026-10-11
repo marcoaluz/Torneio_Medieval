@@ -69,6 +69,9 @@ func confirmar() -> void:
 	if jog:
 		jog.definir_brasao(brasao)
 	brasao_definido.emit(brasao.duplicate())
+	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
+	if f and jog and not jog.tutorial_concluido():
+		f.concluiu("brasao")
 
 func _rotulo(chave_texto: String) -> void:
 	var l := Label.new()

@@ -1,0 +1,90 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/scripts/presentation/ui/tela_bau.gd" id="1"]
+[ext_resource type="Theme" path="res://game/scenes/ui/tema_jogo.tres" id="2"]
+[ext_resource type="Script" path="res://game/scripts/presentation/provisorio/retangulo_provisorio.gd" id="3"]
+[ext_resource type="Script" path="res://game/scripts/presentation/personagem/camadas_personagem.gd" id="4"]
+
+[node name="TelaBau" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Fundo" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Titulo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 14.0
+offset_right = 500.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_font_sizes/font_size = 22
+
+[node name="Bau" type="Node2D" parent="."]
+position = Vector2(300, 330)
+scale = Vector2(3, 3)
+
+[node name="Caixa" type="Node2D" parent="Bau" groups=["provisorio"]]
+position = Vector2(-20, -18)
+script = ExtResource("3")
+tamanho = Vector2(40, 22)
+cor = Color(0.42, 0.28, 0.16, 1)
+
+[node name="Ferragem" type="Node2D" parent="Bau" groups=["provisorio"]]
+position = Vector2(-20, -10)
+script = ExtResource("3")
+tamanho = Vector2(40, 3)
+cor = Color(0.45, 0.45, 0.48, 1)
+
+[node name="Tampa" type="Node2D" parent="Bau"]
+position = Vector2(-20, -18)
+
+[node name="Provisorio" type="Node2D" parent="Bau/Tampa" groups=["provisorio"]]
+position = Vector2(0, -8)
+script = ExtResource("3")
+tamanho = Vector2(40, 8)
+cor = Color(0.5, 0.34, 0.2, 1)
+
+[node name="Retrato" type="Node2D" parent="."]
+position = Vector2(700, 430)
+scale = Vector2(0.75, 0.75)
+script = ExtResource("4")
+tamanho = "equipamentos"
+
+[node name="Coluna" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -110.0
+offset_right = -40.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Texto" type="Label" parent="Coluna"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Seguir" type="Button" parent="Coluna"]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0

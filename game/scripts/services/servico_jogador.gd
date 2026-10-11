@@ -551,7 +551,9 @@ func pode_automatico(torneio: String, indice: int) -> Dictionary:
 ## Tudo que a justa precisa do rival: {lado, perfil, casa, brasao, nome_chave}.
 ## O nêmesis cresce a cada encontro (atributos + cresce_por_encontro).
 func rival_para_justa(rival_id: String) -> Dictionary:
-	var r: Dictionary = pve()["rivais"][rival_id]
+	return _rival_de(pve()["rivais"][rival_id], rival_id)
+
+func _rival_de(r: Dictionary, rival_id: String) -> Dictionary:
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
 	var bonus := int(r.get("cresce_por_encontro", 0)) * int(estado["pve"].get("encontros", {}).get(rival_id, 0))
 	var cav := {}
@@ -625,10 +627,55 @@ func disputa_automatica(torneio: String, indice: int, semente: int) -> Dictionar
 	r["eventos"] = sim["eventos"]
 	return r
 
-## Duração real de um timer. No primeiro dia (tutorial, 2.11) os timers
-## terminam em segundos; aqui é o ponto único onde isso entra.
+## Duração real de um timer. No primeiro dia (GDD: regra do tutorial) todo
+## timer termina em segundos; aqui é o ponto único onde isso entra.
 func duracao_timer(segundos: int) -> int:
+	var pd: Dictionary = Balanceamento.carregar("inicio")["primeiro_dia"]
+	if ServicoTempo.agora() - int(estado.get("criado_em", 0)) < int(pd["duracao_s"]):
+		return mini(segundos, int(pd["timer_max_s"]))
 	return segundos
+
+# ------------------------------------------------------------------ tutorial
+# Passos (GDD Início do jogo): 0 título, 1 criação, 2 brasão, 3 justa de
+# exibição, 4 primeira justa, 5 primeiro baú, 6 concluído (vila).
+
+const TUTORIAL_CONCLUIDO := 6
+
+func tutorial_passo() -> int:
+	return int(estado["tutorial"]["passo"])
+
+func tutorial_concluido() -> bool:
+	return estado["tutorial"].get("concluido", false)
+
+func definir_passo_tutorial(passo: int) -> Dictionary:
+	estado["tutorial"]["passo"] = clampi(passo, 0, TUTORIAL_CONCLUIDO)
+	if passo >= TUTORIAL_CONCLUIDO:
+		estado["tutorial"]["concluido"] = true
+	return _concluir("tutorial")
+
+## Recompensa do tutorial (uma vez só): ouro, XP até o nível 2 e a peça do
+## primeiro baú, já equipada. Quem pula o tutorial também recebe.
+## Devolve {ok, item (id), modelo, niveis}.
+func recompensa_tutorial() -> Dictionary:
+	var t: Dictionary = estado["tutorial"]
+	if t.get("recompensa_dada", false):
+		return {"ok": true, "erro": "", "item": t.get("item_bau", ""), "modelo": "", "niveis": []}
+	var cfg: Dictionary = Balanceamento.carregar("inicio")["tutorial"]
+	var modelo: String = cfg["item_bau"]
+	var maximo := int(Balanceamento.carregar("itens")["modelos"][modelo]["durabilidade_max"])
+	var id := _novo_id(estado, "i")
+	estado["inventario"]["itens"].append({"id": id, "modelo": modelo, "nivel": 0, "durabilidade": maximo})
+	estado["equipamento"][Balanceamento.carregar("itens")["modelos"][modelo]["espaco"]] = id
+	var niveis := _ganhar(int(cfg["ouro"]), int(cfg["xp"]))
+	t["recompensa_dada"] = true
+	t["item_bau"] = id
+	var r := _concluir("inventario")
+	r.merge({"item": id, "modelo": modelo, "niveis": niveis}, true)
+	return r
+
+## Rival fraco da primeira justa (dados do tutorial).
+func rival_tutorial() -> Dictionary:
+	return _rival_de(Balanceamento.carregar("inicio")["tutorial"]["rival_primeira_justa"], "tutorial")
 
 func _garantir_predio(nome: String) -> void:
 	if not estado["vila"]["predios"].has(nome):

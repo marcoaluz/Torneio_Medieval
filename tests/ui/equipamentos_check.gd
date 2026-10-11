@@ -12,6 +12,7 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_equip/")
 	jog.caminho_save = "user://teste_equip/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 	jog.estado["inventario"]["itens"].append({"id": "v1", "modelo": "peitoral_vigia", "nivel": 0, "durabilidade": 240})
 	var tela: TelaEquipamentos = load("res://game/scenes/ui/tela_equipamentos.tscn").instantiate()
 	root.add_child(tela)

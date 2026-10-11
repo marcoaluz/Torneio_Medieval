@@ -9,6 +9,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_vila_demo/")
 	jog.caminho_save = "user://teste_vila_demo/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 	jog.estado["cavaleiro"]["nome"] = "Isolda"
 	jog.estado["cavaleiro"]["nivel"] = 3
 	jog.estado["casa"]["nome"] = "Casa de Valcorvo"

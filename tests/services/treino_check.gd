@@ -9,6 +9,7 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_treino/")
 	jog.caminho_save = "user://teste_treino/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 	jog.estado["inventario"]["ouro"] = 1000
 	var cfg := Balanceamento.carregar("treino")
 	var f: Dictionary = cfg["folego_cavalo"]

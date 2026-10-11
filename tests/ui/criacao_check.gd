@@ -11,6 +11,7 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute("user://teste_criacao/")
 	jog.caminho_save = "user://teste_criacao/jogador.json"
 	jog.estado = jog.novo_estado()
+	jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000  # fora do primeiro dia
 	var tela: CriacaoPersonagem = load("res://game/scenes/ui/criacao_personagem.tscn").instantiate()
 	root.add_child(tela)
 	await process_frame
