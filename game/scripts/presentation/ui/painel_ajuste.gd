@@ -64,6 +64,10 @@ var _campos := {}  ## "arquivo:caminho" -> SpinBox
 @onready var _status: Label = $Painel/Coluna/Status
 
 func _ready() -> void:
+	# Modo canhoto (3.24): o botão de ajuste troca de lado com o da habilidade.
+	var ac := get_node_or_null("/root/Acessibilidade") as OpcoesAcessibilidade
+	if ac and ac.canhoto():
+		OpcoesAcessibilidade.espelhar($Abrir)
 	if not OS.is_debug_build():
 		queue_free()
 		return

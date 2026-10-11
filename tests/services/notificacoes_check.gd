@@ -68,7 +68,8 @@ func _initialize() -> void:
 	tela.abrir()
 	await process_frame
 	var dados: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ServicoNotificacoes.DADOS))
-	var chaves: Array = tela.get_node("Coluna/Rolagem/Lista").get_children().filter(func(c): return c is CheckButton)
+	# As duas primeiras chaves são de acessibilidade (canhoto, vibração; 3.24).
+	var chaves: Array = tela.get_node("Coluna/Rolagem/Lista").get_children().filter(func(c): return c is CheckButton).slice(2)
 	_checa("uma chave por tipo e a geral (%d)" % chaves.size(), chaves.size() == dados["ordem"].size() + 1)
 	(chaves[2] as CheckButton).button_pressed = false
 	_checa("a chave muda a preferencia", not jog.notificacao_ligada(dados["ordem"][1]))

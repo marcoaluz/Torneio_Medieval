@@ -155,6 +155,8 @@ func iniciar(semente_fixa := -1) -> void:
 			if jog_d:
 				rv = jog_d.rival_tutorial()
 				rv["nome_chave"] = "RIVAL_TUTORIAL"
+			# Primeira justa com semente fixa: a mesma experiência para todos.
+			semente_fixa = int(Balanceamento.carregar("inicio")["tutorial"].get("semente_primeira_justa", semente_fixa))
 		"exibicao":
 			# Dois veteranos da IA; o jogador assiste da arquibancada.
 			var ex: Dictionary = Balanceamento.carregar("inicio")["tutorial"]["exibicao"]

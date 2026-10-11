@@ -635,3 +635,17 @@ CONFIG_NOTIF_AJUDA_ORDEM,Pedidos de ajuda da ordem,Order help requests
 CONFIG_NOTIF_TEMPORADA,Fim da temporada,Season ending
 CONFIG_PELO_SERVIDOR,(pelo servidor),(from the server)
 VILA_CONFIG,⚙,⚙
+CONFIG_ACESSIBILIDADE,Acessibilidade,Accessibility
+CONFIG_IDIOMA,Idioma,Language
+CONFIG_TEXTO,Tamanho do texto,Text size
+CONFIG_CANHOTO,Modo canhoto (botões do outro lado),Left-handed mode (buttons on the other side)
+CONFIG_VIBRACAO,Vibração,Vibration
+IDIOMA_AUTO,Do aparelho,Device language
+IDIOMA_PT_BR,Português,Português
+IDIOMA_EN,English,English
+TEXTO_PEQUENO,Pequeno,Small
+TEXTO_NORMAL,Normal,Normal
+TEXTO_GRANDE,Grande,Large
+TEXTO_MUITO_GRANDE,Muito grande,Extra large
+ERRO_OPCAO_INEXISTENTE,Opção desconhecida.,Unknown option.
+ERRO_OPCAO_INVALIDA,Valor inválido.,Invalid value.

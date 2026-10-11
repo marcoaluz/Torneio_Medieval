@@ -36,6 +36,10 @@ func _ready() -> void:
 	resultado.visible = false
 	botao.visible = false
 	botao.pressed.connect(_ao_apertar_botao)
+	# Modo canhoto (3.24): o botão da habilidade vai para a esquerda.
+	var ac := get_node_or_null("/root/Acessibilidade") as OpcoesAcessibilidade
+	if ac and ac.canhoto():
+		OpcoesAcessibilidade.espelhar(botao)
 	if controlador:
 		controlador.apresentacao_comecou.connect(_ao_comecar_passada)
 		controlador.largada_avaliada.connect(_ao_avaliar_largada)

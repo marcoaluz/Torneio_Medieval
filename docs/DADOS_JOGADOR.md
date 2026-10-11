@@ -40,6 +40,8 @@ metas: renome, dia, diarias [{id, progresso, resgatada}], semana,      (v5, 3.21
        sequencia, conquistas [id], titulos [id], titulo, novas [id]
 historia: vistas [id da cena]                                           (v6, 3.22)
 config: notificacoes {todas, <tipo>: bool}                             (v7, 3.23)
+        canhoto, vibracao, texto, idioma (3.24; ausente = padrão de
+        game/data/ui/acessibilidade.json, por isso sem versão nova)
 ```
 
 - `lado_para_justa()` monta o lado da regra (`{cavaleiro, cavalo, equipamento, habilidade}`) a partir das peças equipadas: o `status` do modelo mais a durabilidade atual (peça com 0 perde os bônus na regra).

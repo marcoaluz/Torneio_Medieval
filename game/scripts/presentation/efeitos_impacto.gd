@@ -204,7 +204,8 @@ func _hit_stop(forca: float) -> void:
 	_hit_stop_ativo = false
 
 func _vibrar(forca: float) -> void:
-	if not vibrar:
+	var ac := get_node_or_null("/root/Acessibilidade") as OpcoesAcessibilidade
+	if not vibrar or (ac and not ac.vibracao()):
 		return
 	var v: Dictionary = _cfg["vibracao"]
 	Input.vibrate_handheld(int(lerpf(float(v["ms_min"]), float(v["ms_max"]), forca)))

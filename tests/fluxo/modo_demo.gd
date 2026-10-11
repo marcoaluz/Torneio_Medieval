@@ -13,6 +13,13 @@ func _ready() -> void:
 	jog.caminho_save = "user://teste_modo_demo/jogador.json"
 	jog.estado = jog.novo_estado()
 	jog.estado["cavaleiro"]["nome"] = "Isolda"
+	# Acessibilidade (3.24) para qualquer demo: TM_IDIOMA, TM_TEXTO, TM_CANHOTO=1.
+	if OS.get_environment("TM_IDIOMA") != "":
+		jog.definir_config("idioma", OS.get_environment("TM_IDIOMA"))
+	if OS.get_environment("TM_TEXTO") != "":
+		jog.definir_config("texto", OS.get_environment("TM_TEXTO"))
+	if OS.get_environment("TM_CANHOTO") == "1":
+		jog.definir_config("canhoto", true)
 	var tela := OS.get_environment("TM_TELA")
 	if tela == "titulo":
 		add_child(load("res://game/scenes/ui/tela_titulo.tscn").instantiate())

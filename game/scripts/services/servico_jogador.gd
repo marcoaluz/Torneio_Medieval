@@ -986,6 +986,25 @@ func notificacao_ligada(tipo: String) -> bool:
 		return false
 	return tipo == "" or bool(n.get(tipo, true))
 
+## Opções de acessibilidade (3.24): canhoto, vibracao, texto, idioma
+## (padrões em game/data/ui/acessibilidade.json).
+func config_valor(chave: String) -> Variant:
+	var padrao: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/data/ui/acessibilidade.json"))["padrao"]
+	return estado.get("config", {}).get(chave, padrao.get(chave))
+
+func definir_config(chave: String, valor: Variant) -> Dictionary:
+	var a: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/data/ui/acessibilidade.json"))
+	if not a["padrao"].has(chave):
+		return _erro("opcao_inexistente")
+	if chave == "texto" and not a["tamanhos_texto"].has(str(valor)):
+		return _erro("opcao_invalida")
+	if chave == "idioma" and not (a["idiomas"] as Array).has(str(valor)):
+		return _erro("opcao_invalida")
+	if not estado.has("config"):
+		estado["config"] = {"notificacoes": {}}
+	estado["config"][chave] = valor
+	return _concluir("config")
+
 func definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
 	if not estado.has("config"):
 		estado["config"] = {"notificacoes": {}}

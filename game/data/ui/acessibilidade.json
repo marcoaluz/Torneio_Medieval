@@ -1,0 +1,8 @@
+{
+	"versao": 1,
+	"_nota": "Acessibilidade (GDD O que acrescentar; Pacote 3.24): tamanho do texto (multiplica o tamanho de cada texto da interface), idiomas oferecidos ('' = o do aparelho) e os padroes das opcoes salvas em estado.config.",
+	"tamanhos_texto": { "pequeno": 0.85, "normal": 1.0, "grande": 1.2, "muito_grande": 1.4 },
+	"ordem_tamanhos": ["pequeno", "normal", "grande", "muito_grande"],
+	"idiomas": ["", "pt_BR", "en"],
+	"padrao": { "canhoto": false, "vibracao": true, "texto": "normal", "idioma": "" }
+}
