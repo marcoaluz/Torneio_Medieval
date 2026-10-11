@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 8
+const VERSAO := 9
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -78,6 +78,8 @@ func _recuperacao_por_hora() -> int:
 	var f: Dictionary = Balanceamento.ler("treino")["folego_cavalo"]
 	var bonus := int(f["bonus_recupera_por_nivel_estabulo_pct"]) * maxi(predio_nivel("estabulo") - 1, 0)
 	bonus += bonus_companheiros("folego_recupera_pct")
+	if vip_ativo():
+		bonus += int(Balanceamento.ler("economia")["vip"]["folego_recuperacao_extra_pct"])
 	return int(f["recupera_por_hora"]) * (100 + bonus) / 100
 
 func cavalo_treinando(id: String) -> bool:
@@ -405,7 +407,9 @@ func concluir_timer(id: String) -> Dictionary:
 ## Vagas de treino de um prédio (campo de treino ou estábulo).
 func vagas_treino(predio: String) -> int:
 	var v: Dictionary = Balanceamento.ler("treino")["vagas"]
-	return int(v["base"]) + (1 if predio_nivel(predio) >= int(v["extra_no_nivel_do_predio"]) else 0)
+	# A vaga extra vem do prédio ou do VIP (é a mesma vaga; não somam).
+	var extra := predio_nivel(predio) >= int(v["extra_no_nivel_do_predio"]) or vip_ativo()
+	return int(v["base"]) + (1 if extra else 0)
 
 func treinos_em(predio: String) -> Array:
 	return timers_do_predio(predio).filter(func(t): return str(t["tipo"]).begins_with("treino_"))
@@ -505,6 +509,7 @@ func registrar_justa(resultado: Dictionary) -> Dictionary:
 			c["folego"] = maxi(folego_cavalo(c["id"]) - int(f["gasto_por_justa"]), 0)
 			c["folego_em"] = ServicoTempo.agora()
 	_evento("justa")
+	_passe_xp(int(Balanceamento.ler("economia")["passe"]["xp_por_justa"]))
 	return _concluir("cavalos")
 
 # ------------------------------------------------------------------ conserto
@@ -1144,6 +1149,10 @@ func concluir_pvp(eventos: Array) -> Dictionary:
 	while partidas.size() > 30:
 		partidas.pop_back()
 	lg["adversario"] = {}
+	if not venceu and _derrota_por_pouco(eventos):
+		disparar_oferta("derrota_por_pouco")
+	if int(pos["liga"]) > int(pos_antes["liga"]):
+		disparar_oferta("subiu_liga")
 	var niveis := _ganhar(ouro_g, xp_g)
 	var r := _concluir("liga")
 	r.merge({"venceu": venceu, "estrelas": 1 if venceu else 0, "pontos_antes": antes, "pontos": int(lg["pontos"]), "ouro": ouro_g, "xp": xp_g,
@@ -1286,6 +1295,274 @@ func jogar_campeonato() -> Dictionary:
 	var r := _concluir("liga")
 	r["adversario"] = f.duplicate(true)
 	return r
+
+# --------------------------------------------------------------------- loja
+# Loja, VIP, passe e ofertas (3.18; catálogo em loja.json, números do VIP e
+# do passe em economia.json). Compras com DINHEIRO só pelo provedor de teste
+# (build de depuração) até a 3.7 validar recibos no servidor; compras com
+# gemas valem de verdade.
+
+static func _loja_nova() -> Dictionary:
+	return {"vip_ate": 0, "passe": {"temporada": 1, "premium": false, "xp": 0, "gratis": [], "premium_resgatados": []},
+		"compras": [], "cosmeticos": [], "frase": "", "vitoria": "", "compras_dia": {"dia": -1}, "ofertas": [], "ultima_oferta": {}}
+
+func cfg_loja() -> Dictionary:
+	return Balanceamento.ler("loja")
+
+func gemas() -> int:
+	return int(estado["inventario"].get("gemas", 0))
+
+func vip_ativo() -> bool:
+	return estado.has("loja") and int(estado["loja"]["vip_ate"]) > ServicoTempo.agora()
+
+## Compras com dinheiro: só o provedor de teste, em build de depuração.
+func loja_de_teste() -> bool:
+	return OS.is_debug_build()
+
+## Compra um produto pago (gemas, VIP, passe premium ou oferta) pelo provedor
+## de teste. {ok, erro, produto, teste}.
+func comprar(produto: String) -> Dictionary:
+	if not loja_de_teste():
+		return _erro("loja_indisponivel")
+	var cfg := cfg_loja()
+	var lj: Dictionary = estado["loja"]
+	var entregue := {}
+	var achou := false
+	for g: Dictionary in cfg["gemas"]:
+		if g["id"] == produto:
+			estado["inventario"]["gemas"] = gemas() + int(g["gemas"])
+			entregue = {"gemas": int(g["gemas"])}
+			achou = true
+	if produto == cfg["vip"]["id"]:
+		lj["vip_ate"] = maxi(int(lj["vip_ate"]), ServicoTempo.agora()) + int(cfg["vip"]["dias"]) * 86400
+		var gm := int(Balanceamento.ler("economia")["vip"]["gemas_mes"])
+		estado["inventario"]["gemas"] = gemas() + gm
+		entregue = {"vip_dias": int(cfg["vip"]["dias"]), "gemas": gm}
+		achou = true
+	if produto == cfg["passe"]["id"]:
+		_atualizar_passe()
+		if lj["passe"]["premium"]:
+			return _erro("ja_comprado")
+		lj["passe"]["premium"] = true
+		entregue = {"passe": true}
+		achou = true
+	for o: Dictionary in cfg["ofertas"]:
+		if o["id"] == produto:
+			var ativa: Array = (lj["ofertas"] as Array).filter(func(x): return x["id"] == produto and int(x["ate"]) > ServicoTempo.agora())
+			if ativa.is_empty():
+				return _erro("oferta_expirada")
+			entregue = _entregar_conteudo(o["conteudo"])
+			lj["ofertas"] = (lj["ofertas"] as Array).filter(func(x): return x["id"] != produto)
+			achou = true
+	if not achou:
+		return _erro("produto_inexistente")
+	(lj["compras"] as Array).append({"produto": produto, "quando": ServicoTempo.agora(), "teste": true})
+	var r := _concluir("loja")
+	r.merge({"produto": produto, "entregue": entregue, "teste": true}, true)
+	return r
+
+func _entregar_conteudo(c: Dictionary) -> Dictionary:
+	var dado := {}
+	for k: String in c:
+		match k:
+			"gemas":
+				estado["inventario"]["gemas"] = gemas() + int(c[k])
+			"bau":
+				dado["bau_ganho"] = _guardar_bau(str(c[k]))
+			"ouro":
+				_ganhar(int(c[k]), 0)
+			_:
+				var mats: Dictionary = estado["inventario"]["materiais"]
+				mats[k] = int(mats.get(k, 0)) + int(c[k])
+		dado[k] = c[k]
+	return dado
+
+## Gasta gemas: cosmético (uma vez) ou material (limite por dia).
+func comprar_com_gemas(id: String) -> Dictionary:
+	var cfg := cfg_loja()
+	var lj: Dictionary = estado["loja"]
+	for c: Dictionary in cfg["cosmeticos"]:
+		if c["id"] == id:
+			if (lj["cosmeticos"] as Array).has(id):
+				return _erro("ja_comprado")
+			if gemas() < int(c["gemas"]):
+				return _erro("gemas_insuficientes")
+			estado["inventario"]["gemas"] = gemas() - int(c["gemas"])
+			lj["cosmeticos"].append(id)
+			return _concluir("loja")
+	for m: Dictionary in cfg["materiais"]:
+		if m["material"] == id:
+			var cd: Dictionary = lj["compras_dia"]
+			if int(cd.get("dia", -1)) != dia_atual():
+				cd.clear()
+				cd["dia"] = dia_atual()
+			if int(cd.get(id, 0)) >= int(m["limite_dia"]):
+				return _erro("limite_diario")
+			if gemas() < int(m["gemas"]):
+				return _erro("gemas_insuficientes")
+			estado["inventario"]["gemas"] = gemas() - int(m["gemas"])
+			cd[id] = int(cd.get(id, 0)) + 1
+			var mats: Dictionary = estado["inventario"]["materiais"]
+			mats[id] = int(mats.get(id, 0)) + int(m["quantidade"])
+			return _concluir("loja")
+	return _erro("produto_inexistente")
+
+## Quantas compras de um material ainda dá para fazer hoje.
+func compras_restantes_hoje(material: String) -> int:
+	var cd: Dictionary = estado["loja"]["compras_dia"]
+	var usado := int(cd.get(material, 0)) if int(cd.get("dia", -1)) == dia_atual() else 0
+	for m: Dictionary in cfg_loja()["materiais"]:
+		if m["material"] == material:
+			return maxi(0, int(m["limite_dia"]) - usado)
+	return 0
+
+## Usa um cosmético comprado: frase do arauto ou cor da comemoração ("" tira).
+func usar_cosmetico(id: String) -> Dictionary:
+	var lj: Dictionary = estado["loja"]
+	if id != "" and not (lj["cosmeticos"] as Array).has(id):
+		return _erro("cosmetico_bloqueado")
+	var tipo := ""
+	for c: Dictionary in cfg_loja()["cosmeticos"]:
+		if c["id"] == id:
+			tipo = c["tipo"]
+	if tipo == "frase_arauto" or id == "":
+		lj["frase"] = id
+	if tipo == "efeito_vitoria":
+		lj["vitoria"] = id
+	return _concluir("loja")
+
+## Custo em gemas para terminar agora um timer ou um baú abrindo.
+func custo_pular(restante_s: int) -> int:
+	return int(ceil(maxi(restante_s, 0) / 3600.0)) * int(cfg_loja()["gemas_por_hora_timer"])
+
+## Termina agora um timer (treino, obra, forja...) ou o baú que está abrindo, com gemas.
+func pular_com_gemas(id: String) -> Dictionary:
+	var alvo: Dictionary = {}
+	var chave := "termina_em"
+	for t: Dictionary in estado["timers"]:
+		if t["id"] == id:
+			alvo = t
+	if alvo.is_empty():
+		alvo = _bau(id)
+		chave = "abre_em"
+	if alvo.is_empty() or int(alvo.get(chave, 0)) <= 0:
+		return _erro("timer_inexistente")
+	var custo := custo_pular(int(alvo[chave]) - ServicoTempo.agora())
+	if gemas() < custo:
+		return _erro("gemas_insuficientes")
+	estado["inventario"]["gemas"] = gemas() - custo
+	alvo[chave] = ServicoTempo.agora()
+	var r := _concluir("loja")
+	r["gemas"] = custo
+	return r
+
+# Passe da temporada: XP por justa; a temporada é a da liga.
+func _atualizar_passe() -> void:
+	var p: Dictionary = estado["loja"]["passe"]
+	var t := int(estado["liga"]["temporada"])
+	if int(p["temporada"]) != t:
+		p.clear()
+		p.merge({"temporada": t, "premium": false, "xp": 0, "gratis": [], "premium_resgatados": []}, true)
+
+func _passe_xp(xp: int) -> void:
+	if not estado.has("loja"):
+		return
+	_atualizar_passe()
+	estado["loja"]["passe"]["xp"] = int(estado["loja"]["passe"]["xp"]) + xp
+
+## Recompensas de um nível do passe nas duas trilhas.
+func recompensa_passe(nivel: int) -> Dictionary:
+	var ps: Dictionary = Balanceamento.ler("economia")["passe"]
+	var g: Dictionary = ps["gratis"]
+	var pr: Dictionary = ps["premium"]
+	var rg := {"ouro": int(g["ouro_por_nivel"])}
+	if nivel % int(g["bau_ferro_a_cada"]) == 0:
+		rg["bau"] = "ferro"
+	var rp := {"ouro": int(pr["ouro_por_nivel"]), "fragmentos": int(pr["fragmentos_por_nivel"])}
+	if nivel % int(pr["bau_ouro_a_cada"]) == 0:
+		rp["bau"] = "ouro"
+	elif nivel % int(pr["bau_ferro_a_cada"]) == 0:
+		rp["bau"] = "ferro"
+	if (pr["projeto_nos_niveis"] as Array).any(func(x): return int(x) == nivel):
+		rp["projeto"] = true
+	return {"gratis": rg, "premium": rp}
+
+## Estado do passe: {temporada, nivel, xp, xp_nivel, niveis, premium, gratis [n], premium_resgatados [n]}.
+func passe() -> Dictionary:
+	_atualizar_passe()
+	var ps: Dictionary = Balanceamento.ler("economia")["passe"]
+	var p: Dictionary = estado["loja"]["passe"]
+	return {"temporada": int(p["temporada"]), "nivel": mini(int(ps["niveis"]), int(p["xp"]) / int(ps["xp_por_nivel"])), "xp": int(p["xp"]),
+		"xp_nivel": int(ps["xp_por_nivel"]), "niveis": int(ps["niveis"]), "premium": p["premium"],
+		"gratis": (p["gratis"] as Array).duplicate(), "premium_resgatados": (p["premium_resgatados"] as Array).duplicate()}
+
+## Pega a recompensa de um nível numa trilha ("gratis" ou "premium").
+func resgatar_passe(nivel: int, trilha: String) -> Dictionary:
+	var info := passe()
+	if nivel < 1 or nivel > int(info["nivel"]):
+		return _erro("nivel_do_passe_bloqueado")
+	if trilha == "premium" and not info["premium"]:
+		return _erro("passe_sem_premium")
+	var lista: Array = estado["loja"]["passe"]["gratis" if trilha == "gratis" else "premium_resgatados"]
+	if lista.has(nivel):
+		return _erro("ja_resgatada")
+	lista.append(nivel)
+	var rec: Dictionary = recompensa_passe(nivel)[trilha]
+	var dado := _dar_recompensa(rec)
+	if rec.get("projeto", false):
+		for c: Dictionary in Balanceamento.ler("economia")["conjuntos"]:
+			if c["raridade"] in ["raro", "epico"] and not (estado["inventario"]["projetos"] as Array).has(c["nome"]):
+				estado["inventario"]["projetos"].append(c["nome"])
+				dado["projeto"] = c["nome"]
+				break
+	var r := _concluir("loja")
+	r["recompensa"] = dado
+	return r
+
+## Ofertas (GDD): no gatilho, se não houve outra desse gatilho no intervalo.
+func disparar_oferta(gatilho: String) -> void:
+	if not estado.has("loja"):
+		return
+	var lj: Dictionary = estado["loja"]
+	for o: Dictionary in cfg_loja()["ofertas"]:
+		if o["gatilho"] != gatilho:
+			continue
+		var ultima := int(lj["ultima_oferta"].get(gatilho, -999999999))
+		if ServicoTempo.agora() - ultima < int(o["intervalo_s"]):
+			return
+		lj["ultima_oferta"][gatilho] = ServicoTempo.agora()
+		(lj["ofertas"] as Array).append({"id": o["id"], "ate": ServicoTempo.agora() + int(o["duracao_s"]), "vista": false})
+
+## Ofertas ainda valendo, com o conteúdo: [{id, ate, vista, conteudo, preco}].
+func ofertas() -> Array:
+	var r: Array = []
+	for x: Dictionary in estado["loja"]["ofertas"]:
+		if int(x["ate"]) > ServicoTempo.agora():
+			var d: Dictionary = (cfg_loja()["ofertas"] as Array).filter(func(o): return o["id"] == x["id"])[0]
+			var c := x.duplicate()
+			c.merge({"conteudo": d["conteudo"].duplicate(), "preco": d["preco"]}, true)
+			r.append(c)
+	return r
+
+## A próxima oferta a mostrar (uma vez cada); {} se nenhuma.
+func oferta_nova() -> Dictionary:
+	for o: Dictionary in ofertas():
+		if not o["vista"]:
+			return o
+	return {}
+
+func marcar_oferta_vista(id: String) -> void:
+	for x: Dictionary in estado["loja"]["ofertas"]:
+		if x["id"] == id:
+			x["vista"] = true
+	salvar()
+
+func _derrota_por_pouco(eventos: Array) -> bool:
+	for e: Dictionary in eventos:
+		if e.get("tipo", "") == "fim" and e.has("placar_jogador"):
+			return e["vencedor"] == JustaFases.Lado.RIVAL and e.get("motivo", "") == "pontos" \
+				and int(e["placar_rival"]) - int(e["placar_jogador"]) <= int(cfg_loja()["derrota_por_pouco_pontos"])
+	return false
 
 # ------------------------------------------------------------- configurações
 # Preferências do jogador (3.23): notificações por tipo (game/data/
@@ -1740,6 +2017,8 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 			renome_g += int(ganho["campeao"])
 	else:
 		metas["sequencia"] = 0
+		if _derrota_por_pouco(eventos):
+			disparar_oferta("derrota_por_pouco")
 	if fechou:
 		_evento("torneio_vencido")
 	if projeto != "":
@@ -1774,6 +2053,8 @@ func duracao_timer(segundos: int) -> int:
 	var pd: Dictionary = Balanceamento.ler("inicio")["primeiro_dia"]
 	if ServicoTempo.agora() - int(estado.get("criado_em", 0)) < int(pd["duracao_s"]):
 		return mini(segundos, int(pd["timer_max_s"]))
+	if vip_ativo():
+		return segundos * (100 - int(Balanceamento.ler("economia")["vip"]["timer_reducao_pct"])) / 100
 	return segundos
 
 # ------------------------------------------------------------------ tutorial
@@ -1850,6 +2131,7 @@ func novo_estado() -> Dictionary:
 	e["historia"] = {"vistas": []}
 	e["config"] = {"notificacoes": {}}
 	e["liga"] = _liga_nova(int(e["criado_em"]))
+	e["loja"] = _loja_nova()
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.ler("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -1940,6 +2222,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("liga") or not d["liga"].has("pontos"):
 			d["liga"] = _liga_nova(int(d.get("criado_em", 0)))
 		v = 8
+	if v < 9:
+		# 3.18: loja (VIP, passe, cosméticos, limites diários, ofertas).
+		if not d.has("loja"):
+			d["loja"] = _loja_nova()
+		v = 9
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

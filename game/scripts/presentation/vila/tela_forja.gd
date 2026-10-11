@@ -13,6 +13,8 @@ var predio := "armeiro"
 var aba := "criar"
 var _jog: ServicoJogador
 var _martelo: Tween
+var _agora: Button
+var _agora_id := ""
 var _acumulado := 0.0
 
 @onready var _titulo: Label = $Coluna/Cabecalho/Titulo
@@ -35,6 +37,12 @@ func _ready() -> void:
 	_pegar.text = tr("FORJA_PEGAR")
 	_fechar.pressed.connect(func(): visible = false; _parar_martelo())
 	_pegar.pressed.connect(_pegar_pronto)
+	# Terminar com gemas (3.18).
+	_agora = Button.new()
+	_agora.focus_mode = Control.FOCUS_NONE
+	_agora.visible = false
+	_agora.pressed.connect(func(): _mostrar(_jog.pular_com_gemas(_agora_id)))
+	$Coluna/Oficina.add_child(_agora)
 	_melhorar_predio.pressed.connect(func(): _mostrar(_jog.melhorar_predio(predio)))
 	_jog.mudou.connect(func(_s): if visible: montar())
 
@@ -119,6 +127,8 @@ func _montar_criar() -> void:
 			b.focus_mode = Control.FOCUS_NONE
 			b.text = tr("FORJA_FORJAR")
 			var pf := _jog.pode_forjar(m)
+			if pf["erro"] == "material_insuficiente":
+				_jog.disparar_oferta("projeto_sem_material")
 			b.disabled = not pf["ok"]
 			b.tooltip_text = "" if pf["ok"] else tr("ERRO_" + str(pf["erro"]).to_upper())
 			b.pressed.connect(func(): _mostrar(_jog.forjar(m)))
@@ -190,6 +200,7 @@ func _montar_oficina() -> void:
 	var ts: Array = _jog.timers().filter(func(t): return t["tipo"] == tipo)
 	_pegar.visible = false
 	if ts.is_empty():
+		_agora.visible = false
 		_status.text = tr("FORJA_LIVRE" if tipo == "forja" else "FORJA_FORNO_LIVRE")
 		_parar_martelo()
 		return
@@ -204,6 +215,9 @@ func _montar_oficina() -> void:
 		_status.text = tr("FORJA_FUNDIDO_PRONTO").format({"qtd": t["quantidade"], "material": mat}) if pronto else tr("FORJA_FUNDINDO").format(
 			{"qtd": t["quantidade"], "material": mat, "tempo": Vila.formatar_tempo(ServicoTempo.restante(int(t["termina_em"])))})
 	_pegar.visible = pronto
+	_agora.visible = not pronto
+	_agora.text = tr("LOJA_TERMINAR_AGORA").format({"n": _jog.custo_pular(ServicoTempo.restante(int(t["termina_em"])))})
+	_agora_id = t["id"]
 	if pronto:
 		_parar_martelo()
 	else:

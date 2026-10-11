@@ -84,6 +84,11 @@ func montar() -> void:
 			b.pressed.connect(func(): abrir_bau(id, false))
 		elif int(bau["abre_em"]) > 0:
 			b.text = "%s\n\n%s" % [nome, tr("BAUS_ABRINDO").format({"tempo": Vila.formatar_tempo(ServicoTempo.restante(int(bau["abre_em"])))})]
+			var agora_b := Button.new()
+			agora_b.focus_mode = Control.FOCUS_NONE
+			agora_b.text = tr("LOJA_TERMINAR_AGORA").format({"n": _jog.custo_pular(ServicoTempo.restante(int(bau["abre_em"])))})
+			agora_b.pressed.connect(func(): _resposta(_jog.pular_com_gemas(id)))
+			caixa.add_child(agora_b)
 		else:
 			var seg := _jog.duracao_timer(int(_jog.cfg_baus()["tipos"][bau["tipo"]]["segundos"]))
 			b.text = "%s\n\n%s" % [nome, tr("BAUS_TOQUE_ABRIR").format({"tempo": Vila.formatar_tempo(seg)})

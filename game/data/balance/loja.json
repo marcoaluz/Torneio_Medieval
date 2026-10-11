@@ -1,0 +1,32 @@
+{
+	"versao": 1,
+	"_nota": "Loja (GDD Monetizacao; Pacote 3.18). Precos em dinheiro sao so referencia: a cobranca real e a validacao do recibo sao da 3.7 (servidor). Ate la, compras com dinheiro passam por um provedor de TESTE que so funciona em build de depuracao. Compras com gemas (cosmeticos, materiais, pular timer) valem de verdade. VIP e passe usam os numeros de economia.json > vip e > passe. Ofertas: aparecem no gatilho (derrota_por_pouco, subiu_liga, projeto_sem_material), no maximo uma por gatilho a cada intervalo_s, e somem em duracao_s.",
+	"gemas": [
+		{ "id": "gemas_pequeno", "gemas": 80, "preco": "R$ 4,90" },
+		{ "id": "gemas_medio", "gemas": 450, "preco": "R$ 24,90" },
+		{ "id": "gemas_grande", "gemas": 1000, "preco": "R$ 49,90" }
+	],
+	"vip": { "id": "vip_mensal", "dias": 30, "preco": "R$ 19,90 por mês" },
+	"passe": { "id": "passe_premium", "preco": "R$ 14,90 por temporada" },
+	"cosmeticos": [
+		{ "id": "frase_trovao", "tipo": "frase_arauto", "gemas": 120 },
+		{ "id": "frase_lenda", "tipo": "frase_arauto", "gemas": 120 },
+		{ "id": "frase_povo", "tipo": "frase_arauto", "gemas": 80 },
+		{ "id": "vitoria_dourada", "tipo": "efeito_vitoria", "cor": "f0c040", "gemas": 150 },
+		{ "id": "vitoria_rubra", "tipo": "efeito_vitoria", "cor": "c0302a", "gemas": 150 }
+	],
+	"materiais": [
+		{ "material": "lingote_ferro", "quantidade": 5, "gemas": 20, "limite_dia": 3 },
+		{ "material": "lingote_aco", "quantidade": 2, "gemas": 30, "limite_dia": 2 },
+		{ "material": "couro", "quantidade": 3, "gemas": 15, "limite_dia": 3 },
+		{ "material": "tecido_nobre", "quantidade": 1, "gemas": 40, "limite_dia": 1 },
+		{ "material": "fragmentos", "quantidade": 10, "gemas": 25, "limite_dia": 3 }
+	],
+	"ofertas": [
+		{ "id": "oferta_revanche", "gatilho": "derrota_por_pouco", "conteudo": { "gemas": 100, "bau": "ferro" }, "preco": "R$ 4,90", "duracao_s": 3600, "intervalo_s": 86400 },
+		{ "id": "oferta_nova_liga", "gatilho": "subiu_liga", "conteudo": { "gemas": 300, "bau": "ouro" }, "preco": "R$ 14,90", "duracao_s": 7200, "intervalo_s": 86400 },
+		{ "id": "oferta_forja", "gatilho": "projeto_sem_material", "conteudo": { "lingote_ferro": 10, "lingote_aco": 3, "couro": 4 }, "preco": "R$ 9,90", "duracao_s": 3600, "intervalo_s": 86400 }
+	],
+	"derrota_por_pouco_pontos": 1,
+	"gemas_por_hora_timer": 10
+}

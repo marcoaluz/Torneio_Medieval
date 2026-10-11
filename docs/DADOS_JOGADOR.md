@@ -46,6 +46,10 @@ liga: pontos, melhor, temporada, temporada_inicio, defesa {equipamento,   (v8, 3
       cavalo, habilidades, salva_em}, defesas [..], partidas [..],
       ultima_simulacao, buscas, adversario {fantasma}, campeonato {semana,
       rodada, eliminado, chave}
+loja: vip_ate, passe {temporada, premium, xp, gratis [n],              (v9, 3.18)
+      premium_resgatados [n]}, compras [{produto, quando, teste}],
+      cosmeticos [id], frase, vitoria, compras_dia {dia, material: n},
+      ofertas [{id, ate, vista}], ultima_oferta {gatilho: quando}
 ```
 
 - `lado_para_justa()` monta o lado da regra (`{cavaleiro, cavalo, equipamento, habilidade}`) a partir das peças equipadas: o `status` do modelo mais a durabilidade atual (peça com 0 perde os bônus na regra).

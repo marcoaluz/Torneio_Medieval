@@ -139,6 +139,22 @@ func _ready() -> void:
 		camada_l.add_child(tl)
 		tl.abrir.call_deferred(OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "liga")
 		return
+	if tela == "loja":
+		# Loja com passe no nível 7 (premium comprado), ofertas e gemas (TM_ABA).
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.comprar("gemas_medio")
+		jog.comprar("passe_premium")
+		for i in 90:
+			jog.registrar_justa({"equipamento_final": {}, "gasta_folego": false})
+		jog.resgatar_passe(1, "gratis")
+		jog.resgatar_passe(1, "premium")
+		jog.disparar_oferta("subiu_liga")
+		var tlj: TelaLoja = load("res://game/scenes/ui/tela_loja.tscn").instantiate()
+		var camada_lj := CanvasLayer.new()
+		add_child(camada_lj)
+		camada_lj.add_child(tlj)
+		tlj.abrir.call_deferred(OS.get_environment("TM_ABA"))
+		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.
 		jog.estado["cavaleiro"]["nivel"] = 20

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vila.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/chao_vila_provisorio.gd" id="2"]
@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" path="res://game/scenes/ui/cena_historia.tscn" id="13"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_configuracoes.tscn" id="14"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_liga.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://game/scenes/ui/tela_loja.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://game/scenes/ui/janela_oferta.tscn" id="17"]
 
 [node name="Vila" type="Node2D"]
 script = ExtResource("1")
@@ -157,5 +159,10 @@ visible = false
 
 [node name="TelaLiga" parent="Interface" instance=ExtResource("15")]
 visible = false
+
+[node name="TelaLoja" parent="Interface" instance=ExtResource("16")]
+visible = false
+
+[node name="JanelaOferta" parent="Interface" instance=ExtResource("17")]
 
 [node name="CenaHistoria" parent="Interface" instance=ExtResource("13")]

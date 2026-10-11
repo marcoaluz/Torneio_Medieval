@@ -137,6 +137,10 @@ func iniciar(semente_fixa := -1) -> void:
 	if jog_d and jog_d.titulo() != "" and modo in ["disputa", "livre", "pvp"]:
 		anuncio_titulo = tr("ARAUTO_TITULO").format({"nome": jog_d.cavaleiro().get("nome", ""),
 			"titulo": tr("TITULO_" + jog_d.titulo().to_upper())})
+	# Frase do arauto comprada na loja (cosmético, 3.18).
+	if jog_d and str(jog_d.estado.get("loja", {}).get("frase", "")) != "" and modo in ["disputa", "livre", "pvp"]:
+		var frase := tr("ARAUTO_FRASE_" + str(jog_d.estado["loja"]["frase"]).to_upper()).format({"nome": jog_d.cavaleiro().get("nome", "")})
+		anuncio_titulo = (anuncio_titulo + "  " if anuncio_titulo != "" else "") + frase
 	provocacao = ""
 	desafios = []
 	_gasta_folego = true

@@ -694,3 +694,51 @@ PVP_PREMIO_CAMPEONATO,Prêmio do campeonato recebido!,Championship prize receive
 ERRO_SEM_ADVERSARIO,Procure um adversário primeiro.,Find an opponent first.
 ERRO_CAMPEONATO_FECHADO,O campeonato só abre no fim de semana.,The championship only opens on weekends.
 ERRO_CAMPEONATO_ENCERRADO,Seu campeonato desta semana acabou.,Your championship this week is over.
+PREDIO_LOJA,Loja,Shop
+PREDIO_DESC_LOJA,"Compras, ofertas e o passe da temporada.","Purchases, offers and the season pass."
+LOJA_TITULO,Loja do mercador,Merchant's shop
+LOJA_INFO,Gemas: {gemas},Gems: {gemas}
+LOJA_VIP_ATE,VIP por mais {tempo},VIP for {tempo} more
+LOJA_TESTE,(compras de teste: nada é cobrado),(test purchases: nothing is charged)
+LOJA_ABA_OFERTAS,Ofertas,Offers
+LOJA_ABA_GEMAS,Gemas,Gems
+LOJA_ABA_VIP,VIP,VIP
+LOJA_ABA_PASSE,Passe,Pass
+LOJA_ABA_COSMETICOS,Visual,Cosmetics
+LOJA_ABA_MATERIAIS,Materiais,Materials
+LOJA_SEM_OFERTAS,Nenhuma oferta agora.,No offers right now.
+LOJA_ACABA_EM,acaba em {tempo},ends in {tempo}
+LOJA_GEMAS,+{n} gemas,+{n} gems
+LOJA_VIP,VIP por 30 dias,VIP for 30 days
+LOJA_VIP_BENEFICIOS,"VIP: timers {timer}% mais curtos, segunda vaga de treino, fôlego {folego}% mais rápido, benefícios dos anúncios sem assistir e {gemas} gemas por mês.","VIP: {timer}% shorter timers, a second training slot, {folego}% faster stamina, ad rewards without watching and {gemas} gems a month."
+LOJA_PASSE_INFO,Passe da temporada {temporada}: nível {nivel}/{niveis} ({xp}/{xp_nivel} XP). Cada justa dá XP.,Season {temporada} pass: level {nivel}/{niveis} ({xp}/{xp_nivel} XP). Every joust gives XP.
+LOJA_PASSE_PREMIUM,Trilha premium do passe,Premium pass track
+LOJA_PROJETO,um projeto de conjunto,a set blueprint
+LOJA_EM_USO,Em uso,In use
+LOJA_USAR,Usar,Use
+LOJA_PRECO_GEMAS,{n} gemas,{n} gems
+LOJA_RESTAM_HOJE,{n} hoje,{n} today
+LOJA_FEITO,Pronto!,Done!
+LOJA_TERMINAR_AGORA,Agora ({n} gemas),Now ({n} gems)
+OFERTA_OFERTA_REVANCHE,Revanche! Volte mais forte,Rematch! Come back stronger
+OFERTA_OFERTA_NOVA_LIGA,"Liga nova, arsenal novo","New league, new arsenal"
+OFERTA_OFERTA_FORJA,Material para a sua forja,Materials for your forge
+OFERTA_VER,Ver na loja,See in shop
+COSMETICO_FRASE_TROVAO,"Frase do arauto: ""O trovão da liça!""","Herald line: ""The thunder of the lists!"""
+COSMETICO_FRASE_LENDA,"Frase do arauto: ""A lenda viva!""","Herald line: ""The living legend!"""
+COSMETICO_FRASE_POVO,"Frase do arauto: ""O campeão do povo!""","Herald line: ""The people's champion!"""
+COSMETICO_VITORIA_DOURADA,Comemoração dourada,Golden celebration
+COSMETICO_VITORIA_RUBRA,Comemoração rubra,Crimson celebration
+ARAUTO_FRASE_FRASE_TROVAO,"Abram alas para {nome}, o trovão da liça!","Make way for {nome}, the thunder of the lists!"
+ARAUTO_FRASE_FRASE_LENDA,"Eis {nome}, a lenda viva!","Behold {nome}, the living legend!"
+ARAUTO_FRASE_FRASE_POVO,"{nome}, o campeão do povo!","{nome}, the people's champion!"
+VILA_GEMAS,Gemas: {gemas},Gems: {gemas}
+ERRO_LOJA_INDISPONIVEL,A loja abre quando as compras estiverem ligadas.,The shop opens once purchases are enabled.
+ERRO_JA_COMPRADO,Você já tem isso.,You already own this.
+ERRO_OFERTA_EXPIRADA,A oferta acabou.,The offer has ended.
+ERRO_PRODUTO_INEXISTENTE,Produto não encontrado.,Product not found.
+ERRO_GEMAS_INSUFICIENTES,Gemas insuficientes.,Not enough gems.
+ERRO_LIMITE_DIARIO,Limite de hoje atingido.,Today's limit reached.
+ERRO_COSMETICO_BLOQUEADO,Compre primeiro.,Buy it first.
+ERRO_NIVEL_DO_PASSE_BLOQUEADO,Ainda não chegou nesse nível.,You have not reached that level yet.
+ERRO_PASSE_SEM_PREMIUM,Só com a trilha premium.,Premium track only.

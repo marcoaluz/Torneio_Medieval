@@ -21,6 +21,7 @@ func _ready() -> void:
 	if controlador:
 		controlador.impacto_resolvido.connect(_ao_impacto)
 		controlador.habilidade_ativada.connect(_ao_ativar_habilidade)
+		controlador.justa_terminou.connect(func(v, _m, _a, _b): if v == JustaFases.Lado.JOGADOR: reagir_torcida(true))
 		controlador.apresentacao_comecou.connect(_ao_comecar_passada)
 
 ## Força de um golpe, de 0 a 1 (dano / referência; derrubada = 1).
@@ -123,6 +124,11 @@ func reagir_torcida(forte: bool) -> void:
 	f.hue_variation_min = -1.0
 	f.hue_variation_max = 1.0
 	f.color = Color(controlador.arena.jogador.cor_casa)
+	# Cor da comemoração comprada na loja (cosmético, 3.18).
+	var vit := str(jog.estado.get("loja", {}).get("vitoria", ""))
+	for c: Dictionary in Balanceamento.ler("loja")["cosmeticos"]:
+		if c["id"] == vit and c.has("cor"):
+			f.color = Color(c["cor"])
 	arq.add_child(f)
 	f.emitting = true
 	f.finished.connect(f.queue_free)

@@ -50,6 +50,8 @@ var tela_equipamentos: TelaEquipamentos:
 @onready var cena_historia: CenaHistoria = $Interface/CenaHistoria
 @onready var tela_configuracoes: TelaConfiguracoes = $Interface/TelaConfiguracoes
 @onready var tela_liga: TelaLiga = $Interface/TelaLiga
+@onready var tela_loja: TelaLoja = $Interface/TelaLoja
+@onready var janela_oferta: JanelaOferta = $Interface/JanelaOferta
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -72,6 +74,7 @@ func _ready() -> void:
 	_botao_missoes.pressed.connect(func(): fechar_painel(); tela_missoes.abrir("login" if _jog.login_hoje()["pode"] else "diarias"))
 	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
 	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())
+	janela_oferta.ver.connect(func(_id): fechar_painel(); tela_loja.abrir("ofertas"))
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	cena_historia.terminou.connect(_ao_terminar_cena)
@@ -86,7 +89,13 @@ func atualizar() -> void:
 	var cav := _jog.cavaleiro()
 	_topo_nome.text = tr("VILA_TOPO").format({"nome": cav["nome"] if cav["nome"] != "" else "—",
 		"nivel": cav["nivel"], "casa": _jog.casa()["nome"]})
-	_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()}) + "  ·  " + tr("VILA_RENOME").format({"renome": _jog.renome()})
+	_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()}) + "  ·  " + tr("VILA_GEMAS").format({"gemas": _jog.gemas()}) \
+		+ "  ·  " + tr("VILA_RENOME").format({"renome": _jog.renome()}) + ("  ·  VIP" if _jog.vip_ativo() else "")
+	# Oferta nova (GDD: janela que fecha com um toque, sem bloquear).
+	if not janela_oferta.visible and not cena_historia.visible:
+		var of := _jog.oferta_nova()
+		if not of.is_empty():
+			janela_oferta.mostrar(of, tela_loja.texto_conteudo(of["conteudo"]))
 	var m := _jog.missoes()
 	var prontas: int = (m["diarias"] + m["semanais"]).filter(func(x): return x["pronta"]).size() + (1 if _jog.login_hoje()["pode"] else 0)
 	_botao_missoes.text = tr("VILA_MISSOES") + (" !" if prontas > 0 else "")
@@ -164,6 +173,10 @@ func tocar_predio(nome: String) -> void:
 	if nome == "salao_liga":
 		fechar_painel()
 		tela_liga.abrir()
+		return
+	if nome == "loja":
+		fechar_painel()
+		tela_loja.abrir()
 		return
 	if nome in ["campo_treino", "estabulo"]:
 		fechar_painel()

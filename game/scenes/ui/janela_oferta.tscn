@@ -1,0 +1,49 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/scripts/presentation/ui/janela_oferta.gd" id="1"]
+[ext_resource type="Theme" path="res://game/scenes/ui/tema_jogo.tres" id="2"]
+
+[node name="JanelaOferta" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Quadro" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -170.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Coluna" type="VBoxContainer" parent="Quadro"]
+layout_mode = 2
+
+[node name="Texto" type="Label" parent="Quadro/Coluna"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+
+[node name="Botoes" type="HBoxContainer" parent="Quadro/Coluna"]
+layout_mode = 2
+
+[node name="Ver" type="Button" parent="Quadro/Coluna/Botoes"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+
+[node name="Fechar" type="Button" parent="Quadro/Coluna/Botoes"]
+layout_mode = 2
+focus_mode = 0
