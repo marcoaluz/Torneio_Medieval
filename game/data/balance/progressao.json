@@ -1,5 +1,38 @@
 {
 	"versao": 1,
 	"_nota": "XP acumulado para chegar a cada nivel do cavaleiro (indice 0 = nivel 1). O nivel libera predios da vila (vila.json) e torneios (pve.json). A curva fina sai da simulacao de economia (3.12).",
-	"xp_por_nivel": [0, 50, 160, 340, 600, 950, 1400, 1950, 2600, 3400, 4300, 5300, 6400, 7600, 8900, 10300, 11800, 13400, 15100, 16900, 18800]
+	"xp_por_nivel": [
+		0,
+		50,
+		160,
+		340,
+		600,
+		950,
+		1400,
+		1950,
+		2600,
+		3400,
+		4300,
+		5300,
+		6400,
+		7600,
+		8900,
+		10300,
+		11800,
+		13400,
+		15100,
+		16900,
+		18800
+	],
+	"habilidades": {
+		"_nota": "GDD: 1 espaco no comeco; o segundo libera numa liga alta (ou no nivel, enquanto nao ha liga). No maximo uma por grupo (ofensiva, defensiva). base = as que todo cavaleiro conhece; as de conjunto exigem o conjunto completo equipado.",
+		"base": [
+			"investida",
+			"bloqueio",
+			"golpe_pesado"
+		],
+		"espacos_iniciais": 1,
+		"segundo_espaco_liga": "platina",
+		"segundo_espaco_nivel": 15
+	}
 }

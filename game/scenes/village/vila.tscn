@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vila.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/chao_vila_provisorio.gd" id="2"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://game/scenes/village/tela_torneios.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_baus.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://game/scenes/village/tela_forja.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://game/scenes/ui/tela_habilidades.tscn" id="11"]
 
 [node name="Vila" type="Node2D"]
 script = ExtResource("1")
@@ -135,4 +136,7 @@ visible = false
 visible = false
 
 [node name="TelaForja" parent="Interface" instance=ExtResource("10")]
+visible = false
+
+[node name="TelaHabilidades" parent="Interface" instance=ExtResource("11")]
 visible = false

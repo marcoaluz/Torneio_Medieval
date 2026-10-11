@@ -2,7 +2,7 @@ extends Node
 ## Demonstração para o `driver.sh shot`: a arena no modo TM_MODO (exibicao ou
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
-## TM_PREDIO/TM_ABA, torneios com TM_REGIAO). Save em
+## TM_PREDIO/TM_ABA, habilidades, torneios com TM_REGIAO). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -55,6 +55,20 @@ func _ready() -> void:
 		tf.abrir.call_deferred(predio)
 		if OS.get_environment("TM_ABA") == "melhorar":
 			(func(): tf.aba = "melhorar"; tf.montar()).call_deferred()
+		return
+	if tela == "habilidades":
+		# Nível 15 (dois espaços) com o conjunto da vigia completo.
+		jog.estado["cavaleiro"]["nivel"] = 15
+		var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+		for m: String in jog.pecas_do_projeto("vigia"):
+			jog.estado["inventario"]["itens"].append({"id": "v_" + m, "modelo": m, "nivel": 0, "durabilidade": int(modelos[m]["durabilidade_max"])})
+			jog.estado["equipamento"][modelos[m]["espaco"]] = "v_" + m
+		jog.equipar_habilidades(["investida", "olhar_da_vigia"])
+		var th: TelaHabilidades = load("res://game/scenes/ui/tela_habilidades.tscn").instantiate()
+		var camada_h := CanvasLayer.new()
+		add_child(camada_h)
+		camada_h.add_child(th)
+		th.abrir.call_deferred()
 		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.

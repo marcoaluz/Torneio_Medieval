@@ -1,0 +1,27 @@
+{
+	"versao": 1,
+	"descricao": "Bonus de conjunto (game/scripts/rules/conjuntos.gd), calculados a mao com um catalogo pequeno embutido. efeito(modelos_equipados, itens) == esperado (atributos somados; habilidades dos conjuntos completos em ordem alfabetica do conjunto).",
+	"itens": {
+		"modelos": {
+			"elmo_a": {"conjunto": "a"}, "peito_a": {"conjunto": "a"}, "escudo_a": {"conjunto": "a"},
+			"elmo_b": {"conjunto": "b"}, "peito_b": {"conjunto": "b"},
+			"elmo_c": {"conjunto": "c"}, "peito_c": {"conjunto": "c"}, "lanca_c": {"conjunto": "c"},
+			"avulsa": {"conjunto": ""}
+		},
+		"conjuntos": {
+			"a": {"bonus_2": {"forca": 3}, "habilidade": "hab_a"},
+			"b": {"bonus_2": {"forca": 2, "equilibrio": 1}, "habilidade": "hab_b"},
+			"c": {"bonus_2": {"precisao": 4}, "habilidade": ""}
+		}
+	},
+	"casos": [
+		{"nome": "nada equipado", "equipados": [], "esperado": {"atributos": {}, "habilidades": []}},
+		{"nome": "uma peca nao da bonus", "equipados": ["elmo_a"], "esperado": {"atributos": {}, "habilidades": []}},
+		{"nome": "duas pecas dao o bonus", "equipados": ["elmo_a", "peito_a"], "esperado": {"atributos": {"forca": 3}, "habilidades": []}},
+		{"nome": "completo libera a habilidade", "equipados": ["escudo_a", "elmo_a", "peito_a"], "esperado": {"atributos": {"forca": 3}, "habilidades": ["hab_a"]}},
+		{"nome": "dois conjuntos somam", "equipados": ["elmo_a", "peito_a", "elmo_b", "peito_b"], "esperado": {"atributos": {"forca": 5, "equilibrio": 1}, "habilidades": ["hab_b"]}},
+		{"nome": "conjunto sem habilidade", "equipados": ["elmo_c", "peito_c", "lanca_c"], "esperado": {"atributos": {"precisao": 4}, "habilidades": []}},
+		{"nome": "peca avulsa e desconhecida nao contam", "equipados": ["avulsa", "nao_existe", "elmo_b"], "esperado": {"atributos": {}, "habilidades": []}},
+		{"nome": "ordem alfabetica das habilidades", "equipados": ["peito_b", "elmo_b", "elmo_a", "peito_a", "escudo_a"], "esperado": {"atributos": {"forca": 5, "equilibrio": 1}, "habilidades": ["hab_a", "hab_b"]}}
+	]
+}

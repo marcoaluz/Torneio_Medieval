@@ -487,3 +487,35 @@ PVE_MATERIAIS,Materiais: {lista},Materials: {lista}
 MATERIAL_OURO_MOEDAS,ouro,gold
 ITEM_CAPARACAO_VIGIA,Caparação da vigia,Sentinel's caparison
 FORJA_FORNO_LIVRE,O forno está livre.,The furnace is free.
+HABILIDADE_OLHAR_DA_VIGIA,Olhar da Vigia,Sentinel's Eye
+HABILIDADE_CARGA_ANDANTE,Carga do Andante,Errant's Charge
+HABILIDADE_MARTELO_NEGRO,Martelo Negro,Black Hammer
+HABILIDADE_BALUARTE_REAL,Baluarte Real,Royal Bulwark
+HABILIDADE_FURIA_DO_DRAGAO,Fúria do Dragão,Dragon's Fury
+HABILIDADE_LANCA_DO_SOL,Lança do Sol,Sun Lance
+HABILIDADE_DO_RIVAL,{nome} do rival!,Rival's {nome}!
+HABILIDADE_DISPAROU,{nome}!,{nome}!
+HABS_TITULO,Habilidades especiais,Special abilities
+HABS_ESPACOS,Espaços: {usados}/{espacos}. O segundo abre no nível {nivel} ou na liga {liga}. Uma por grupo.,Slots: {usados}/{espacos}. The second opens at level {nivel} or in the {liga} league. One per group.
+HABS_GRUPO_OFENSIVA,ofensiva (botão na corrida),offensive (button while charging)
+HABS_GRUPO_DEFENSIVA,defensiva (dispara no impacto),defensive (fires on impact)
+HABS_FAMILIA,vence {vence},beats {vence}
+HABS_EFEITO_DERRUBADA,+{v}% de chance de derrubar,+{v}% unhorse chance
+HABS_EFEITO_DANO,+{v}% dano,+{v}% damage
+HABS_EFEITO_BLOQUEIO,{v}% de desviar,{v}% to deflect
+HABS_EQUIPADA,Em uso,In use
+HABS_USAR,Usar,Use
+HABS_TIRAR,Tirar,Remove
+HABS_CONJUNTOS,Conjuntos,Sets
+HABS_CONJUNTO_LINHA,{conjunto}: {n}/{total} peças · 2 peças: {bonus} · completo: {habilidade},{conjunto}: {n}/{total} pieces · 2 pieces: {bonus} · full set: {habilidade}
+HABS_DO_CONJUNTO,do conjunto {conjunto},from the {conjunto} set
+HABS_ABRIR,Habilidades,Abilities
+LIGA_BRONZE,Bronze,Bronze
+LIGA_PRATA,Prata,Silver
+LIGA_OURO,Ouro,Gold
+LIGA_PLATINA,Platina,Platinum
+LIGA_DIAMANTE,Diamante,Diamond
+LIGA_CAMPEAO,Campeão,Champion
+ERRO_SEM_ESPACO_HABILIDADE,Não há espaço para outra habilidade.,No slot for another ability.
+ERRO_HABILIDADE_DESCONHECIDA,Você ainda não conhece essa habilidade.,You do not know that ability yet.
+ERRO_UMA_POR_GRUPO,Só uma habilidade por grupo.,Only one ability per group.

@@ -30,7 +30,8 @@ static func validar(cfg: Dictionary) -> String:
 static func crescimento_pct(cfg: Dictionary, precisao: int, bonus_pct: int) -> int:
 	var p: Dictionary = cfg["precisao"]
 	var g := maxi(precisao, 0) * int(p["crescimento_por_ponto_milesimos"]) / 1000 + maxi(bonus_pct, 0)
-	return mini(g, int(p["crescimento_max_pct"]))
+	# Teto suave (GDD: perto do teto cada ponto rende menos).
+	return Impacto.suave(g, int(p["crescimento_max_pct"]), int(p.get("joelho_pct", 100)))
 
 ## Retângulos efetivos (décimos de px) por zona, na ordem de prioridade:
 ## [{nome, retangulos: Array[Rect2i]}].

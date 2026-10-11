@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 3
+const VERSAO := 4
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -134,8 +134,9 @@ func estagio_dano(id: String) -> int:
 	return e
 
 ## Lado do jogador para a regra da justa: {cavaleiro, cavalo, equipamento,
-## habilidade}. Peça quebrada (durabilidade 0) vai com durabilidade 0 e a
-## regra ignora os bônus dela.
+## habilidades}. Peça quebrada (durabilidade 0) vai com durabilidade 0 e a
+## regra ignora os bônus dela. Os atributos do cavaleiro já levam o bônus de
+## conjunto (2 peças), sem passar do teto.
 func lado_para_justa() -> Dictionary:
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
 	var equip := {}
@@ -151,12 +152,84 @@ func lado_para_justa() -> Dictionary:
 	if cavalo_cansado():
 		var pen := int(Balanceamento.carregar("treino")["folego_cavalo"]["penalidade_velocidade_cansado_pct"])
 		atr_cavalo["velocidade"] = int(atr_cavalo.get("velocidade", 0)) * (100 - pen) / 100
+	var cav_atr: Dictionary = estado["cavaleiro"]["atributos"].duplicate()
+	var bonus: Dictionary = efeito_conjuntos()["atributos"]
+	var teto := int(Balanceamento.carregar("treino")["teto_atributo"])
+	for k: String in bonus:
+		if cav_atr.has(k):
+			cav_atr[k] = mini(int(cav_atr[k]) + int(bonus[k]), teto)
 	return {
-		"cavaleiro": estado["cavaleiro"]["atributos"].duplicate(),
+		"cavaleiro": cav_atr,
 		"cavalo": atr_cavalo,
 		"equipamento": equip,
-		"habilidade": estado["cavaleiro"].get("habilidade", ""),
+		"habilidades": habilidades_em_uso(),
 	}
+
+# -------------------------------------------------------------- habilidades
+# GDD Habilidades especiais e Conjuntos (3.16): ofensivas (ativas, botão que
+# carrega) e defensivas (passivas, disparam no impacto); 1 espaço no começo,
+# o segundo numa liga alta (ou no nível, enquanto não há liga); no máximo uma
+# por grupo. As de conjunto só valem com o conjunto completo equipado.
+
+## Efeito dos conjuntos equipados (RegraConjuntos): {atributos, habilidades, contagem, total}.
+func efeito_conjuntos() -> Dictionary:
+	var modelos_eq: Array = []
+	for esp: String in estado["equipamento"]:
+		var it := item(estado["equipamento"][esp])
+		if not it.is_empty():
+			modelos_eq.append(it["modelo"])
+	return RegraConjuntos.efeito(modelos_eq, Balanceamento.carregar("itens"))
+
+## Habilidades que o cavaleiro pode equipar agora: as de base e as dos
+## conjuntos completos equipados.
+func habilidades_conhecidas() -> Array:
+	var r: Array = (Balanceamento.carregar("progressao")["habilidades"]["base"] as Array).duplicate()
+	for h: String in efeito_conjuntos()["habilidades"]:
+		if not r.has(h):
+			r.append(h)
+	return r
+
+func espacos_habilidade() -> int:
+	var cfg: Dictionary = Balanceamento.carregar("progressao")["habilidades"]
+	var n := int(cfg["espacos_iniciais"])
+	var ligas: Array = Balanceamento.carregar("economia")["ligas"]["nomes"]
+	var melhor := str(estado.get("liga", {}).get("melhor", ""))
+	var por_liga := melhor != "" and ligas.find(melhor) >= ligas.find(cfg["segundo_espaco_liga"])
+	if por_liga or int(estado["cavaleiro"]["nivel"]) >= int(cfg["segundo_espaco_nivel"]):
+		n += 1
+	return n
+
+## Habilidades escolhidas (como estão salvas).
+func habilidades_escolhidas() -> Array:
+	return (estado["cavaleiro"].get("habilidades", []) as Array).duplicate()
+
+## As que valem na justa: as escolhidas que ainda são conhecidas (a de um
+## conjunto sai se o conjunto for desfeito), até o número de espaços.
+func habilidades_em_uso() -> Array:
+	var conhecidas := habilidades_conhecidas()
+	var r: Array = []
+	for h: String in habilidades_escolhidas():
+		if conhecidas.has(h) and r.size() < espacos_habilidade():
+			r.append(h)
+	return r
+
+## Troca as habilidades escolhidas: até o número de espaços, conhecidas,
+## sem repetir e no máximo uma por grupo (ofensiva, defensiva).
+func equipar_habilidades(lista: Array) -> Dictionary:
+	if lista.size() > espacos_habilidade():
+		return _erro("sem_espaco_habilidade")
+	var conhecidas := habilidades_conhecidas()
+	var defs: Dictionary = Balanceamento.carregar("impacto")["habilidades"]
+	var grupos := {}
+	for h: String in lista:
+		if not conhecidas.has(h) or not defs.has(h):
+			return _erro("habilidade_desconhecida")
+		var g := str(defs[h]["grupo"])
+		if grupos.has(g):
+			return _erro("uma_por_grupo")
+		grupos[g] = true
+	estado["cavaleiro"]["habilidades"] = lista.duplicate()
+	return _concluir("cavaleiro")
 
 # ----------------------------------------------------------------- comandos
 
@@ -1129,7 +1202,7 @@ func novo_estado() -> Dictionary:
 		"proximo_id": 1,
 		"cavaleiro": {"nome": "", "corpo": "masculino", "rosto": "1", "cabelo": "1", "pele": "media",
 			"cor_cabelo": "castanho", "nivel": int(ini["cavaleiro"]["nivel"]), "xp": int(ini["cavaleiro"]["xp"]),
-			"atributos": ini["cavaleiro"]["atributos"].duplicate(), "habilidade": ini["cavaleiro"]["habilidade"]},
+			"atributos": ini["cavaleiro"]["atributos"].duplicate(), "habilidades": [ini["cavaleiro"]["habilidade"]]},
 		"casa": {"nome": "", "cores": {"principal": "azul_real", "secundaria": "ouro_velho", "metal": "ferro"}, "brasao": {}},
 		"cavalos": [],
 		"cavalo_ativo": "",
@@ -1205,6 +1278,14 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("baus"):
 			d["baus"] = _baus_novos(int(d.get("criado_em", 0)), 0)
 		v = 3
+	if v < 4:
+		# 3.16: até dois espaços de habilidade (lista no lugar de uma só).
+		var cav4: Dictionary = d.get("cavaleiro", {})
+		if not cav4.has("habilidades"):
+			var h := str(cav4.get("habilidade", ""))
+			cav4["habilidades"] = [h] if h != "" else []
+		cav4.erase("habilidade")
+		v = 4
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

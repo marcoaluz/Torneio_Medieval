@@ -119,12 +119,20 @@ func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> 
 func _ao_avaliar_largada(_p: int, qualidade: String, _reacao: int, queimada: bool) -> void:
 	mostrar_letreiro(tr("LARGADA_QUEIMADA") if queimada else tr("LARGADA_" + qualidade.to_upper()))
 
+## Letreiro sempre que uma habilidade dispara (GDD): a ativa ao acionar, a
+## passiva quando desvia o golpe.
 func _ao_ativar_habilidade(_p: int, lado: String, nome: String) -> void:
 	if lado == "jogador":
 		mostrar_letreiro(tr("HABILIDADE_" + nome.to_upper()))
+	else:
+		mostrar_letreiro(tr("HABILIDADE_DO_RIVAL").format({"nome": tr("HABILIDADE_" + nome.to_upper())}))
 
 func _ao_resolver_impacto(_p: int, jog: Dictionary, riv: Dictionary, _d: JustaFases.Lado, _q: JustaFases.Lado) -> void:
 	var partes: Array[String] = []
+	if str(riv.get("habilidade_bloqueio", "")) != "":
+		partes.append(tr("HABILIDADE_DISPAROU").format({"nome": tr("HABILIDADE_" + str(riv["habilidade_bloqueio"]).to_upper())}))
+	if str(jog.get("habilidade_bloqueio", "")) != "":
+		partes.append(tr("HABILIDADE_DO_RIVAL").format({"nome": tr("HABILIDADE_" + str(jog["habilidade_bloqueio"]).to_upper())}))
 	if jog["falta"]:
 		partes.append(tr("GOLPE_FALTA"))
 	elif jog["zona"] == Mira.ERRO:

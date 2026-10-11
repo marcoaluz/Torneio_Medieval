@@ -54,7 +54,7 @@ func _initialize() -> void:
 	var lado := j.lado_para_justa()
 	_checa("lado tem as quatro pecas da regra", lado["equipamento"].keys().size() == 4)
 	_checa("lado com atributos do inicio", int(lado["cavaleiro"]["forca"]) == 30)
-	_checa("lado valido para a justa", Justa.validar(Justa.carregar_configuracao()) == "" and lado["habilidade"] == "investida")
+	_checa("lado valido para a justa", Justa.validar(Justa.carregar_configuracao()) == "" and lado["habilidades"] == ["investida"])
 	var cfg := Justa.carregar_configuracao()
 	var justa := Justa.new(cfg, lado, Justa.lado_padrao(Balanceamento.carregar("padrao")), 1)
 	_checa("justa aceita o lado do jogador", justa.iniciar().size() > 0)

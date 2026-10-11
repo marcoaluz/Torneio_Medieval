@@ -2,6 +2,16 @@
 	"versao": 1,
 	"_nota": "Catalogo de pecas. status usa as mesmas chaves da regra do impacto (defesa, bloqueio_milesimos, poder, precisao). visual = variante da arte em game/art/sprites/personagem (camadas.json: {espaco}_{visual}_{animacao}.png). espaco: elmo, peitoral, escudo, lanca, caparacao (os da regra) e os demais do GDD quando tiverem arte. Conjuntos acima do vigia (3.13) usam a arte do vigia ate ter arte propria.",
 	"raridades": ["comum", "incomum", "raro", "epico", "lendario"],
+	"conjuntos": {
+		"_nota": "GDD Conjuntos: com 2 pecas equipadas do mesmo conjunto o cavaleiro ganha bonus_2 (atributos); com o conjunto completo (todas as pecas do conjunto no catalogo) libera a habilidade dele (impacto.json > habilidades).",
+		"escudeiro": {"bonus_2": {"equilibrio": 2}, "habilidade": ""},
+		"vigia": {"bonus_2": {"equilibrio": 3}, "habilidade": "olhar_da_vigia"},
+		"cavaleiro_andante": {"bonus_2": {"forca": 3}, "habilidade": "carga_andante"},
+		"ferro_negro": {"bonus_2": {"forca": 4}, "habilidade": "martelo_negro"},
+		"guarda_real": {"bonus_2": {"equilibrio": 4}, "habilidade": "baluarte_real"},
+		"dragao": {"bonus_2": {"forca": 5}, "habilidade": "furia_do_dragao"},
+		"rei_sol": {"bonus_2": {"precisao": 5}, "habilidade": "lanca_do_sol"}
+	},
 	"cores_raridade": {"comum": "c9c2b6", "incomum": "6fbf5a", "raro": "4f8fe0", "epico": "b062d8", "lendario": "f0a830"},
 	"cores_bau": {"madeira": "8a5a2b", "ferro": "7d8590", "ouro": "d4a72c", "real": "8e2a3a"},
 	"modelos": {

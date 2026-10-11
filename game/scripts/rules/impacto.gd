@@ -7,7 +7,9 @@ extends RefCounted
 ##   golpeador = {
 ##     cavaleiro: {forca, precisao, equilibrio},
 ##     equipamento: {peca: {defesa?, bloqueio_milesimos?, poder?, precisao?, durabilidade}} (opcional),
-##     habilidade: {nome, ativa} (opcional; nome em impacto.json/habilidades),
+##     habilidades: [{nome, ativa}] (opcional; nomes em impacto.json/habilidades;
+##       no máximo uma ofensiva e uma defensiva). O formato antigo
+##       habilidade: {nome, ativa} vale como lista de uma.
 ##     zona: "capacete" | "peito" | "escudo" | "cavalo" | "erro" (da Mira),
 ##     velocidade, velocidade_nominal (do galope, no fim da corrida),
 ##     ritmo_milesimos (0 a 1000),
@@ -16,13 +18,19 @@ extends RefCounted
 ## golpe DAQUELE lado no outro:
 ##   {zona, zona_final, bloqueado, bloqueio_por ("" | "habilidade" | "escudo"),
 ##    falta, pontos, chance_derrubar_milesimos, derrubou,
-##    habilidade ("" se não tinha, anulada ou inativa), dano: {peca: n}, dano_lanca}
+##    habilidade (a primeira em efeito de quem bate; "" se nenhuma),
+##    habilidades (todas em efeito de quem bate), habilidade_bloqueio (a do
+##    defensor que desviou; "" se não foi habilidade), dano: {peca: n}, dano_lanca}
 ##
 ## Regras (GDD): capacete 3, peito 2, escudo 1, erro 0. Cavalo é falta (perde
 ## pontos). Bloqueio desvia golpe no capacete/peito para o escudo. Derrubada:
 ## Força de quem bate contra Equilíbrio de quem leva, mais velocidade, ritmo,
 ## poder da lança e habilidade, menos a defesa da peça atingida. Peça com
-## durabilidade 0 não dá bônus. Ciclo: cada habilidade anula a que ela "vence".
+## durabilidade 0 não dá bônus. Ciclo: cada habilidade tem uma família
+## (investida, bloqueio ou golpe_pesado; a de um conjunto herda o ciclo da
+## família) e anula as do outro lado da família que ela "vence". Bônus de
+## habilidades em efeito somam (derrubada, dano); no bloqueio vale a maior
+## chance entre as do defensor, num sorteio só.
 ##
 ## Ordem fixa dos sorteios (paridade com TypeScript): golpe do jogador e depois
 ## o do rival; em cada um, (1) bloqueio da habilidade do defensor, se houver,
@@ -58,6 +66,8 @@ static func validar(cfg: Dictionary) -> String:
 		for k in ["vence", "tipo", "derrubada_bonus_milesimos", "dano_bonus_pct", "bloqueio_milesimos"]:
 			if not cfg["habilidades"][nome].has(k):
 				return "falta \"habilidades.%s.%s\"" % [nome, k]
+		if not cfg["habilidades"].has(familia(cfg, nome)):
+			return "familia desconhecida em \"habilidades.%s\"" % nome
 	return ""
 
 ## Teto suave: até `joelho_pct` do teto passa inteiro; acima, cada ponto rende
@@ -88,38 +98,63 @@ static func stat(equipamento: Variant, peca: String, chave: String) -> int:
 static func precisao_efetiva(lado: Dictionary) -> int:
 	return int(lado["cavaleiro"]["precisao"]) + stat(lado.get("equipamento"), "lanca", "precisao")
 
-## Nome da habilidade em efeito para `lado`: ativa e não anulada pela do outro.
-static func habilidade_em_efeito(cfg: Dictionary, lado: Dictionary, outro: Dictionary) -> String:
-	var h := _habilidade_ativa(cfg, lado)
-	if h == "":
-		return ""
-	var o := _habilidade_ativa(cfg, outro)
-	if o != "" and cfg["habilidades"][o]["vence"] == h:
-		return ""
-	return h
+## Família de uma habilidade (a dela mesma, se não disser).
+static func familia(cfg: Dictionary, nome: String) -> String:
+	return str(cfg["habilidades"][nome].get("familia", nome))
 
-static func _habilidade_ativa(cfg: Dictionary, lado: Dictionary) -> String:
-	var h: Variant = lado.get("habilidade")
-	if not h is Dictionary or not h.get("ativa", false):
-		return ""
-	var nome: String = h.get("nome", "")
-	return nome if cfg["habilidades"].has(nome) else ""
+## Habilidades em efeito para `lado`, na ordem dele: ativas e não anuladas
+## por nenhuma das ativas do outro.
+static func habilidades_em_efeito(cfg: Dictionary, lado: Dictionary, outro: Dictionary) -> Array[String]:
+	var minhas := _ativas(cfg, lado)
+	var dele := _ativas(cfg, outro)
+	var res: Array[String] = []
+	for h in minhas:
+		var anulada := false
+		for o in dele:
+			if cfg["habilidades"][o]["vence"] == familia(cfg, h):
+				anulada = true
+		if not anulada:
+			res.append(h)
+	return res
+
+## A primeira em efeito ("" se nenhuma); compatível com a versão de uma só.
+static func habilidade_em_efeito(cfg: Dictionary, lado: Dictionary, outro: Dictionary) -> String:
+	var hs := habilidades_em_efeito(cfg, lado, outro)
+	return hs[0] if not hs.is_empty() else ""
+
+static func _ativas(cfg: Dictionary, lado: Dictionary) -> Array[String]:
+	var lista: Array = []
+	if lado.get("habilidades") is Array:
+		lista = lado["habilidades"]
+	elif lado.get("habilidade") is Dictionary:
+		lista = [lado["habilidade"]]
+	var res: Array[String] = []
+	for h: Variant in lista:
+		if h is Dictionary and h.get("ativa", false) and cfg["habilidades"].has(str(h.get("nome", ""))):
+			res.append(str(h["nome"]))
+	return res
 
 static func resolver(cfg: Dictionary, entrada: Dictionary, rng: Aleatorio) -> Dictionary:
 	var j: Dictionary = entrada["jogador"]
 	var r: Dictionary = entrada["rival"]
-	var hj := habilidade_em_efeito(cfg, j, r)
-	var hr := habilidade_em_efeito(cfg, r, j)
+	var hj := habilidades_em_efeito(cfg, j, r)
+	var hr := habilidades_em_efeito(cfg, r, j)
 	var res_j := _golpe(cfg, j, r, hj, hr, rng)
 	var res_r := _golpe(cfg, r, j, hr, hj, rng)
 	return {"jogador": res_j, "rival": res_r}
 
-## Golpe de `a` (com habilidade `ha` em efeito) em `d` (com `hd`).
-static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: String, hd: String, rng: Aleatorio) -> Dictionary:
+static func _soma(cfg: Dictionary, hs: Array[String], chave: String) -> int:
+	var t := 0
+	for h in hs:
+		t += int(cfg["habilidades"][h][chave])
+	return t
+
+## Golpe de `a` (com as habilidades `ha` em efeito) em `d` (com `hd`).
+static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: Array[String], hd: Array[String], rng: Aleatorio) -> Dictionary:
 	var zona: String = a.get("zona", ERRO)
 	var r := {"zona": zona, "zona_final": zona, "bloqueado": false, "bloqueio_por": "", "falta": false,
-		"pontos": 0, "chance_derrubar_milesimos": 0, "derrubou": false, "habilidade": ha,
-		"dano": {}, "dano_lanca": 0}
+		"pontos": 0, "chance_derrubar_milesimos": 0, "derrubou": false, "habilidade": ha[0] if not ha.is_empty() else "",
+		"habilidades": ha.duplicate(), "habilidade_bloqueio": "", "dano": {}, "dano_lanca": 0}
 	if zona == ERRO or not cfg["pontos"].has(zona):
 		r["zona"] = ERRO
 		r["zona_final"] = ERRO
@@ -131,16 +166,22 @@ static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: String, hd
 	if zona == cfg["falta"]["zona"]:
 		r["falta"] = true
 		r["pontos"] = -int(cfg["falta"]["penalidade_pontos"])
-		_aplicar_dano(cfg, r, a, d, zona, "")
+		_aplicar_dano(cfg, r, a, d, zona, [] as Array[String])
 		return r
 
 	# Bloqueio: primeiro a habilidade do defensor, depois o escudo.
 	var b: Dictionary = cfg["bloqueio"]
 	if b["zonas"].has(zona):
-		if hd != "" and int(cfg["habilidades"][hd]["bloqueio_milesimos"]) > 0:
-			if rng.chance_milesimos(int(cfg["habilidades"][hd]["bloqueio_milesimos"])):
+		var hb := ""
+		for h in hd:
+			var bh := int(cfg["habilidades"][h]["bloqueio_milesimos"])
+			if bh > 0 and (hb == "" or bh > int(cfg["habilidades"][hb]["bloqueio_milesimos"])):
+				hb = h
+		if hb != "":
+			if rng.chance_milesimos(int(cfg["habilidades"][hb]["bloqueio_milesimos"])):
 				r["bloqueado"] = true
 				r["bloqueio_por"] = "habilidade"
+				r["habilidade_bloqueio"] = hb
 		if not r["bloqueado"]:
 			var chance := suave(int(b["base_milesimos"]) + stat(equip_d, "escudo", "bloqueio_milesimos"),
 				int(b["teto_milesimos"]), joelho)
@@ -163,8 +204,7 @@ static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: String, hd
 		chance += int(dr["ritmo_max_milesimos"]) * clampi(int(a.get("ritmo_milesimos", 0)), 0, 1000) / 1000
 		chance += stat(equip_a, "lanca", "poder") * int(dr["poder_lanca_milesimos"])
 		chance -= stat(equip_d, peca, "defesa") * int(dr["defesa_peca_milesimos"])
-		if ha != "":
-			chance += int(cfg["habilidades"][ha]["derrubada_bonus_milesimos"])
+		chance += _soma(cfg, ha, "derrubada_bonus_milesimos")
 		chance = suave(chance, int(dr["teto_milesimos"]), joelho)
 		r["chance_derrubar_milesimos"] = chance
 		r["derrubou"] = rng.chance_milesimos(chance)
@@ -179,15 +219,15 @@ static func _velocidade_pct(a: Dictionary) -> int:
 		return 100
 	return maxi(int(a.get("velocidade", nominal)), 0) * 100 / nominal
 
-static func _aplicar_dano(cfg: Dictionary, r: Dictionary, a: Dictionary, d: Dictionary, zona: String, ha: String) -> void:
+static func _aplicar_dano(cfg: Dictionary, r: Dictionary, a: Dictionary, d: Dictionary, zona: String, ha: Array[String]) -> void:
 	var dn: Dictionary = cfg["dano"]
 	if not dn["base_por_zona"].has(zona):
 		return
 	var peca: String = dn["peca_por_zona"][zona]
 	var extra := maxi(_velocidade_pct(a) - 100, 0)
 	var dano := int(dn["base_por_zona"][zona]) * (1000 + extra * int(dn["velocidade_por_pct_milesimos"])) / 1000
-	if ha != "":
-		dano = dano * (100 + int(cfg["habilidades"][ha]["dano_bonus_pct"])) / 100
+	if not ha.is_empty():
+		dano = dano * (100 + _soma(cfg, ha, "dano_bonus_pct")) / 100
 	var reducao := stat(d.get("equipamento"), peca, "defesa") * int(dn["defesa_reduz_por_ponto_milesimos"]) / 1000
 	r["dano"] = {peca: maxi(dano - reducao, int(dn["minimo"]))}
 	r["dano_lanca"] = int(dn["lanca_por_contato"])

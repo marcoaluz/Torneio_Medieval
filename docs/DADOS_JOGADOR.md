@@ -15,7 +15,8 @@ Modelo de dados e save local (prompt 2.4). Código: `game/scripts/services/servi
 ```
 versao, criado_em, proximo_id
 cavaleiro: nome, corpo (masculino|feminino), rosto, cabelo, pele, cor_cabelo,
-           nivel, xp, atributos {forca, precisao, equilibrio}, habilidade
+           nivel, xp, atributos {forca, precisao, equilibrio},
+           habilidades [nome] (v4, 3.16: até 2, uma por grupo; antes "habilidade")
 casa: nome, cores {principal, secundaria, metal}, brasao {...}         (2.3)
 cavalos: [{id, nome, pelagem, atributos {velocidade, folego, temperamento, vinculo}}]
 cavalo_ativo: id

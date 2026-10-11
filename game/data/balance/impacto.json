@@ -1,6 +1,6 @@
 {
-	"versao": 1,
-	"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida).",
+	"versao": 2,
+	"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa).",
 	"pontos": {
 		"capacete": 3,
 		"peito": 2,
@@ -57,6 +57,8 @@
 	"habilidades": {
 		"investida": {
 			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "investida",
 			"vence": "bloqueio",
 			"derrubada_bonus_milesimos": 80,
 			"dano_bonus_pct": 0,
@@ -64,6 +66,8 @@
 		},
 		"golpe_pesado": {
 			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "golpe_pesado",
 			"vence": "investida",
 			"derrubada_bonus_milesimos": 40,
 			"dano_bonus_pct": 50,
@@ -71,10 +75,66 @@
 		},
 		"bloqueio": {
 			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "golpe_pesado",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 600
+		},
+		"olhar_da_vigia": {
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "golpe_pesado",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 650
+		},
+		"carga_andante": {
+			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "investida",
+			"vence": "bloqueio",
+			"derrubada_bonus_milesimos": 100,
+			"dano_bonus_pct": 10,
+			"bloqueio_milesimos": 0
+		},
+		"martelo_negro": {
+			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "golpe_pesado",
+			"vence": "investida",
+			"derrubada_bonus_milesimos": 50,
+			"dano_bonus_pct": 65,
+			"bloqueio_milesimos": 0
+		},
+		"baluarte_real": {
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
 			"vence": "golpe_pesado",
 			"derrubada_bonus_milesimos": 0,
 			"dano_bonus_pct": 0,
 			"bloqueio_milesimos": 700
+		},
+		"furia_do_dragao": {
+			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "golpe_pesado",
+			"vence": "investida",
+			"derrubada_bonus_milesimos": 60,
+			"dano_bonus_pct": 80,
+			"bloqueio_milesimos": 0
+		},
+		"lanca_do_sol": {
+			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "investida",
+			"vence": "bloqueio",
+			"derrubada_bonus_milesimos": 120,
+			"dano_bonus_pct": 20,
+			"bloqueio_milesimos": 0
 		}
 	},
 	"habilidade_carga_ms": 1000

@@ -2,8 +2,8 @@
 	"versao": 1,
 	"descricao": "Regra do impacto (game/scripts/rules/impacto.gd). Cada caso: Impacto.resolver(config, entrada, Aleatorio(semente)) == esperado. Config embutida.",
 	"config": {
-		"versao": 1,
-		"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida).",
+		"versao": 2,
+		"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa).",
 		"pontos": {
 			"capacete": 3,
 			"peito": 2,
@@ -60,6 +60,8 @@
 		"habilidades": {
 			"investida": {
 				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "investida",
 				"vence": "bloqueio",
 				"derrubada_bonus_milesimos": 80,
 				"dano_bonus_pct": 0,
@@ -67,6 +69,8 @@
 			},
 			"golpe_pesado": {
 				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "golpe_pesado",
 				"vence": "investida",
 				"derrubada_bonus_milesimos": 40,
 				"dano_bonus_pct": 50,
@@ -74,10 +78,66 @@
 			},
 			"bloqueio": {
 				"tipo": "passiva",
+				"grupo": "defensiva",
+				"familia": "bloqueio",
+				"vence": "golpe_pesado",
+				"derrubada_bonus_milesimos": 0,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 600
+			},
+			"olhar_da_vigia": {
+				"tipo": "passiva",
+				"grupo": "defensiva",
+				"familia": "bloqueio",
+				"vence": "golpe_pesado",
+				"derrubada_bonus_milesimos": 0,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 650
+			},
+			"carga_andante": {
+				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "investida",
+				"vence": "bloqueio",
+				"derrubada_bonus_milesimos": 100,
+				"dano_bonus_pct": 10,
+				"bloqueio_milesimos": 0
+			},
+			"martelo_negro": {
+				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "golpe_pesado",
+				"vence": "investida",
+				"derrubada_bonus_milesimos": 50,
+				"dano_bonus_pct": 65,
+				"bloqueio_milesimos": 0
+			},
+			"baluarte_real": {
+				"tipo": "passiva",
+				"grupo": "defensiva",
+				"familia": "bloqueio",
 				"vence": "golpe_pesado",
 				"derrubada_bonus_milesimos": 0,
 				"dano_bonus_pct": 0,
 				"bloqueio_milesimos": 700
+			},
+			"furia_do_dragao": {
+				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "golpe_pesado",
+				"vence": "investida",
+				"derrubada_bonus_milesimos": 60,
+				"dano_bonus_pct": 80,
+				"bloqueio_milesimos": 0
+			},
+			"lanca_do_sol": {
+				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "investida",
+				"vence": "bloqueio",
+				"derrubada_bonus_milesimos": 120,
+				"dano_bonus_pct": 20,
+				"bloqueio_milesimos": 0
 			}
 		},
 		"habilidade_carga_ms": 1000
@@ -183,6 +243,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				},
@@ -196,6 +258,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -239,6 +303,8 @@
 					"chance_derrubar_milesimos": 120,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 20
 					},
@@ -254,6 +320,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -297,6 +365,8 @@
 					"chance_derrubar_milesimos": 90,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -312,6 +382,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -355,6 +427,8 @@
 					"chance_derrubar_milesimos": 30,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"escudo": 10
 					},
@@ -370,6 +444,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -413,6 +489,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral_cavalo": 8
 					},
@@ -428,6 +506,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -471,6 +551,8 @@
 					"chance_derrubar_milesimos": 90,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -486,6 +568,8 @@
 					"chance_derrubar_milesimos": 120,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 20
 					},
@@ -537,6 +621,8 @@
 					"chance_derrubar_milesimos": 30,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"escudo": 10
 					},
@@ -552,6 +638,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -601,6 +689,8 @@
 					"chance_derrubar_milesimos": 120,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 20
 					},
@@ -616,6 +706,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -659,6 +751,8 @@
 					"chance_derrubar_milesimos": 399,
 					"derrubou": true,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 24
 					},
@@ -674,6 +768,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -717,6 +813,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 20
 					},
@@ -732,6 +830,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -786,6 +886,10 @@
 					"chance_derrubar_milesimos": 429,
 					"derrubou": true,
 					"habilidade": "investida",
+					"habilidades": [
+						"investida"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 42
 					},
@@ -801,6 +905,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -844,6 +950,8 @@
 					"chance_derrubar_milesimos": 10,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -859,6 +967,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -908,6 +1018,8 @@
 					"chance_derrubar_milesimos": 60,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 5
 					},
@@ -923,6 +1035,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -973,6 +1087,8 @@
 					"chance_derrubar_milesimos": 200,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 20
 					},
@@ -988,6 +1104,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1035,6 +1153,10 @@
 					"chance_derrubar_milesimos": 130,
 					"derrubou": false,
 					"habilidade": "golpe_pesado",
+					"habilidades": [
+						"golpe_pesado"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 22
 					},
@@ -1050,6 +1172,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1097,6 +1221,8 @@
 					"chance_derrubar_milesimos": 30,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "bloqueio",
 					"dano": {
 						"escudo": 10
 					},
@@ -1112,6 +1238,10 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "bloqueio",
+					"habilidades": [
+						"bloqueio"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1163,6 +1293,10 @@
 					"chance_derrubar_milesimos": 170,
 					"derrubou": false,
 					"habilidade": "investida",
+					"habilidades": [
+						"investida"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -1178,6 +1312,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1229,6 +1365,8 @@
 					"chance_derrubar_milesimos": 90,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -1244,6 +1382,10 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "bloqueio",
+					"habilidades": [
+						"bloqueio"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1295,6 +1437,10 @@
 					"chance_derrubar_milesimos": 130,
 					"derrubou": false,
 					"habilidade": "golpe_pesado",
+					"habilidades": [
+						"golpe_pesado"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 22
 					},
@@ -1310,6 +1456,8 @@
 					"chance_derrubar_milesimos": 90,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -1359,6 +1507,8 @@
 					"chance_derrubar_milesimos": 90,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -1374,6 +1524,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1421,6 +1573,8 @@
 					"chance_derrubar_milesimos": 90,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral": 15
 					},
@@ -1436,6 +1590,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1485,6 +1641,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"peitoral_cavalo": 8
 					},
@@ -1500,6 +1658,968 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "lista: ofensiva e defensiva juntas",
+			"semente": 31,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "investida",
+							"ativa": true
+						},
+						{
+							"nome": "bloqueio",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 200,
+					"derrubou": false,
+					"habilidade": "investida",
+					"habilidades": [
+						"investida",
+						"bloqueio"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "bloqueio",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "lista: a defensiva do rival desvia (baluarte)",
+			"semente": 32,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "baluarte_real",
+					"habilidades": [
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "familia: carga andante (investida) anula o baluarte (bloqueio)",
+			"semente": 32,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "carga_andante",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 190,
+					"derrubou": true,
+					"habilidade": "carga_andante",
+					"habilidades": [
+						"carga_andante"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 16
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "familia: olhar da vigia anula o martelo negro",
+			"semente": 33,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "martelo_negro",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "olhar_da_vigia",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "olhar_da_vigia",
+					"habilidades": [
+						"olhar_da_vigia"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "familia: furia do dragao anula a lanca do sol",
+			"semente": 34,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "furia_do_dragao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "lanca_do_sol",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 150,
+					"derrubou": true,
+					"habilidade": "furia_do_dragao",
+					"habilidades": [
+						"furia_do_dragao"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 27
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": true,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "a passiva do lado anulado continua valendo",
+			"semente": 35,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "investida",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "golpe_pesado",
+							"ativa": true
+						},
+						{
+							"nome": "bloqueio",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 160,
+					"derrubou": false,
+					"habilidade": "golpe_pesado",
+					"habilidades": [
+						"golpe_pesado"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"elmo": 30
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "duas defensivas: vale a maior chance",
+			"semente": 36,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "bloqueio",
+							"ativa": true
+						},
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "baluarte_real",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "bloqueio",
+					"habilidades": [
+						"bloqueio",
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "lista com ativa ainda nao acionada",
+			"semente": 37,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "lanca_do_sol",
+							"ativa": false
+						},
+						{
+							"nome": "bloqueio",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 90,
+					"derrubou": false,
+					"habilidade": "bloqueio",
+					"habilidades": [
+						"bloqueio"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "capacete",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "bloqueio",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "lanca do sol: derrubada e dano",
+			"semente": 38,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 70,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "lanca_do_sol",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 300,
+					"derrubou": true,
+					"habilidade": "lanca_do_sol",
+					"habilidades": [
+						"lanca_do_sol"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"elmo": 24
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio do baluarte semente 41",
+			"semente": 41,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "capacete",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 3,
+					"chance_derrubar_milesimos": 120,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"elmo": 20
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "baluarte_real",
+					"habilidades": [
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio do baluarte semente 42",
+			"semente": 42,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "baluarte_real",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "baluarte_real",
+					"habilidades": [
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio do baluarte semente 43",
+			"semente": 43,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "baluarte_real",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "baluarte_real",
+					"habilidades": [
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "sorteio do baluarte semente 44",
+			"semente": 44,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 0,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "baluarte_real",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "baluarte_real",
+					"habilidades": [
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1543,6 +2663,8 @@
 					"chance_derrubar_milesimos": 352,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 23
 					},
@@ -1558,6 +2680,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1601,6 +2725,8 @@
 					"chance_derrubar_milesimos": 352,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 23
 					},
@@ -1616,6 +2742,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1659,6 +2787,8 @@
 					"chance_derrubar_milesimos": 352,
 					"derrubou": true,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 23
 					},
@@ -1674,6 +2804,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1717,6 +2849,8 @@
 					"chance_derrubar_milesimos": 352,
 					"derrubou": true,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 23
 					},
@@ -1732,6 +2866,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1775,6 +2911,8 @@
 					"chance_derrubar_milesimos": 352,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 23
 					},
@@ -1790,6 +2928,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}
@@ -1833,6 +2973,8 @@
 					"chance_derrubar_milesimos": 352,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {
 						"elmo": 23
 					},
@@ -1848,6 +2990,8 @@
 					"chance_derrubar_milesimos": 0,
 					"derrubou": false,
 					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
 				}

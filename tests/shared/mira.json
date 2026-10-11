@@ -1,9 +1,9 @@
 {
-	"versao": 1,
+	"versao": 2,
 	"descricao": "Mira (game/scripts/rules/mira.gd): zona no ponto em decimos de px do quadro do alvo, com precisao e bonus da largada; crescimento; limites da ponta. Config embutida.",
 	"config": {
-		"versao": 1,
-		"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+		"versao": 2,
+		"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn). v2 (3.16): o crescimento pela precisao tem teto suave (joelho_pct do maximo passa inteiro; acima, cada ponto rende menos). GDD: acerto ate o teto, perto dele cada ponto rende menos.",
 		"zonas": [
 			{
 				"nome": "escudo",
@@ -68,7 +68,8 @@
 		],
 		"precisao": {
 			"crescimento_por_ponto_milesimos": 400,
-			"crescimento_max_pct": 50
+			"crescimento_max_pct": 50,
+			"joelho_pct": 70
 		},
 		"ponta_inicial": [
 			40,
@@ -98,9 +99,19 @@
 			"esperado": 20
 		},
 		{
+			"precisao": 87,
+			"bonus": 0,
+			"esperado": 34
+		},
+		{
+			"precisao": 88,
+			"bonus": 0,
+			"esperado": 35
+		},
+		{
 			"precisao": 100,
 			"bonus": 0,
-			"esperado": 40
+			"esperado": 38
 		},
 		{
 			"precisao": 50,
@@ -110,7 +121,12 @@
 		{
 			"precisao": 100,
 			"bonus": 40,
-			"esperado": 50
+			"esperado": 46
+		},
+		{
+			"precisao": 250,
+			"bonus": 0,
+			"esperado": 47
 		},
 		{
 			"precisao": -5,

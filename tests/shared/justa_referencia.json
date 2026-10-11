@@ -44,7 +44,7 @@
 			"versao": 2.0
 		},
 		"impacto": {
-			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida).",
+			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa).",
 			"bloqueio": {
 				"base_milesimos": 50.0,
 				"teto_milesimos": 400.0,
@@ -92,17 +92,48 @@
 			},
 			"habilidade_carga_ms": 1000.0,
 			"habilidades": {
-				"bloqueio": {
+				"baluarte_real": {
 					"bloqueio_milesimos": 700.0,
 					"dano_bonus_pct": 0.0,
 					"derrubada_bonus_milesimos": 0.0,
+					"familia": "bloqueio",
+					"grupo": "defensiva",
 					"tipo": "passiva",
 					"vence": "golpe_pesado"
+				},
+				"bloqueio": {
+					"bloqueio_milesimos": 600.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 0.0,
+					"familia": "bloqueio",
+					"grupo": "defensiva",
+					"tipo": "passiva",
+					"vence": "golpe_pesado"
+				},
+				"carga_andante": {
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 10.0,
+					"derrubada_bonus_milesimos": 100.0,
+					"familia": "investida",
+					"grupo": "ofensiva",
+					"tipo": "ativa",
+					"vence": "bloqueio"
+				},
+				"furia_do_dragao": {
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 80.0,
+					"derrubada_bonus_milesimos": 60.0,
+					"familia": "golpe_pesado",
+					"grupo": "ofensiva",
+					"tipo": "ativa",
+					"vence": "investida"
 				},
 				"golpe_pesado": {
 					"bloqueio_milesimos": 0.0,
 					"dano_bonus_pct": 50.0,
 					"derrubada_bonus_milesimos": 40.0,
+					"familia": "golpe_pesado",
+					"grupo": "ofensiva",
 					"tipo": "ativa",
 					"vence": "investida"
 				},
@@ -110,8 +141,37 @@
 					"bloqueio_milesimos": 0.0,
 					"dano_bonus_pct": 0.0,
 					"derrubada_bonus_milesimos": 80.0,
+					"familia": "investida",
+					"grupo": "ofensiva",
 					"tipo": "ativa",
 					"vence": "bloqueio"
+				},
+				"lanca_do_sol": {
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 20.0,
+					"derrubada_bonus_milesimos": 120.0,
+					"familia": "investida",
+					"grupo": "ofensiva",
+					"tipo": "ativa",
+					"vence": "bloqueio"
+				},
+				"martelo_negro": {
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 65.0,
+					"derrubada_bonus_milesimos": 50.0,
+					"familia": "golpe_pesado",
+					"grupo": "ofensiva",
+					"tipo": "ativa",
+					"vence": "investida"
+				},
+				"olhar_da_vigia": {
+					"bloqueio_milesimos": 650.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 0.0,
+					"familia": "bloqueio",
+					"grupo": "defensiva",
+					"tipo": "passiva",
+					"vence": "golpe_pesado"
 				}
 			},
 			"pontos": {
@@ -122,7 +182,7 @@
 				"peito": 2.0
 			},
 			"teto_suave_joelho_pct": 70.0,
-			"versao": 1.0
+			"versao": 2.0
 		},
 		"justa": {
 			"_nota": "fases_ms.corrida e o teto da Corrida; ela termina antes quando os cavaleiros chegam ao ponto da Mira (galope.json, pista)",
@@ -138,7 +198,7 @@
 			"versao": 2.0
 		},
 		"mira": {
-			"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+			"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn). v2 (3.16): o crescimento pela precisao tem teto suave (joelho_pct do maximo passa inteiro; acima, cada ponto rende menos). GDD: acerto ate o teto, perto dele cada ponto rende menos.",
 			"limites_ponta": [
 				-90.0,
 				-200.0,
@@ -156,9 +216,10 @@
 			],
 			"precisao": {
 				"crescimento_max_pct": 50.0,
-				"crescimento_por_ponto_milesimos": 400.0
+				"crescimento_por_ponto_milesimos": 400.0,
+				"joelho_pct": 70.0
 			},
-			"versao": 1.0,
+			"versao": 2.0,
 			"zonas": [
 				{
 					"cresce": true,
@@ -479,7 +540,7 @@
 		"fase|anterior=2|fase=3|passada=1|t=7084",
 		"soltou|passada=1|t=8084|t_mira_ms=1000|x=0|y=-1060",
 		"golpe|automatico=false|passada=1|sem_golpe=false|t=9084|t_mira_ms=1000|x=0|y=-1060|zona=peito",
-		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 170, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=1|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 100, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=9084",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 170, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"bloqueio\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=1|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 100, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=9084",
 		"fase|anterior=3|fase=4|passada=1|t=9084",
 		"passada|derrubado=0|desclassificado=0|passada=1|pontos_jogador=1|pontos_rival=3|t=11084",
 		"fase|anterior=4|fase=0|passada=2|t=11084",
@@ -499,7 +560,7 @@
 		"fase|anterior=2|fase=3|passada=2|t=18168",
 		"soltou|passada=2|t=19168|t_mira_ms=1000|x=0|y=-1060",
 		"golpe|automatico=false|passada=2|sem_golpe=false|t=20168|t_mira_ms=1000|x=0|y=-1060|zona=peito",
-		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 230, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=2|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 100, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=20168",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 230, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=2|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 100, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=20168",
 		"fase|anterior=3|fase=4|passada=2|t=20168",
 		"passada|derrubado=0|desclassificado=0|passada=2|pontos_jogador=2|pontos_rival=3|t=22168",
 		"fase|anterior=4|fase=0|passada=3|t=22168",
@@ -519,7 +580,7 @@
 		"fase|anterior=2|fase=3|passada=3|t=29252",
 		"soltou|passada=3|t=30252|t_mira_ms=1000|x=0|y=-1060",
 		"golpe|automatico=false|passada=3|sem_golpe=false|t=31252|t_mira_ms=1000|x=0|y=-1060|zona=peito",
-		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 170, \"derrubou\": false, \"habilidade\": \"\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=3|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 120, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"dano\": { \"elmo\": 20 }, \"dano_lanca\": 4 }|t=31252",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 170, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"bloqueio\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=3|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 120, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 20 }, \"dano_lanca\": 4 }|t=31252",
 		"fase|anterior=3|fase=4|passada=3|t=31252",
 		"passada|derrubado=0|desclassificado=0|passada=3|pontos_jogador=1|pontos_rival=3|t=33252",
 		"fase|anterior=4|fase=5|passada=3|t=33252",

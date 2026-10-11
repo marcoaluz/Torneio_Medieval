@@ -20,6 +20,7 @@ func _ready() -> void:
 	_cfg = Balanceamento.carregar("sensacao")
 	if controlador:
 		controlador.impacto_resolvido.connect(_ao_impacto)
+		controlador.habilidade_ativada.connect(_ao_ativar_habilidade)
 		controlador.apresentacao_comecou.connect(_ao_comecar_passada)
 
 ## Força de um golpe, de 0 a 1 (dano / referência; derrubada = 1).
@@ -39,6 +40,11 @@ func _ao_comecar_passada(_p: int) -> void:
 func _ao_impacto(_p: int, jog: Dictionary, riv: Dictionary, _d: JustaFases.Lado, _q: JustaFases.Lado) -> void:
 	var a := controlador.arena
 	# jog = golpe do jogador NO rival; riv = golpe do rival NO jogador.
+	# Passiva que disparou (GDD): o escudo do defensor pisca.
+	if str(jog.get("habilidade_bloqueio", "")) != "":
+		_piscar_escudo(a.rival)
+	if str(riv.get("habilidade_bloqueio", "")) != "":
+		_piscar_escudo(a.jogador)
 	var fj := _golpe(jog, a.jogador, a.rival)
 	var fr := _golpe(riv, a.rival, a.jogador)
 	var forca := maxf(fj, fr)
@@ -51,6 +57,44 @@ func _ao_impacto(_p: int, jog: Dictionary, riv: Dictionary, _d: JustaFases.Lado,
 	a.camera.tremer(trauma)
 	_vibrar(forca)
 	_hit_stop(forca)
+
+## Ativa (GDD): brilho e rastro no cavaleiro que acionou.
+func _ao_ativar_habilidade(_p: int, lado: String, _nome: String) -> void:
+	var a := controlador.arena
+	var c: Cavaleiro = a.jogador if lado == "jogador" else a.rival
+	var h: Dictionary = _cfg["habilidade"]
+	var t := c.create_tween()
+	t.tween_property(c.visual(), "modulate", Color(h["cor_brilho"]), float(h["brilho_s"]) * 0.25)
+	t.tween_property(c.visual(), "modulate", Color.WHITE, float(h["brilho_s"]) * 0.75)
+	var r := CPUParticles2D.new()
+	r.name = "Rastro"
+	r.amount = int(h["rastro_quantidade"])
+	r.lifetime = float(h["rastro_s"])
+	r.local_coords = false
+	r.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	r.emission_rect_extents = Vector2(20, 40)
+	r.gravity = Vector2.ZERO
+	r.initial_velocity_min = 0.0
+	r.initial_velocity_max = 10.0
+	r.scale_amount_min = 2.0
+	r.scale_amount_max = 4.0
+	r.color = Color(h["cor_rastro"])
+	r.position = Vector2(0, -90)
+	c.add_child(r)
+	r.emitting = true
+	get_tree().create_timer(float(h["rastro_s"]) * 2.0).timeout.connect(func():
+		if is_instance_valid(r):
+			r.emitting = false
+			r.queue_free())
+
+func _piscar_escudo(c: Cavaleiro) -> void:
+	var no := c.no_da_zona("escudo")
+	if no == null:
+		return
+	var h: Dictionary = _cfg["habilidade"]
+	var t := no.create_tween().set_loops(int(h["escudo_piscadas"]))
+	t.tween_property(no, "modulate", Color(h["cor_escudo"]), 0.06)
+	t.tween_property(no, "modulate", Color.WHITE, 0.06)
 
 ## Efeitos de um golpe de `atacante` em `alvo`. Devolve a força (0 se não houve contato).
 func _golpe(res: Dictionary, atacante: Cavaleiro, alvo: Cavaleiro) -> float:

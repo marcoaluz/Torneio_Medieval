@@ -33,6 +33,7 @@ var _acumulado := 0.0
 @onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
 @onready var tela_baus: TelaBaus = $Interface/TelaBaus
 @onready var tela_forja: TelaForja = $Interface/TelaForja
+@onready var tela_habilidades: TelaHabilidades = $Interface/TelaHabilidades
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -51,6 +52,7 @@ func _ready() -> void:
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
 	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
+	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	var notif := get_node_or_null("/root/Notificacoes") as ServicoNotificacoes

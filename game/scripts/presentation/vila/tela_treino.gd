@@ -7,8 +7,11 @@ extends PanelContainer
 ##     e treinar (cavalo em treino não corre; o ativo não treina).
 ## Tudo pelo serviço Jogador; a tela só mostra e pede.
 
+signal abrir_habilidades
+
 var predio := ""
 var _jog: ServicoJogador
+var _habilidades: Button
 var _acumulado := 0.0
 
 @onready var _titulo: Label = $Coluna/Titulo
@@ -24,11 +27,19 @@ func _ready() -> void:
 	_fechar.text = tr("PAINEL_FECHAR")
 	_fechar.pressed.connect(fechar)
 	_melhorar.pressed.connect(func(): _mostrar(_jog.melhorar_predio(predio)))
+	# Campo de treino: abre as habilidades especiais (3.16).
+	_habilidades = Button.new()
+	_habilidades.focus_mode = Control.FOCUS_NONE
+	_habilidades.text = tr("HABS_ABRIR")
+	_habilidades.pressed.connect(func(): abrir_habilidades.emit())
+	$Coluna/Botoes.add_child(_habilidades)
+	$Coluna/Botoes.move_child(_habilidades, 0)
 	_jog.mudou.connect(func(_s): if visible: montar())
 
 func abrir(nome: String) -> void:
 	predio = nome
 	_erro.text = ""
+	_habilidades.visible = nome == "campo_treino"
 	visible = true
 	montar()
 

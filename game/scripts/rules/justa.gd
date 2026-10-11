@@ -31,7 +31,8 @@ extends RefCounted
 ##
 ## Configuração: {justa, galope, mira, impacto} (os JSON de game/data/balance/).
 ## Cada lado: {cavaleiro: {forca, precisao, equilibrio}, cavalo: {velocidade,
-## folego, temperamento}, equipamento?: {peca: {...}}, habilidade?: nome}.
+## folego, temperamento}, equipamento?: {peca: {...}}, habilidades?: [nome]
+## (no máximo uma ativa e uma passiva; habilidade?: nome também vale)}.
 ## Habilidade passiva (Bloqueio) vale em todas as passadas; ativa só quando
 ## acionada.
 ##
@@ -178,8 +179,8 @@ func zonas_efetivas() -> Array[Dictionary]:
 func ativar_habilidade() -> Array[Dictionary]:
 	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_jogador or not habilidade_carregada(true):
 		return []
-	var nome := _habilidade_de(lado_jogador)
-	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
+	var nome := _ativa_de(lado_jogador)
+	if nome == "":
 		return []
 	habilidade_usada_jogador = true
 	habilidade_na_passada_jogador = true
@@ -198,8 +199,8 @@ func habilidade_carregada(do_jogador: bool) -> bool:
 
 ## Habilidade ativa equipada por um lado ("" se não tem ou é passiva).
 func habilidade_ativa_de(do_jogador: bool) -> String:
-	var nome := _habilidade_de(lado_jogador if do_jogador else lado_rival)
-	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
+	var nome := _ativa_de(lado_jogador if do_jogador else lado_rival)
+	if nome == "":
 		return ""
 	return nome
 
@@ -207,8 +208,8 @@ func habilidade_ativa_de(do_jogador: bool) -> String:
 func rival_ativar_habilidade() -> Array[Dictionary]:
 	if fases.fase != JustaFases.Fase.CORRIDA or habilidade_usada_rival or not habilidade_carregada(false):
 		return []
-	var nome := _habilidade_de(lado_rival)
-	if nome == "" or _cfg["impacto"]["habilidades"][nome]["tipo"] != "ativa":
+	var nome := _ativa_de(lado_rival)
+	if nome == "":
 		return []
 	habilidade_usada_rival = true
 	habilidade_na_passada_rival = true
@@ -226,9 +227,23 @@ func rival_mirar(ponto: Vector2i) -> void:
 func equipamento_final(do_jogador: bool) -> Dictionary:
 	return (lado_jogador if do_jogador else lado_rival).get("equipamento", {}).duplicate(true)
 
-static func _habilidade_de(lado: Dictionary) -> String:
-	var h: Variant = lado.get("habilidade", "")
-	return h if h is String else ""
+## Habilidades do lado (lista "habilidades", ou a antiga "habilidade").
+static func _habilidades_de(lado: Dictionary) -> Array[String]:
+	var res: Array[String] = []
+	if lado.get("habilidades") is Array:
+		for h: Variant in lado["habilidades"]:
+			if h is String and h != "":
+				res.append(h)
+	elif lado.get("habilidade", "") is String and lado.get("habilidade", "") != "":
+		res.append(lado["habilidade"])
+	return res
+
+## A habilidade ativa (botão) do lado; "" se não tem.
+func _ativa_de(lado: Dictionary) -> String:
+	for h in _habilidades_de(lado):
+		if _cfg["impacto"]["habilidades"].has(h) and _cfg["impacto"]["habilidades"][h]["tipo"] == "ativa":
+			return h
+	return ""
 
 func avancar(ms: int) -> Array[Dictionary]:
 	var eventos: Array[Dictionary] = []
@@ -466,13 +481,16 @@ static func _lado_de(jogador_afetado: bool, rival_afetado: bool) -> JustaFases.L
 		return JustaFases.Lado.RIVAL
 	return JustaFases.Lado.NENHUM
 
+## Passivas valem em toda passada; a ativa, só na passada em que foi acionada.
 func _golpeador(lado: Dictionary, zona: String, g: Galope, ativa_na_passada: bool) -> Dictionary:
-	var nome := _habilidade_de(lado)
-	var em_efeito := false
-	if nome != "" and _cfg["impacto"]["habilidades"].has(nome):
-		em_efeito = _cfg["impacto"]["habilidades"][nome]["tipo"] == "passiva" or ativa_na_passada
+	var habs: Array = []
+	for nome in _habilidades_de(lado):
+		var em_efeito := false
+		if _cfg["impacto"]["habilidades"].has(nome):
+			em_efeito = _cfg["impacto"]["habilidades"][nome]["tipo"] == "passiva" or ativa_na_passada
+		habs.append({"nome": nome, "ativa": em_efeito})
 	return {"cavaleiro": lado["cavaleiro"], "equipamento": lado.get("equipamento", {}),
-		"habilidade": {"nome": nome, "ativa": em_efeito}, "zona": zona,
+		"habilidades": habs, "zona": zona,
 		"velocidade": g.velocidade, "velocidade_nominal": g.velocidade_nominal,
 		"ritmo_milesimos": g.ritmo_milesimos()}
 
