@@ -27,10 +27,25 @@ extends Node2D
 func _ready() -> void:
 	jogador.direcao = 1
 	jogador.escala = 1.0
+	vestir_jogador()
 	rival.direcao = -1
 	rival.escala = escala_rival
 	posicionar_nas_pontas()
 	camera.plano_aberto(true)
+
+## Aparência do cavaleiro do jogador a partir dos dados do jogador (se houver).
+func vestir_jogador() -> void:
+	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	if jog == null:
+		return
+	var cav := jog.cavaleiro()
+	var cores: Dictionary = jog.casa()["cores"]
+	jogador.definir_casa({"principal": cores["principal"], "secundaria": cores["secundaria"], "metal": cores.get("metal", "ferro"),
+		"pele": cav.get("pele", "media"), "cabelo": cav.get("cor_cabelo", "castanho")})
+	var pecas := jog.visual_das_pecas()
+	pecas["pelagem"] = jog.cavalo_ativo().get("pelagem", "alazao")
+	pecas["corpo"] = cav.get("corpo", "masculino")
+	jogador.camadas().vestir(pecas)
 
 ## Coloca os dois cavaleiros parados no começo das pistas (Apresentação).
 func posicionar_nas_pontas() -> void:

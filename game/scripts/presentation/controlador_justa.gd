@@ -62,8 +62,9 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var sensibilidade_mira := 1.0
 
 var justa: Justa
-## Atributos de cada lado: {cavaleiro, cavalo}. Até a 2.4 (dados do jogador),
-## os padrões de game/data/balance/padrao.json.
+## Atributos de cada lado: {cavaleiro, cavalo, equipamento, habilidade}.
+## O jogador vem dos dados do jogador (autoload Jogador); o rival, por enquanto,
+## de game/data/balance/padrao.json (perfis de rival da região: 2.10).
 var lado_jogador: Dictionary
 var lado_rival: Dictionary
 ## Semente da justa (no servidor, Parte 3, quem sorteia é ele).
@@ -97,7 +98,8 @@ func iniciar(semente_fixa := -1) -> void:
 		set_process(false)
 		return
 	if lado_jogador.is_empty():
-		lado_jogador = Justa.lado_padrao(padrao)
+		var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+		lado_jogador = jog.lado_para_justa() if jog else Justa.lado_padrao(padrao)
 	if lado_rival.is_empty():
 		lado_rival = Justa.lado_padrao(padrao)
 	var perfil := {}

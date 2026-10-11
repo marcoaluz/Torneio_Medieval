@@ -58,3 +58,6 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Paleta por mapa de gradiente com máscara RGB opcional** (R principal, G secundária, B metal) e material padrão por camada; o cavalo usa material "original", porque o PixelLab gera cada pelagem colorida (B3). Pele e cabelo têm materiais próprios.
 - **2026-10-11 · Pontos de encaixe por folha de pontos** (pixel de cor pura por quadro) extraídos por ferramenta para `pontos.json`, em vez de digitar coordenadas: o artista marca no próprio desenho.
 - **2026-10-11 · Dados de aparência em `game/data/personagem/`** (camadas, paletas, pontos), separados de `balance/` porque não são números de jogo.
+- **2026-10-11 · Ordem: 2.4 antes de 2.2/2.3**, porque as telas de criação e brasão precisam de onde gravar.
+- **2026-10-11 · Dados do jogador num autoload de serviço com comandos `{ok, erro}`**, leitura por cópia e save local atômico com `.bak` e migração por versão. Na Parte 3 os comandos de economia viram Edge Functions com a mesma assinatura e o save local vira cache.
+- **2026-10-11 · Filtro de nomes por raízes normalizadas** (sem acento, leetspeak trocado), com lista em dados; o servidor repete a validação na Parte 3.

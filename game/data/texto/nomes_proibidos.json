@@ -1,0 +1,10 @@
+{
+	"versao": 1,
+	"_nota": "Raizes proibidas em nomes de cavaleiro e casa (pt e en). A comparacao e feita sem acento, em minusculas, trocando numeros/simbolos comuns por letras (0->o, 1->i, 3->e, 4->a, 5->s, 7->t, @->a, $->s) e sem espacos. Acrescente raizes aqui; nao precisa mexer no codigo.",
+	"tamanho_min": 2,
+	"tamanho_max": 20,
+	"raizes": [
+		"porra", "caralh", "buceta", "boceta", "puta", "putinh", "viad", "bicha", "cuzao", "arrombad", "fdp", "foder", "fodid", "merda", "piroca", "rola", "xoxota", "xereca", "otario", "vagabund", "corno", "macac", "nazi", "hitler", "estupr", "pedofil",
+		"fuck", "shit", "bitch", "cunt", "dick", "pussy", "nigg", "fag", "whore", "slut", "rape", "retard", "bastard", "asshole"
+	]
+}

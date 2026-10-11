@@ -41,7 +41,7 @@ func _initialize() -> void:
 	op.item_selected.emit(perfil_ix)
 	p.recomecar()
 	_checa("fechar volta a rodar", not paused)
-	_checa("forca nova vale ao recomecar (%s)" % c.justa.lado_jogador["cavaleiro"]["forca"], int(c.justa.lado_jogador["cavaleiro"]["forca"]) == 77)
+	_checa("forca nova (padrao.json = rival) vale ao recomecar (%s)" % c.justa.lado_rival["cavaleiro"]["forca"], int(c.justa.lado_rival["cavaleiro"]["forca"]) == 77)
 	_checa("perfil do rival muda ao recomecar", c.perfil_rival == "agressivo")
 
 	DirAccess.make_dir_recursive_absolute(PASTA_TESTE)

@@ -1,0 +1,12 @@
+{
+	"versao": 1,
+	"_nota": "Estado inicial de um jogador novo (antes da criacao do personagem preencher nome, aparencia e casa).",
+	"ouro": 100,
+	"gemas": 0,
+	"materiais": { "sucata": 5, "lingote_ferro": 0, "couro": 0 },
+	"cavaleiro": { "nivel": 1, "xp": 0, "atributos": { "forca": 30, "precisao": 30, "equilibrio": 30 }, "habilidade": "investida" },
+	"cavalo": { "atributos": { "velocidade": 40, "folego": 40, "temperamento": 40, "vinculo": 0 } },
+	"itens": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro", "caparacao_escudeiro"],
+	"equipar": ["elmo_escudeiro", "peitoral_escudeiro", "escudo_escudeiro", "lanca_escudeiro", "caparacao_escudeiro"],
+	"predios": { "casa_senhorial": 1, "estabulo": 1, "campo_treino": 1, "ferreiro": 1 }
+}

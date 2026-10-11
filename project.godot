@@ -13,6 +13,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Jogador="*res://game/scripts/services/servico_jogador.gd"
 Depuracao="*res://game/scenes/common/depuracao.tscn"
 
 [display]

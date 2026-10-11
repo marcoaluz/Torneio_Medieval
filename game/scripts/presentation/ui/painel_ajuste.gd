@@ -5,6 +5,7 @@ extends CanvasLayer
 ## arquivo. O valor muda o mesmo dicionário que a justa em andamento lê,
 ## então janelas, zonas, pontos e chances valem na hora; durações das fases,
 ## atributos e o perfil do rival valem ao recomeçar a justa (botão).
+## Atributos de padrao.json valem para o rival (o jogador usa os dados dele).
 ## Enquanto aberto, o jogo fica pausado. Os rótulos dos campos são os
 ## caminhos nos JSON (ferramenta de desenvolvimento).
 
