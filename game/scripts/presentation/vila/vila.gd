@@ -37,6 +37,7 @@ var _acumulado := 0.0
 @onready var tela_missoes: TelaMissoes = $Interface/TelaMissoes
 @onready var _botao_missoes: Button = $Interface/Topo/Linha/Missoes
 @onready var cena_historia: CenaHistoria = $Interface/CenaHistoria
+@onready var tela_configuracoes: TelaConfiguracoes = $Interface/TelaConfiguracoes
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -54,6 +55,8 @@ func _ready() -> void:
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
+	($Interface/Topo/Linha/Config as Button).text = tr("VILA_CONFIG")
+	($Interface/Topo/Linha/Config as Button).pressed.connect(func(): fechar_painel(); tela_configuracoes.abrir())
 	_botao_missoes.pressed.connect(func(): fechar_painel(); tela_missoes.abrir("login" if _jog.login_hoje()["pode"] else "diarias"))
 	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
 	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())

@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 6
+const VERSAO := 7
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -976,6 +976,22 @@ func _dar_recompensa(r: Dictionary) -> Dictionary:
 	_ganhar(int(r.get("ouro", 0)), int(r.get("xp", 0)))
 	return dado
 
+# ------------------------------------------------------------- configurações
+# Preferências do jogador (3.23): notificações por tipo (game/data/
+# notificacoes.json) e a chave "todas". Sem registro = ligada.
+
+func notificacao_ligada(tipo: String) -> bool:
+	var n: Dictionary = estado.get("config", {}).get("notificacoes", {})
+	if not n.get("todas", true):
+		return false
+	return tipo == "" or bool(n.get(tipo, true))
+
+func definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
+	if not estado.has("config"):
+		estado["config"] = {"notificacoes": {}}
+	estado["config"]["notificacoes"][tipo] = ligada
+	return _concluir("config")
+
 # ----------------------------------------------------------------- história
 # Cenas curtas entre regiões e companheiros (3.22; enredo provisório em
 # game/data/historia/historia.json). Uma cena fica pendente quando a
@@ -1502,6 +1518,7 @@ func novo_estado() -> Dictionary:
 	e["baus"] = _baus_novos(int(e["criado_em"]), int(ini.get("chaves", 0)))
 	e["metas"] = _metas_novas()
 	e["historia"] = {"vistas": []}
+	e["config"] = {"notificacoes": {}}
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.carregar("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -1582,6 +1599,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("historia"):
 			d["historia"] = {"vistas": []}
 		v = 6
+	if v < 7:
+		# 3.23: configurações do jogador (notificações; acessibilidade na 3.24).
+		if not d.has("config"):
+			d["config"] = {"notificacoes": {}}
+		v = 7
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

@@ -98,3 +98,4 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Login de chegada só nos 7 primeiros dias** (GDD: retenção nos primeiros 7 dias), sem perder o progresso se pular um dia. Convites = torneios de desafio com renome mínimo. Título anunciado pelo arauto na apresentação.
 - **2026-10-11 · Save v5**: `metas`.
 - **2026-10-11 · História como dados + sobreposição na vila**: cenas disparadas pelos contadores das metas e tocadas quando a vila abre (não interrompem a volta da justa nem mudam o Fluxo); enredo provisório marcado nos dados. Companheiros dão bônus por tipo (`renome_pct`, `fundicao_tempo_pct`, `folego_recupera_pct`), somados no serviço. Save v6: `historia.vistas`.
+- **2026-10-11 · Notificações: timers locais, ordem/temporada por push**. Preferências no save (`config.notificacoes`, v7), mandadas junto com o token de push para o servidor respeitar. Sem registro = ligada.

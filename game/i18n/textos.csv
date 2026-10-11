@@ -617,3 +617,21 @@ COMPANHEIRO_ARAUTO,Bento anuncia o seu nome: +{v}% de renome,Bento announces you
 COMPANHEIRO_FERREIRA,Brígida no forno: lingotes {v}% mais rápidos,Brígida at the furnace: ingots {v}% faster
 COMPANHEIRO_ESCUDEIRO,Tomé cuida do cavalo: fôlego volta {v}% mais rápido,Tomé tends the horse: stamina returns {v}% faster
 VILA_COMPANHEIRO_ENTROU,{nome} entrou para a sua casa!,{nome} joined your house!
+NOTIF_BAU,Um baú está pronto para abrir.,A chest is ready to open.
+NOTIF_FORJA,A peça na forja ficou pronta.,The piece in the forge is ready.
+NOTIF_FUNDICAO,Os lingotes saíram do forno.,The ingots are out of the furnace.
+NOTIF_AJUDA_ORDEM,Alguém da sua ordem pediu ajuda.,Someone in your order asked for help.
+NOTIF_TEMPORADA,A temporada está terminando: confira sua liga!,The season is ending: check your league!
+CONFIG_TITULO,Configurações,Settings
+CONFIG_NOTIFICACOES,Notificações,Notifications
+CONFIG_NOTIF_TODAS,Todas as notificações,All notifications
+CONFIG_NOTIF_TREINO,Treino pronto,Training done
+CONFIG_NOTIF_CAVALO_DESCANSADO,Cavalo descansado,Horse rested
+CONFIG_NOTIF_BAU,Baú aberto,Chest opened
+CONFIG_NOTIF_FORJA,Forja e forno prontos,Forge and furnace ready
+CONFIG_NOTIF_CONSERTO,Conserto pronto,Repair done
+CONFIG_NOTIF_MELHORIA,Obra da vila pronta,Village upgrade done
+CONFIG_NOTIF_AJUDA_ORDEM,Pedidos de ajuda da ordem,Order help requests
+CONFIG_NOTIF_TEMPORADA,Fim da temporada,Season ending
+CONFIG_PELO_SERVIDOR,(pelo servidor),(from the server)
+VILA_CONFIG,⚙,⚙

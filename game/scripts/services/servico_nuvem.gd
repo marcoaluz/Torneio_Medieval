@@ -135,6 +135,20 @@ func sincronizar() -> Dictionary:
 		return await enviar_save()
 	return {"ok": true, "erro": "", "origem": "local"}
 
+## Push (3.23): registra o token do aparelho (FCM/APNs, entregue pelo plugin
+## nativo) com as preferências de notificação, para a Edge Function mandar
+## os avisos do servidor (ajuda da ordem, temporada). Ver docs/NUVEM.md.
+func registrar_push(token: String, plataforma: String) -> Dictionary:
+	if not configurado() or not conectado() or _jog == null:
+		return {"ok": false, "erro": "nuvem_desconectada"}
+	sessao["push_token"] = token
+	sessao["push_plataforma"] = plataforma
+	_salvar_sessao()
+	var resp := await _autenticado(HTTPClient.METHOD_POST, _url("/rest/v1/dispositivo_push?on_conflict=jogador_id,token"),
+		JSON.stringify({"jogador_id": sessao["usuario"], "token": token, "plataforma": plataforma,
+			"preferencias": _jog.estado.get("config", {}).get("notificacoes", {})}), ["Prefer: resolution=merge-duplicates,return=minimal"])
+	return {"ok": int(resp["codigo"]) < 300, "erro": "" if int(resp["codigo"]) < 300 else "nuvem_%d" % int(resp["codigo"])}
+
 ## Junta mudanças: envia alguns segundos depois da última.
 func agendar_envio() -> void:
 	if not configurado() or not conectado():

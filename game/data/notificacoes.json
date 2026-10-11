@@ -1,0 +1,15 @@
+{
+	"versao": 1,
+	"_nota": "Tipos de notificacao (GDD Timers: treino pronto, cavalo descansado, bau aberto, conserto pronto; Pacote 3.23: forja pronta, ajuda da ordem, temporada terminando), todos desligaveis um a um nas configuracoes. timers = tipos de timer do servico que viram este aviso. origem local = o celular agenda (plugin Android, docs/ANDROID.md); servidor = push pelo Supabase (docs/NUVEM.md), quando existir. Texto do aviso: NOTIF_<TIPO_DO_TIMER> ou NOTIF_<TIPO>; nome na tela: CONFIG_NOTIF_<TIPO>.",
+	"tipos": {
+		"treino": { "timers": ["treino_cavaleiro", "treino_cavalo"], "origem": "local" },
+		"cavalo_descansado": { "timers": [], "origem": "local" },
+		"bau": { "timers": [], "origem": "local" },
+		"forja": { "timers": ["forja", "fundicao"], "origem": "local" },
+		"conserto": { "timers": ["conserto"], "origem": "local" },
+		"melhoria": { "timers": ["melhoria"], "origem": "local" },
+		"ajuda_ordem": { "timers": [], "origem": "servidor" },
+		"temporada": { "timers": [], "origem": "servidor" }
+	},
+	"ordem": ["treino", "cavalo_descansado", "bau", "forja", "conserto", "melhoria", "ajuda_ordem", "temporada"]
+}

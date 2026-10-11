@@ -110,6 +110,14 @@ func _ready() -> void:
 				vila_h.cena_historia.avancar()
 				vila_h.cena_historia.avancar()).call_deferred()
 		return
+	if tela == "config":
+		jog.definir_notificacao("conserto", false)
+		var tc: TelaConfiguracoes = load("res://game/scenes/ui/tela_configuracoes.tscn").instantiate()
+		var camada_c := CanvasLayer.new()
+		add_child(camada_c)
+		camada_c.add_child(tc)
+		tc.abrir.call_deferred()
+		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.
 		jog.estado["cavaleiro"]["nivel"] = 20

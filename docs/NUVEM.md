@@ -35,3 +35,14 @@ O Supabase não tem Play Games como provedor pronto. O caminho planejado:
 3. Alternativa mais simples: vincular **Google** (OAuth) com `linkIdentity`, abrindo o navegador e voltando por deep link.
 
 Os dois caminhos usam o mesmo `user.id`, então o save continua o mesmo. Fica para quando o projeto existir e o plugin estiver instalado.
+
+## Push pelo servidor (3.23)
+
+Os avisos de timer (treino, cavalo, baú, forja, conserto, obra) são **locais**: o celular agenda pelo plugin de notificação (`docs/ANDROID.md`). Os avisos que só o servidor conhece (pedido de ajuda da ordem e fim de temporada) vão por push:
+
+1. Plugin nativo de push (Firebase Cloud Messaging no Android; APNs no iOS) entrega o token do aparelho ao jogo.
+2. O jogo chama `Nuvem.registrar_push(token, plataforma)`, que grava em `dispositivo_push` (migração `20261011120300_push.sql`, RLS só do próprio) o token e as preferências (as mesmas chaves da tela de Configurações, `estado.config.notificacoes`).
+3. Uma Edge Function agendada (cron do banco) procura quem tem pedido de ajuda novo ou temporada acabando, respeita `preferencias` (tipo desligado = não manda; "todas" desligado = nada) e envia pela API do FCM, com a chave de serviço guardada como secret da função.
+
+Nada disso está aplicado: depende do projeto Supabase e de uma conta Firebase (autorização do usuário).
+
