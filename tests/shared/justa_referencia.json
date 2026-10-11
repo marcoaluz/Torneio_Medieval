@@ -1,71 +1,414 @@
 {
-	"cavalo": {
-		"folego": 50.0,
-		"temperamento": 50.0,
-		"velocidade": 50.0
-	},
-	"config_galope": {
-		"cavalo_padrao": {
-			"folego": 50.0,
-			"temperamento": 50.0,
-			"velocidade": 50.0
-		},
-		"folego": {
-			"base": 60.0,
-			"custo_erro": 6.0,
-			"custo_por_passada": 10.0,
-			"por_ponto_milesimos": 800.0
-		},
+	"config": {
 		"galope": {
-			"compasso_ms": 500.0,
-			"ganho_pct": 4.0,
-			"janela_base_ms": 70.0,
-			"janela_max_ms": 180.0,
-			"janela_por_temperamento_milesimos": 1000.0,
-			"perda_perdido_pct": 4.0,
-			"perda_sem_folego_pct": 5.0,
-			"velocidade_base": 80.0,
-			"velocidade_max_cansado_pct": 100.0,
-			"velocidade_max_pct": 120.0,
-			"velocidade_min_pct": 80.0,
-			"velocidade_por_ponto_milesimos": 300.0
-		},
-		"largada": {
-			"bandeira_ms": 250.0,
-			"bandeira_variacao_ms": 350.0,
-			"boa_ms": 350.0,
-			"bonus_precisao_pct": {
-				"boa": 0.0,
-				"perfeita": 10.0,
-				"ruim": 0.0
+			"folego": {
+				"base": 60.0,
+				"custo_erro": 6.0,
+				"custo_por_passada": 10.0,
+				"por_ponto_milesimos": 800.0
 			},
-			"perfeita_ms": 150.0,
-			"velocidade_inicial_pct": {
-				"boa": 100.0,
-				"perfeita": 115.0,
-				"ruim": 85.0
-			}
+			"galope": {
+				"compasso_ms": 500.0,
+				"ganho_pct": 4.0,
+				"janela_base_ms": 70.0,
+				"janela_max_ms": 180.0,
+				"janela_por_temperamento_milesimos": 1000.0,
+				"perda_perdido_pct": 4.0,
+				"perda_sem_folego_pct": 5.0,
+				"velocidade_base": 80.0,
+				"velocidade_max_cansado_pct": 100.0,
+				"velocidade_max_pct": 120.0,
+				"velocidade_min_pct": 80.0,
+				"velocidade_por_ponto_milesimos": 300.0
+			},
+			"largada": {
+				"bandeira_ms": 250.0,
+				"bandeira_variacao_ms": 350.0,
+				"boa_ms": 350.0,
+				"bonus_precisao_pct": {
+					"boa": 0.0,
+					"perfeita": 10.0,
+					"ruim": 0.0
+				},
+				"perfeita_ms": 150.0,
+				"velocidade_inicial_pct": {
+					"boa": 100.0,
+					"perfeita": 115.0,
+					"ruim": 85.0
+				}
+			},
+			"pista": {
+				"distancia_mira": 150.0,
+				"distancia_total": 1000.0
+			},
+			"versao": 2.0
 		},
-		"pista": {
-			"distancia_mira": 150.0,
-			"distancia_total": 1000.0
+		"justa": {
+			"_nota": "fases_ms.corrida e o teto da Corrida; ela termina antes quando os cavaleiros chegam ao ponto da Mira (galope.json, pista)",
+			"fases_ms": {
+				"apresentacao": 2000.0,
+				"corrida": 6000.0,
+				"impacto": 2000.0,
+				"largada": 1000.0,
+				"mira": 2000.0
+			},
+			"passadas": 3.0,
+			"passadas_extras_max": 1.0,
+			"versao": 2.0
 		},
-		"versao": 1.0
+		"mira": {
+			"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+			"limites_ponta": [
+				-90.0,
+				-200.0,
+				180.0,
+				200.0
+			],
+			"oscilacao": {
+				"amplitude_px": 3.0,
+				"frequencia_x_milesimos": 1300.0,
+				"frequencia_y_milesimos": 1700.0
+			},
+			"ponta_inicial": [
+				40.0,
+				-175.0
+			],
+			"precisao": {
+				"crescimento_max_pct": 50.0,
+				"crescimento_por_ponto_milesimos": 400.0
+			},
+			"versao": 1.0,
+			"zonas": [
+				{
+					"cresce": true,
+					"nome": "escudo",
+					"retangulos": [
+						[
+							6.0,
+							-123.0,
+							16.0,
+							30.0
+						]
+					]
+				},
+				{
+					"cresce": true,
+					"nome": "capacete",
+					"retangulos": [
+						[
+							-10.0,
+							-150.0,
+							20.0,
+							22.0
+						]
+					]
+				},
+				{
+					"cresce": true,
+					"nome": "peito",
+					"retangulos": [
+						[
+							-12.0,
+							-128.0,
+							24.0,
+							44.0
+						]
+					]
+				},
+				{
+					"cresce": false,
+					"nome": "cavalo",
+					"retangulos": [
+						[
+							-50.0,
+							-84.0,
+							100.0,
+							42.0
+						],
+						[
+							36.0,
+							-116.0,
+							38.0,
+							34.0
+						],
+						[
+							-60.0,
+							-80.0,
+							10.0,
+							26.0
+						]
+					]
+				}
+			]
+		}
 	},
-	"config_justa": {
-		"_nota": "fases_ms.corrida e o teto da Corrida; ela termina antes quando os cavaleiros chegam ao ponto da Mira (galope.json, pista)",
-		"fases_ms": {
-			"apresentacao": 2000.0,
-			"corrida": 6000.0,
-			"impacto": 2000.0,
-			"largada": 1000.0,
-			"mira": 2000.0
-		},
-		"passadas": 3.0,
-		"passadas_extras_max": 1.0,
-		"versao": 2.0
-	},
-	"descricao": "Justa completa (game/scripts/rules/justa.gd) gravada pelo GDScript. Repita: Justa(config_justa, config_galope, cavalo, cavalo, semente); iniciar(); para cada t em toques_ms avance ate t e toque; avance ate o fim. Eventos: tipo|chave=valor ordenados.",
+	"descricao": "Justa completa (game/scripts/rules/justa.gd) gravada pelo GDScript. Repita: Justa(config, lado, lado, semente); iniciar(); para cada entrada [t, acao, x, y] avance ate t e aplique (tocar | mirar x y | soltar); avance ate o fim. Eventos: tipo|chave=valor ordenados.",
+	"entradas": [
+		[
+			2692,
+			"tocar",
+			0,
+			0
+		],
+		[
+			3500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			4000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			4500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			5000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			5500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			6000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			6500,
+			"tocar",
+			0,
+			0
+		],
+		[
+			7000,
+			"tocar",
+			0,
+			0
+		],
+		[
+			7184,
+			"mirar",
+			0,
+			-1060
+		],
+		[
+			8084,
+			"soltar",
+			0,
+			0
+		],
+		[
+			13549,
+			"tocar",
+			0,
+			0
+		],
+		[
+			14584,
+			"tocar",
+			0,
+			0
+		],
+		[
+			15084,
+			"tocar",
+			0,
+			0
+		],
+		[
+			15584,
+			"tocar",
+			0,
+			0
+		],
+		[
+			16084,
+			"tocar",
+			0,
+			0
+		],
+		[
+			16584,
+			"tocar",
+			0,
+			0
+		],
+		[
+			17084,
+			"tocar",
+			0,
+			0
+		],
+		[
+			17584,
+			"tocar",
+			0,
+			0
+		],
+		[
+			18084,
+			"tocar",
+			0,
+			0
+		],
+		[
+			18268,
+			"mirar",
+			0,
+			-1060
+		],
+		[
+			19168,
+			"soltar",
+			0,
+			0
+		],
+		[
+			24711,
+			"tocar",
+			0,
+			0
+		],
+		[
+			25668,
+			"tocar",
+			0,
+			0
+		],
+		[
+			26168,
+			"tocar",
+			0,
+			0
+		],
+		[
+			26668,
+			"tocar",
+			0,
+			0
+		],
+		[
+			27168,
+			"tocar",
+			0,
+			0
+		],
+		[
+			27668,
+			"tocar",
+			0,
+			0
+		],
+		[
+			28168,
+			"tocar",
+			0,
+			0
+		],
+		[
+			28668,
+			"tocar",
+			0,
+			0
+		],
+		[
+			29168,
+			"tocar",
+			0,
+			0
+		],
+		[
+			29352,
+			"mirar",
+			0,
+			-1060
+		],
+		[
+			30252,
+			"soltar",
+			0,
+			0
+		],
+		[
+			35839,
+			"tocar",
+			0,
+			0
+		],
+		[
+			36752,
+			"tocar",
+			0,
+			0
+		],
+		[
+			37252,
+			"tocar",
+			0,
+			0
+		],
+		[
+			37752,
+			"tocar",
+			0,
+			0
+		],
+		[
+			38252,
+			"tocar",
+			0,
+			0
+		],
+		[
+			38752,
+			"tocar",
+			0,
+			0
+		],
+		[
+			39252,
+			"tocar",
+			0,
+			0
+		],
+		[
+			39752,
+			"tocar",
+			0,
+			0
+		],
+		[
+			40252,
+			"tocar",
+			0,
+			0
+		],
+		[
+			40436,
+			"mirar",
+			0,
+			-1060
+		],
+		[
+			41336,
+			"soltar",
+			0,
+			0
+		]
+	],
 	"eventos": [
 		"fase|anterior=5|fase=0|passada=1|t=0",
 		"fase|anterior=0|fase=1|passada=1|t=2000",
@@ -82,6 +425,8 @@
 		"toque|batida=8|desvio_ms=0|folego=90|passada=1|resultado=no_tempo|t=7000|velocidade=114",
 		"corrida_fim|distancia_jogador_mil=462076|distancia_rival_mil=387980|passada=1|ritmo_jogador_milesimos=1000|t=7084|velocidade_jogador=114|velocidade_rival=95",
 		"fase|anterior=2|fase=3|passada=1|t=7084",
+		"soltou|passada=1|t=8084|t_mira_ms=1000|x=0|y=-1060",
+		"golpe|automatico=false|passada=1|sem_golpe=false|t=9084|t_mira_ms=1000|x=0|y=-1060|zona=peito",
 		"fase|anterior=3|fase=4|passada=1|t=9084",
 		"passada|derrubado=0|passada=1|pontos_jogador=0|pontos_rival=0|t=11084",
 		"fase|anterior=4|fase=0|passada=2|t=11084",
@@ -99,6 +444,8 @@
 		"toque|batida=8|desvio_ms=0|folego=80|passada=2|resultado=no_tempo|t=18084|velocidade=114",
 		"corrida_fim|distancia_jogador_mil=462076|distancia_rival_mil=387980|passada=2|ritmo_jogador_milesimos=1000|t=18168|velocidade_jogador=114|velocidade_rival=95",
 		"fase|anterior=2|fase=3|passada=2|t=18168",
+		"soltou|passada=2|t=19168|t_mira_ms=1000|x=0|y=-1060",
+		"golpe|automatico=false|passada=2|sem_golpe=false|t=20168|t_mira_ms=1000|x=0|y=-1060|zona=peito",
 		"fase|anterior=3|fase=4|passada=2|t=20168",
 		"passada|derrubado=0|passada=2|pontos_jogador=0|pontos_rival=0|t=22168",
 		"fase|anterior=4|fase=0|passada=3|t=22168",
@@ -116,6 +463,8 @@
 		"toque|batida=8|desvio_ms=0|folego=70|passada=3|resultado=no_tempo|t=29168|velocidade=114",
 		"corrida_fim|distancia_jogador_mil=462076|distancia_rival_mil=387980|passada=3|ritmo_jogador_milesimos=1000|t=29252|velocidade_jogador=114|velocidade_rival=95",
 		"fase|anterior=2|fase=3|passada=3|t=29252",
+		"soltou|passada=3|t=30252|t_mira_ms=1000|x=0|y=-1060",
+		"golpe|automatico=false|passada=3|sem_golpe=false|t=31252|t_mira_ms=1000|x=0|y=-1060|zona=peito",
 		"fase|anterior=3|fase=4|passada=3|t=31252",
 		"passada|derrubado=0|passada=3|pontos_jogador=0|pontos_rival=0|t=33252",
 		"fase|anterior=4|fase=0|passada=4|t=33252",
@@ -133,49 +482,25 @@
 		"toque|batida=8|desvio_ms=0|folego=60|passada=4|resultado=no_tempo|t=40252|velocidade=114",
 		"corrida_fim|distancia_jogador_mil=462076|distancia_rival_mil=387980|passada=4|ritmo_jogador_milesimos=1000|t=40336|velocidade_jogador=114|velocidade_rival=95",
 		"fase|anterior=2|fase=3|passada=4|t=40336",
+		"soltou|passada=4|t=41336|t_mira_ms=1000|x=0|y=-1060",
+		"golpe|automatico=false|passada=4|sem_golpe=false|t=42336|t_mira_ms=1000|x=0|y=-1060|zona=peito",
 		"fase|anterior=3|fase=4|passada=4|t=42336",
 		"passada|derrubado=0|passada=4|pontos_jogador=0|pontos_rival=0|t=44336",
 		"fase|anterior=4|fase=5|passada=4|t=44336",
 		"fim|motivo=empate|placar_jogador=0|placar_rival=0|t=44336|vencedor=0"
 	],
+	"lado": {
+		"cavaleiro": {
+			"equilibrio": 50.0,
+			"forca": 50.0,
+			"precisao": 50.0
+		},
+		"cavalo": {
+			"folego": 50.0,
+			"temperamento": 50.0,
+			"velocidade": 50.0
+		}
+	},
 	"semente": 7,
-	"toques_ms": [
-		2692,
-		3500,
-		4000,
-		4500,
-		5000,
-		5500,
-		6000,
-		6500,
-		7000,
-		13549,
-		14584,
-		15084,
-		15584,
-		16084,
-		16584,
-		17084,
-		17584,
-		18084,
-		24711,
-		25668,
-		26168,
-		26668,
-		27168,
-		27668,
-		28168,
-		28668,
-		29168,
-		35839,
-		36752,
-		37252,
-		37752,
-		38252,
-		38752,
-		39252,
-		39752,
-		40252
-	],
-	"versao": 1
+	"versao": 2
 }

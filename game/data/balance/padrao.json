@@ -1,0 +1,6 @@
+{
+	"versao": 1,
+	"_nota": "Atributos (0 a 100) usados enquanto nao existem dados do jogador (2.4) e para o rival sem perfil.",
+	"cavaleiro": { "forca": 50, "precisao": 50, "equilibrio": 50 },
+	"cavalo": { "velocidade": 50, "folego": 50, "temperamento": 50 }
+}

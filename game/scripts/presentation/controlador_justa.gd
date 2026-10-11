@@ -11,7 +11,9 @@ extends Node
 ##   Mira: zoom no peito do rival, cavaleiros em câmera lenta
 ##   Impacto: close lateral no ponto de encontro
 ## Toque na tela inteira, com uma mão: pula a Apresentação, larga na
-## Largada, galopa na Corrida.
+## Largada, galopa na Corrida. Na Mira: segura, arrasta a ponta da lança
+## sobre o rival (arrasto relativo, o dedo não cobre o alvo) e solta para
+## golpear. A zona sob a ponta brilha de leve no próprio rival.
 
 ## Qualquer troca de fase. `anterior` é JustaFases.Fase.FIM no começo.
 signal fase_mudou(fase: JustaFases.Fase, anterior: JustaFases.Fase, passada: int)
@@ -27,6 +29,10 @@ signal largada_avaliada(passada: int, qualidade: String, reacao_ms: int, queimad
 ## resultado: "no_tempo", "fora_do_tempo", "rapido_demais" ou "perdido".
 signal toque_galope(resultado: String, desvio_ms: int, velocidade: int, folego: int)
 signal corrida_terminou(passada: int, velocidade_jogador: int, ritmo_milesimos: int)
+## O jogador soltou o dedo na Mira (o golpe sai no choque).
+signal golpe_solto(passada: int)
+## Golpe avaliado no choque: zona "capacete", "peito", "escudo", "cavalo" ou "erro".
+signal golpe_avaliado(passada: int, zona: String, automatico: bool, sem_golpe: bool)
 signal passada_terminou(passada: int, pontos_jogador: int, pontos_rival: int, derrubado: JustaFases.Lado)
 signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador: int, placar_rival: int)
 
@@ -38,11 +44,14 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export_range(0.05, 1.0, 0.05) var camera_lenta := 0.3
 ## Zoom do close do Impacto: precisa caber os dois cavaleiros inteiros.
 @export var zoom_impacto := 1.5
+## Quanto a ponta anda por px de arrasto aparente na tela (1 = acompanha o dedo).
+@export var sensibilidade_mira := 1.0
 
 var justa: Justa
-## Atributos dos cavalos. Até a 2.4 (dados do jogador), o cavalo padrão dos dados.
-var cavalo_jogador: Dictionary
-var cavalo_rival: Dictionary
+## Atributos de cada lado: {cavaleiro, cavalo}. Até a 2.4 (dados do jogador),
+## os padrões de game/data/balance/padrao.json.
+var lado_jogador: Dictionary
+var lado_rival: Dictionary
 ## Semente da justa (no servidor, Parte 3, quem sorteia é ele).
 var semente := 0
 
@@ -52,6 +61,9 @@ var _fim_corrida_j := 0.0  ## distâncias em px no fim da Corrida (para a Mira)
 var _fim_corrida_r := 0.0
 var _encontro_j := 0.0
 var _encontro_r := 0.0
+var _cfg: Dictionary
+var _base_mira := Vector2.ZERO  ## ponta sem a oscilação, décimos de px do quadro do rival
+var _tempo_mira := 0.0
 
 func _ready() -> void:
 	if iniciar_sozinho:
@@ -60,19 +72,21 @@ func _ready() -> void:
 ## Começa uma justa nova com os dados de game/data/balance/.
 ## `semente_fixa` < 0 sorteia uma.
 func iniciar(semente_fixa := -1) -> void:
-	var cj := Balanceamento.carregar("justa")
-	var cg := Balanceamento.carregar("galope")
-	var erro := Justa.validar(cj, cg)
+	_cfg = Justa.carregar_configuracao()
+	var erro := Justa.validar(_cfg)
+	var padrao := Balanceamento.carregar("padrao")
+	if erro == "" and not (padrao.has("cavaleiro") and padrao.has("cavalo")):
+		erro = "padrao.json sem cavaleiro/cavalo"
 	if erro != "":
 		push_error("ControladorJusta: " + erro)
 		set_process(false)
 		return
-	if cavalo_jogador.is_empty():
-		cavalo_jogador = cg["cavalo_padrao"]
-	if cavalo_rival.is_empty():
-		cavalo_rival = cg["cavalo_padrao"]
+	if lado_jogador.is_empty():
+		lado_jogador = {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
+	if lado_rival.is_empty():
+		lado_rival = {"cavaleiro": padrao["cavaleiro"], "cavalo": padrao["cavalo"]}
 	semente = semente_fixa if semente_fixa >= 0 else randi()
-	justa = Justa.new(cj, cg, cavalo_jogador, cavalo_rival, semente)
+	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente)
 	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)
 	_px_por_mil = vao / float(justa.distancia_total_mil())
 	_resto_ms = 0.0
@@ -83,6 +97,31 @@ func iniciar(semente_fixa := -1) -> void:
 func tocar() -> void:
 	if justa and not justa.terminou():
 		_despachar(justa.tocar())
+
+## Mira: começa a segurar (toque na tela).
+func segurar_mira() -> void:
+	if fase() == JustaFases.Fase.MIRA and not justa.solto:
+		justa.mirar(_ponto_mira())
+
+## Mira: arrasto do dedo, em px da tela. Converte para o quadro do rival
+## (desfaz zoom, escala e espelho) e move a ponta.
+func arrastar_mira(delta_tela: Vector2) -> void:
+	if fase() != JustaFases.Fase.MIRA or justa.solto or not justa.segurando:
+		return
+	var mundo := delta_tela / arena.camera.zoom * sensibilidade_mira
+	# affine_inverse: basis_xform_inv só serve para base sem escala (usa a transposta).
+	var quadro := arena.rival.visual().global_transform.affine_inverse().basis_xform(mundo)
+	_base_mira = Vector2(Mira.limitar(_cfg["mira"], Vector2i((_base_mira + quadro * 10.0).round())))
+	justa.mirar(_ponto_mira())
+
+## Mira: solta o dedo (golpeia).
+func soltar_mira() -> void:
+	if fase() == JustaFases.Fase.MIRA:
+		_despachar(justa.soltar())
+
+## Ponta da lança em coordenadas do mundo (para desenhar).
+func ponta_no_mundo() -> Vector2:
+	return arena.rival.visual().to_global(Vector2(justa.ponta) / 10.0)
 
 ## Resultado da passada atual (vem da regra do impacto, prompt 1.5).
 func registrar_resultado(pontos_jogador: int, pontos_rival: int, derrubado := JustaFases.Lado.NENHUM) -> bool:
@@ -97,13 +136,38 @@ func _process(delta: float) -> void:
 	_resto_ms += delta * 1000.0
 	var ms := int(_resto_ms)
 	_resto_ms -= ms
+	if fase() == JustaFases.Fase.MIRA:
+		_tempo_mira += delta
+		if justa.segurando:
+			justa.mirar(_ponto_mira())
 	_despachar(justa.avancar(ms))
 	_atualizar_visual()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch and event.pressed:
+	if justa == null:
+		return
+	if fase() == JustaFases.Fase.MIRA:
+		if event is InputEventScreenTouch:
+			if event.pressed:
+				segurar_mira()
+			else:
+				soltar_mira()
+			get_viewport().set_input_as_handled()
+		elif event is InputEventScreenDrag:
+			arrastar_mira(event.relative)
+			get_viewport().set_input_as_handled()
+	elif event is InputEventScreenTouch and event.pressed:
 		tocar()
 		get_viewport().set_input_as_handled()
+
+## Ponta com a oscilação da mão (dados: mira.oscilacao), em décimos de px.
+func _ponto_mira() -> Vector2i:
+	var o: Dictionary = _cfg["mira"]["oscilacao"]
+	var a := float(o["amplitude_px"]) * 10.0
+	var fx := float(o["frequencia_x_milesimos"]) / 1000.0
+	var fy := float(o["frequencia_y_milesimos"]) / 1000.0
+	var osc := Vector2(sin(_tempo_mira * TAU * fx), sin(_tempo_mira * TAU * fy + 1.3)) * a
+	return Mira.limitar(_cfg["mira"], Vector2i((_base_mira + osc).round()))
 
 func _despachar(eventos: Array[Dictionary]) -> void:
 	for e in eventos:
@@ -130,6 +194,10 @@ func _despachar(eventos: Array[Dictionary]) -> void:
 			"corrida_fim":
 				_ao_fim_da_corrida(e)
 				corrida_terminou.emit(p, e["velocidade_jogador"], e["ritmo_jogador_milesimos"])
+			"soltou":
+				golpe_solto.emit(p)
+			"golpe":
+				golpe_avaliado.emit(p, e["zona"], e["automatico"], e["sem_golpe"])
 			"passada":
 				passada_terminou.emit(p, e["pontos_jogador"], e["pontos_rival"], e["derrubado"])
 			"fim":
@@ -151,6 +219,8 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 			cam.seguir(arena.jogador)
 		JustaFases.Fase.MIRA:
 			cam.focar_alvo(arena.rival.get_node("Visual/Cavaleiro/Peito"))
+			_base_mira = Vector2(Mira.ponta_inicial(_cfg["mira"]))
+			_tempo_mira = 0.0
 		JustaFases.Fase.IMPACTO:
 			var meio := (arena.jogador.centro() + arena.rival.centro()) * 0.5
 			cam.focar(meio, zoom_impacto)
@@ -190,12 +260,23 @@ func _atualizar_visual() -> void:
 	var d := distancias_px()
 	arena.jogador.global_position = arena.inicio_jogador.global_position + Vector2(d.x, 0)
 	arena.rival.global_position = arena.inicio_rival.global_position - Vector2(d.y, 0)
+	_atualizar_mira()
 	if barra == null:
 		return
 	var total := justa.distancia_total_mil() * _px_por_mil
 	barra.posicao_jogador = d.x / total
 	barra.posicao_rival = 1.0 - d.y / total
 	barra.brilho = _brilho_do_compasso()
+
+## Ponta da lança e brilho leve na zona sob ela, só na Mira.
+func _atualizar_mira() -> void:
+	var na_mira := justa.fases.fase == JustaFases.Fase.MIRA
+	arena.ponta_lanca.visible = na_mira
+	if not na_mira:
+		arena.rival.realcar("")
+		return
+	arena.ponta_lanca.global_position = ponta_no_mundo()
+	arena.rival.realcar(Mira.zona_no_ponto(_cfg["mira"], justa.ponta, justa.precisao_jogador, justa.bonus_precisao_pct()))
 
 ## 1 dentro da janela da batida mais próxima, caindo até 0 a uma janela
 ## de distância dela; 0 fora da Corrida. A janela visível já inclui o

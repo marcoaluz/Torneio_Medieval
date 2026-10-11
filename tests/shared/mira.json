@@ -1,0 +1,301 @@
+{
+	"versao": 1,
+	"descricao": "Mira (game/scripts/rules/mira.gd): zona no ponto em decimos de px do quadro do alvo, com precisao e bonus da largada; crescimento; limites da ponta. Config embutida.",
+	"config": {
+		"versao": 1,
+		"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+		"zonas": [
+			{
+				"nome": "escudo",
+				"retangulos": [
+					[
+						6,
+						-123,
+						16,
+						30
+					]
+				],
+				"cresce": true
+			},
+			{
+				"nome": "capacete",
+				"retangulos": [
+					[
+						-10,
+						-150,
+						20,
+						22
+					]
+				],
+				"cresce": true
+			},
+			{
+				"nome": "peito",
+				"retangulos": [
+					[
+						-12,
+						-128,
+						24,
+						44
+					]
+				],
+				"cresce": true
+			},
+			{
+				"nome": "cavalo",
+				"retangulos": [
+					[
+						-50,
+						-84,
+						100,
+						42
+					],
+					[
+						36,
+						-116,
+						38,
+						34
+					],
+					[
+						-60,
+						-80,
+						10,
+						26
+					]
+				],
+				"cresce": false
+			}
+		],
+		"precisao": {
+			"crescimento_por_ponto_milesimos": 400,
+			"crescimento_max_pct": 50
+		},
+		"ponta_inicial": [
+			40,
+			-175
+		],
+		"limites_ponta": [
+			-90,
+			-200,
+			180,
+			200
+		],
+		"oscilacao": {
+			"amplitude_px": 3,
+			"frequencia_x_milesimos": 1300,
+			"frequencia_y_milesimos": 1700
+		}
+	},
+	"crescimento": [
+		{
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": 0
+		},
+		{
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": 20
+		},
+		{
+			"precisao": 100,
+			"bonus": 0,
+			"esperado": 40
+		},
+		{
+			"precisao": 50,
+			"bonus": 10,
+			"esperado": 30
+		},
+		{
+			"precisao": 100,
+			"bonus": 40,
+			"esperado": 50
+		},
+		{
+			"precisao": -5,
+			"bonus": 0,
+			"esperado": 0
+		}
+	],
+	"zonas": [
+		{
+			"nome": "centro do capacete",
+			"x": 0,
+			"y": -1390,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "capacete"
+		},
+		{
+			"nome": "centro do peito",
+			"x": 0,
+			"y": -1060,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "peito"
+		},
+		{
+			"nome": "centro do escudo",
+			"x": 140,
+			"y": -1080,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "escudo"
+		},
+		{
+			"nome": "escudo tem prioridade sobre o peito",
+			"x": 70,
+			"y": -1100,
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": "escudo"
+		},
+		{
+			"nome": "corpo do cavalo e falta",
+			"x": 0,
+			"y": -620,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "cavalo"
+		},
+		{
+			"nome": "cabeca do cavalo e falta",
+			"x": 550,
+			"y": -1000,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "cavalo"
+		},
+		{
+			"nome": "cauda do cavalo e falta",
+			"x": -550,
+			"y": -700,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "cavalo"
+		},
+		{
+			"nome": "acima da cabeca e erro",
+			"x": 0,
+			"y": -1700,
+			"precisao": 50,
+			"bonus": 0,
+			"esperado": "erro"
+		},
+		{
+			"nome": "borda esquerda do capacete sem precisao",
+			"x": -100,
+			"y": -1400,
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": "capacete"
+		},
+		{
+			"nome": "um decimo fora do capacete sem precisao",
+			"x": -101,
+			"y": -1400,
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": "erro"
+		},
+		{
+			"nome": "borda direita do peito sem precisao",
+			"x": 119,
+			"y": -900,
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": "peito"
+		},
+		{
+			"nome": "precisao alarga o capacete",
+			"x": -125,
+			"y": -1400,
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": "erro"
+		},
+		{
+			"nome": "precisao alarga o capacete (com 100)",
+			"x": -125,
+			"y": -1400,
+			"precisao": 100,
+			"bonus": 0,
+			"esperado": "capacete"
+		},
+		{
+			"nome": "bonus da largada alarga",
+			"x": -110,
+			"y": -1400,
+			"precisao": 0,
+			"bonus": 10,
+			"esperado": "capacete"
+		},
+		{
+			"nome": "crescimento para no teto",
+			"x": -160,
+			"y": -1400,
+			"precisao": 100,
+			"bonus": 40,
+			"esperado": "erro"
+		},
+		{
+			"nome": "cavalo nao cresce com precisao",
+			"x": 0,
+			"y": -415,
+			"precisao": 100,
+			"bonus": 40,
+			"esperado": "erro"
+		},
+		{
+			"nome": "abaixo da barriga e erro mesmo com precisao",
+			"x": 0,
+			"y": -410,
+			"precisao": 100,
+			"bonus": 40,
+			"esperado": "erro"
+		},
+		{
+			"nome": "entre peito e cavalo sem precisao",
+			"x": -140,
+			"y": -860,
+			"precisao": 0,
+			"bonus": 0,
+			"esperado": "erro"
+		}
+	],
+	"limites": [
+		{
+			"x": 0,
+			"y": 0,
+			"esperado": [
+				0,
+				0
+			]
+		},
+		{
+			"x": -5000,
+			"y": -5000,
+			"esperado": [
+				-900,
+				-2000
+			]
+		},
+		{
+			"x": 5000,
+			"y": 5000,
+			"esperado": [
+				900,
+				0
+			]
+		},
+		{
+			"x": 100,
+			"y": -1000,
+			"esperado": [
+				100,
+				-1000
+			]
+		}
+	]
+}

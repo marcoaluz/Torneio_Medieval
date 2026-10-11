@@ -33,3 +33,8 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Um toque, uma ação por fase:** pula (Apresentação), larga (Largada, só o primeiro toque), galopa (Corrida). Tocar antes da bandeira queima a largada (ruim).
 - **2026-10-11 · Barra de distância mostra a pista inteira**, e os ícones se encontram onde os cavaleiros se encontram (quem corre mais anda mais), em vez de supor o encontro no meio.
 - **2026-10-11 · Referência compartilhada gravada pelo GDScript** (`justa_referencia.json`) para a justa completa; as peças menores têm oráculo Python independente.
+- **2026-10-11 · Mira em coordenadas do quadro do alvo** (décimos de px, sem espelho): a regra não depende de tela, zoom nem lado; o servidor recebe o ponto. Arrasto relativo, para o dedo não cobrir o alvo.
+- **2026-10-11 · Precisão aumenta só as zonas que pontuam**; a zona de falta (cavalo) tem tamanho fixo. Senão, Precisão viraria penalidade. Prioridade de zona: escudo > capacete > peito > cavalo.
+- **2026-10-11 · Golpe avaliado no choque (fim da Mira)**, não no instante em que solta; segurar até o fim golpeia sozinho; nunca tocar = erro.
+- **2026-10-11 · Atributos padrão em `padrao.json`** e lados como `{cavaleiro, cavalo}`; `Justa` recebe um pacote de configurações `{justa, galope, mira}`.
+- **2026-10-11 · `basis_xform_inv` não serve para nós com escala** (usa a transposta); para converter do mundo para o quadro do rival, use `affine_inverse().basis_xform()`.

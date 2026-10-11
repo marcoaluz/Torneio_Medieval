@@ -50,7 +50,7 @@ tamanho = Vector2(1280, 248)
 cor = Color(0.57, 0.49, 0.37, 1)
 
 [node name="Arauto" parent="." instance=ExtResource("8")]
-position = Vector2(480, 206)
+position = Vector2(200, 206)
 
 [node name="Pistas" type="Node2D" parent="."]
 
@@ -84,6 +84,16 @@ script = ExtResource("4")
 
 [node name="Jogador" parent="." instance=ExtResource("5")]
 position = Vector2(90, 470)
+
+[node name="PontaLanca" type="Node2D" parent="."]
+visible = false
+z_index = 10
+
+[node name="Provisorio" type="Node2D" parent="PontaLanca" groups=["provisorio"]]
+position = Vector2(-1.5, -1.5)
+script = ExtResource("2")
+tamanho = Vector2(3, 3)
+cor = Color(0.95, 0.92, 0.8, 1)
 
 [node name="Camera" type="Camera2D" parent="."]
 position = Vector2(480, 270)

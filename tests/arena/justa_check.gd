@@ -5,11 +5,15 @@ extends SceneTree
 ## fase, a bandeira do arauto, a barra de distância e os cavaleiros se
 ## encontrando no fim da Mira.
 
+## Parte do peito que o escudo não cobre, no quadro do alvo (px); ver mira.json.
+const PEITO := Vector2(-5, -106)
+
 var _falhas := 0
 var _log: Array[String] = []
 var _planos := {}
 var _toques := {}
 var _largadas: Array[String] = []
+var _golpes: Array[String] = []
 
 func _initialize() -> void:
 	var arena: Arena = load("res://game/scenes/arena/arena.tscn").instantiate()
@@ -27,6 +31,7 @@ func _initialize() -> void:
 	c.largada_avaliada.connect(func(_p, q, _r, _qm): _largadas.append(q))
 	c.toque_galope.connect(func(r, _d, _v, _f): _toques[r] = _toques.get(r, 0) + 1)
 	c.corrida_terminou.connect(func(p, _v, _r): _log.append("corrida_fim:%d" % p))
+	c.golpe_avaliado.connect(func(_p, z, a, s): _golpes.append("%s%s%s" % [z, ":auto" if a else "", ":sem" if s else ""]))
 	c.passada_terminou.connect(func(p, pj, pr, _d): _log.append("passada:%d:%d-%d" % [p, pj, pr]))
 	c.justa_terminou.connect(func(v, m, pj, pr): _log.append("fim:%s:%s:%d-%d" % [JustaFases.NOMES_LADO[v], m, pj, pr]))
 	c.fase_mudou.connect(func(f, _a, _p): _planos[JustaFases.NOMES_FASE[f]] = arena.camera.plano)
@@ -40,6 +45,8 @@ func _initialize() -> void:
 	var barra_fim_mira := 0.0
 	var brilho_max := 0.0
 	var bandeira_baixada_ok := false
+	var ponta_visivel := false
+	var realce_peito := false
 	var quadros := 0
 	var passo := 1.0 / 30.0
 	while not c.justa.terminou() and quadros < 30 * 120:
@@ -55,6 +62,11 @@ func _initialize() -> void:
 			if j.jogador.t_ms >= p / 2 and (resto <= 17 or resto > p - 17):
 				c.tocar()
 			brilho_max = maxf(brilho_max, c.barra.brilho)
+		elif antes == JustaFases.Fase.MIRA:
+			robo_mira(c, PEITO)
+			if c.justa.segurando:
+				ponta_visivel = ponta_visivel or arena.ponta_lanca.visible
+				realce_peito = realce_peito or arena.rival.get_node("Visual/Cavaleiro/Peito").modulate != Color.WHITE
 		c._process(passo)
 		arena.camera._process(passo)
 		quadros += 1
@@ -74,6 +86,10 @@ func _initialize() -> void:
 	_checa("largadas do robo sao perfeitas %s" % [_largadas], _largadas.size() == 3 and _largadas.count("perfeita") == 3)
 	_checa("toques no compasso contam %s" % [_toques], _toques.get("no_tempo", 0) >= 18 and _toques.get("perdido", 0) == 0)
 	_checa("brilho do compasso acende na corrida", brilho_max == 1.0)
+	_checa("robo arrasta ate o peito e acerta %s" % [_golpes], _golpes == ["peito", "peito", "peito"])
+	_checa("ponta da lanca aparece na mira", ponta_visivel)
+	_checa("zona sob a ponta brilha no rival", realce_peito)
+	_checa("brilho apaga fora da mira", arena.rival.get_node("Visual/Cavaleiro/Peito").modulate == Color.WHITE and not arena.ponta_lanca.visible)
 	_checa("cavaleiros se encontram no fim da mira (%.1f px)" % dist_fim_mira, dist_fim_mira >= 0.0 and dist_fim_mira < 6.0)
 	_checa("icones da barra se encontram no fim da mira (%.3f)" % barra_fim_mira, barra_fim_mira < 0.01)
 	_checa("camera aberta na apresentacao e largada",
@@ -96,6 +112,21 @@ func _initialize() -> void:
 
 	print("JUSTA %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)
+
+## Robô da Mira: segura aos 300 ms, arrasta (em px da tela) até o peito do
+## rival e solta aos 1000 ms.
+static func robo_mira(c: ControladorJusta, alvo_quadro: Vector2) -> void:
+	var j := c.justa
+	if j.fases.fase != JustaFases.Fase.MIRA or j.solto:
+		return
+	var t := j.fases.tempo_na_fase_ms
+	if t >= 300 and not j.segurando:
+		c.segurar_mira()
+		var falta := alvo_quadro - Vector2(j.ponta) / 10.0
+		var tela := c.arena.rival.visual().global_transform.basis_xform(falta) * c.arena.camera.zoom
+		c.arrastar_mira(tela)
+	elif t >= 1000 and j.segurando:
+		c.soltar_mira()
 
 func _checa(nome: String, ok: bool) -> void:
 	print("JUSTA %s %s" % [nome, "OK" if ok else "FALHOU"])

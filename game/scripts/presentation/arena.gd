@@ -17,6 +17,7 @@ extends Node2D
 @onready var rival: Cavaleiro = $Rival
 @onready var camera: CameraArena = $Camera
 @onready var arauto: Arauto = $Arauto
+@onready var ponta_lanca: Node2D = $PontaLanca
 @onready var inicio_jogador: Marker2D = $Pistas/Jogador/Inicio
 @onready var fim_jogador: Marker2D = $Pistas/Jogador/Fim
 @onready var inicio_rival: Marker2D = $Pistas/Rival/Inicio

@@ -43,7 +43,6 @@ static func validar(cfg: Dictionary) -> String:
 			"velocidade_base", "velocidade_por_ponto_milesimos", "velocidade_min_pct", "velocidade_max_pct",
 			"ganho_pct", "perda_perdido_pct", "perda_sem_folego_pct", "velocidade_max_cansado_pct"],
 		"folego": ["base", "por_ponto_milesimos", "custo_por_passada", "custo_erro"],
-		"cavalo_padrao": ["velocidade", "folego", "temperamento"],
 	}
 	for grupo: String in exigidas:
 		if not cfg.get(grupo) is Dictionary:

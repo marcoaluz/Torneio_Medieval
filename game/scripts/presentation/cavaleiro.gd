@@ -11,6 +11,9 @@ extends Node2D
 ## O espelhamento e a escala ficam em Visual; o Brasao desfaz o espelhamento
 ## para o símbolo nunca sair invertido (GDD: brasão aplicado depois do espelho).
 
+const COR_REALCE := Color(1.35, 1.3, 1.15)
+const COR_REALCE_FALTA := Color(1.3, 0.85, 0.8)
+
 ## 1 = corre para a direita (jogador), -1 = para a esquerda (rival).
 @export_enum("Esquerda:-1", "Direita:1") var direcao := 1:
 	set(v):
@@ -41,6 +44,23 @@ func brasao() -> Node2D:
 ## Centro do quadro de 160×160 (cavalo e cavaleiro), já com a escala.
 func centro() -> Vector2:
 	return global_position + Vector2(0, -80 * escala)
+
+## Brilho leve na zona sob a ponta da lança: "capacete", "peito", "escudo",
+## "cavalo" (falta, puxa para o vermelho) ou "" para apagar.
+## Sinal no próprio cavaleiro, sem círculo na tela (GDD).
+func realcar(zona: String) -> void:
+	var nos := {"capacete": "Visual/Cavaleiro/Capacete", "peito": "Visual/Cavaleiro/Peito",
+		"escudo": "Visual/Cavaleiro/Escudo", "cavalo": "Visual/Cavalo"}
+	for z: String in nos:
+		var no := get_node_or_null(nos[z]) as CanvasItem
+		if no == null:
+			continue
+		if z != zona:
+			no.modulate = Color.WHITE
+		elif z == "cavalo":
+			no.modulate = COR_REALCE_FALTA
+		else:
+			no.modulate = COR_REALCE
 
 ## Posição global de um alvo da mira: "Capacete", "Peito" ou "Escudo".
 func ponto_alvo(nome: String) -> Vector2:

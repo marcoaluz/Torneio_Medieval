@@ -1,0 +1,21 @@
+{
+	"versao": 1,
+	"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn).",
+	"zonas": [
+		{ "nome": "escudo", "retangulos": [[6, -123, 16, 30]], "cresce": true },
+		{ "nome": "capacete", "retangulos": [[-10, -150, 20, 22]], "cresce": true },
+		{ "nome": "peito", "retangulos": [[-12, -128, 24, 44]], "cresce": true },
+		{ "nome": "cavalo", "retangulos": [[-50, -84, 100, 42], [36, -116, 38, 34], [-60, -80, 10, 26]], "cresce": false }
+	],
+	"precisao": {
+		"crescimento_por_ponto_milesimos": 400,
+		"crescimento_max_pct": 50
+	},
+	"ponta_inicial": [40, -175],
+	"limites_ponta": [-90, -200, 180, 200],
+	"oscilacao": {
+		"amplitude_px": 3,
+		"frequencia_x_milesimos": 1300,
+		"frequencia_y_milesimos": 1700
+	}
+}
