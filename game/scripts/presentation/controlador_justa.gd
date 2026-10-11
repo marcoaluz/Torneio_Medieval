@@ -84,6 +84,7 @@ var disputa := {}
 var resultado_disputa := {}
 
 var _resto_ms := 0.0
+var _desistencia_registrada := false
 var _px_por_mil := 0.0
 var _fim_corrida_j := 0.0  ## distâncias em px no fim da Corrida (para a Mira)
 var _fim_corrida_r := 0.0
@@ -172,6 +173,7 @@ func iniciar(semente_fixa := -1) -> void:
 	_resto_ms = 0.0
 	_tempo_desde_fim = 0.0
 	set_process(true)
+	_metrica("justa_iniciada", {"modo": modo, "rival": nome_rival, "disputa": disputa})
 	_despachar(justa.iniciar())
 
 ## Toque do jogador (qualquer ponto da tela).
@@ -221,6 +223,19 @@ func ativar_habilidade() -> void:
 
 func fase() -> JustaFases.Fase:
 	return justa.fases.fase if justa else JustaFases.Fase.FIM
+
+## Desistência: sair da cena ou fechar o jogo com a justa em andamento.
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_EXIT_TREE, NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_APPLICATION_PAUSED]:
+		if justa != null and not justa.terminou() and modo != "exibicao" and not _desistencia_registrada:
+			_desistencia_registrada = true
+			_metrica("desistencia", {"modo": modo, "fase": JustaFases.NOMES_FASE[justa.fases.fase],
+				"passada": justa.fases.passada, "rival": nome_rival})
+
+func _metrica(evento: String, dados := {}) -> void:
+	var m := get_node_or_null("/root/Metricas") as ServicoMetricas
+	if m:
+		m.registrar(evento, dados)
 
 func _process(delta: float) -> void:
 	if justa == null:
@@ -324,6 +339,9 @@ func _despachar(eventos: Array[Dictionary]) -> void:
 			"passada":
 				passada_terminou.emit(p, e["pontos_jogador"], e["pontos_rival"], e["derrubado"])
 			"fim":
+				_metrica("justa_terminada", {"modo": modo, "rival": nome_rival, "vencedor": JustaFases.NOMES_LADO[e["vencedor"]],
+					"motivo": e["motivo"], "placar": [e["placar_jogador"], e["placar_rival"]], "passadas": justa.fases.passada,
+					"ms": justa.fases.tempo_total_ms, "estrelas": resultado_disputa.get("estrelas", -1)})
 				_registrar_no_jogador(e)
 				justa_terminou.emit(e["vencedor"], e["motivo"], e["placar_jogador"], e["placar_rival"])
 

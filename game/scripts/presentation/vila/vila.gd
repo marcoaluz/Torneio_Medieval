@@ -130,6 +130,10 @@ func melhorar(nome: String) -> void:
 	var r := _jog.melhorar_predio(nome)
 	if not r["ok"]:
 		mostrar_letreiro(tr("ERRO_" + str(r["erro"]).to_upper()))
+		return
+	var m := get_node_or_null("/root/Metricas") as ServicoMetricas
+	if m:
+		m.registrar("predio_melhorado", {"predio": nome, "para_nivel": _jog.predio_nivel(nome) + 1, "ouro": r.get("ouro", 0)})
 
 func _preencher_painel(nome: String) -> void:
 	_titulo.text = tr("PREDIO_" + nome.to_upper())

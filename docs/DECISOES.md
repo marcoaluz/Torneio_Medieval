@@ -78,3 +78,4 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Roteamento por `Fluxo` e passo salvo**; as telas só avisam `concluiu(etapa)`. A justa tem modos (livre, disputa, exibicao, tutorial) no mesmo controlador.
 - **2026-10-11 · Supabase pela API REST com `HTTPRequest`** (sem SDK de terceiros), com transporte injetável para teste. Save na nuvem = o JSON do jogador inteiro com `revisao` controlada por gatilho; nuvem vence em celular novo ou revisão maior.
 - **2026-10-11 · Projeto Supabase não criado sem autorização** (custo e ação externa); migrações e cliente prontos localmente, jogo funciona offline sem configuração.
+- **2026-10-11 · Métricas em fila local enviada em lotes**; o app só insere, não lê. Desligadas em headless para os testes não poluírem a fila real.

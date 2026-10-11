@@ -28,6 +28,11 @@ var pulando_tutorial := false
 func _jog() -> ServicoJogador:
 	return get_node_or_null("/root/Jogador")
 
+func _metrica(evento: String, dados := {}) -> void:
+	var m := get_node_or_null("/root/Metricas") as ServicoMetricas
+	if m:
+		m.registrar(evento, dados)
+
 ## Abertura do jogo: retoma do passo salvo.
 func iniciar_jogo() -> void:
 	var j := _jog()
@@ -56,9 +61,15 @@ func concluiu(etapa: String) -> void:
 	var proximo := {"titulo": 1, "criacao": 2, "brasao": 3, "exibicao": 4, "primeira_justa": 5, "bau": 6}.get(etapa, -1) as int
 	if proximo < 0:
 		return
+	if etapa == "titulo":
+		_metrica("tutorial_inicio", {"pulando": pulando_tutorial})
 	if etapa == "brasao" and pulando_tutorial:
 		j.recompensa_tutorial()
 		proximo = ServicoJogador.TUTORIAL_CONCLUIDO
+		_metrica("tutorial_pulado")
+	_metrica("tutorial_passo", {"passo": proximo, "etapa": etapa})
+	if proximo >= ServicoJogador.TUTORIAL_CONCLUIDO:
+		_metrica("tutorial_fim", {"pulado": pulando_tutorial})
 	j.definir_passo_tutorial(proximo)
 	ir_para_passo(proximo)
 
