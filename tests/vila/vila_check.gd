@@ -19,7 +19,7 @@ func _initialize() -> void:
 	root.add_child(vila)
 	await process_frame
 
-	_checa("seis predios", vila.predios.size() == 6)
+	_checa("um predio por item de vila.json", vila.predios.size() == (Balanceamento.ler("vila")["ordem"] as Array).size())
 	_checa("arena bloqueada no nivel 1", vila.predios["arena"].bloqueado and not jog.predio_liberado("arena"))
 	_checa("estabulo liberado", not vila.predios["estabulo"].bloqueado)
 	vila.tocar_predio("arena")

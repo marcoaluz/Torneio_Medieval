@@ -53,27 +53,29 @@ Os números vêm de `game/data/balance/`. O novo `economia.json` reúne os parâ
 
 ## Resultado (40 sementes, mediana do dia; — = não chega em 90 dias)
 
-Atualizado depois da forja (3.15): a receita da peça rara ficou em 13 lingotes de ferro equivalentes e 300 de ouro, então o primeiro conjunto raro do grátis passou do dia 32 para o dia 58.
+Atualizado depois da forja (3.15) e da correção do passe na simulação (3.17: os projetos do passe premium não eram entregues, por comparar número inteiro com número do JSON). A receita da peça rara ficou em 13 lingotes de ferro equivalentes e 300 de ouro, então o primeiro conjunto raro do grátis passou do dia 32 para o dia 57.
 
 | Marco | Grátis | Grátis + anúncios | Pagante | Habilidoso grátis | Pagante ruim | Só VIP | Só passe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Condado | 6 | 5 | 4 | 4 | 5 | 4 | 6 |
-| Ducado | 30 | 21 | 13 | 21 | 17 | 14 | 22 |
-| Reino | 58 | 34 | 25 | 34 | 32 | 28 | 39 |
-| Grande Torneio | 71 | 55 | 41 | 59 | 75 | 49 | 61 |
-| Campeão do Grande Torneio | — | — | 80 | 78 | — | — | — |
+| Ducado | 29 | 21 | 14 | 18 | 19 | 15 | 20 |
+| Reino | 52 | 34 | 25 | 35 | 32 | 28 | 35 |
+| Grande Torneio | 70 | 56 | 41 | 59 | 58 | 49 | 57 |
+| Campeão do Grande Torneio | — | — | 88 | 76 | — | — | — |
 | Liga Prata | 9 | 9 | 9 | 8 | 11 | 8 | 10 |
-| Liga Ouro | 18 | 16 | 13 | 14 | 17 | 13 | 17 |
-| Liga Platina | 50 | 38 | 34 | 38 | 40 | 35 | 40 |
-| Liga Diamante | — | 76 | 55 | 71 | — | 72 | 80 |
+| Liga Ouro | 18 | 16 | 13 | 14 | 18 | 13 | 16 |
+| Liga Platina | 51 | 39 | 35 | 38 | 42 | 36 | 39 |
+| Liga Diamante | — | 76 | 66 | 71 | — | 72 | 72 |
 | Liga Campeão | — | — | — | — | — | — | — |
 | 1º conjunto incomum completo | 9 | 8 | 6 | 9 | 7 | 6 | 9 |
-| 1º conjunto raro completo | 58 | 30 | 19 | 47 | 21 | 21 | 32 |
+| 1º conjunto raro completo | 57 | 28 | 20 | 49 | 22 | 25 | 31 |
+| Nível 10 | 31 | 26 | 21 | 27 | 25 | 22 | 26 |
+| Nível 15 | 65 | 58 | 46 | 59 | 58 | 54 | 58 |
 
 **Meta do prompt:**
 - O pagante chega primeiro em todos os marcos e o grátis com anúncios fica entre os dois.
 - O grátis chega a todas as regiões em 90 dias. Só o campeão do Grande Torneio e as ligas Diamante e Campeão ficam para depois.
-- O teste do GDD passa: o grátis habilidoso é campeão do Grande Torneio no dia 78; o pagante que joga mal não chega lá em 90 dias.
+- O teste do GDD passa: o grátis habilidoso é campeão do Grande Torneio no dia 76; o pagante que joga mal não chega lá em 90 dias.
 
 **No dia 90:**
 - Grátis: nível 17,6 e poder 152 (72% do teto).

@@ -125,6 +125,20 @@ func _ready() -> void:
 		camada_c.add_child(tc)
 		tc.abrir.call_deferred()
 		return
+	if tela == "liga":
+		# Salão da liga com adversário, defesa e histórico (TM_ABA).
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["cavaleiro"]["nivel"] = 8
+		jog.estado["liga"]["pontos"] = 340
+		jog.salvar_defesa()
+		jog.estado["liga"]["ultima_simulacao"] = int(jog.estado["liga"]["ultima_simulacao"]) - 86400
+		jog.procurar_adversario()
+		var tl: TelaLiga = load("res://game/scenes/ui/tela_liga.tscn").instantiate()
+		var camada_l := CanvasLayer.new()
+		add_child(camada_l)
+		camada_l.add_child(tl)
+		tl.abrir.call_deferred(OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "liga")
+		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.
 		jog.estado["cavaleiro"]["nivel"] = 20

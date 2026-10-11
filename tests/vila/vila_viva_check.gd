@@ -28,7 +28,7 @@ func _initialize() -> void:
 	amb.hora_forcada = 22.0
 	amb._aplicar()
 	var tochas := get_nodes_in_group("tocha")
-	_checa("tochas acesas a noite (%d)" % tochas.size(), amb.tochas_acesas() and tochas.size() == 6 and tochas.all(func(t): return t.acesa))
+	_checa("tochas acesas a noite (%d)" % tochas.size(), amb.tochas_acesas() and tochas.size() == (Balanceamento.ler("vila")["ordem"] as Array).size() and tochas.all(func(t): return t.acesa))
 
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(AmbienteVila.DADOS))
 	_checa("mesmo dia, mesmo clima", AmbienteVila.sortear_clima(cfg, 20000) == AmbienteVila.sortear_clima(cfg, 20000))

@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 7
+const VERSAO := 8
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -976,6 +976,317 @@ func _dar_recompensa(r: Dictionary) -> Dictionary:
 	_ganhar(int(r.get("ouro", 0)), int(r.get("xp", 0)))
 	return dado
 
+# --------------------------------------------------------------------- liga
+# PvP assíncrono e ligas (3.17; regra pura RegraLiga). Até o servidor (3.5/
+# 3.6), os fantasmas (cavaleiros de outros jogadores), as defesas, o ranking
+# e o campeonato são SIMULADOS aqui com a semente do save; a tela mostra isso.
+
+static func _liga_nova(criado_em: int) -> Dictionary:
+	return {"pontos": 0, "melhor": "", "temporada": 1, "temporada_inicio": criado_em, "defesa": {}, "defesas": [],
+		"partidas": [], "ultima_simulacao": criado_em, "buscas": 0, "adversario": {}, "campeonato": {}}
+
+func cfg_ligas() -> Dictionary:
+	return Balanceamento.ler("economia")["ligas"]
+
+## Posição na liga (RegraLiga.posicao) com os pontos.
+func liga_atual() -> Dictionary:
+	var r := RegraLiga.posicao(int(estado["liga"]["pontos"]), cfg_ligas())
+	r["pontos"] = int(estado["liga"]["pontos"])
+	return r
+
+## Poder do cavaleiro equipado (atributos com bônus de conjunto + peças).
+func poder_jogador() -> int:
+	var lado := lado_para_justa()
+	var atr: Array = []
+	for k in ["forca", "precisao", "equilibrio"]:
+		atr.append(int(lado["cavaleiro"][k]))
+	for k in ["velocidade", "folego", "temperamento"]:
+		atr.append(int(lado["cavalo"].get(k, 0)))
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
+	var pecas: Array = []
+	for esp: String in estado["equipamento"]:
+		var it := item(estado["equipamento"][esp])
+		if not it.is_empty():
+			pecas.append({"raridade": modelos[it["modelo"]]["raridade"], "nivel": int(it.get("nivel", 0))})
+	return RegraLiga.poder(atr, pecas, Balanceamento.ler("economia"))
+
+## Fantasma simulado `n`, perto de `pontos` (determinístico pela semente do
+## save). O poder é o típico daqueles pontos, limitado à faixa de pareamento
+## em volta de `poder_ref` (o do jogador; -1 = sem limite), como o servidor
+## faria ao procurar jogadores de verdade.
+func _fantasma(n: int, pontos_alvo: int, extra_poder := 0, poder_ref := -1) -> Dictionary:
+	var cfg := cfg_ligas()
+	var eco: Dictionary = Balanceamento.ler("economia")
+	var rng := Aleatorio.new(int(estado["baus"]["semente"]) + 7777 * (n + 1))
+	var var_p := int(cfg["fantasmas"]["variacao_pontos"])
+	var pontos := maxi(0, pontos_alvo + rng.inteiro(-var_p, var_p))
+	var alvo := int(float(cfg["poder_rival_base"]) + pontos * float(cfg["poder_rival_por_ponto"])) + rng.inteiro(-8, 8)
+	if poder_ref >= 0:
+		var faixa := int(cfg["faixa_poder"])
+		alvo = clampi(alvo, poder_ref - faixa + 3, poder_ref + faixa - 3)
+	alvo += extra_poder
+	# Peças: raridade pela faixa de poder, do catálogo (ordem alfabética).
+	var ordem := ["comum", "incomum", "raro", "epico", "lendario"]
+	var rar: String = ordem[clampi((alvo - 30) / 30, 0, 4)]
+	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
+	var equip := {}
+	var pecas: Array = []
+	var nivel := clampi((alvo - 30) % 30 / 3, 0, 10)
+	for esp in ["elmo", "peitoral", "escudo", "lanca"]:
+		var opcoes: Array = []
+		for m: String in modelos:
+			if modelos[m]["espaco"] == esp and modelos[m]["raridade"] == rar:
+				opcoes.append(m)
+		if opcoes.is_empty():
+			continue
+		opcoes.sort()
+		var m: String = opcoes[rng.inteiro(0, opcoes.size() - 1)]
+		var st := RegraForja.status_com_nivel(modelos[m]["status"], nivel, int(eco["forja"]["bonus_status_por_nivel_pct"]))
+		st["durabilidade"] = int(modelos[m]["durabilidade_max"])
+		equip[esp] = st
+		pecas.append({"raridade": rar, "nivel": nivel})
+	var poder_pecas := RegraLiga.poder([], pecas, eco)
+	var base_atr := clampi((alvo - poder_pecas) * 2, 20, 100)
+	var cav := {"forca": clampi(base_atr + rng.inteiro(-6, 6), 10, 100), "precisao": clampi(base_atr + rng.inteiro(-6, 6), 10, 100),
+		"equilibrio": clampi(base_atr + rng.inteiro(-6, 6), 10, 100)}
+	var cavalo := {"velocidade": clampi(base_atr + rng.inteiro(-6, 6), 10, 100), "folego": clampi(base_atr + rng.inteiro(-6, 6), 10, 100),
+		"temperamento": clampi(base_atr + rng.inteiro(-6, 6), 10, 100)}
+	var atr: Array = cav.values() + cavalo.values()
+	var nomes: Dictionary = Balanceamento.ler_json("res://game/data/texto/nomes_sorteio.json")
+	var lista: Array = (nomes["femininos"] as Array) + (nomes["masculinos"] as Array)
+	var casas: Array = nomes["casas"]
+	var cores: Array = Balanceamento.ler_json(CamadasPersonagem.PALETAS)["cores_casa"].keys()
+	var c1: String = cores[rng.inteiro(0, cores.size() - 1)]
+	var c2: String = cores[rng.inteiro(0, cores.size() - 1)]
+	var habs := ["investida", "golpe_pesado"]
+	return {"id": "f%d" % n, "nome": "%s · %s" % [lista[rng.inteiro(0, lista.size() - 1)], casas[rng.inteiro(0, casas.size() - 1)]],
+		"pontos": pontos, "poder": RegraLiga.poder(atr, pecas, eco), "simulado": true,
+		"lado": {"cavaleiro": cav, "cavalo": cavalo, "equipamento": equip, "habilidades": [habs[rng.inteiro(0, 1)], "bloqueio"]},
+		"casa": {"principal": c1, "secundaria": c2}, "brasao_perfil": ["novato", "equilibrado", "agressivo"][rng.inteiro(0, 2)],
+		"raridade": rar, "nivel_pecas": nivel}
+
+## Procura um adversário: candidatos simulados, pareados pela regra (faixa de
+## poder e pontos). Guarda como o adversário da próxima justa de PvP.
+func procurar_adversario() -> Dictionary:
+	var cfg := cfg_ligas()
+	var lg: Dictionary = estado["liga"]
+	lg["buscas"] = int(lg["buscas"]) + 1
+	var candidatos: Array = []
+	var meu := poder_jogador()
+	for i in int(cfg["fantasmas"]["candidatos"]):
+		candidatos.append(_fantasma(int(lg["buscas"]) * 100 + i, int(lg["pontos"]), 0, meu))
+	var id := RegraLiga.parear(int(lg["pontos"]), meu, candidatos.map(func(c): return {"id": c["id"], "pontos": c["pontos"], "poder": c["poder"]}), cfg)
+	var escolhido: Dictionary = {}
+	for c: Dictionary in candidatos:
+		if c["id"] == id:
+			escolhido = c
+	if escolhido.is_empty():
+		# Ninguém na faixa: o de poder mais próximo (no servidor, alarga a faixa).
+		candidatos.sort_custom(func(a, b): return absi(int(a["poder"]) - meu) < absi(int(b["poder"]) - meu))
+		escolhido = candidatos[0]
+	lg["adversario"] = escolhido
+	var r := _concluir("liga")
+	r["adversario"] = escolhido.duplicate(true)
+	return r
+
+func adversario() -> Dictionary:
+	return (estado["liga"]["adversario"] as Dictionary).duplicate(true)
+
+## Tudo para a justa de PvP: {cfg, lado_jogador, rival {lado, perfil, perfil_nome, casa, brasao, nome_chave}}.
+func preparar_pvp() -> Dictionary:
+	var a: Dictionary = estado["liga"]["adversario"]
+	if a.is_empty():
+		return {}
+	var perfil_nome: String = cfg_ligas()["fantasmas"]["perfil"]
+	var rv := {"id": a["id"], "lado": (a["lado"] as Dictionary).duplicate(true), "perfil_nome": perfil_nome,
+		"perfil": Balanceamento.ler("ia_rival")["perfis"][perfil_nome].duplicate(true), "casa": a["casa"].duplicate(),
+		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(a["brasao_perfil"], {}), "nome_chave": a["nome"], "provocacao": ""}
+	return {"cfg": Justa.carregar_configuracao(), "lado_jogador": lado_para_justa(), "rival": rv}
+
+## Fim da justa de PvP: pontos (RegraLiga), ouro e XP na vitória, chance de
+## baú, histórico; no campeonato, avança ou elimina.
+func concluir_pvp(eventos: Array) -> Dictionary:
+	var lg: Dictionary = estado["liga"]
+	var a: Dictionary = lg["adversario"]
+	if a.is_empty():
+		return _erro("sem_adversario")
+	var cfg := cfg_ligas()
+	var venceu := RegraPve.estrelas(eventos) > 0
+	var antes := int(lg["pontos"])
+	var pos_antes := RegraLiga.posicao(antes, cfg)
+	var ouro_g := 0
+	var xp_g := 0
+	var baus_g: Array = []
+	var premio := {}
+	var camp: Dictionary = lg["campeonato"]
+	if a.get("campeonato", false):
+		if venceu:
+			var premios: Array = cfg["campeonato"]["premios"]
+			premio = premios[mini(int(camp["rodada"]), premios.size() - 1)]
+			camp["rodada"] = int(camp["rodada"]) + 1
+			_dar_recompensa(premio)
+		else:
+			camp["eliminado"] = true
+	else:
+		lg["pontos"] = RegraLiga.depois_da_partida(antes, venceu, cfg)
+		if venceu:
+			ouro_g = RegraLiga.ouro_vitoria(int(pos_antes["liga"]), cfg)
+			xp_g = int(cfg["xp_vitoria"])
+			if _sorteio_milesimos(int(round(float(cfg_baus()["chance_madeira_por_vitoria"]) * 1000.0))):
+				baus_g.append(_guardar_bau("madeira"))
+	var pos := RegraLiga.posicao(int(lg["pontos"]), cfg)
+	var nomes: Array = cfg["nomes"]
+	if str(lg["melhor"]) == "" or nomes.find(lg["melhor"]) < int(pos["liga"]):
+		lg["melhor"] = nomes[int(pos["liga"])]
+	var partidas: Array = lg["partidas"]
+	partidas.push_front({"quando": ServicoTempo.agora(), "adversario": a["nome"], "venceu": venceu, "pontos": int(lg["pontos"]) - antes,
+		"campeonato": a.get("campeonato", false)})
+	while partidas.size() > 30:
+		partidas.pop_back()
+	lg["adversario"] = {}
+	var niveis := _ganhar(ouro_g, xp_g)
+	var r := _concluir("liga")
+	r.merge({"venceu": venceu, "estrelas": 1 if venceu else 0, "pontos_antes": antes, "pontos": int(lg["pontos"]), "ouro": ouro_g, "xp": xp_g,
+		"niveis": niveis, "baus": baus_g, "subiu": int(pos["liga"]) > int(pos_antes["liga"]) or pos["divisao"] != pos_antes["divisao"] and int(lg["pontos"]) > antes,
+		"premio": premio, "pvp": true}, true)
+	return r
+
+## Guarda o equipamento, o cavalo e as habilidades de agora como defesa.
+func salvar_defesa() -> Dictionary:
+	estado["liga"]["defesa"] = {"equipamento": (estado["equipamento"] as Dictionary).duplicate(), "cavalo": estado["cavalo_ativo"],
+		"habilidades": habilidades_em_uso(), "salva_em": ServicoTempo.agora()}
+	return _concluir("liga")
+
+func defesa() -> Dictionary:
+	return (estado["liga"]["defesa"] as Dictionary).duplicate(true)
+
+## Lado da defesa salva (peças que ainda existem, com o desgaste de agora).
+func lado_defesa() -> Dictionary:
+	var d: Dictionary = estado["liga"]["defesa"]
+	if d.is_empty():
+		return {}
+	var equip := {}
+	for esp: String in d["equipamento"]:
+		if not ESPACOS_REGRA.has(esp):
+			continue
+		var it := item(d["equipamento"][esp])
+		if it.is_empty():
+			continue
+		var st := status_do_item(it["id"])
+		st["durabilidade"] = int(it["durabilidade"])
+		equip[esp] = st
+	var cav := cavalo(d["cavalo"])
+	return {"cavaleiro": lado_para_justa()["cavaleiro"], "cavalo": cav.get("atributos", cavalo_ativo().get("atributos", {})).duplicate(),
+		"equipamento": equip, "habilidades": d["habilidades"]}
+
+## Ao abrir o salão: fecha a temporada vencida e simula as defesas do tempo
+## em que o jogador esteve fora (até 10). Salva.
+func atualizar_liga() -> Dictionary:
+	var lg: Dictionary = estado["liga"]
+	var cfg := cfg_ligas()
+	var dur := int(cfg["temporada_dias"]) * 86400
+	var fechou := {}
+	while ServicoTempo.agora() >= int(lg["temporada_inicio"]) + dur:
+		var pos := RegraLiga.posicao(int(lg["pontos"]), cfg)
+		var rec: Array = cfg["recompensa_temporada"]
+		fechou = {"temporada": int(lg["temporada"]), "liga": pos["nome"], "bau": rec[mini(int(pos["liga"]), rec.size() - 1)]}
+		_guardar_bau(fechou["bau"])
+		lg["pontos"] = RegraLiga.reinicio(int(lg["pontos"]), cfg)
+		lg["temporada"] = int(lg["temporada"]) + 1
+		lg["temporada_inicio"] = int(lg["temporada_inicio"]) + dur
+	var novas := 0
+	var passado := ServicoTempo.agora() - int(lg["ultima_simulacao"])
+	var n := mini(10, passado * int(cfg["defesas_por_dia"]) / 86400)
+	if n > 0:
+		lg["ultima_simulacao"] = ServicoTempo.agora()
+		var lado_d := lado_defesa()
+		if not lado_d.is_empty():
+			var perfis: Dictionary = Balanceamento.ler("ia_rival")["perfis"]
+			var perfil: Dictionary = perfis[cfg["fantasmas"]["perfil"]]
+			var jcfg := Justa.carregar_configuracao()
+			for i in n:
+				var semente := int(estado["baus"]["semente"]) + 31 * (int(lg["buscas"]) + 1000 * int(lg["temporada"]) + i + (lg["defesas"] as Array).size())
+				var atac := _fantasma(900000 + semente % 100000, int(lg["pontos"]), 0, poder_jogador())
+				var sim := RegraPve.simular(jcfg, atac["lado"], lado_d, semente, perfil, perfil)
+				var defendeu := RegraPve.estrelas(sim["eventos"]) == 0
+				var antes := int(lg["pontos"])
+				lg["pontos"] = RegraLiga.depois_da_defesa(antes, defendeu, cfg)
+				(lg["defesas"] as Array).push_front({"quando": ServicoTempo.agora(), "atacante": atac["nome"], "defendeu": defendeu,
+					"pontos": int(lg["pontos"]) - antes, "simulado": true})
+				novas += 1
+			while (lg["defesas"] as Array).size() > 20:
+				(lg["defesas"] as Array).pop_back()
+	var r := _concluir("liga")
+	r.merge({"temporada_fechada": fechou, "defesas_novas": novas}, true)
+	return r
+
+## Temporada: {numero, termina_em, restante_s, recompensas: [{liga, bau}]}.
+func temporada() -> Dictionary:
+	var lg: Dictionary = estado["liga"]
+	var cfg := cfg_ligas()
+	var fim := int(lg["temporada_inicio"]) + int(cfg["temporada_dias"]) * 86400
+	var rec: Array = []
+	for i in (cfg["nomes"] as Array).size():
+		rec.append({"liga": cfg["nomes"][i], "bau": cfg["recompensa_temporada"][mini(i, (cfg["recompensa_temporada"] as Array).size() - 1)]})
+	return {"numero": int(lg["temporada"]), "termina_em": fim, "restante_s": maxi(0, fim - ServicoTempo.agora()), "recompensas": rec}
+
+## Ranking simulado de jogadores perto dos seus pontos, com você no meio:
+## [{posicao, nome, pontos, voce}].
+func ranking_jogadores() -> Array:
+	var cfg := cfg_ligas()
+	var lista: Array = []
+	for i in int(cfg["ranking_simulado"]):
+		var f := _fantasma(500000 + i + 1000 * int(estado["liga"]["temporada"]), int(estado["liga"]["pontos"]))
+		lista.append({"nome": f["nome"], "pontos": int(f["pontos"]), "voce": false})
+	lista.append({"nome": cavaleiro().get("nome", ""), "pontos": int(estado["liga"]["pontos"]), "voce": true})
+	lista.sort_custom(func(a, b): return int(a["pontos"]) > int(b["pontos"]) or (int(a["pontos"]) == int(b["pontos"]) and a["voce"]))
+	for i in lista.size():
+		lista[i]["posicao"] = i + 1
+	return lista
+
+## Ranking simulado de ordens (as ordens de verdade vêm com o servidor, 3.8).
+func ranking_ordens() -> Array:
+	var nomes: Array = Balanceamento.ler_json("res://game/data/texto/nomes_sorteio.json")["casas"]
+	var rng := Aleatorio.new(int(estado["baus"]["semente"]) + 4242 * int(estado["liga"]["temporada"]))
+	var lista: Array = []
+	for i in nomes.size():
+		lista.append({"nome": str(nomes[i]).replace("Casa", "Ordem"), "pontos": rng.inteiro(200, 6000)})
+	lista.sort_custom(func(a, b): return int(a["pontos"]) > int(b["pontos"]))
+	for i in lista.size():
+		lista[i]["posicao"] = i + 1
+	return lista
+
+## Campeonato de fim de semana (simulado): {aberto, rodada, rodadas, eliminado, chave: [nomes], premios}.
+func campeonato() -> Dictionary:
+	var cfg: Dictionary = cfg_ligas()["campeonato"]
+	var dia_semana := int(Time.get_datetime_dict_from_unix_time(ServicoTempo.agora())["weekday"])
+	var semana := semana_atual()
+	var c: Dictionary = estado["liga"]["campeonato"]
+	if int(c.get("semana", -1)) != semana:
+		c.clear()
+		c.merge({"semana": semana, "rodada": 0, "eliminado": false, "chave": []}, true)
+		var chave: Array = []
+		for i in 8:
+			chave.append(_fantasma(700000 + semana * 10 + i, int(estado["liga"]["pontos"]), i)["nome"])
+		c["chave"] = chave
+	return {"aberto": (cfg["dias_semana"] as Array).any(func(x): return int(x) == dia_semana), "rodada": int(c["rodada"]), "rodadas": int(cfg["rodadas"]),
+		"eliminado": c["eliminado"], "chave": (c["chave"] as Array).duplicate(), "premios": (cfg["premios"] as Array).duplicate(true)}
+
+## Próxima luta do campeonato: o adversário da rodada vira o da justa de PvP.
+func jogar_campeonato() -> Dictionary:
+	var info := campeonato()
+	if not info["aberto"]:
+		return _erro("campeonato_fechado")
+	if info["eliminado"] or int(info["rodada"]) >= int(info["rodadas"]):
+		return _erro("campeonato_encerrado")
+	var f := _fantasma(800000 + semana_atual() * 10 + int(info["rodada"]), int(estado["liga"]["pontos"]), 4 * int(info["rodada"]), poder_jogador())
+	f["nome"] = info["chave"][int(info["rodada"]) * 2 + 1] if int(info["rodada"]) * 2 + 1 < info["chave"].size() else f["nome"]
+	f["campeonato"] = true
+	estado["liga"]["adversario"] = f
+	var r := _concluir("liga")
+	r["adversario"] = f.duplicate(true)
+	return r
+
 # ------------------------------------------------------------- configurações
 # Preferências do jogador (3.23): notificações por tipo (game/data/
 # notificacoes.json) e a chave "todas". Sem registro = ligada.
@@ -1538,6 +1849,7 @@ func novo_estado() -> Dictionary:
 	e["metas"] = _metas_novas()
 	e["historia"] = {"vistas": []}
 	e["config"] = {"notificacoes": {}}
+	e["liga"] = _liga_nova(int(e["criado_em"]))
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.ler("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -1623,6 +1935,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("config"):
 			d["config"] = {"notificacoes": {}}
 		v = 7
+	if v < 8:
+		# 3.17: liga, defesa de PvP, histórico, temporada e campeonato.
+		if not d.has("liga") or not d["liga"].has("pontos"):
+			d["liga"] = _liga_nova(int(d.get("criado_em", 0)))
+		v = 8
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

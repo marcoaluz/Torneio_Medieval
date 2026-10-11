@@ -134,7 +134,7 @@ func iniciar(semente_fixa := -1) -> void:
 	nome_jogador = ""
 	var rv := {}
 	anuncio_titulo = ""
-	if jog_d and jog_d.titulo() != "" and modo in ["disputa", "livre"]:
+	if jog_d and jog_d.titulo() != "" and modo in ["disputa", "livre", "pvp"]:
 		anuncio_titulo = tr("ARAUTO_TITULO").format({"nome": jog_d.cavaleiro().get("nome", ""),
 			"titulo": tr("TITULO_" + jog_d.titulo().to_upper())})
 	provocacao = ""
@@ -151,6 +151,13 @@ func iniciar(semente_fixa := -1) -> void:
 				desafios = prep["desafios"]
 				_gasta_folego = prep["gasta_folego"]
 				arena.aplicar_ambiente(prep["visuais"])
+		"pvp":
+			if jog_d:
+				var prep_p := jog_d.preparar_pvp()
+				if not prep_p.is_empty():
+					_cfg = prep_p["cfg"]
+					lado_jogador = prep_p["lado_jogador"]
+					rv = prep_p["rival"]
 		"tutorial":
 			if jog_d:
 				rv = jog_d.rival_tutorial()
@@ -288,7 +295,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			var fluxo := get_node_or_null("/root/Fluxo") as FluxoTelas
 			match modo:
-				"disputa":
+				"disputa", "pvp":
 					if fluxo:
 						fluxo.ir_para_vila()
 				"exibicao":
@@ -409,6 +416,11 @@ func _registrar_no_jogador(e: Dictionary) -> void:
 	if modo == "exibicao":
 		return  # a exibição não mexe nos dados do jogador
 	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	if jog and modo == "pvp" and not jog.adversario().is_empty():
+		resultado_disputa = jog.concluir_pvp(eventos_justa)
+		var fluxo_p := get_node_or_null("/root/Fluxo") as FluxoTelas
+		if fluxo_p:
+			fluxo_p.ultimo_resultado = resultado_disputa
 	if jog and not disputa.is_empty():
 		resultado_disputa = jog.concluir_disputa(disputa["torneio"], int(disputa["indice"]), eventos_justa)
 		var fluxo := get_node_or_null("/root/Fluxo") as FluxoTelas

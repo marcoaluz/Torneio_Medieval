@@ -169,12 +169,19 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 	if not r.is_empty():
 		var linhas: Array[String] = [tr("MOTIVO_" + motivo.to_upper())]
 		if r.get("venceu", false):
-			linhas.append("★".repeat(int(r["estrelas"])) + "☆".repeat(3 - int(r["estrelas"])))
+			if not r.get("pvp", false):
+				linhas.append("★".repeat(int(r["estrelas"])) + "☆".repeat(3 - int(r["estrelas"])))
 			linhas.append(tr("PVE_RECOMPENSA").format({"ouro": r["ouro"], "xp": r["xp"]}))
 		for n: int in r.get("niveis", []):
 			linhas.append(tr("PVE_SUBIU_NIVEL").format({"nivel": n}))
 		if r.get("torneio_concluido", false):
 			linhas.append(tr("PVE_TORNEIO_VENCIDO"))
+		if r.get("pvp", false):
+			var pos := RegraLiga.posicao(int(r["pontos"]), Balanceamento.ler("economia")["ligas"])
+			linhas.append(tr("PVP_PONTOS").format({"delta": "%+d" % (int(r["pontos"]) - int(r["pontos_antes"])),
+				"liga": tr("LIGA_" + str(pos["nome"]).to_upper()), "divisao": pos["divisao"]}))
+			if not (r.get("premio", {}) as Dictionary).is_empty():
+				linhas.append(tr("PVP_PREMIO_CAMPEONATO"))
 		var mats: Dictionary = r.get("materiais", {})
 		if not mats.is_empty():
 			var partes: Array[String] = []

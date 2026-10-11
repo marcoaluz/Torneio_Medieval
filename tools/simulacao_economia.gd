@@ -338,7 +338,7 @@ func _passe(n: int) -> void:
 			_ganhar_bau("ferro")
 		if lv % int(pr["bau_ouro_a_cada"]) == 0:
 			_ganhar_bau("ouro")
-		if lv in pr["projeto_nos_niveis"]:
+		if (pr["projeto_nos_niveis"] as Array).any(func(x): return int(x) == lv):  # JSON: números vêm como float
 			for c in eco["conjuntos"]:
 				if c["raridade"] in ["raro", "epico"] and not projetos.has(c["nome"]):
 					projetos.append(c["nome"])

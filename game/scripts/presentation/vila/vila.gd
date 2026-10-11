@@ -49,6 +49,7 @@ var tela_equipamentos: TelaEquipamentos:
 @onready var _botao_missoes: Button = $Interface/Topo/Linha/Missoes
 @onready var cena_historia: CenaHistoria = $Interface/CenaHistoria
 @onready var tela_configuracoes: TelaConfiguracoes = $Interface/TelaConfiguracoes
+@onready var tela_liga: TelaLiga = $Interface/TelaLiga
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -159,6 +160,10 @@ func tocar_predio(nome: String) -> void:
 	if nome in ["armeiro", "ferreiro"]:
 		fechar_painel()
 		tela_forja.abrir(nome)
+		return
+	if nome == "salao_liga":
+		fechar_painel()
+		tela_liga.abrir()
 		return
 	if nome in ["campo_treino", "estabulo"]:
 		fechar_painel()

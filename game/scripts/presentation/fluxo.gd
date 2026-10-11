@@ -16,7 +16,7 @@ const BAU := "res://game/scenes/ui/tela_bau.tscn"
 const VILA := "res://game/scenes/village/vila.tscn"
 const ARENA := "res://game/scenes/arena/arena.tscn"
 
-## Modo da justa que a arena vai abrir: "livre", "disputa", "exibicao", "tutorial".
+## Modo da justa que a arena vai abrir: "livre", "disputa", "pvp", "exibicao", "tutorial".
 var modo_justa := "livre"
 ## Disputa do PvE em andamento: {torneio, indice} ({} = nenhuma).
 var disputa := {}
@@ -55,7 +55,7 @@ func ir_para_passo(passo: int) -> void:
 func concluiu(etapa: String) -> void:
 	var j := _jog()
 	if j == null or j.tutorial_concluido():
-		if etapa in ["exibicao", "primeira_justa", "disputa", "livre"]:
+		if etapa in ["exibicao", "primeira_justa", "disputa", "livre", "pvp"]:
 			ir_para_vila()
 		return
 	var proximo := {"titulo": 1, "criacao": 2, "brasao": 3, "exibicao": 4, "primeira_justa": 5, "bau": 6}.get(etapa, -1) as int
@@ -88,6 +88,12 @@ func justar(torneio: String, indice: int) -> void:
 	disputa = {"torneio": torneio, "indice": indice}
 	ultimo_resultado = {}
 	_justa("disputa")
+
+## Justa de PvP contra o adversário escolhido no salão da liga (3.17).
+func justar_pvp() -> void:
+	disputa = {}
+	ultimo_resultado = {}
+	_justa("pvp")
 
 ## Justa livre (treino, sem PvE).
 func justa_livre() -> void:

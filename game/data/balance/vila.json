@@ -12,8 +12,10 @@
 			"melhoria": [ { "ouro": 60, "segundos": 120 }, { "ouro": 120, "segundos": 240 }, { "ouro": 240, "segundos": 360 }, { "ouro": 480, "segundos": 480 } ] },
 		"arena": { "libera_nivel": 2, "nivel_max": 5, "estagios": 5, "posicao": [480, 400], "tamanho": [170, 100], "cor_telhado": "7a2326",
 			"melhoria": [ { "ouro": 100, "segundos": 180 }, { "ouro": 200, "segundos": 300 }, { "ouro": 400, "segundos": 420 }, { "ouro": 800, "segundos": 600 } ] },
+		"salao_liga": { "libera_nivel": 6, "nivel_max": 5, "estagios": 4, "posicao": [835, 140], "tamanho": [120, 80], "cor_telhado": "4a2a4f",
+			"melhoria": [ { "ouro": 120, "segundos": 240 }, { "ouro": 240, "segundos": 360 }, { "ouro": 480, "segundos": 480 }, { "ouro": 960, "segundos": 600 } ] },
 		"armeiro": { "libera_nivel": 3, "nivel_max": 5, "estagios": 4, "posicao": [710, 420], "tamanho": [120, 80], "cor_telhado": "2c3a5a",
 			"melhoria": [ { "ouro": 80, "segundos": 150 }, { "ouro": 160, "segundos": 270 }, { "ouro": 320, "segundos": 390 }, { "ouro": 640, "segundos": 540 } ] }
 	},
-	"ordem": ["casa_senhorial", "estabulo", "campo_treino", "ferreiro", "arena", "armeiro"]
+	"ordem": ["casa_senhorial", "estabulo", "campo_treino", "ferreiro", "arena", "armeiro", "salao_liga"]
 }

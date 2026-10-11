@@ -650,3 +650,47 @@ TEXTO_MUITO_GRANDE,Muito grande,Extra large
 ERRO_OPCAO_INEXISTENTE,Opção desconhecida.,Unknown option.
 ERRO_OPCAO_INVALIDA,Valor inválido.,Invalid value.
 CONFIG_BATERIA,"Economia de bateria (30 quadros, menos partículas)","Battery saver (30 fps, fewer particles)"
+PREDIO_SALAO_LIGA,Salão da liga,League hall
+PREDIO_DESC_SALAO_LIGA,"PvP, ranking e temporadas.","PvP, rankings and seasons."
+LIGA_TITULO,Salão da liga,League hall
+LIGA_POSICAO,{liga} {divisao} · {pontos} pontos · seu poder {poder},{liga} {divisao} · {pontos} points · your power {poder}
+LIGA_PARA_SUBIR,(faltam {n} para subir),({n} to rank up)
+LIGA_ABA_LIGA,Justar,Joust
+LIGA_ABA_DEFESA,Defesa,Defense
+LIGA_ABA_RANKING,Ranking,Ranking
+LIGA_ABA_TEMPORADA,Temporada,Season
+LIGA_ABA_CAMPEONATO,Campeonato,Championship
+LIGA_PROCURAR,Procurar adversário,Find an opponent
+LIGA_ADVERSARIO,{nome} · poder {poder} · {pontos} pontos,{nome} · power {poder} · {pontos} points
+LIGA_ADVERSARIO_EQUIP,Peças {raridade} +{nivel} · {habilidades},{raridade} pieces +{nivel} · {habilidades}
+LIGA_SIMULADO,(simulado até o servidor),(simulated until the server)
+LIGA_JUSTAR,Justar,Joust
+LIGA_OUTRO,Outro adversário,Another opponent
+LIGA_PARTIDAS,Últimas partidas,Recent matches
+LIGA_PARTIDA_VENCEU,Venceu {nome} ({pontos}),Beat {nome} ({pontos})
+LIGA_PARTIDA_PERDEU,Perdeu para {nome} ({pontos}),Lost to {nome} ({pontos})
+LIGA_SEM_DEFESA,Você ainda não montou sua defesa. Outros jogadores enfrentam o seu fantasma com ela.,You have not set up your defense yet. Other players face your ghost with it.
+LIGA_DEFESA_ATUAL,Defesa: {pecas} · {habilidades},Defense: {pecas} · {habilidades}
+LIGA_SALVAR_DEFESA,Usar meu equipamento atual como defesa,Use my current gear as defense
+LIGA_DEFESA_SALVA,Defesa salva.,Defense saved.
+LIGA_HISTORICO_DEFESAS,Defesas,Defenses
+LIGA_DEFENDEU,Defendeu contra {nome} ({pontos}),Held off {nome} ({pontos})
+LIGA_NAO_DEFENDEU,{nome} venceu sua defesa,{nome} broke your defense
+LIGA_RANKING_JOGADORES,Jogadores,Players
+LIGA_RANKING_ORDENS,Ordens,Orders
+LIGA_TEMPORADA,Temporada {n} · termina em {tempo},Season {n} · ends in {tempo}
+LIGA_RECOMPENSA_LINHA,{liga}: {bau},{liga}: {bau}
+LIGA_REINICIO,No fim da temporada você fica com {pct}% dos pontos.,At season end you keep {pct}% of your points.
+LIGA_TEMPORADA_FECHOU,A temporada {n} terminou na liga {liga}: {bau}!,Season {n} ended in the {liga} league: {bau}!
+LIGA_DEFESAS_NOVAS,{n} defesa(s) enquanto você estava fora.,{n} defense(s) while you were away.
+LIGA_CAMPEONATO_ABERTO,Campeonato de fim de semana aberto!,Weekend championship is open!
+LIGA_CAMPEONATO_FECHADO,O campeonato abre no sábado e no domingo.,The championship opens on Saturday and Sunday.
+LIGA_PREMIO_RODADA,Vencer a rodada {n}: {premio},Win round {n}: {premio}
+LIGA_ELIMINADO,Você foi eliminado. Volte no próximo fim de semana!,You were knocked out. Come back next weekend!
+LIGA_CAMPEAO_DO_FIM_DE_SEMANA,Campeão do fim de semana!,Weekend champion!
+LIGA_JOGAR_RODADA,Jogar a rodada {n},Play round {n}
+PVP_PONTOS,Pontos de liga: {delta} ({liga} {divisao}),League points: {delta} ({liga} {divisao})
+PVP_PREMIO_CAMPEONATO,Prêmio do campeonato recebido!,Championship prize received!
+ERRO_SEM_ADVERSARIO,Procure um adversário primeiro.,Find an opponent first.
+ERRO_CAMPEONATO_FECHADO,O campeonato só abre no fim de semana.,The championship only opens on weekends.
+ERRO_CAMPEONATO_ENCERRADO,Seu campeonato desta semana acabou.,Your championship this week is over.

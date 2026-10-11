@@ -1,0 +1,40 @@
+{
+	"versao": 1,
+	"descricao": "Ligas e PvP (game/scripts/rules/liga.gd), calculados a mao. Divisoes inteiras truncam. O servidor (Edge Function, 3.5/3.6) roda os mesmos casos.",
+	"ligas": { "nomes": ["bronze", "prata", "ouro", "platina", "diamante", "campeao"], "divisoes": ["III", "II", "I"], "pontos_por_divisao": 100,
+		"vitoria": 20, "derrota": -16, "defesa_vencida": 4, "faixa_poder": 15, "reinicio_pct": 50, "ouro_vitoria": 14, "ouro_por_liga": 8 },
+	"economia": { "poder_raridade": { "comum": 3, "incomum": 5, "raro": 8, "epico": 12, "lendario": 17 }, "poder_por_melhoria": 1 },
+	"posicao": [
+		{ "pontos": 0, "esperado": { "liga": 0, "nome": "bronze", "divisao": "III", "pontos_na_divisao": 0, "para_subir": 100 } },
+		{ "pontos": 250, "esperado": { "liga": 0, "nome": "bronze", "divisao": "I", "pontos_na_divisao": 50, "para_subir": 50 } },
+		{ "pontos": 300, "esperado": { "liga": 1, "nome": "prata", "divisao": "III", "pontos_na_divisao": 0, "para_subir": 100 } },
+		{ "pontos": -20, "esperado": { "liga": 0, "nome": "bronze", "divisao": "III", "pontos_na_divisao": 0, "para_subir": 100 } },
+		{ "pontos": 1799, "esperado": { "liga": 5, "nome": "campeao", "divisao": "I", "pontos_na_divisao": 99, "para_subir": -1 } },
+		{ "pontos": 5000, "esperado": { "liga": 5, "nome": "campeao", "divisao": "I", "pontos_na_divisao": 3300, "para_subir": -1 } }
+	],
+	"partida": [
+		{ "pontos": 100, "venceu": true, "esperado": 120 },
+		{ "pontos": 10, "venceu": false, "esperado": 0 },
+		{ "pontos": 100, "venceu": false, "esperado": 84 }
+	],
+	"defesa": [
+		{ "pontos": 50, "defendeu": true, "esperado": 54 },
+		{ "pontos": 50, "defendeu": false, "esperado": 50 }
+	],
+	"parear": [
+		{ "nome": "empate em pontos: menor id", "pontos": 300, "poder": 100,
+			"candidatos": [ { "id": "a", "pontos": 310, "poder": 120 }, { "id": "b", "pontos": 280, "poder": 110 }, { "id": "c", "pontos": 320, "poder": 95 }, { "id": "d", "pontos": 300, "poder": 116 } ],
+			"esperado": "b" },
+		{ "nome": "o mais perto em pontos", "pontos": 300, "poder": 100,
+			"candidatos": [ { "id": "x", "pontos": 360, "poder": 100 }, { "id": "y", "pontos": 290, "poder": 114 } ], "esperado": "y" },
+		{ "nome": "ninguem na faixa", "pontos": 300, "poder": 100,
+			"candidatos": [ { "id": "z", "pontos": 300, "poder": 200 } ], "esperado": "" }
+	],
+	"reinicio": [ { "pontos": 345, "esperado": 172 }, { "pontos": 0, "esperado": 0 } ],
+	"ouro": [ { "liga": 0, "esperado": 14 }, { "liga": 3, "esperado": 38 } ],
+	"poder": [
+		{ "atributos": [30, 30, 30, 40, 40, 40], "pecas": [ { "raridade": "comum", "nivel": 0 }, { "raridade": "comum", "nivel": 0 }, { "raridade": "comum", "nivel": 0 }, { "raridade": "comum", "nivel": 0 }, { "raridade": "comum", "nivel": 0 } ], "esperado": 32 },
+		{ "atributos": [30, 30, 30, 40, 40, 40], "pecas": [ { "raridade": "raro", "nivel": 3 } ], "esperado": 28 },
+		{ "atributos": [], "pecas": [], "esperado": 0 }
+	]
+}
