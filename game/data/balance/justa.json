@@ -1,0 +1,12 @@
+{
+	"versao": 1,
+	"passadas": 3,
+	"passadas_extras_max": 1,
+	"fases_ms": {
+		"apresentacao": 2000,
+		"largada": 1000,
+		"corrida": 4500,
+		"mira": 2000,
+		"impacto": 2000
+	}
+}

@@ -3,7 +3,8 @@ extends Camera2D
 ## Câmera da justa. Três planos (GDD, tabela de fases):
 ##   plano_aberto() - mostra a arena inteira (Apresentação, Largada)
 ##   seguir(alvo)   - acompanha um cavaleiro (Corrida)
-##   focar(ponto)   - zoom num ponto do mundo (Mira, Impacto)
+##   focar(ponto)   - zoom num ponto fixo do mundo (Impacto)
+##   focar_alvo(no) - zoom num nó que se move (Mira: o peito do rival)
 ## A troca de plano é suave: posição e zoom se aproximam do destino com
 ## decaimento exponencial a cada quadro, o que também funciona quando o
 ## alvo está em movimento. Os limites da Camera2D seguram a imagem dentro
@@ -47,6 +48,12 @@ func focar(ponto: Vector2, zoom_ponto := 0.0, imediato := false) -> void:
 	_ponto = ponto
 	_trocar(Plano.FOCO, zoom_ponto if zoom_ponto > 0.0 else zoom_foco, imediato)
 
+## Zoom que acompanha um nó em movimento. `zoom` <= 0 usa `zoom_foco`.
+func focar_alvo(no: Node2D, zoom_ponto := 0.0, imediato := false) -> void:
+	_alvo = no
+	_ponto = no.global_position
+	_trocar(Plano.FOCO, zoom_ponto if zoom_ponto > 0.0 else zoom_foco, imediato)
+
 ## Posição que a câmera persegue no plano atual.
 func destino() -> Vector2:
 	match plano:
@@ -59,6 +66,8 @@ func destino() -> Vector2:
 				return _alvo.global_position + d
 			return centro_aberto
 		Plano.FOCO:
+			if is_instance_valid(_alvo):
+				return _alvo.global_position
 			return _ponto
 	return centro_aberto
 

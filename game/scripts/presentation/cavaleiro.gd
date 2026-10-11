@@ -38,6 +38,10 @@ func visual() -> Node2D:
 func brasao() -> Node2D:
 	return get_node_or_null("Visual/Cavaleiro/Escudo/Brasao")
 
+## Centro do quadro de 160×160 (cavalo e cavaleiro), já com a escala.
+func centro() -> Vector2:
+	return global_position + Vector2(0, -80 * escala)
+
 ## Posição global de um alvo da mira: "Capacete", "Peito" ou "Escudo".
 func ponto_alvo(nome: String) -> Vector2:
 	var no := get_node("Visual/Cavaleiro/" + nome) as Node2D

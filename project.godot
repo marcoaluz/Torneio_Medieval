@@ -21,6 +21,10 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=0
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [internationalization]
 
 locale/translations=PackedStringArray("res://game/i18n/textos.pt_BR.translation", "res://game/i18n/textos.en.translation")

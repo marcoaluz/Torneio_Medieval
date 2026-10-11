@@ -20,3 +20,9 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Ajustes visuais (zoom da câmera, escala do rival 0.85, posições das pistas) ficam como `@export`/marcadores nas cenas**, não em `game/data/balance/`. Motivo: são apresentação, não regra de jogo. Velocidades e durações de jogo vão para os dados (1.2+).
 - **2026-10-11 · Arte provisória desenhada por scripts `@tool` (`_draw`) dentro de nós-encaixe**, em vez de ColorRect. Motivo: ColorRect é Control e pode engolir toques; os encaixes já têm os nomes das camadas finais.
 - **2026-10-11 · O brasão desfaz o espelhamento** (`Brasao.scale.x = direcao`), conforme o GDD; há um teste que confere isso.
+- **2026-10-11 · Fases da justa: FSM por enum, pura, em `rules/` (`JustaFases`)**, que avança por `avancar(ms)` e devolve uma lista de eventos com instante exato. O nó `ControladorJusta` traduz em sinais, câmera e movimento. Descartada a FSM com um nó por estado: não cabe em `rules/` (sem nós) nem porta para TypeScript, e são só 5 fases com tempo fixo.
+- **2026-10-11 · Tempos da regra em milissegundos inteiros**, para dar paridade exata com o TypeScript; o resultado não depende do tamanho do quadro (testado picando em 17 ms).
+- **2026-10-11 · Passada extra:** até `passadas_extras_max` (1); se ainda empatar, a justa termina empatada. Derrubada encerra a justa no fim da passada, mesmo com placar contrário. Pendente de confirmação de design.
+- **2026-10-11 · Câmera lenta da Mira é só visual** (os cavaleiros andam a 0.3 da velocidade); o tempo de jogo da Mira continua 2 s reais.
+- **2026-10-11 · Entrada por toque:** `emulate_touch_from_mouse=true`; o jogo só trata eventos de toque, e o mouse do desktop vira toque.
+- **2026-10-11 · Pedido do usuário: executar todos os prompts do Pacote em sequência**, parando só antes de gasto de crédito ou serviço externo.

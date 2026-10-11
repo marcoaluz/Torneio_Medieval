@@ -19,6 +19,9 @@ bash $D script res://tests/smoke/headless_check.gd   # roda script de teste (hea
 bash $D shot res://tests/smoke/smoke.tscn 10 /tmp/out/smoke.png   # renderiza e salva PNG
 SIZE=1600x720 bash $D shot res://tests/smoke/smoke.tscn 10 /tmp/out/s209.png   # mesma coisa em 20:9
 
+# Todos os testes headless de uma vez (resumo PASSOU/FALHOU por arquivo)
+bash tests/rodar_testes.sh
+
 # Arena (prompt 1.1)
 timeout 60 bash $D script res://tests/arena/arena_check.gd    # montagem + 3 planos da câmera; espera "ARENA TUDO OK"
 TM_CAMERA=seguir bash $D shot res://tests/arena/arena_camera_demo.tscn 60 /tmp/out/seguir.png  # aberto | seguir | focar
