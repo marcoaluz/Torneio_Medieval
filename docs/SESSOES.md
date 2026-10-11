@@ -23,3 +23,4 @@ Uma linha por sessão: data · conta · o que foi feito · próximo passo.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.2: tela de criação de personagem (prévia ao vivo, seletores, amostras de cor, sortear, filtro de nomes), tema_jogo.tres · Próximo: 2.3.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.3: editor de brasão com gerador pixel a pixel por dados, brasão no escudo/sobreveste/caparação seguindo pontos por quadro, brasões dos rivais · Próximo: 2.5.
 - 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.5: vila vista de cima (6 prédios, estágios, balão de timer, pronto, cadeado, painel com melhoria/justar), melhoria de prédio como comando do serviço, vila.json · Próximo: 2.6.
+- 2026-10-11 · conta marcoluz1994@outlook.com · Prompt 2.6: vila viva (dia/noite pelo relógio, tochas com luz, clima do dia, treino no estafermo, estábulo, martelo com faíscas, bandeira com brasão), AparenciaJogador · Próximo: 2.7.

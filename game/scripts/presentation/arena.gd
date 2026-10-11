@@ -36,20 +36,8 @@ func _ready() -> void:
 ## Aparência do cavaleiro do jogador a partir dos dados do jogador (se houver).
 func vestir_jogador() -> void:
 	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
-	if jog == null:
-		return
-	var cav := jog.cavaleiro()
-	var cores: Dictionary = jog.casa()["cores"]
-	jogador.definir_casa({"principal": cores["principal"], "secundaria": cores["secundaria"], "metal": cores.get("metal", "ferro"),
-		"pele": cav.get("pele", "media"), "cabelo": cav.get("cor_cabelo", "castanho")})
-	var pecas := jog.visual_das_pecas()
-	pecas["pelagem"] = jog.cavalo_ativo().get("pelagem", "alazao")
-	pecas["corpo"] = cav.get("corpo", "masculino")
-	jogador.camadas().vestir(pecas)
-	var b: Dictionary = jog.casa().get("brasao", {})
-	if b.is_empty():
-		b = {"cor1": cores["principal"], "cor2": cores["secundaria"], "cor_simbolo": cores["secundaria"]}
-	jogador.definir_brasao(b)
+	if jog:
+		AparenciaJogador.vestir_cavaleiro(jogador, jog)
 
 ## Brasão do rival pelo perfil da IA (game/data/crests/brasao.json, "rivais").
 func vestir_rival(perfil: String) -> void:

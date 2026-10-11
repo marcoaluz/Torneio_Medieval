@@ -63,3 +63,5 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Filtro de nomes por raízes normalizadas** (sem acento, leetspeak trocado), com lista em dados; o servidor repete a validação na Parte 3.
 - **2026-10-11 · Brasão desenhado por código no tamanho de cada uso**, a partir de primitivas em dados (e PNG de máscara quando houver arte), em vez de sprites prontos: as combinações são muitas, e reduzir pixel art borra.
 - **2026-10-11 · Prédio liberado pelo nível do cavaleiro começa no nível 1 sem precisar construir**; a casa senhorial é o teto dos outros. Melhoria cobra na hora e cria timer por horário de término; concluir é um comando (vira Edge Function).
+- **2026-10-11 · Dia/noite por `CanvasModulate` no mundo e tochas com `PointLight2D`** (a interface fica numa CanvasLayer e não escurece). Clima sorteado com semente = dia, para não mudar a cada vez que se abre a vila.
+- **2026-10-11 · A vila viva lê ocupado/ocioso dos timers do Jogador**, sem estado próprio; a vila só mostra.

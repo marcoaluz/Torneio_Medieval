@@ -44,6 +44,15 @@ func cavalo_ativo() -> Dictionary:
 			return c.duplicate(true)
 	return {}
 
+## Cavalo cansado (fôlego baixo; regras na 2.7). Sem dado de fôlego, não está.
+func cavalo_cansado(id := "") -> bool:
+	var c := cavalo_ativo() if id == "" else {}
+	if id != "":
+		for x: Dictionary in estado["cavalos"]:
+			if x["id"] == id:
+				c = x
+	return c.get("cansado", false)
+
 func cavalos() -> Array:
 	return estado["cavalos"].duplicate(true)
 

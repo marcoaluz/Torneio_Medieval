@@ -14,6 +14,8 @@ var predios := {}  ## nome -> PredioVila
 var aberto := ""   ## prédio com o painel aberto
 
 var _jog: ServicoJogador
+@onready var vida: VidaVila = $Vida
+@onready var ambiente: AmbienteVila = $Ambiente
 var _acumulado := 0.0
 
 @onready var _topo_nome: Label = $Interface/Topo/Linha/Nome
@@ -41,7 +43,8 @@ func _ready() -> void:
 	_fechar.pressed.connect(fechar_painel)
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): abrir_justa.emit())
-	_jog.mudou.connect(func(_s): atualizar())
+	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
+	vida.configurar(self, _jog)
 	atualizar()
 
 ## Atualiza prédios e topo a partir dos dados (e o painel aberto).

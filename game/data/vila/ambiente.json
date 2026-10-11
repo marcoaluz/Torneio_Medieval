@@ -1,0 +1,26 @@
+{
+	"versao": 1,
+	"_nota": "Ambiente da vila (apresentacao): cor do mundo por hora do dia (interpolada entre as marcas), horas com tochas acesas, clima sorteado uma vez por dia (pesos) e intensidades. Horario = relogio do celular.",
+	"cores_por_hora": [
+		[0, "3a4466"],
+		[5, "3e4568"],
+		[6, "b08878"],
+		[8, "ffffff"],
+		[17, "fff4e6"],
+		[19, "c08a6a"],
+		[20, "4a4f72"],
+		[24, "3a4466"]
+	],
+	"tochas": { "acende": 18.5, "apaga": 6.5 },
+	"clima": {
+		"pesos": { "limpo": 45, "nublado": 30, "chuva": 15, "neblina": 10 },
+		"escurecer": { "limpo": 1.0, "nublado": 0.82, "chuva": 0.7, "neblina": 0.85 },
+		"chuva_gotas": 140,
+		"neblina_manchas": 9
+	},
+	"vida": {
+		"estabulo_troca_s": 8,
+		"treino_volta_s": 3.2,
+		"martelo_s": 0.6
+	}
+}
