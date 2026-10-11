@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="Gradient" id="fade"]
+offsets = PackedFloat32Array(0, 0.7, 1)
+colors = PackedColorArray(0.82, 0.68, 0.45, 1, 0.65, 0.5, 0.3, 1, 0.5, 0.38, 0.22, 0)
+
+[node name="Lascas" type="CPUParticles2D"]
+z_index = 20
+emitting = false
+amount = 12
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+direction = Vector2(1, -0.4)
+spread = 65.0
+gravity = Vector2(0, 420)
+initial_velocity_min = 70.0
+initial_velocity_max = 190.0
+angular_velocity_min = -540.0
+angular_velocity_max = 540.0
+scale_amount_min = 1.5
+scale_amount_max = 3.0
+color_ramp = SubResource("fade")

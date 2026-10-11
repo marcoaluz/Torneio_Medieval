@@ -31,9 +31,15 @@ const COR_REALCE_FALTA := Color(1.3, 0.85, 0.8)
 		cor_casa = v
 		_aplicar_cor_casa()
 
+var caido := false
+var _posicao_lanca := Vector2.ZERO
+
 func _ready() -> void:
 	_aplicar_orientacao()
 	_aplicar_cor_casa()
+	var lanca := get_node_or_null("Visual/Lanca") as Node2D
+	if lanca:
+		_posicao_lanca = lanca.position
 
 func visual() -> Node2D:
 	return get_node_or_null("Visual")
@@ -61,6 +67,50 @@ func realcar(zona: String) -> void:
 			no.modulate = COR_REALCE_FALTA
 		else:
 			no.modulate = COR_REALCE
+
+## Derrubada: o cavaleiro (Visual/Cavaleiro, com a lança) cai para trás,
+## saindo do cavalo. `giro_graus` e `distancia` em px do quadro.
+func cair(duracao: float, giro_graus: float, distancia: float) -> void:
+	var corpo := get_node_or_null("Visual/Cavaleiro") as Node2D
+	var lanca := get_node_or_null("Visual/Lanca") as Node2D
+	if corpo == null:
+		return
+	caido = true
+	var t := create_tween().set_parallel(true).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.tween_property(corpo, "rotation_degrees", -giro_graus, duracao)
+	t.tween_property(corpo, "position", Vector2(-distancia, distancia * 0.6), duracao)
+	if lanca:
+		t.tween_property(lanca, "rotation_degrees", -giro_graus * 0.6, duracao)
+		t.tween_property(lanca, "position", lanca.position + Vector2(-distancia, distancia * 0.6), duracao)
+
+## A lança estilhaça no contato: fica curta até a próxima passada.
+func quebrar_lanca(escala: float) -> void:
+	var lanca := get_node_or_null("Visual/Lanca") as Node2D
+	if lanca:
+		lanca.scale.x = escala
+
+## Volta tudo ao normal (começo de passada).
+func restaurar() -> void:
+	caido = false
+	var corpo := get_node_or_null("Visual/Cavaleiro") as Node2D
+	if corpo:
+		corpo.rotation = 0.0
+		corpo.position = Vector2.ZERO
+	var lanca := get_node_or_null("Visual/Lanca") as Node2D
+	if lanca:
+		lanca.rotation = 0.0
+		lanca.scale = Vector2.ONE
+		lanca.position = _posicao_lanca
+	realcar("")
+
+## Nó que representa uma zona do alvo: "capacete", "peito", "escudo" ou "cavalo".
+func no_da_zona(zona: String) -> Node2D:
+	match zona:
+		"capacete": return get_node_or_null("Visual/Cavaleiro/Capacete")
+		"peito": return get_node_or_null("Visual/Cavaleiro/Peito")
+		"escudo": return get_node_or_null("Visual/Cavaleiro/Escudo")
+		"cavalo": return get_node_or_null("Visual/Cavalo/Manta")
+	return null
 
 ## Posição global de um alvo da mira: "Capacete", "Peito" ou "Escudo".
 func ponto_alvo(nome: String) -> Vector2:

@@ -24,15 +24,29 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 @export var deslocamento_seguir := Vector2(70, -80)
 ## Rapidez da transição (por segundo). Maior = mais seco.
 @export var rapidez := 5.0
+## Tremor (trauma): deslocamento e giro máximos com trauma 1, e quanto o
+## trauma cai por segundo. O deslocamento é trauma² (tremor fraco fica sutil).
+@export var tremor_max_px := Vector2(14, 10)
+@export var tremor_max_graus := 2.0
+@export var tremor_queda := 1.8
 
 var plano := Plano.ABERTO
 var _alvo: Node2D
 var _ponto := Vector2.ZERO
 var _zoom_destino := 1.0
+var trauma := 0.0
+var _ruido := FastNoiseLite.new()
+var _tempo_ruido := 0.0
 
 func _ready() -> void:
 	position_smoothing_enabled = false
+	ignore_rotation = false
+	_ruido.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	plano_aberto(true)
+
+## Tremor de câmera: soma trauma (0 a 1, acumula até 1).
+func tremer(quanto: float) -> void:
+	trauma = minf(trauma + maxf(quanto, 0.0), 1.0)
 
 func plano_aberto(imediato := false) -> void:
 	_alvo = null
@@ -75,6 +89,19 @@ func _process(delta: float) -> void:
 	var k := 1.0 - exp(-rapidez * delta)
 	global_position = global_position.lerp(destino(), k)
 	zoom = zoom.lerp(Vector2.ONE * _zoom_destino, k)
+	_aplicar_tremor(delta)
+
+func _aplicar_tremor(delta: float) -> void:
+	if trauma <= 0.0:
+		offset = Vector2.ZERO
+		rotation = 0.0
+		return
+	trauma = maxf(trauma - tremor_queda * delta, 0.0)
+	_tempo_ruido += delta * 60.0
+	var forca := trauma * trauma
+	offset = Vector2(tremor_max_px.x * _ruido.get_noise_2d(_tempo_ruido, 0.0),
+		tremor_max_px.y * _ruido.get_noise_2d(0.0, _tempo_ruido)) * forca
+	rotation = deg_to_rad(tremor_max_graus) * forca * _ruido.get_noise_2d(_tempo_ruido, _tempo_ruido)
 
 func _trocar(novo: Plano, novo_zoom: float, imediato: bool) -> void:
 	_zoom_destino = novo_zoom

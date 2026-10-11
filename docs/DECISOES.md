@@ -48,3 +48,6 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Interface lê o estado da `Justa` a cada quadro** (fôlego e armadura mudam sem sinal próprio) e usa sinais só para eventos (letreiro, resultado). Fica numa cena separada, dentro de uma CanvasLayer, com `mouse_filter` IGNORE em tudo menos o botão; o controlador ignora o toque que cai no botão.
 - **2026-10-11 · Carga da habilidade ativa é regra** (`impacto.habilidade_carga_ms`), não só visual: o servidor precisa rejeitar a ativação antes da carga.
 - **2026-10-11 · Barra de armadura = soma da durabilidade das peças de armadura** (todo o equipamento menos a lança), sobre a soma no começo da justa.
+- **2026-10-11 · Partículas em `CPUParticles2D`**, não GPU: no renderer Compatibility, em Android de entrada, as GPU são menos previsíveis, e são poucas partículas por choque. Cenas de disparo único, criadas no choque e apagadas no fim.
+- **2026-10-11 · Hit-stop por `Engine.time_scale`** com timer que ignora a escala: congela regra e apresentação juntas (a Justa anda pelo delta escalado), então nada fica fora de sincronia.
+- **2026-10-11 · Intensidades da sensação em `sensacao.json`** (pasta balance, mas são números de apresentação; a regra não lê esse arquivo).

@@ -1,0 +1,13 @@
+{
+	"versao": 1,
+	"_nota": "Intensidades da sensacao de impacto (apresentacao, nao regra). forca vai de 0 a 1: dano / dano_referencia, e 1 na derrubada. Tempos em ms.",
+	"dano_referencia": 25,
+	"hit_stop": { "ms_min": 40, "ms_max": 140, "escala_tempo": 0.05 },
+	"tremor": { "trauma_min": 0.25, "trauma_max": 0.8, "trauma_derrubada": 1.0 },
+	"lascas": { "quantidade_min": 6, "quantidade_max": 18 },
+	"faiscas": { "quantidade_min": 4, "quantidade_max": 14, "zonas": ["capacete", "peito"] },
+	"peca_voando": { "dano_minimo": 18, "distancia_px": 60, "altura_px": 50, "duracao_ms": 700 },
+	"vibracao": { "ms_min": 30, "ms_max": 120 },
+	"queda": { "duracao_ms": 650, "giro_graus": 80, "distancia_px": 34 },
+	"lanca_quebrada_escala": 0.45
+}
