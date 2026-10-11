@@ -419,3 +419,32 @@ ITEM_LANCA_REI_SOL,Lança do Rei Sol,Sun King's lance
 ITEM_CAPARACAO_REI_SOL,Caparação do Rei Sol,Sun King's caparison
 ARAUTO_PROVOCACAO,O arauto: {texto},The herald: {texto}
 PVE_BLOQUEADO_ANTERIOR,vença o torneio anterior,win the previous tournament
+BAUS_TITULO,Baús,Chests
+BAU_MADEIRA,Baú de madeira,Wooden chest
+BAU_FERRO,Baú de ferro,Iron chest
+BAU_OURO,Baú de ouro,Gold chest
+BAU_REAL,Baú real,Royal chest
+BAUS_INFO,Chaves: {chaves}  ·  Fragmentos: {fragmentos},Keys: {chaves}  ·  Shards: {fragmentos}
+BAUS_VAZIO,espaço vazio,empty slot
+BAUS_TOQUE_ABRIR,Toque para abrir ({tempo}),Tap to unlock ({tempo})
+BAUS_ABRINDO,Abrindo: {tempo},Unlocking: {tempo}
+BAUS_PRONTO,Pronto! Toque para abrir,Ready! Tap to open
+BAUS_NA_FILA,Espere o outro abrir,Wait for the other one
+BAUS_USAR_CHAVE,Usar chave,Use key
+BAUS_PROBABILIDADES,Ver chances,See odds
+BAUS_VOLTAR,Voltar aos baús,Back to chests
+BAUS_PROB_LINHA,{bau}: abre em {tempo} · {itens} peça(s) · {ouro_min} a {ouro_max} ouro,{bau}: opens in {tempo} · {itens} piece(s) · {ouro_min} to {ouro_max} gold
+BAUS_GARANTIA,"Garantia: a cada {n} baús de ferro ou melhores, uma peça rara ou melhor.","Guarantee: every {n} iron or better chests, one rare or better piece."
+BAUS_REPETIDAS,Peça que você já tem vira {n} fragmentos para o ferreiro.,A piece you already own becomes {n} shards for the blacksmith.
+BAUS_REPETIDA,repetida: +{n} fragmentos,duplicate: +{n} shards
+BAUS_NOVA,nova!,new!
+BAUS_GANHOU,+{ouro} ouro  ·  +{fragmentos} fragmentos,+{ouro} gold  ·  +{fragmentos} shards
+BAUS_CONTINUAR,Continuar,Continue
+VILA_BAUS,Baús {n}/{max},Chests {n}/{max}
+PVE_BAU_GANHO,Você ganhou: {bau}!,You won: {bau}!
+PVE_BAU_CHEIO,Espaços de baú cheios: +{ouro} ouro no lugar do {bau},Chest slots full: +{ouro} gold instead of the {bau}
+ERRO_BAU_INEXISTENTE,Esse baú não existe.,That chest does not exist.
+ERRO_BAU_JA_ABRINDO,Esse baú já está abrindo.,That chest is already unlocking.
+ERRO_OUTRO_BAU_ABRINDO,Um baú por vez: espere o outro abrir.,One chest at a time: wait for the other.
+ERRO_SEM_CHAVE,Você não tem chave.,You have no key.
+ERRO_BAU_FECHADO,Esse baú ainda não abriu.,That chest is not open yet.

@@ -3,6 +3,7 @@
 	"_nota": "Estado inicial de um jogador novo e o inicio do jogo (GDD Inicio do jogo). primeiro_dia: na primeira duracao_s desde a criacao, todo timer termina em no maximo timer_max_s. tutorial: recompensa (leva ao nivel 2, que abre a arena), peca do primeiro bau (ja equipada), rival fraco da primeira justa e os veteranos da justa de exibicao.",
 	"ouro": 100,
 	"gemas": 0,
+	"chaves": 1,
 	"materiais": {
 		"sucata": 5,
 		"lingote_ferro": 0,

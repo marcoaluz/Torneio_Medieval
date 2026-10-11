@@ -160,6 +160,11 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 			linhas.append(tr("PVE_SUBIU_NIVEL").format({"nivel": n}))
 		if r.get("torneio_concluido", false):
 			linhas.append(tr("PVE_TORNEIO_VENCIDO"))
+		for b: Dictionary in r.get("baus", []):
+			if b["cheio"]:
+				linhas.append(tr("PVE_BAU_CHEIO").format({"bau": tr("BAU_" + str(b["tipo"]).to_upper()), "ouro": b["ouro"]}))
+			else:
+				linhas.append(tr("PVE_BAU_GANHO").format({"bau": tr("BAU_" + str(b["tipo"]).to_upper())}))
 		if str(r.get("projeto", "")) != "":
 			linhas.append(tr("PVE_PROJETO_GANHO").format({"conjunto": tr("CONJUNTO_" + str(r["projeto"]).to_upper())}))
 		if str(r.get("regiao_nova", "")) != "":

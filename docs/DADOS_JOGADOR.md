@@ -22,6 +22,9 @@ cavalo_ativo: id
 inventario: ouro, gemas, materiais {sucata, lingote_ferro, couro, ...},
             itens [{id, modelo, nivel, durabilidade}]     (modelo -> itens.json)
             projetos [conjunto]          (v2, 3.13: projetos ganhos dos campeões de região)
+            materiais.fragmentos         (v3, 3.14: peças repetidas dos baús)
+baus: espacos [{id, tipo, abre_em (0 = fechado)}], garantia, chaves,    (v3, 3.14)
+      abertos, sorteios, semente (sorteios determinísticos; o servidor assume na Parte 3)
 equipamento: {espaco: id}        visual (guarda-roupa): {espaco: id}
 vila: predios {nome: {nivel, ...}}                                     (2.5)
 timers: [{id, tipo, alvo, inicio_em, termina_em}]                      (2.7)

@@ -2,6 +2,8 @@
 	"versao": 1,
 	"_nota": "Catalogo de pecas. status usa as mesmas chaves da regra do impacto (defesa, bloqueio_milesimos, poder, precisao). visual = variante da arte em game/art/sprites/personagem (camadas.json: {espaco}_{visual}_{animacao}.png). espaco: elmo, peitoral, escudo, lanca, caparacao (os da regra) e os demais do GDD quando tiverem arte. Conjuntos acima do vigia (3.13) usam a arte do vigia ate ter arte propria.",
 	"raridades": ["comum", "incomum", "raro", "epico", "lendario"],
+	"cores_raridade": {"comum": "c9c2b6", "incomum": "6fbf5a", "raro": "4f8fe0", "epico": "b062d8", "lendario": "f0a830"},
+	"cores_bau": {"madeira": "8a5a2b", "ferro": "7d8590", "ouro": "d4a72c", "real": "8e2a3a"},
 	"modelos": {
 		"elmo_escudeiro": {"espaco": "elmo", "raridade": "comum", "conjunto": "escudeiro", "visual": "provisorio", "durabilidade_max": 180, "status": {"defesa": 8}},
 		"peitoral_escudeiro": {"espaco": "peitoral", "raridade": "comum", "conjunto": "escudeiro", "visual": "provisorio", "durabilidade_max": 180, "status": {"defesa": 8}},

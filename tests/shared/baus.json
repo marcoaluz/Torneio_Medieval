@@ -1,0 +1,502 @@
+{
+	"versao": 1,
+	"descricao": "Abertura de bau (game/scripts/rules/bau.gd), gerada por um oraculo independente em Python. config e modelos (so a raridade) embutidos.",
+	"config": {
+		"espacos": 4,
+		"tipos": {
+			"madeira": {
+				"segundos": 300,
+				"ouro": [
+					20,
+					40
+				],
+				"itens": 1,
+				"fragmentos": [
+					1,
+					2
+				],
+				"raridade": {
+					"comum": 75,
+					"incomum": 22,
+					"raro": 3
+				}
+			},
+			"ferro": {
+				"segundos": 3600,
+				"ouro": [
+					60,
+					100
+				],
+				"itens": 2,
+				"fragmentos": [
+					2,
+					4
+				],
+				"raridade": {
+					"comum": 40,
+					"incomum": 40,
+					"raro": 17,
+					"epico": 3
+				}
+			},
+			"ouro": {
+				"segundos": 14400,
+				"ouro": [
+					150,
+					250
+				],
+				"itens": 3,
+				"fragmentos": [
+					4,
+					7
+				],
+				"raridade": {
+					"incomum": 45,
+					"raro": 40,
+					"epico": 13,
+					"lendario": 2
+				}
+			},
+			"real": {
+				"segundos": 43200,
+				"ouro": [
+					400,
+					600
+				],
+				"itens": 4,
+				"fragmentos": [
+					8,
+					12
+				],
+				"raridade": {
+					"raro": 55,
+					"epico": 37,
+					"lendario": 8
+				}
+			}
+		},
+		"chance_madeira_por_vitoria": 0.5,
+		"ferro_por_tres_estrelas": true,
+		"ouro_por_campeao": true,
+		"garantia_raro_a_cada": 10,
+		"garantia_conta": [
+			"ferro",
+			"ouro",
+			"real"
+		],
+		"_nota_cheio": "Vitoria com os 4 espacos cheios da so ouro (GDD): o minimo de ouro do bau que viria.",
+		"fragmentos_por_repetida": 4
+	},
+	"modelos": {
+		"elmo_escudeiro": {
+			"raridade": "comum"
+		},
+		"peitoral_escudeiro": {
+			"raridade": "comum"
+		},
+		"escudo_escudeiro": {
+			"raridade": "comum"
+		},
+		"lanca_escudeiro": {
+			"raridade": "comum"
+		},
+		"caparacao_escudeiro": {
+			"raridade": "comum"
+		},
+		"elmo_vigia": {
+			"raridade": "incomum"
+		},
+		"peitoral_vigia": {
+			"raridade": "incomum"
+		},
+		"escudo_vigia": {
+			"raridade": "incomum"
+		},
+		"lanca_vigia": {
+			"raridade": "incomum"
+		},
+		"elmo_cavaleiro_andante": {
+			"raridade": "incomum"
+		},
+		"peitoral_cavaleiro_andante": {
+			"raridade": "incomum"
+		},
+		"escudo_cavaleiro_andante": {
+			"raridade": "incomum"
+		},
+		"lanca_cavaleiro_andante": {
+			"raridade": "incomum"
+		},
+		"caparacao_cavaleiro_andante": {
+			"raridade": "incomum"
+		},
+		"elmo_ferro_negro": {
+			"raridade": "raro"
+		},
+		"peitoral_ferro_negro": {
+			"raridade": "raro"
+		},
+		"escudo_ferro_negro": {
+			"raridade": "raro"
+		},
+		"lanca_ferro_negro": {
+			"raridade": "raro"
+		},
+		"caparacao_ferro_negro": {
+			"raridade": "raro"
+		},
+		"elmo_guarda_real": {
+			"raridade": "raro"
+		},
+		"peitoral_guarda_real": {
+			"raridade": "raro"
+		},
+		"escudo_guarda_real": {
+			"raridade": "raro"
+		},
+		"lanca_guarda_real": {
+			"raridade": "raro"
+		},
+		"caparacao_guarda_real": {
+			"raridade": "raro"
+		},
+		"elmo_dragao": {
+			"raridade": "epico"
+		},
+		"peitoral_dragao": {
+			"raridade": "epico"
+		},
+		"escudo_dragao": {
+			"raridade": "epico"
+		},
+		"lanca_dragao": {
+			"raridade": "epico"
+		},
+		"caparacao_dragao": {
+			"raridade": "epico"
+		},
+		"elmo_rei_sol": {
+			"raridade": "lendario"
+		},
+		"peitoral_rei_sol": {
+			"raridade": "lendario"
+		},
+		"escudo_rei_sol": {
+			"raridade": "lendario"
+		},
+		"lanca_rei_sol": {
+			"raridade": "lendario"
+		},
+		"caparacao_rei_sol": {
+			"raridade": "lendario"
+		}
+	},
+	"casos": [
+		{
+			"nome": "caso 1 (madeira)",
+			"tipo": "madeira",
+			"possui": [],
+			"garantia": 0,
+			"semente": 1,
+			"esperado": {
+				"ouro": 35,
+				"fragmentos": 2,
+				"itens": [
+					{
+						"modelo": "caparacao_escudeiro",
+						"raridade": "comum",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 2 (madeira)",
+			"tipo": "madeira",
+			"possui": [
+				"elmo_escudeiro",
+				"peitoral_escudeiro",
+				"escudo_escudeiro",
+				"lanca_escudeiro",
+				"caparacao_escudeiro"
+			],
+			"garantia": 0,
+			"semente": 2,
+			"esperado": {
+				"ouro": 29,
+				"fragmentos": 5,
+				"itens": [
+					{
+						"modelo": "escudo_escudeiro",
+						"raridade": "comum",
+						"repetida": true
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 3 (ferro)",
+			"tipo": "ferro",
+			"possui": [],
+			"garantia": 0,
+			"semente": 3,
+			"esperado": {
+				"ouro": 64,
+				"fragmentos": 4,
+				"itens": [
+					{
+						"modelo": "escudo_cavaleiro_andante",
+						"raridade": "incomum",
+						"repetida": false
+					},
+					{
+						"modelo": "escudo_escudeiro",
+						"raridade": "comum",
+						"repetida": false
+					}
+				],
+				"garantia": 1
+			}
+		},
+		{
+			"nome": "caso 4 (ferro)",
+			"tipo": "ferro",
+			"possui": [],
+			"garantia": 9,
+			"semente": 4,
+			"esperado": {
+				"ouro": 79,
+				"fragmentos": 2,
+				"itens": [
+					{
+						"modelo": "escudo_ferro_negro",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "escudo_vigia",
+						"raridade": "incomum",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 5 (ferro)",
+			"tipo": "ferro",
+			"possui": [],
+			"garantia": 9,
+			"semente": 77,
+			"esperado": {
+				"ouro": 99,
+				"fragmentos": 4,
+				"itens": [
+					{
+						"modelo": "caparacao_ferro_negro",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "peitoral_vigia",
+						"raridade": "incomum",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 6 (ouro)",
+			"tipo": "ouro",
+			"possui": [
+				"elmo_vigia"
+			],
+			"garantia": 3,
+			"semente": 5,
+			"esperado": {
+				"ouro": 211,
+				"fragmentos": 5,
+				"itens": [
+					{
+						"modelo": "caparacao_dragao",
+						"raridade": "epico",
+						"repetida": false
+					},
+					{
+						"modelo": "peitoral_guarda_real",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "lanca_cavaleiro_andante",
+						"raridade": "incomum",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 7 (real)",
+			"tipo": "real",
+			"possui": [],
+			"garantia": 0,
+			"semente": 6,
+			"esperado": {
+				"ouro": 544,
+				"fragmentos": 16,
+				"itens": [
+					{
+						"modelo": "lanca_ferro_negro",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "lanca_ferro_negro",
+						"raridade": "raro",
+						"repetida": true
+					},
+					{
+						"modelo": "lanca_guarda_real",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "peitoral_ferro_negro",
+						"raridade": "raro",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 8 (real)",
+			"tipo": "real",
+			"possui": [],
+			"garantia": 0,
+			"semente": 123456,
+			"esperado": {
+				"ouro": 586,
+				"fragmentos": 12,
+				"itens": [
+					{
+						"modelo": "elmo_dragao",
+						"raridade": "epico",
+						"repetida": false
+					},
+					{
+						"modelo": "lanca_dragao",
+						"raridade": "epico",
+						"repetida": false
+					},
+					{
+						"modelo": "caparacao_rei_sol",
+						"raridade": "lendario",
+						"repetida": false
+					},
+					{
+						"modelo": "peitoral_ferro_negro",
+						"raridade": "raro",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 9 (madeira)",
+			"tipo": "madeira",
+			"possui": [],
+			"garantia": 9,
+			"semente": 8,
+			"esperado": {
+				"ouro": 35,
+				"fragmentos": 1,
+				"itens": [
+					{
+						"modelo": "escudo_escudeiro",
+						"raridade": "comum",
+						"repetida": false
+					}
+				],
+				"garantia": 9
+			}
+		},
+		{
+			"nome": "caso 10 (ouro)",
+			"tipo": "ouro",
+			"possui": [],
+			"garantia": 9,
+			"semente": 2024,
+			"esperado": {
+				"ouro": 191,
+				"fragmentos": 9,
+				"itens": [
+					{
+						"modelo": "elmo_guarda_real",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "elmo_guarda_real",
+						"raridade": "raro",
+						"repetida": true
+					},
+					{
+						"modelo": "caparacao_ferro_negro",
+						"raridade": "raro",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 11 (ferro)",
+			"tipo": "ferro",
+			"possui": [],
+			"garantia": 0,
+			"semente": 0,
+			"esperado": {
+				"ouro": 83,
+				"fragmentos": 2,
+				"itens": [
+					{
+						"modelo": "caparacao_guarda_real",
+						"raridade": "raro",
+						"repetida": false
+					},
+					{
+						"modelo": "lanca_vigia",
+						"raridade": "incomum",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		},
+		{
+			"nome": "caso 12 (madeira)",
+			"tipo": "madeira",
+			"possui": [],
+			"garantia": 0,
+			"semente": 4294967295,
+			"esperado": {
+				"ouro": 29,
+				"fragmentos": 2,
+				"itens": [
+					{
+						"modelo": "peitoral_escudeiro",
+						"raridade": "comum",
+						"repetida": false
+					}
+				],
+				"garantia": 0
+			}
+		}
+	]
+}

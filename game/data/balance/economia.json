@@ -70,6 +70,8 @@
 		"ferro_por_tres_estrelas": true,
 		"ouro_por_campeao": true,
 		"garantia_raro_a_cada": 10,
+		"garantia_conta": ["ferro", "ouro", "real"],
+		"_nota_cheio": "Vitoria com os 4 espacos cheios da so ouro (GDD): o minimo de ouro do bau que viria.",
 		"fragmentos_por_repetida": 4
 	},
 	"melhoria": {

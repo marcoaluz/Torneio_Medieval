@@ -1,7 +1,8 @@
 extends Node
 ## Demonstração para o `driver.sh shot`: a arena no modo TM_MODO (exibicao ou
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
-## a tela TM_TELA (titulo, bau, torneios com TM_REGIAO). Save em
+## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, torneios com
+## TM_REGIAO). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -18,6 +19,22 @@ func _ready() -> void:
 		var b: TelaBau = load("res://game/scenes/ui/tela_bau.tscn").instantiate()
 		add_child(b)
 		b.abrir.call_deferred()
+		return
+	if tela == "baus":
+		# Baús: 3 nos espaços (um abrindo); TM_ABRIR=1 mostra a abertura de um real.
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		for tipo in ["madeira", "ferro", "real"]:
+			jog.ganhar_bau(tipo)
+		jog.comecar_abrir(jog.baus()[1]["id"])
+		var tb: TelaBaus = load("res://game/scenes/ui/tela_baus.tscn").instantiate()
+		var camada_b := CanvasLayer.new()
+		add_child(camada_b)
+		camada_b.add_child(tb)
+		tb.abrir.call_deferred()
+		if OS.get_environment("TM_ABRIR") == "1":
+			tb.abrir_bau.call_deferred(jog.baus()[2]["id"], true)
+		elif OS.get_environment("TM_ABRIR") == "chances":
+			(tb.get_node("Coluna/Botoes/VerChances") as Button).set_pressed.call_deferred(true)
 		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.

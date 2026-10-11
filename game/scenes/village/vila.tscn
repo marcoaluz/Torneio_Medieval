@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vila.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/chao_vila_provisorio.gd" id="2"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://game/scenes/village/tela_treino.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_equipamentos.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://game/scenes/village/tela_torneios.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://game/scenes/ui/tela_baus.tscn" id="9"]
 
 [node name="Vila" type="Node2D"]
 script = ExtResource("1")
@@ -57,6 +58,10 @@ size_flags_horizontal = 3
 [node name="Ouro" type="Label" parent="Interface/Topo/Linha"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+
+[node name="Baus" type="Button" parent="Interface/Topo/Linha"]
+layout_mode = 2
+focus_mode = 0
 
 [node name="Letreiro" type="Label" parent="Interface"]
 anchors_preset = 10
@@ -124,3 +129,6 @@ focus_mode = 0
 visible = false
 
 [node name="TelaTorneios" parent="Interface" instance=ExtResource("8")]
+
+[node name="TelaBaus" parent="Interface" instance=ExtResource("9")]
+visible = false

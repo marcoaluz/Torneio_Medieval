@@ -86,3 +86,6 @@ Formato: data · decisão · motivo.
 - **2026-10-11 · Conteúdo do PvE continua em JSON (não `.tres`)**: a Edge Function em TypeScript e os oráculos precisam ler os mesmos dados; `.tres` só o Godot lê. Formato compacto (um rival/torneio por linha) para editar à mão.
 - **2026-10-11 · Desafios especiais como transformação pura da configuração e dos lados antes da justa** (`RegraPve.aplicar_desafios`), não como regra nova dentro da justa: a justa não muda e o servidor só precisa aplicar a mesma transformação. Torneios de desafio são opcionais; "uma chance" também proíbe repetir disputa vencida.
 - **2026-10-11 · Save v2**: `inventario.projetos` (projetos dos campeões de região, para a forja do 3.15).
+- **2026-10-11 · Baú: sorteio como regra pura com ordem fixa** (raridades na ordem comum→lendário; modelo entre os da raridade em ordem alfabética), para o TypeScript reproduzir; semente local = semente do save + baús abertos (o servidor assume na Parte 3). Animação por Tween (procedural sobre arte provisória) em vez de AnimationPlayer.
+- **2026-10-11 · Baú de ferro só na primeira vez que a disputa chega a 3 estrelas**, senão o automático (que só joga disputas de 3 estrelas) fabricaria baús de ferro.
+- **2026-10-11 · Save v3**: `baus` e `materiais.fragmentos`.

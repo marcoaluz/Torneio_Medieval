@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 2
+const VERSAO := 3
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -502,6 +502,122 @@ func xp_para_proximo() -> int:
 	var n := int(estado["cavaleiro"]["nivel"])
 	return 0 if n >= tabela.size() else maxi(int(tabela[n]) - int(estado["cavaleiro"]["xp"]), 0)
 
+# --------------------------------------------------------------------- baús
+# GDD Baús e itens: 4 espaços, um abrindo por vez, chave abre na hora,
+# vitória com os espaços cheios dá só ouro, peça repetida vira fragmentos.
+# O sorteio é a regra pura RegraBau com semente do save + contador; na
+# Parte 3, abrir vira chamada à Edge Function (o servidor sorteia e grava) e
+# aqui só entra o resultado.
+
+static func _baus_novos(criado_em: int, chaves_iniciais: int) -> Dictionary:
+	return {"espacos": [], "garantia": 0, "chaves": chaves_iniciais, "abertos": 0, "sorteios": 0,
+		"semente": hash(str(criado_em)) & 0x7FFFFFFF}
+
+func cfg_baus() -> Dictionary:
+	return Balanceamento.carregar("economia")["baus"]
+
+## Espaços de baú: [{id, tipo, abre_em (0 = fechado; senão o horário em que fica pronto)}].
+func baus() -> Array:
+	return (estado["baus"]["espacos"] as Array).duplicate(true)
+
+func chaves() -> int:
+	return int(estado["baus"]["chaves"])
+
+func fragmentos() -> int:
+	return int(estado["inventario"]["materiais"].get("fragmentos", 0))
+
+## O baú que está abrindo ({} se nenhum).
+func bau_abrindo() -> Dictionary:
+	for b: Dictionary in estado["baus"]["espacos"]:
+		if int(b["abre_em"]) > 0:
+			return b.duplicate()
+	return {}
+
+func bau_pronto(id: String) -> bool:
+	var b := _bau(id)
+	return not b.is_empty() and int(b["abre_em"]) > 0 and ServicoTempo.pronto(int(b["abre_em"]))
+
+## Ganha um baú. Com os espaços cheios, ganha só o ouro mínimo dele.
+## {ok, id ("" se cheio), tipo, cheio, ouro}.
+func ganhar_bau(tipo: String) -> Dictionary:
+	if not cfg_baus()["tipos"].has(tipo):
+		return _erro("bau_inexistente")
+	var g := _guardar_bau(tipo)
+	var r := _concluir("baus")
+	r.merge(g, true)
+	return r
+
+func _guardar_bau(tipo: String) -> Dictionary:
+	var cfg := cfg_baus()
+	var esp: Array = estado["baus"]["espacos"]
+	if esp.size() >= int(cfg["espacos"]):
+		var consolo := int(cfg["tipos"][tipo]["ouro"][0])
+		_ganhar(consolo, 0)
+		return {"id": "", "tipo": tipo, "cheio": true, "ouro": consolo}
+	var id := _novo_id(estado, "b")
+	esp.append({"id": id, "tipo": tipo, "abre_em": 0})
+	return {"id": id, "tipo": tipo, "cheio": false, "ouro": 0}
+
+func _bau(id: String) -> Dictionary:
+	for b: Dictionary in estado["baus"]["espacos"]:
+		if b["id"] == id:
+			return b
+	return {}
+
+## Começa a abrir um baú (um por vez); o tempo vem de economia.json.
+func comecar_abrir(id: String) -> Dictionary:
+	var b := _bau(id)
+	if b.is_empty():
+		return _erro("bau_inexistente")
+	if int(b["abre_em"]) > 0:
+		return _erro("bau_ja_abrindo")
+	if not bau_abrindo().is_empty():
+		return _erro("outro_bau_abrindo")
+	b["abre_em"] = ServicoTempo.agora() + maxi(duracao_timer(int(cfg_baus()["tipos"][b["tipo"]]["segundos"])), 1)
+	return _concluir("baus")
+
+## Abre um baú pronto, ou na hora gastando uma chave (`com_chave`). Entrega
+## ouro, fragmentos e peças (repetidas viram fragmentos).
+## {ok, tipo, ouro, fragmentos, itens: [{modelo, raridade, repetida, id}]}.
+func abrir_bau(id: String, com_chave := false) -> Dictionary:
+	var b := _bau(id)
+	if b.is_empty():
+		return _erro("bau_inexistente")
+	if com_chave:
+		if chaves() <= 0:
+			return _erro("sem_chave")
+	elif not bau_pronto(id):
+		return _erro("bau_fechado")
+	var cfg := cfg_baus()
+	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
+	var possui: Array = []
+	for it: Dictionary in estado["inventario"]["itens"]:
+		possui.append(it["modelo"])
+	var bs: Dictionary = estado["baus"]
+	var r := RegraBau.abrir(b["tipo"], cfg, modelos, possui, int(bs["garantia"]), int(bs["semente"]) + int(bs["abertos"]))
+	if com_chave:
+		bs["chaves"] = chaves() - 1
+	bs["garantia"] = int(r["garantia"])
+	bs["abertos"] = int(bs["abertos"]) + 1
+	(bs["espacos"] as Array).erase(b)
+	estado["inventario"]["materiais"]["fragmentos"] = fragmentos() + int(r["fragmentos"])
+	for it: Dictionary in r["itens"]:
+		it["id"] = ""
+		if not it["repetida"]:
+			it["id"] = _novo_id(estado, "i")
+			estado["inventario"]["itens"].append({"id": it["id"], "modelo": it["modelo"], "nivel": 0,
+				"durabilidade": int(modelos[it["modelo"]]["durabilidade_max"])})
+	_ganhar(int(r["ouro"]), 0)
+	var res := _concluir("baus")
+	res.merge({"tipo": b["tipo"], "ouro": r["ouro"], "fragmentos": r["fragmentos"], "itens": r["itens"]}, true)
+	return res
+
+## Sorteio do serviço (baú de madeira por vitória): semente do save + contador.
+func _sorteio_milesimos(chance: int) -> bool:
+	var bs: Dictionary = estado["baus"]
+	bs["sorteios"] = int(bs["sorteios"]) + 1
+	return Aleatorio.new(int(bs["semente"]) + 1000003 * int(bs["sorteios"])).chance_milesimos(chance)
+
 # ---------------------------------------------------------------------- PvE
 
 func pve() -> Dictionary:
@@ -676,6 +792,8 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 	var regiao_nova := ""
 	if est == 0 and _uma_chance(torneio):
 		reg["falhou"] = true
+	var baus_ganhos: Array = []
+	var estrelas_antes := int(reg["estrelas"].get(str(indice), 0))
 	if est > 0:
 		var r: Dictionary = dados["recompensa_disputa"]
 		ouro_g = (int(r["ouro_base"]) + est * int(r["ouro_por_estrela"])) * pct / 100
@@ -701,10 +819,21 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 					if i + 1 < ordem.size() and estado["pve"]["regiao"] == regiao:
 						regiao_nova = ordem[i + 1]
 						estado["pve"]["regiao"] = regiao_nova
+	# Baús (GDD): ferro na primeira vez que a disputa chega a 3 estrelas
+	# (repetir no automático não fabrica ferro), senão chance de madeira;
+	# ouro ao vencer um campeão.
+	if est > 0:
+		var cb := cfg_baus()
+		if est >= 3 and estrelas_antes < 3 and cb["ferro_por_tres_estrelas"]:
+			baus_ganhos.append(_guardar_bau("ferro"))
+		elif _sorteio_milesimos(int(round(float(cb["chance_madeira_por_vitoria"]) * 1000.0))):
+			baus_ganhos.append(_guardar_bau("madeira"))
+		if dados["rivais"][rival].get("campeao", false) and cb["ouro_por_campeao"] and estrelas_antes == 0:
+			baus_ganhos.append(_guardar_bau("ouro"))
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
 	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0,
-		"projeto": projeto, "regiao_nova": regiao_nova}, true)
+		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos}, true)
 	return res
 
 ## Disputa no automático: a mesma regra, com uma IA de precisão média no
@@ -798,6 +927,8 @@ func novo_estado() -> Dictionary:
 		"pve": {"regiao": "feiras", "torneios": {}},
 		"tutorial": {"passo": 0, "concluido": false},
 	}
+	e["inventario"]["materiais"]["fragmentos"] = int(e["inventario"]["materiais"].get("fragmentos", 0))
+	e["baus"] = _baus_novos(int(e["criado_em"]), int(ini.get("chaves", 0)))
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.carregar("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -850,6 +981,16 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not inv.has("projetos"):
 			inv["projetos"] = []
 		v = 2
+	if v < 3:
+		# 3.14: baús (4 espaços, garantia, chaves) e fragmentos de peça.
+		var inv3: Dictionary = d.get("inventario", {})
+		var mat: Dictionary = inv3.get("materiais", {})
+		if not mat.has("fragmentos"):
+			mat["fragmentos"] = 0
+		inv3["materiais"] = mat
+		if not d.has("baus"):
+			d["baus"] = _baus_novos(int(d.get("criado_em", 0)), 0)
+		v = 3
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

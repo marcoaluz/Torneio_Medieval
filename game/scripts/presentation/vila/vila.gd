@@ -31,6 +31,8 @@ var _acumulado := 0.0
 @onready var tela_treino: TelaTreino = $Interface/TelaTreino
 @onready var tela_equipamentos: TelaEquipamentos = $Interface/TelaEquipamentos
 @onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
+@onready var tela_baus: TelaBaus = $Interface/TelaBaus
+@onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
@@ -46,6 +48,7 @@ func _ready() -> void:
 	_fechar.pressed.connect(fechar_painel)
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
+	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	var notif := get_node_or_null("/root/Notificacoes") as ServicoNotificacoes
@@ -59,6 +62,8 @@ func atualizar() -> void:
 	_topo_nome.text = tr("VILA_TOPO").format({"nome": cav["nome"] if cav["nome"] != "" else "—",
 		"nivel": cav["nivel"], "casa": _jog.casa()["nome"]})
 	_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()})
+	var prontos := _jog.baus().filter(func(b): return _jog.bau_pronto(b["id"])).size()
+	_botao_baus.text = tr("VILA_BAUS").format({"n": _jog.baus().size(), "max": int(_jog.cfg_baus()["espacos"])}) + (" !" if prontos > 0 else "")
 	for nome: String in predios:
 		var p: PredioVila = predios[nome]
 		p.bloqueado = not _jog.predio_liberado(nome)
