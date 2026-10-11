@@ -86,6 +86,8 @@ var resultado_disputa := {}
 ## torneio e se o cavalo do jogador cansa (cavalo emprestado não).
 var provocacao := ""
 var desafios: Array = []
+## Anúncio do arauto com o título do jogador ("" sem título; 3.21).
+var anuncio_titulo := ""
 var _gasta_folego := true
 
 var _resto_ms := 0.0
@@ -131,6 +133,10 @@ func iniciar(semente_fixa := -1) -> void:
 	nome_rival = "RIVAL_" + perfil_rival.to_upper() if perfil_rival != "" else ""
 	nome_jogador = ""
 	var rv := {}
+	anuncio_titulo = ""
+	if jog_d and jog_d.titulo() != "" and modo in ["disputa", "livre"]:
+		anuncio_titulo = tr("ARAUTO_TITULO").format({"nome": jog_d.cavaleiro().get("nome", ""),
+			"titulo": tr("TITULO_" + jog_d.titulo().to_upper())})
 	provocacao = ""
 	desafios = []
 	_gasta_folego = true

@@ -72,8 +72,11 @@ func _montar_regiao() -> void:
 			estado_txt = tr("PVE_CHANCE_PERDIDA")
 		if not _jog.torneio_liberado(t):
 			var nivel_min := int(dados["torneios"][t]["nivel_minimo"])
+			var renome_min := int(dados["torneios"][t].get("renome_minimo", 0))
 			if int(_jog.cavaleiro()["nivel"]) < nivel_min:
 				estado_txt = tr("PVE_BLOQUEADO").format({"nivel": nivel_min})
+			elif _jog.renome() < renome_min:
+				estado_txt = tr("PVE_CONVITE").format({"renome": renome_min})
 			else:
 				estado_txt = tr("PVE_BLOQUEADO_ANTERIOR")
 			b.disabled = true

@@ -101,6 +101,9 @@ func _initialize() -> void:
 	jog.estado["pve"]["regiao"] = "reino"
 	for t in ["torneio_aurora", "torneio_rocha", "torneio_lis", "torneio_mar"]:
 		_vencer_torneio(jog, t)
+	jog.estado["metas"]["renome"] = 0
+	_checa("convite: sem renome o desafio fica fechado", not jog.torneio_liberado("desafio_unica_chance"))
+	jog.estado["metas"]["renome"] = int(d["torneios"]["desafio_unica_chance"]["renome_minimo"])
 	_checa("uma chance: liberado", jog.pode_disputar("desafio_unica_chance", 0)["ok"])
 	jog.concluir_disputa("desafio_unica_chance", 0, _ev(true))
 	_checa("uma chance: nao repete a vencida", jog.pode_disputar("desafio_unica_chance", 0)["erro"] == "chance_perdida")

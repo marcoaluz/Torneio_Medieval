@@ -35,6 +35,9 @@ timers: [{id, tipo, alvo, inicio_em, termina_em, ...}]                 (2.7)
 pve: regiao (a última aberta), torneios {id: {proxima, concluido,     (2.10, 3.13)
      estrelas, falhou (desafio de uma chance perdido)}}, encontros {rival: n}
 tutorial: passo, concluido                                             (2.11)
+metas: renome, dia, diarias [{id, progresso, resgatada}], semana,      (v5, 3.21)
+       semanais [...], login {dias, ultimo_dia}, contadores {evento: n},
+       sequencia, conquistas [id], titulos [id], titulo, novas [id]
 ```
 
 - `lado_para_justa()` monta o lado da regra (`{cavaleiro, cavalo, equipamento, habilidade}`) a partir das peças equipadas: o `status` do modelo mais a durabilidade atual (peça com 0 perde os bônus na regra).

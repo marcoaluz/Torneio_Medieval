@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 4
+const VERSAO := 5
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -355,6 +355,7 @@ func melhorar_predio(nome: String) -> Dictionary:
 	estado["timers"].append({"id": _novo_id(estado, "t"), "tipo": "melhoria", "alvo": nome,
 		"inicio_em": agora, "termina_em": agora + duracao_timer(int(p["segundos"])), "nivel_novo": predio_nivel(nome) + 1})
 	_garantir_predio(nome)
+	_evento("predio")
 	var r := _concluir("vila")
 	r["ouro"] = p["ouro"]
 	return r
@@ -465,6 +466,7 @@ func _iniciar_treino(predio: String, extra: Dictionary) -> Dictionary:
 	var t := {"id": _novo_id(estado, "t"), "alvo": predio, "inicio_em": agora, "termina_em": agora + duracao_timer(duracao_treino())}
 	t.merge(extra)
 	estado["timers"].append(t)
+	_evento("treino")
 	return _concluir("treino")
 
 ## Escolhe o cavalo da justa (não pode estar treinando).
@@ -501,6 +503,7 @@ func registrar_justa(resultado: Dictionary) -> Dictionary:
 		if c["id"] == estado["cavalo_ativo"] and resultado.get("gasta_folego", true):
 			c["folego"] = maxi(folego_cavalo(c["id"]) - int(f["gasto_por_justa"]), 0)
 			c["folego_em"] = ServicoTempo.agora()
+	_evento("justa")
 	return _concluir("cavalos")
 
 # ------------------------------------------------------------------ conserto
@@ -661,6 +664,7 @@ func forjar(modelo: String) -> Dictionary:
 	var rec := receita(modelo)
 	estado["inventario"]["ouro"] = ouro() - int(rec["ouro"])
 	_gastar_materiais(rec["materiais"])
+	_evento("forja")
 	var agora := ServicoTempo.agora()
 	estado["timers"].append({"id": _novo_id(estado, "t"), "tipo": "forja", "alvo": "armeiro", "modelo": modelo,
 		"inicio_em": agora, "termina_em": agora + duracao_timer(int(rec["segundos"]))})
@@ -671,6 +675,7 @@ func _entregar_forja(modelo: String) -> Dictionary:
 	var st := RegraForja.variar_status(m["status"], int(cfg_forja()["variacao_status_pct"]), _semente_servico())
 	var id := _novo_id(estado, "i")
 	estado["inventario"]["itens"].append({"id": id, "modelo": modelo, "nivel": 0, "durabilidade": int(m["durabilidade_max"]), "status": st})
+	_evento("peca_nova")
 	return {"item": id, "modelo": modelo, "status": st}
 
 ## Teto de melhoria pelo nível do armeiro (0 se fechado).
@@ -727,6 +732,9 @@ func melhorar_peca(id: String) -> Dictionary:
 		for it: Dictionary in estado["inventario"]["itens"]:
 			if it["id"] == id:
 				it["nivel"] = nivel
+		_evento("melhoria_peca")
+		if nivel >= int(Balanceamento.carregar("economia")["melhoria"]["nivel_max"]):
+			_evento("melhoria_10")
 	var r := _concluir("inventario")
 	r.merge({"sucesso": sucesso, "nivel": nivel}, true)
 	return r
@@ -774,6 +782,197 @@ func _semente_servico() -> int:
 	var bs: Dictionary = estado["baus"]
 	bs["sorteios"] = int(bs["sorteios"]) + 1
 	return int(bs["semente"]) + 1000003 * int(bs["sorteios"])
+
+# -------------------------------------------------------------------- metas
+# Renome, missões diárias e semanais, login dos 7 primeiros dias, conquistas
+# e títulos (3.21; números em metas.json). O dia vira na hora de
+# virada_hora_utc; a semana começa na segunda. Missões sorteadas com a
+# semente do save + o dia (a mesma para quem joga no mesmo save). Os comandos
+# do serviço chamam _evento(); resgates passam por aqui.
+
+static func _metas_novas() -> Dictionary:
+	return {"renome": 0, "dia": -1, "diarias": [], "semana": -1, "semanais": [], "login": {"dias": 0, "ultimo_dia": -1},
+		"contadores": {}, "sequencia": 0, "conquistas": [], "titulos": [], "titulo": "", "novas": []}
+
+func cfg_metas() -> Dictionary:
+	return Balanceamento.carregar("metas")
+
+func dia_atual() -> int:
+	return (ServicoTempo.agora() - int(cfg_metas()["virada_hora_utc"]) * 3600) / 86400
+
+## Semana que começa na segunda (o dia 0, 1/1/1970, foi uma quinta).
+func semana_atual() -> int:
+	return (dia_atual() + 3) / 7
+
+func renome() -> int:
+	return int(estado["metas"]["renome"])
+
+## Faixa de renome atual: {nome, minimo, torcida, proxima (mínimo da seguinte, -1 se é a última)}.
+func faixa_renome() -> Dictionary:
+	var faixas: Array = cfg_metas()["renome"]["faixas"]
+	var atual: Dictionary = faixas[0]
+	var prox := -1
+	for i in faixas.size():
+		if renome() >= int(faixas[i]["minimo"]):
+			atual = faixas[i]
+			prox = int(faixas[i + 1]["minimo"]) if i + 1 < faixas.size() else -1
+	var r := atual.duplicate()
+	r["proxima"] = prox
+	return r
+
+## Sorteia as missões do dia/semana quando viram (sem salvar).
+func _atualizar_missoes() -> void:
+	var m: Dictionary = estado["metas"]
+	var cfg: Dictionary = cfg_metas()["missoes"]
+	if int(m["dia"]) != dia_atual():
+		m["dia"] = dia_atual()
+		m["diarias"] = _sortear_missoes(cfg["diarias"], int(cfg["diarias_por_dia"]), dia_atual())
+	if int(m["semana"]) != semana_atual():
+		m["semana"] = semana_atual()
+		m["semanais"] = _sortear_missoes(cfg["semanais"], int(cfg["semanais_por_semana"]), 100000 + semana_atual())
+	_evento_maximo("sequencia", int(m["sequencia"]))
+
+func _sortear_missoes(pool: Array, n: int, salt: int) -> Array:
+	var rng := Aleatorio.new(int(estado["baus"]["semente"]) + 7919 * salt)
+	var ids: Array = pool.map(func(x): return x["id"])
+	var res: Array = []
+	while res.size() < mini(n, pool.size()):
+		var id: String = ids[rng.inteiro(0, ids.size() - 1)]
+		ids.erase(id)
+		res.append({"id": id, "progresso": 0, "resgatada": false})
+	return res
+
+## Missões do dia e da semana com os dados de cada uma:
+## {diarias: [{id, evento, meta, recompensa, progresso, resgatada, pronta}], semanais: [...]}.
+func missoes() -> Dictionary:
+	_atualizar_missoes()
+	var cfg: Dictionary = cfg_metas()["missoes"]
+	var r := {}
+	for tipo: String in ["diarias", "semanais"]:
+		var lista: Array = []
+		for mi: Dictionary in estado["metas"][tipo]:
+			var d: Dictionary = (cfg[tipo] as Array).filter(func(x): return x["id"] == mi["id"])[0].duplicate(true)
+			d.merge(mi, true)
+			d["pronta"] = int(mi["progresso"]) >= int(d["meta"]) and not mi["resgatada"]
+			lista.append(d)
+		r[tipo] = lista
+	return r
+
+func resgatar_missao(id: String) -> Dictionary:
+	_atualizar_missoes()
+	for tipo: String in ["diarias", "semanais"]:
+		for mi: Dictionary in estado["metas"][tipo]:
+			if mi["id"] != id:
+				continue
+			var d: Dictionary = (cfg_metas()["missoes"][tipo] as Array).filter(func(x): return x["id"] == id)[0]
+			if mi["resgatada"]:
+				return _erro("ja_resgatada")
+			if int(mi["progresso"]) < int(d["meta"]):
+				return _erro("missao_incompleta")
+			mi["resgatada"] = true
+			var g := _dar_recompensa(d["recompensa"])
+			var res := _concluir("metas")
+			res["recompensa"] = g
+			return res
+	return _erro("missao_inexistente")
+
+## Login dos 7 primeiros dias: {dia (1 a 7; 0 = acabou), pode, recompensa}.
+func login_hoje() -> Dictionary:
+	var l: Dictionary = estado["metas"]["login"]
+	var tabela: Array = cfg_metas()["login"]
+	var feitos := int(l["dias"])
+	if feitos >= tabela.size():
+		return {"dia": 0, "pode": false, "recompensa": {}}
+	return {"dia": feitos + 1, "pode": int(l["ultimo_dia"]) != dia_atual(), "recompensa": (tabela[feitos] as Dictionary).duplicate()}
+
+func resgatar_login() -> Dictionary:
+	var h := login_hoje()
+	if not h["pode"]:
+		return _erro("login_ja_resgatado")
+	var l: Dictionary = estado["metas"]["login"]
+	l["dias"] = int(l["dias"]) + 1
+	l["ultimo_dia"] = dia_atual()
+	var g := _dar_recompensa(h["recompensa"])
+	var res := _concluir("metas")
+	res.merge({"dia": h["dia"], "recompensa": g}, true)
+	return res
+
+## Conquistas com o progresso: [{id, evento, meta, recompensa, titulo?, progresso, feita}].
+func conquistas() -> Array:
+	var r: Array = []
+	var cont: Dictionary = estado["metas"]["contadores"]
+	for c: Dictionary in cfg_metas()["conquistas"]:
+		var d := c.duplicate(true)
+		d["progresso"] = mini(int(cont.get(c["evento"], 0)), int(c["meta"]))
+		d["feita"] = (estado["metas"]["conquistas"] as Array).has(c["id"])
+		r.append(d)
+	return r
+
+## Conquistas feitas desde a última leitura (para o letreiro da vila).
+func conquistas_novas() -> Array:
+	var n: Array = (estado["metas"]["novas"] as Array).duplicate()
+	estado["metas"]["novas"] = []
+	return n
+
+func titulos() -> Array:
+	return (estado["metas"]["titulos"] as Array).duplicate()
+
+func titulo() -> String:
+	return str(estado["metas"]["titulo"])
+
+func definir_titulo(id: String) -> Dictionary:
+	if id != "" and not titulos().has(id):
+		return _erro("titulo_bloqueado")
+	estado["metas"]["titulo"] = id
+	return _concluir("metas")
+
+## Conta um evento: missões do dia/semana, contador das conquistas (sem salvar;
+## quem chama salva).
+func _evento(nome: String, qtd := 1) -> void:
+	if not estado.has("metas"):
+		return
+	_atualizar_missoes()
+	var m: Dictionary = estado["metas"]
+	var cfg: Dictionary = cfg_metas()["missoes"]
+	for tipo: String in ["diarias", "semanais"]:
+		for mi: Dictionary in m[tipo]:
+			var d: Array = (cfg[tipo] as Array).filter(func(x): return x["id"] == mi["id"])
+			if not d.is_empty() and d[0]["evento"] == nome:
+				mi["progresso"] = mini(int(mi["progresso"]) + qtd, int(d[0]["meta"]))
+	var cont: Dictionary = m["contadores"]
+	cont[nome] = int(cont.get(nome, 0)) + qtd
+	_checar_conquistas()
+
+## Contador que guarda o maior valor (ex.: melhor sequência de vitórias).
+func _evento_maximo(nome: String, valor: int) -> void:
+	var cont: Dictionary = estado["metas"]["contadores"]
+	if valor > int(cont.get(nome, 0)):
+		cont[nome] = valor
+		_checar_conquistas()
+
+func _checar_conquistas() -> void:
+	var m: Dictionary = estado["metas"]
+	var cont: Dictionary = m["contadores"]
+	for c: Dictionary in cfg_metas()["conquistas"]:
+		if (m["conquistas"] as Array).has(c["id"]) or int(cont.get(c["evento"], 0)) < int(c["meta"]):
+			continue
+		m["conquistas"].append(c["id"])
+		m["novas"].append(c["id"])
+		if c.has("titulo") and not (m["titulos"] as Array).has(c["titulo"]):
+			m["titulos"].append(c["titulo"])
+		_dar_recompensa(c.get("recompensa", {}))
+
+## Entrega uma recompensa {ouro, fragmentos, chaves, bau, xp}; devolve o que deu.
+func _dar_recompensa(r: Dictionary) -> Dictionary:
+	var dado := r.duplicate()
+	if r.has("fragmentos"):
+		estado["inventario"]["materiais"]["fragmentos"] = fragmentos() + int(r["fragmentos"])
+	if r.has("chaves"):
+		estado["baus"]["chaves"] = chaves() + int(r["chaves"])
+	if r.has("bau"):
+		dado["bau_ganho"] = _guardar_bau(str(r["bau"]))
+	_ganhar(int(r.get("ouro", 0)), int(r.get("xp", 0)))
+	return dado
 
 # --------------------------------------------------------------------- baús
 # GDD Baús e itens: 4 espaços, um abrindo por vez, chave abre na hora,
@@ -880,6 +1079,8 @@ func abrir_bau(id: String, com_chave := false) -> Dictionary:
 			it["id"] = _novo_id(estado, "i")
 			estado["inventario"]["itens"].append({"id": it["id"], "modelo": it["modelo"], "nivel": 0,
 				"durabilidade": int(modelos[it["modelo"]]["durabilidade_max"])})
+			_evento("peca_nova")
+	_evento("bau_aberto")
 	_ganhar(int(r["ouro"]), 0)
 	var res := _concluir("baus")
 	res.merge({"tipo": b["tipo"], "ouro": r["ouro"], "fragmentos": r["fragmentos"], "itens": r["itens"]}, true)
@@ -940,6 +1141,8 @@ func torneio_liberado(id: String) -> bool:
 	var regiao := regiao_do_torneio(id)
 	if t.is_empty() or regiao == "" or not regiao_liberada(regiao) or int(estado["cavaleiro"]["nivel"]) < int(t["nivel_minimo"]):
 		return false
+	if renome() < int(t.get("renome_minimo", 0)):
+		return false  # convite: só com renome (3.21)
 	for anterior: String in dados["regioes"][regiao]["torneios"]:
 		if anterior == id:
 			return true
@@ -1117,10 +1320,36 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 	var inv_mats: Dictionary = estado["inventario"]["materiais"]
 	for m: String in mats_g:
 		inv_mats[m] = int(inv_mats.get(m, 0)) + int(mats_g[m])
+	# Metas (3.21): eventos para missões e conquistas, renome e sequência.
+	var metas: Dictionary = estado["metas"]
+	var renome_g := 0
+	var ganho: Dictionary = Balanceamento.carregar("metas")["renome"]["ganho"]
+	if est > 0:
+		_evento("vitoria")
+		renome_g += int(ganho["vitoria"])
+		metas["sequencia"] = int(metas["sequencia"]) + 1
+		_evento_maximo("sequencia", int(metas["sequencia"]))
+		if est >= 3:
+			_evento("tres_estrelas")
+			renome_g += int(ganho["tres_estrelas"])
+		for e: Dictionary in eventos:
+			if e.get("tipo", "") == "fim" and e.get("motivo", "") == "derrubada":
+				_evento("derrubada")
+				renome_g += int(ganho["derrubada"])
+		if dados["rivais"][rival].get("campeao", false) and estrelas_antes == 0:
+			renome_g += int(ganho["campeao"])
+	else:
+		metas["sequencia"] = 0
+	if fechou:
+		_evento("torneio_vencido")
+	if projeto != "":
+		_evento("regiao_vencida")
+		renome_g += int(ganho["regiao_vencida"])
+	metas["renome"] = int(metas["renome"]) + renome_g
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
 	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0,
-		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos, "materiais": mats_g}, true)
+		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos, "materiais": mats_g, "renome": renome_g}, true)
 	return res
 
 ## Disputa no automático: a mesma regra, com uma IA de precisão média no
@@ -1216,6 +1445,7 @@ func novo_estado() -> Dictionary:
 	}
 	e["inventario"]["materiais"]["fragmentos"] = int(e["inventario"]["materiais"].get("fragmentos", 0))
 	e["baus"] = _baus_novos(int(e["criado_em"]), int(ini.get("chaves", 0)))
+	e["metas"] = _metas_novas()
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.carregar("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -1286,6 +1516,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 			cav4["habilidades"] = [h] if h != "" else []
 		cav4.erase("habilidade")
 		v = 4
+	if v < 5:
+		# 3.21: renome, missões, login, conquistas e títulos.
+		if not d.has("metas"):
+			d["metas"] = _metas_novas()
+		v = 5
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

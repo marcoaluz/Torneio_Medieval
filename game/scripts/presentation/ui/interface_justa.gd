@@ -104,10 +104,13 @@ func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> 
 			dica.text = tr("ARAUTO_EXIBICAO_" + nome) if f != JustaFases.Fase.FIM else ""
 		"tutorial":
 			dica.text = tr("DICA_" + nome) if f != JustaFases.Fase.FIM else ""
-		"disputa":
-			# Na apresentação o arauto lê a provocação do campeão e os desafios.
+		"disputa", "livre":
+			# Na apresentação o arauto anuncia o título do jogador (3.21) e lê a
+			# provocação do campeão e os desafios.
 			var linhas: Array[String] = []
 			if f == JustaFases.Fase.APRESENTACAO and controlador.justa.fases.passada <= 1:
+				if controlador.anuncio_titulo != "":
+					linhas.append(controlador.anuncio_titulo)
 				if controlador.provocacao != "":
 					linhas.append(tr("ARAUTO_PROVOCACAO").format({"texto": tr(controlador.provocacao)}))
 				for d: String in controlador.desafios:

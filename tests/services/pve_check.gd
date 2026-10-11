@@ -46,6 +46,7 @@ func _initialize() -> void:
 	_checa("nivel 2: primeiro torneio liberado, segundo nao", jog.torneio_liberado("feira_moinho") and not jog.torneio_liberado("feira_ponte"))
 	_checa("segunda disputa bloqueada antes da primeira", jog.pode_disputar("feira_moinho", 1)["erro"] == "disputa_bloqueada")
 	_checa("automatico sem 3 estrelas nao", jog.pode_automatico("feira_moinho", 0)["erro"] == "disputa_bloqueada" or jog.pode_automatico("feira_moinho", 0)["erro"] == "precisa_tres_estrelas")
+	jog.estado["metas"]["conquistas"].append("primeira_vitoria")  # o ouro da conquista (3.21) não entra nesta conta
 	var ouro0 := jog.ouro()
 	var r := jog.concluir_disputa("feira_moinho", 0, _ev(true, "derrubada", ["capacete"]))
 	_checa("vitoria de 3 estrelas avanca e paga (%d ouro, %d xp)" % [r["ouro"], r["xp"]], r["estrelas"] == 3 and jog.progresso_torneio("feira_moinho")["proxima"] == 1

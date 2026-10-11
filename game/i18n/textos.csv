@@ -519,3 +519,64 @@ LIGA_CAMPEAO,Campeão,Champion
 ERRO_SEM_ESPACO_HABILIDADE,Não há espaço para outra habilidade.,No slot for another ability.
 ERRO_HABILIDADE_DESCONHECIDA,Você ainda não conhece essa habilidade.,You do not know that ability yet.
 ERRO_UMA_POR_GRUPO,Só uma habilidade por grupo.,Only one ability per group.
+METAS_TITULO,Missões e glória,Quests and glory
+METAS_RENOME,Renome: {renome} ({faixa}),Renown: {renome} ({faixa})
+METAS_PROXIMA_FAIXA,faltam {falta} para a próxima fama,{falta} to the next level of fame
+METAS_ABA_DIARIAS,Diárias,Daily
+METAS_ABA_SEMANAIS,Semanais,Weekly
+METAS_ABA_LOGIN,Chegada,Arrival
+METAS_ABA_CONQUISTAS,Conquistas,Achievements
+METAS_RESGATAR,Pegar,Claim
+METAS_RESGATADA,Pego,Claimed
+METAS_DEPOIS,Depois,Later
+METAS_LOGIN_DIA,Dia {n},Day {n}
+METAS_TITULO_DA,título: {titulo},title: {titulo}
+METAS_TITULOS,Títulos (o arauto anuncia antes da justa),Titles (the herald announces them before the joust)
+METAS_SEM_TITULO,Sem título,No title
+METAS_USAR,Usar,Use
+METAS_USANDO,Em uso,In use
+METAS_CHAVES,+{n} chave(s),+{n} key(s)
+FAIXA_DESCONHECIDO,desconhecido,unknown
+FAIXA_PROMISSOR,promissor,promising
+FAIXA_CONHECIDO,conhecido,known
+FAIXA_FAMOSO,famoso,famous
+FAIXA_LENDARIO,lendário,legendary
+MISSAO_VENCER_3,Vença 3 disputas,Win 3 bouts
+MISSAO_JUSTAR_5,Dispute 5 justas,Ride 5 jousts
+MISSAO_DERRUBAR_1,Derrube 1 rival,Unhorse 1 rival
+MISSAO_TREINAR_2,Comece 2 treinos,Start 2 trainings
+MISSAO_ABRIR_BAU_1,Abra 1 baú,Open 1 chest
+MISSAO_TRES_ESTRELAS_1,Vença com 3 estrelas,Win with 3 stars
+MISSAO_MELHORAR_1,Melhore 1 peça,Upgrade 1 piece
+MISSAO_VENCER_20,Vença 20 disputas,Win 20 bouts
+MISSAO_DERRUBAR_8,Derrube 8 rivais,Unhorse 8 rivals
+MISSAO_TORNEIOS_2,Vença 2 torneios,Win 2 tournaments
+MISSAO_FORJAR_1,Forje 1 peça,Forge 1 piece
+CONQUISTA_PRIMEIRA_VITORIA,Primeira vitória,First victory
+CONQUISTA_CEM_JUSTAS,Cem justas,A hundred jousts
+CONQUISTA_DERRUBADOR,Derrube 25 rivais,Unhorse 25 rivals
+CONQUISTA_INQUEBRAVEL,10 vitórias seguidas,10 wins in a row
+CONQUISTA_CAMPEAO_DAS_FEIRAS,Vença as feiras de vila,Win the village fairs
+CONQUISTA_SENHOR_DO_REINO,Vença o reino,Win the kingdom
+CONQUISTA_GRANDE_CAMPEAO,Vença o Grande Torneio,Win the Grand Tournament
+CONQUISTA_COLECIONADOR,Junte 20 peças,Collect 20 pieces
+CONQUISTA_MESTRE_DA_FORJA,Leve uma peça ao +10,Take a piece to +10
+CONQUISTA_FORJADOR,Forje 10 peças,Forge 10 pieces
+TITULO_VETERANO_DA_LICA,o Veterano da Liça,the Veteran of the Lists
+TITULO_DERRUBA_CAVALEIROS,o Derruba-Cavaleiros,the Knight-Toppler
+TITULO_O_INQUEBRAVEL,o Inquebrável,the Unbreakable
+TITULO_CAMPEAO_DAS_FEIRAS,Campeão das Feiras,Champion of the Fairs
+TITULO_SENHOR_DO_REINO,Senhor do Reino,Lord of the Kingdom
+TITULO_O_GRANDE_CAMPEAO,o Grande Campeão,the Grand Champion
+TITULO_O_COLECIONADOR,o Colecionador,the Collector
+TITULO_MESTRE_DA_FORJA,Mestre da Forja,Master of the Forge
+ARAUTO_TITULO,"O arauto: Apresentando {nome}, {titulo}!","The herald: Presenting {nome}, {titulo}!"
+PVE_CONVITE,convite: renome {renome},invitation: renown {renome}
+VILA_RENOME,Renome {renome},Renown {renome}
+VILA_MISSOES,Missões,Quests
+VILA_CONQUISTA,Conquista: {conquista}!,Achievement: {conquista}!
+ERRO_JA_RESGATADA,Já foi pega.,Already claimed.
+ERRO_MISSAO_INCOMPLETA,Ainda não terminou.,Not finished yet.
+ERRO_MISSAO_INEXISTENTE,Missão não encontrada.,Quest not found.
+ERRO_LOGIN_JA_RESGATADO,Volte amanhã.,Come back tomorrow.
+ERRO_TITULO_BLOQUEADO,Título ainda não conquistado.,Title not earned yet.

@@ -34,6 +34,8 @@ var _acumulado := 0.0
 @onready var tela_baus: TelaBaus = $Interface/TelaBaus
 @onready var tela_forja: TelaForja = $Interface/TelaForja
 @onready var tela_habilidades: TelaHabilidades = $Interface/TelaHabilidades
+@onready var tela_missoes: TelaMissoes = $Interface/TelaMissoes
+@onready var _botao_missoes: Button = $Interface/Topo/Linha/Missoes
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
 func _ready() -> void:
@@ -51,6 +53,7 @@ func _ready() -> void:
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
+	_botao_missoes.pressed.connect(func(): fechar_painel(); tela_missoes.abrir("login" if _jog.login_hoje()["pode"] else "diarias"))
 	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
 	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
@@ -65,7 +68,12 @@ func atualizar() -> void:
 	var cav := _jog.cavaleiro()
 	_topo_nome.text = tr("VILA_TOPO").format({"nome": cav["nome"] if cav["nome"] != "" else "—",
 		"nivel": cav["nivel"], "casa": _jog.casa()["nome"]})
-	_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()})
+	_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()}) + "  ·  " + tr("VILA_RENOME").format({"renome": _jog.renome()})
+	var m := _jog.missoes()
+	var prontas: int = (m["diarias"] + m["semanais"]).filter(func(x): return x["pronta"]).size() + (1 if _jog.login_hoje()["pode"] else 0)
+	_botao_missoes.text = tr("VILA_MISSOES") + (" !" if prontas > 0 else "")
+	for c: String in _jog.conquistas_novas():
+		mostrar_letreiro(tr("VILA_CONQUISTA").format({"conquista": tr("CONQUISTA_" + c.to_upper())}))
 	var prontos := _jog.baus().filter(func(b): return _jog.bau_pronto(b["id"])).size()
 	_botao_baus.text = tr("VILA_BAUS").format({"n": _jog.baus().size(), "max": int(_jog.cfg_baus()["espacos"])}) + (" !" if prontos > 0 else "")
 	for nome: String in predios:

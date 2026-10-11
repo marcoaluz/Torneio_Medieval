@@ -2,7 +2,8 @@ extends Node
 ## Demonstração para o `driver.sh shot`: a arena no modo TM_MODO (exibicao ou
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
-## TM_PREDIO/TM_ABA, habilidades, torneios com TM_REGIAO). Save em
+## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
+## TM_TITULO dá um título ao jogador na arena. Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -70,6 +71,24 @@ func _ready() -> void:
 		camada_h.add_child(th)
 		th.abrir.call_deferred()
 		return
+	if tela == "missoes":
+		# Missões com uma pronta, 2 dias de login, conquistas e um título (TM_ABA).
+		jog.estado["metas"]["renome"] = 340
+		var m := jog.missoes()
+		for i in int(m["diarias"][0]["meta"]):
+			jog._evento(m["diarias"][0]["evento"])
+		jog.estado["metas"]["login"] = {"dias": 2, "ultimo_dia": -1}
+		for i in 10:
+			jog._evento("vitoria")
+		jog._evento_maximo("sequencia", 10)
+		jog.definir_titulo("o_inquebravel")
+		var tm: TelaMissoes = load("res://game/scenes/ui/tela_missoes.tscn").instantiate()
+		var camada_m := CanvasLayer.new()
+		add_child(camada_m)
+		camada_m.add_child(tm)
+		var aba := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "diarias"
+		tm.abrir.call_deferred(aba)
+		return
 	if tela == "torneios":
 		# Circuito aberto até TM_REGIAO (padrão: condado), nível alto.
 		jog.estado["cavaleiro"]["nivel"] = 20
@@ -91,5 +110,9 @@ func _ready() -> void:
 		fluxo.modo_justa = "disputa"
 		add_child(load("res://game/scenes/arena/arena.tscn").instantiate())
 		return
+	if OS.get_environment("TM_TITULO") != "":
+		# Justa livre com título (o arauto anuncia na apresentação).
+		jog.estado["metas"]["titulos"] = [OS.get_environment("TM_TITULO")]
+		jog.definir_titulo(OS.get_environment("TM_TITULO"))
 	fluxo.modo_justa = OS.get_environment("TM_MODO")
 	add_child(load("res://game/scenes/arena/arena.tscn").instantiate())

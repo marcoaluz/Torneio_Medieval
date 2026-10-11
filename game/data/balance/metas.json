@@ -1,0 +1,56 @@
+{
+	"versao": 1,
+	"_nota": "Renome, missoes, login, conquistas e titulos (GDD O que acrescentar; Pacote 3.21). O dia vira as virada_hora_utc horas UTC (3 = meia-noite de Brasilia); a semana comeca na segunda. Eventos contados pelo servico: justa, vitoria (disputa do PvE vencida, manual ou automatica), tres_estrelas, derrubada, torneio_vencido, regiao_vencida, sequencia (melhor sequencia de vitorias), bau_aberto, peca_nova, treino, forja, melhoria_peca, melhoria_10, predio. Recompensa: ouro, fragmentos, chaves, bau (tipo), xp. Renome: soma por evento; as faixas definem a torcida (pulo da arquibancada e flamulas) e os convites (torneios com renome_minimo em pve.json).",
+	"virada_hora_utc": 3,
+	"renome": {
+		"ganho": { "vitoria": 4, "tres_estrelas": 2, "derrubada": 3, "campeao": 25, "regiao_vencida": 60 },
+		"faixas": [
+			{ "nome": "desconhecido", "minimo": 0, "torcida": 1 },
+			{ "nome": "promissor", "minimo": 100, "torcida": 2 },
+			{ "nome": "conhecido", "minimo": 300, "torcida": 3 },
+			{ "nome": "famoso", "minimo": 800, "torcida": 4 },
+			{ "nome": "lendario", "minimo": 2000, "torcida": 5 }
+		],
+		"torcida": { "pulo_px_por_nivel": 2, "pulos": 3, "flamulas_por_nivel": 10 }
+	},
+	"missoes": {
+		"diarias_por_dia": 3,
+		"semanais_por_semana": 2,
+		"diarias": [
+			{ "id": "vencer_3", "evento": "vitoria", "meta": 3, "recompensa": { "ouro": 25 } },
+			{ "id": "justar_5", "evento": "justa", "meta": 5, "recompensa": { "ouro": 15, "fragmentos": 1 } },
+			{ "id": "derrubar_1", "evento": "derrubada", "meta": 1, "recompensa": { "fragmentos": 2 } },
+			{ "id": "treinar_2", "evento": "treino", "meta": 2, "recompensa": { "ouro": 20 } },
+			{ "id": "abrir_bau_1", "evento": "bau_aberto", "meta": 1, "recompensa": { "ouro": 20 } },
+			{ "id": "tres_estrelas_1", "evento": "tres_estrelas", "meta": 1, "recompensa": { "ouro": 15, "fragmentos": 1 } },
+			{ "id": "melhorar_1", "evento": "melhoria_peca", "meta": 1, "recompensa": { "fragmentos": 2 } }
+		],
+		"semanais": [
+			{ "id": "vencer_20", "evento": "vitoria", "meta": 20, "recompensa": { "chaves": 1 } },
+			{ "id": "derrubar_8", "evento": "derrubada", "meta": 8, "recompensa": { "bau": "ferro" } },
+			{ "id": "torneios_2", "evento": "torneio_vencido", "meta": 2, "recompensa": { "bau": "ouro" } },
+			{ "id": "forjar_1", "evento": "forja", "meta": 1, "recompensa": { "chaves": 1 } }
+		]
+	},
+	"login": [
+		{ "ouro": 50 },
+		{ "fragmentos": 5 },
+		{ "bau": "madeira" },
+		{ "ouro": 100 },
+		{ "chaves": 1 },
+		{ "bau": "ferro" },
+		{ "bau": "ouro" }
+	],
+	"conquistas": [
+		{ "id": "primeira_vitoria", "evento": "vitoria", "meta": 1, "recompensa": { "ouro": 30 } },
+		{ "id": "cem_justas", "evento": "justa", "meta": 100, "recompensa": { "chaves": 1 }, "titulo": "veterano_da_lica" },
+		{ "id": "derrubador", "evento": "derrubada", "meta": 25, "recompensa": { "fragmentos": 10 }, "titulo": "derruba_cavaleiros" },
+		{ "id": "inquebravel", "evento": "sequencia", "meta": 10, "recompensa": { "bau": "ouro" }, "titulo": "o_inquebravel" },
+		{ "id": "campeao_das_feiras", "evento": "regiao_vencida", "meta": 1, "recompensa": { "ouro": 100 }, "titulo": "campeao_das_feiras" },
+		{ "id": "senhor_do_reino", "evento": "regiao_vencida", "meta": 4, "recompensa": { "bau": "real" }, "titulo": "senhor_do_reino" },
+		{ "id": "grande_campeao", "evento": "regiao_vencida", "meta": 5, "recompensa": { "bau": "real" }, "titulo": "o_grande_campeao" },
+		{ "id": "colecionador", "evento": "peca_nova", "meta": 20, "recompensa": { "fragmentos": 15 }, "titulo": "o_colecionador" },
+		{ "id": "mestre_da_forja", "evento": "melhoria_10", "meta": 1, "recompensa": { "chaves": 1 }, "titulo": "mestre_da_forja" },
+		{ "id": "forjador", "evento": "forja", "meta": 10, "recompensa": { "fragmentos": 10 } }
+	]
+}

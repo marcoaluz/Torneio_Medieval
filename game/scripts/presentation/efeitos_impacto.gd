@@ -47,6 +47,8 @@ func _ao_impacto(_p: int, jog: Dictionary, riv: Dictionary, _d: JustaFases.Lado,
 		_piscar_escudo(a.jogador)
 	var fj := _golpe(jog, a.jogador, a.rival)
 	var fr := _golpe(riv, a.rival, a.jogador)
+	if int(jog["pontos"]) > 0 or jog["derrubou"]:
+		reagir_torcida(jog["derrubou"])
 	var forca := maxf(fj, fr)
 	if forca <= 0.0:
 		return
@@ -86,6 +88,44 @@ func _ao_ativar_habilidade(_p: int, lado: String, _nome: String) -> void:
 		if is_instance_valid(r):
 			r.emitting = false
 			r.queue_free())
+
+## Torcida (3.21): a arquibancada pula e solta flâmulas; quanto maior o
+## renome do jogador, mais forte (metas.json > renome).
+func reagir_torcida(forte: bool) -> void:
+	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	if jog == null or controlador.modo == "exibicao":
+		return
+	var t: Dictionary = Balanceamento.carregar("metas")["renome"]["torcida"]
+	var nivel := int(jog.faixa_renome()["torcida"]) + (1 if forte else 0)
+	var arq: Node2D = controlador.arena.get_node("Fundo/Arquibancada")
+	var y0 := arq.position.y
+	var tw := arq.create_tween()
+	for i in int(t["pulos"]):
+		tw.tween_property(arq, "position:y", y0 - float(t["pulo_px_por_nivel"]) * nivel, 0.08)
+		tw.tween_property(arq, "position:y", y0, 0.1)
+	var f := CPUParticles2D.new()
+	f.name = "Flamulas"
+	f.one_shot = true
+	f.explosiveness = 0.8
+	f.amount = maxi(1, int(t["flamulas_por_nivel"]) * nivel)
+	f.lifetime = 1.4
+	f.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	f.emission_rect_extents = Vector2(600, 20)
+	f.position = Vector2(480, 120)
+	f.direction = Vector2(0, -1)
+	f.spread = 40.0
+	f.initial_velocity_min = 80.0
+	f.initial_velocity_max = 160.0
+	f.gravity = Vector2(0, 200)
+	f.scale_amount_min = 2.0
+	f.scale_amount_max = 4.0
+	f.color_ramp = null
+	f.hue_variation_min = -1.0
+	f.hue_variation_max = 1.0
+	f.color = Color(controlador.arena.jogador.cor_casa)
+	arq.add_child(f)
+	f.emitting = true
+	f.finished.connect(f.queue_free)
 
 func _piscar_escudo(c: Cavaleiro) -> void:
 	var no := c.no_da_zona("escudo")
