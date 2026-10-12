@@ -1,5 +1,12 @@
 # Estado atual
 
+> **Retomada rápida (2026-10-11, commit `d311e86`):**
+> - **Próximo prompt:** 3.20 (telas sociais), com o texto exato em "Próximo passo", no fim deste arquivo.
+> - **Depois:** preparação local do servidor (3.1–3.11, sem aplicar nada), perguntar ao usuário sobre o Supabase e, por fim, a Parte 4.
+> - **Validação:** a suíte `bash tests/rodar_testes.sh` passa com 42 arquivos e 852 checagens.
+> - **Save:** versão 10.
+> - **Armadilhas e convenções:** veja "Onde paramos" no `CLAUDE.md`.
+
 **Parte 2 — Fatia vertical · prompts 2.1 a 2.11 concluídos; 2.12 e 2.13 preparados localmente (falta autorizar o Supabase)** (o 2.4 veio antes do 2.2 porque as telas precisam dele). Parte 1: código 1.0–1.10 pronto (o 1.9 depende de instalar ferramentas Android); arte (A*) e som (S*) dependem do usuário. **Parte 3:** 3.12 (simulação da economia), 3.13 (circuito completo do PvE) e 3.14 (baús e itens, local) e 3.15 (forja, local) e 3.16 (habilidades especiais e conjuntos) e 3.21 (renome, missões, conquistas e títulos) e 3.22 (história, companheiros e nêmesis, enredo provisório) e 3.23 (notificações, local + push preparado) e 3.24 (inglês e acessibilidade) e 3.25 (desempenho, medido no PC) e 3.17 (PvP e liga, simulado local) e 3.18 (loja, VIP, passe e ofertas; compras de teste) e 3.19 (anúncios premiados; provedor de teste) concluídos. Próximo: 3.20 (telas sociais).
 O usuário pediu (2026-10-11) para executar **todos os prompts do Pacote em sequência**, sem parar para revisão; ele analisa tudo depois. Parar só antes de gastar crédito ou mexer em serviço externo (PixelLab, ElevenLabs, criar projeto/migração no Supabase, lojas).
 

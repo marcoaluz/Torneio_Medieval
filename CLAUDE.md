@@ -50,6 +50,43 @@ Use a skill `/run-torneio-medieval` (`.claude/skills/run-torneio-medieval/driver
 - Diga qual padrão escolheu e qual alternativa descartou, e por quê, antes de construir.
 - Se o plugin não estiver instalado nesta conta: `claude plugins marketplace add jame581/skillsmith` e `claude plugins install godot-prompter@skillsmith`.
 
+## Onde paramos (para quem retomar)
+Atualizado em 2026-10-11, depois do commit `d311e86`. O detalhe completo de cada sistema está em `docs/ESTADO.md`; a decisão e o motivo de cada escolha, em `docs/DECISOES.md`.
+
+- **Pedido do usuário:** executar **todos** os prompts de `docs/PACOTE_DE_PROMPTS.md` em sequência, sem parar para revisão; ele analisa tudo depois.
+- **Parar e perguntar antes de:** gastar crédito ou mexer em serviço externo. Isso inclui PixelLab, ElevenLabs, criar projeto ou aplicar migração no Supabase, Firebase, AdMob e lojas. Tudo o que é local, faça direto.
+- **Feito:**
+  - Parte 1: código 1.0–1.10. O 1.9 (APK) depende de instalar JDK, SDK e templates Android.
+  - Parte 2: 2.1–2.11; 2.12 e 2.13 preparados localmente, sem aplicar nada no Supabase.
+  - Parte 3: 3.12–3.19 e 3.21–3.25, todos locais. PvP, compras e anúncios estão simulados ou com provedor de teste até o servidor existir.
+- **Próximo, em ordem:**
+  1. **3.20** (telas sociais, local).
+  2. **Preparação do servidor 3.1–3.11, sem aplicar:**
+     - porte da regra para TypeScript em `supabase/functions/`, testado com Node 24 (já instalado; roda `.ts` direto) contra `tests/shared/*.json`;
+     - migrações em `supabase/migrations/`;
+     - Edge Functions escritas, mas não publicadas.
+  3. **Perguntar ao usuário** se autoriza criar o projeto Supabase.
+  4. **Parte 4** (4.1–4.3: espada, arco, mêlée).
+- **Fica com o usuário:** os prompts de arte (A*/B*/C*, PixelLab) e de som (S*, ElevenLabs), porque gastam crédito.
+- **Fim de cada prompt:** rodar a suíte, atualizar ESTADO, DECISOES e SESSOES, e fazer commit, como faz a skill `/passagem`.
+
+### Armadilhas já conhecidas
+- **Scripts Python de edição:** grave com a ferramenta Write num arquivo do scratchpad e rode com `python -I arquivo.py`. Heredoc no Bash quebra com aspas, barras invertidas e acentos.
+- **Números do JSON:** o Godot lê todo número do JSON como float, e `[6.0].has(6)` é falso. Compare com `int(x) == n`.
+- **Autoload e classe:** os nomes não podem ser iguais. Por exemplo, o autoload `Fluxo` tem a classe `FluxoTelas`, e o autoload `Acessibilidade` tem a classe `OpcoesAcessibilidade`.
+- **Leitura de dados:**
+  - `Balanceamento.ler(nome)` e `ler_json(caminho)` devolvem um cache somente leitura (alterar dá erro);
+  - `Balanceamento.carregar(nome)` devolve uma cópia;
+  - em caminho quente, use `ler`.
+- **Versão do save:** hoje é 10 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
+- **Mudança na regra da justa:**
+  - regere os casos compartilhados com o oráculo Python correspondente;
+  - regrave as gravações com `TM_GRAVAR=1` em `tests/rules/justa_simulacao_check.gd` e `tests/ai/ia_justa_check.gd`.
+
+  Os oráculos ficavam no scratchpad da sessão e podem não existir mais. Nesse caso, reescreva o oráculo a partir da especificação no topo do arquivo da regra.
+- **Demos e capturas:** `tests/fluxo/modo_demo.tscn` com as variáveis `TM_TELA`, `TM_ABA`, `TM_TORNEIO` e outras, listadas no topo de `modo_demo.gd`, mais `driver.sh shot` para gerar o PNG.
+- **Desempenho:** `tools/benchmark.tscn`. **Economia:** `tools/simular_economia.gd`. Rode a simulação de novo se mexer em `economia.json`.
+
 ## Nunca
 - Colocar texto ou número de balanceamento fixo no código.
 - Dar à regra da justa dependência de cena, nó ou tempo real.
