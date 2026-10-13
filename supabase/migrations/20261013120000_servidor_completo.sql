@@ -230,12 +230,16 @@ alter table public.ordem_pedido_ajuda enable row level security;
 create policy "pedidos da minha ordem" on public.ordem_pedido_ajuda
 	for select to authenticated using (public.sou_da_ordem(ordem_id));
 
+-- Cada ajuda é aplicada no estado de QUEM PEDIU na próxima ação dele (aplicada = true);
+-- o estado de outro jogador nunca é mexido por quem ajuda.
 create table if not exists public.ordem_ajuda (
 	pedido_id uuid not null references public.ordem_pedido_ajuda (id) on delete cascade,
 	ajudante_id uuid not null references public.jogador (id) on delete cascade,
 	em timestamptz not null default now(),
+	aplicada boolean not null default false,
 	primary key (pedido_id, ajudante_id)
 );
+create index if not exists ordem_ajuda_pendente on public.ordem_ajuda (pedido_id) where not aplicada;
 alter table public.ordem_ajuda enable row level security;
 create policy "ajudas le as proprias" on public.ordem_ajuda
 	for select to authenticated using ((select auth.uid()) = ajudante_id);
@@ -248,9 +252,11 @@ create table if not exists public.ordem_doacao (
 	material text not null,
 	quantidade integer not null check (quantidade > 0),
 	dia integer not null,
+	aplicada boolean not null default false,
 	criado_em timestamptz not null default now()
 );
 create index if not exists ordem_doacao_de_dia on public.ordem_doacao (de_id, dia);
+create index if not exists ordem_doacao_pendente on public.ordem_doacao (para_id) where not aplicada;
 alter table public.ordem_doacao enable row level security;
 create policy "doacoes le as proprias" on public.ordem_doacao
 	for select to authenticated using ((select auth.uid()) in (de_id, para_id));
@@ -419,13 +425,248 @@ end;
 $$;
 revoke all on function public.guardar_resposta_acao(uuid, uuid, text, jsonb) from public, anon, authenticated;
 
+-- Operações sociais de uma ação (3.8): a Edge Function decide (permissões pela
+-- regra em TypeScript, lendo o banco); aqui a transação REVALIDA o que não pode
+-- falhar em corrida (vaga, líder único, nome único, permissão de quem age) e
+-- grava. Qualquer invariante quebrada vira 'conflito_de_revisao': a ação inteira
+-- é desfeita e a função refaz sobre o estado novo (e então responde o erro certo).
+create or replace function public.aplicar_ops_sociais(p_jogador uuid, p_ops jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+	op jsonb;
+	t text;
+	meu_cargo text;
+	cargo_alvo text;
+	n integer;
+	max_membros integer := coalesce((select (dados ->> 'membros_max')::integer from public.balanceamento
+		where nome = 'ordem' and ativa limit 1), 30);
+begin
+	for op in select value from jsonb_array_elements(coalesce(p_ops, '[]'::jsonb)) loop
+		t := op ->> 'op';
+		if t = 'ordem_criar' then
+			insert into public.ordem (id, nome, brasao, idioma)
+			values ((op ->> 'ordem_id')::uuid, op ->> 'nome', op -> 'brasao', coalesce(op ->> 'idioma', 'pt'));
+			insert into public.ordem_membro (ordem_id, jogador_id, cargo)
+			values ((op ->> 'ordem_id')::uuid, p_jogador, 'lider');
+
+		elsif t = 'ordem_entrar' then
+			perform 1 from public.ordem where id = (op ->> 'ordem_id')::uuid for update;
+			if not found then raise exception 'conflito_de_revisao'; end if;
+			select count(*) into n from public.ordem_membro where ordem_id = (op ->> 'ordem_id')::uuid;
+			if n >= max_membros then raise exception 'conflito_de_revisao'; end if;
+			insert into public.ordem_membro (ordem_id, jogador_id, cargo)
+			values ((op ->> 'ordem_id')::uuid, p_jogador, 'membro');
+
+		elsif t = 'ordem_sair' then
+			delete from public.ordem_membro
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = p_jogador;
+			if not exists (select 1 from public.ordem_membro where ordem_id = (op ->> 'ordem_id')::uuid) then
+				delete from public.ordem where id = (op ->> 'ordem_id')::uuid;
+			else
+				-- o líder não pode sair com gente dentro (a regra recusa antes); sem líder = conflito
+				if not exists (select 1 from public.ordem_membro where ordem_id = (op ->> 'ordem_id')::uuid and cargo = 'lider') then
+					raise exception 'conflito_de_revisao';
+				end if;
+			end if;
+
+		elsif t = 'ordem_dissolver' then
+			if not exists (select 1 from public.ordem_membro where ordem_id = (op ->> 'ordem_id')::uuid
+				and jogador_id = p_jogador and cargo = 'lider') then
+				raise exception 'conflito_de_revisao';
+			end if;
+			delete from public.ordem where id = (op ->> 'ordem_id')::uuid;
+
+		elsif t = 'ordem_cargo' then
+			select cargo into meu_cargo from public.ordem_membro
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = p_jogador;
+			if meu_cargo is distinct from 'lider' then raise exception 'conflito_de_revisao'; end if;
+			update public.ordem_membro set cargo = op ->> 'cargo'
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = (op ->> 'alvo')::uuid and cargo <> 'lider'
+				and (op ->> 'cargo') in ('oficial', 'membro');
+			if not found then raise exception 'conflito_de_revisao'; end if;
+
+		elsif t = 'ordem_expulsar' then
+			select cargo into meu_cargo from public.ordem_membro
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = p_jogador;
+			select cargo into cargo_alvo from public.ordem_membro
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = (op ->> 'alvo')::uuid;
+			if cargo_alvo is null or cargo_alvo = 'lider'
+				or not (meu_cargo = 'lider' or (meu_cargo = 'oficial' and cargo_alvo = 'membro')) then
+				raise exception 'conflito_de_revisao';
+			end if;
+			delete from public.ordem_membro
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = (op ->> 'alvo')::uuid;
+
+		elsif t = 'ordem_lideranca' then
+			if not exists (select 1 from public.ordem_membro where ordem_id = (op ->> 'ordem_id')::uuid
+				and jogador_id = p_jogador and cargo = 'lider') then
+				raise exception 'conflito_de_revisao';
+			end if;
+			update public.ordem_membro set cargo = 'oficial'
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = p_jogador;
+			update public.ordem_membro set cargo = 'lider'
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = (op ->> 'alvo')::uuid;
+			if not found then raise exception 'conflito_de_revisao'; end if;
+
+		elsif t = 'ordem_editar' then
+			select cargo into meu_cargo from public.ordem_membro
+			where ordem_id = (op ->> 'ordem_id')::uuid and jogador_id = p_jogador;
+			if meu_cargo is null or (meu_cargo = 'membro')
+				or ((op ->> 'nome') is not null and meu_cargo <> 'lider') then
+				raise exception 'conflito_de_revisao';
+			end if;
+			update public.ordem
+			set nome = coalesce(op ->> 'nome', nome), brasao = coalesce(op -> 'brasao', brasao)
+			where id = (op ->> 'ordem_id')::uuid;
+
+		elsif t = 'ajuda_pedir' then
+			insert into public.ordem_pedido_ajuda (id, ordem_id, jogador_id, timer_id, tipo, ajudas_max, expira_em)
+			values ((op ->> 'pedido_id')::uuid, (op ->> 'ordem_id')::uuid, p_jogador, op ->> 'timer_id', op ->> 'tipo',
+				(op ->> 'ajudas_max')::smallint, to_timestamp((op ->> 'expira_em')::bigint));
+
+		elsif t = 'ajuda_dar' then
+			update public.ordem_pedido_ajuda p
+			set ajudas = ajudas + 1
+			where p.id = (op ->> 'pedido_id')::uuid and p.ajudas < p.ajudas_max and p.expira_em > now()
+				and p.jogador_id <> p_jogador and public.ordem_do_jogador(p_jogador) = p.ordem_id;
+			if not found then raise exception 'conflito_de_revisao'; end if;
+			insert into public.ordem_ajuda (pedido_id, ajudante_id) values ((op ->> 'pedido_id')::uuid, p_jogador);
+
+		elsif t = 'ajuda_aplicada' then
+			update public.ordem_ajuda a set aplicada = true
+			where a.pedido_id = (op ->> 'pedido_id')::uuid and a.ajudante_id = (op ->> 'ajudante_id')::uuid
+				and exists (select 1 from public.ordem_pedido_ajuda p where p.id = a.pedido_id and p.jogador_id = p_jogador);
+
+		elsif t = 'doacao_registrar' then
+			if public.ordem_do_jogador(p_jogador) is distinct from (op ->> 'ordem_id')::uuid
+				or public.ordem_do_jogador((op ->> 'para_id')::uuid) is distinct from (op ->> 'ordem_id')::uuid then
+				raise exception 'conflito_de_revisao';
+			end if;
+			insert into public.ordem_doacao (ordem_id, de_id, para_id, material, quantidade, dia)
+			values ((op ->> 'ordem_id')::uuid, p_jogador, (op ->> 'para_id')::uuid, op ->> 'material',
+				(op ->> 'quantidade')::integer, (op ->> 'dia')::integer);
+
+		elsif t = 'doacao_aplicada' then
+			update public.ordem_doacao set aplicada = true
+			where id = (op ->> 'id')::bigint and para_id = p_jogador;
+
+		elsif t = 'chat_inserir' then
+			if exists (select 1 from public.silenciamento where jogador_id = p_jogador and ate > now()) then
+				raise exception 'conflito_de_revisao';
+			end if;
+			if (op ->> 'canal') like 'ordem:%'
+				and public.ordem_do_jogador(p_jogador) is distinct from substr(op ->> 'canal', 7)::uuid then
+				raise exception 'conflito_de_revisao';
+			end if;
+			insert into public.chat_mensagem (canal, de_id, de_nome, texto, chave)
+			values (op ->> 'canal', p_jogador, left(coalesce(op ->> 'de_nome', ''), 40), coalesce(op ->> 'texto', ''), coalesce(op ->> 'chave', ''));
+
+		elsif t = 'amigo_adicionar' then
+			if exists (select 1 from public.bloqueio
+				where jogador_id = (op ->> 'amigo_id')::uuid and bloqueado_id = p_jogador) then
+				raise exception 'conflito_de_revisao';
+			end if;
+			insert into public.amigo (jogador_id, amigo_id) values (p_jogador, (op ->> 'amigo_id')::uuid)
+			on conflict do nothing;
+			insert into public.amigo (jogador_id, amigo_id) values ((op ->> 'amigo_id')::uuid, p_jogador)
+			on conflict do nothing;
+
+		elsif t = 'amigo_remover' then
+			delete from public.amigo
+			where (jogador_id = p_jogador and amigo_id = (op ->> 'amigo_id')::uuid)
+				or (amigo_id = p_jogador and jogador_id = (op ->> 'amigo_id')::uuid);
+
+		elsif t = 'torneio_vitoria' then
+			if public.ordem_do_jogador(p_jogador) is distinct from (op ->> 'ordem_id')::uuid then
+				raise exception 'conflito_de_revisao';
+			end if;
+			insert into public.ordem_torneio (semana, ordem_id, jogador_id, vitorias)
+			values ((op ->> 'semana')::integer, (op ->> 'ordem_id')::uuid, p_jogador, 1)
+			on conflict (semana, ordem_id, jogador_id) do update
+			set vitorias = public.ordem_torneio.vitorias + 1;
+
+		else
+			raise exception 'operacao_social_desconhecida';
+		end if;
+	end loop;
+exception
+	when unique_violation or foreign_key_violation then
+		-- nome de ordem repetido, já está numa ordem, pedido/ajuda duplicados: corrida; refaz
+		raise exception 'conflito_de_revisao';
+end;
+$$;
+revoke all on function public.aplicar_ops_sociais(uuid, jsonb) from public, anon, authenticated;
+
+-- Classificação do Torneio de Ordens: soma das vitórias de PvP por ordem na semana.
+create or replace function public.torneio_da_semana(p_semana integer, p_limite integer)
+returns table (ordem_id uuid, nome text, vitorias bigint)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+	select t.ordem_id, o.nome, sum(t.vitorias)::bigint as vitorias
+	from public.ordem_torneio t
+	join public.ordem o on o.id = t.ordem_id
+	where t.semana = p_semana
+	group by t.ordem_id, o.nome
+	order by 3 desc, o.nome
+	limit p_limite;
+$$;
+revoke all on function public.torneio_da_semana(integer, integer) from public, anon, authenticated;
+
+-- Ordem de um jogador (null se não tem).
+create or replace function public.ordem_do_jogador(p_jogador uuid)
+returns uuid
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+	select ordem_id from public.ordem_membro where jogador_id = p_jogador;
+$$;
+revoke all on function public.ordem_do_jogador(uuid) from public, anon, authenticated;
+
+-- Silenciamento automático: denúncias de jogadores diferentes em 24 h além do limite.
+create or replace function public.silenciar_se_muito_denunciado()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+	limite integer := coalesce((select (dados -> 'limites' ->> 'denuncias_para_silenciar')::integer
+		from public.balanceamento where nome = 'servidor' and ativa limit 1), 5);
+	horas integer := coalesce((select (dados -> 'limites' ->> 'silenciar_horas')::integer
+		from public.balanceamento where nome = 'servidor' and ativa limit 1), 24);
+	n integer;
+begin
+	select count(distinct denunciante_id) into n from public.denuncia
+	where alvo_id = new.alvo_id and criado_em > now() - interval '24 hours';
+	if n >= limite then
+		insert into public.silenciamento (jogador_id, ate, motivo)
+		values (new.alvo_id, now() + make_interval(hours => horas), 'denuncias')
+		on conflict (jogador_id) do update set ate = greatest(public.silenciamento.ate, excluded.ate);
+	end if;
+	return new;
+end;
+$$;
+create trigger denuncia_silencia
+	after insert on public.denuncia
+	for each row execute function public.silenciar_se_muito_denunciado();
+
 -- Efeitos relacionais de uma ação (decididos pela Edge Function, nunca pelo cliente):
 --   publico  : upsert do resumo público do jogador (ranking, pareamento, perfil);
 --   defesa   : retrato da defesa de PvP;
 --   defensor : {id, delta} pontos para o defensor de uma partida;
 --   partida  : registro da partida de PvP (investigação de denúncias);
 --   compra   : registro da compra (recibo conferido); repetido desfaz a ação;
---   compra_estado : muda o estado de uma compra (reembolso, renovação...).
+--   compra_estado : muda o estado de uma compra (reembolso, renovação...);
+--   social   : lista de operações de ordem/ajuda/doação/chat/amigos (aplicar_ops_sociais).
 create or replace function public.aplicar_efeitos(p_jogador uuid, p_efeitos jsonb)
 returns void
 language plpgsql
@@ -439,6 +680,7 @@ declare
 	par jsonb := p_efeitos -> 'partida';
 	cmp jsonb := p_efeitos -> 'compra';
 	cmp_estado jsonb := p_efeitos -> 'compra_estado';
+	soc jsonb := p_efeitos -> 'social';
 begin
 	if pub is not null then
 		insert into public.jogador_publico (jogador_id, codigo, nome, casa, nivel, poder, pontos, liga, melhor_liga,
@@ -479,6 +721,9 @@ begin
 				else to_timestamp((cmp_estado ->> 'valido_ate')::bigint) end,
 			atualizado_em = now()
 		where loja = cmp_estado ->> 'loja' and recibo_hash = cmp_estado ->> 'recibo_hash';
+	end if;
+	if soc is not null then
+		perform public.aplicar_ops_sociais(p_jogador, soc);
 	end if;
 	if par is not null then
 		insert into public.partida_pvp (atacante_id, defensor_id, semente, entradas, venceu, pontos_atacante, pontos_defensor)

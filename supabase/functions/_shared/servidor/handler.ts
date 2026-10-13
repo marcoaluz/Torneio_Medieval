@@ -9,7 +9,8 @@
 
 import { ASSINCRONOS, PUBLICOS } from "./comandos.ts";
 import type { VerificadorLoja } from "./compras.ts";
-import type { DepsComando } from "./comandos.ts";
+import type { BancoDeComandos } from "./comandos.ts";
+import { aplicar_pendencias } from "./social.ts";
 import { resumo_publico } from "./liga.ts";
 import { codigo_amigo } from "../regra/ordem.ts";
 import { validar_argumentos } from "./esquema.ts";
@@ -18,7 +19,7 @@ import { copiar } from "./base.ts";
 import type { Dados, Resultado, Servico } from "./base.ts";
 import { anuncio_sem_assistir } from "./jogador.ts";
 
-export interface Banco extends Omit<DepsComando, "verificador"> {
+export interface Banco extends BancoDeComandos {
   /** Estado e revisão atuais do jogador; null se ainda não tem. */
   carregar(jogador: string): Promise<{ estado: Dados; revisao: number } | null>;
   /**
@@ -101,14 +102,13 @@ export async function tratar_acao(e: Entrada, dep: Dependencias): Promise<Saida>
       if (!ok) return await responder(e, dep, 200, { ok: false, erro: "anuncio_nao_confirmado" });
     }
 
+    // O que os colegas fizeram para ESTE jogador (ajuda nos timers, doações) entra no estado dele agora.
+    const pendencias = atual ? await aplicar_pendencias(s, e.jogador_id, dep.banco) : [];
+
     let r: Resultado;
     try {
       r = Object.hasOwn(ASSINCRONOS, e.tipo)
-        ? await ASSINCRONOS[e.tipo](s, args, {
-          candidatos_pvp: dep.banco.candidatos_pvp.bind(dep.banco),
-          compra_existente: dep.banco.compra_existente.bind(dep.banco),
-          verificador: dep.verificador,
-        }, e.jogador_id)
+        ? await ASSINCRONOS[e.tipo](s, args, { banco: dep.banco, verificador: dep.verificador }, e.jogador_id)
         : PUBLICOS[e.tipo](s, ...args);
     } catch (_erro) {
       // Dado inesperado numa função de regra: recusa sem mudar nada (e sem expor detalhe).
@@ -120,6 +120,7 @@ export async function tratar_acao(e: Entrada, dep: Dependencias): Promise<Saida>
     // saem da resposta e vão na MESMA transação do estado.
     const efeitos: Dados = (r["_efeitos"] as Dados) ?? {};
     delete r["_efeitos"];
+    if (pendencias.length > 0) efeitos["social"] = [...pendencias, ...((efeitos["social"] as Dados[]) ?? [])];
     const confirmar = r["_confirmar"] as { loja: string; produto: string; recibo: string } | undefined;
     delete r["_confirmar"];
     efeitos["publico"] = resumo_publico(s, String(estado["social"]?.["codigo"] || codigo_amigo(Number(estado["baus"]["semente"]))));

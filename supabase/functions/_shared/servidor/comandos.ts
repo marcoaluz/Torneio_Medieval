@@ -14,6 +14,8 @@ import type { Resultado, Servico } from "./base.ts";
 import type { Candidato } from "./liga.ts";
 import { comprar_recibo } from "./compras.ts";
 import type { DepsCompras } from "./compras.ts";
+import * as S from "./social.ts";
+import type { BancoSocial } from "./social.ts";
 
 // deno-lint-ignore no-explicit-any
 type Comando = (s: Servico, ...args: any[]) => Resultado;
@@ -60,28 +62,59 @@ export const PUBLICOS: Record<string, Comando> = {
   concluir_disputa_conferida: D.concluir_disputa_conferida,
   abandonar_disputa: D.abandonar_disputa,
   salvar_defesa: L.salvar_defesa,
-  concluir_pvp_conferido: L.concluir_pvp_conferido,
+  comprar_da_ordem: S.comprar_da_ordem,
+  remover_amigo: (s, id) => S.remover_amigo(s, id),
 };
 
-/** O que um comando assíncrono pode pedir ao banco. */
-export interface DepsComando extends DepsCompras {
+/** O banco que os comandos assíncronos usam para DECIDIR (as escritas saem em `_efeitos`). */
+export interface BancoDeComandos extends BancoSocial {
   /** Jogadores reais com defesa salva, na faixa de poder, ordenados por proximidade de pontos. */
   candidatos_pvp(jogador: string, pontos: number, poder: number, faixa: number, limite: number): Promise<Candidato[]>;
+  compra_existente: DepsCompras["compra_existente"];
+}
+
+export interface DepsComando {
+  banco: BancoDeComandos;
+  verificador: DepsCompras["verificador"];
 }
 
 // deno-lint-ignore no-explicit-any
-type ComandoAssincrono = (s: Servico, args: any[], dep: DepsComando, jogador: string) => Promise<Resultado>;
+type ComandoAssincrono = (s: Servico, args: any[], ctx: DepsComando, jogador: string) => Promise<Resultado>;
 
-/** Comandos que precisam do banco para decidir (pareamento): públicos, também idempotentes. */
+/** Comandos que precisam do banco para decidir (pareamento, ordem, chat...): públicos, idempotentes. */
 export const ASSINCRONOS: Record<string, ComandoAssincrono> = {
-  procurar_adversario: async (s, _args, dep, jogador) => {
+  procurar_adversario: async (s, _args, ctx, jogador) => {
     const cfg = L.cfg_ligas(s);
     const lg = s.estado["liga"];
     const meu = J.poder_jogador(s);
-    const candidatos = await dep.candidatos_pvp(jogador, Math.trunc(lg["pontos"]), meu, Math.trunc(cfg["faixa_poder"]), Math.trunc(cfg["fantasmas"]["candidatos"]));
+    const candidatos = await ctx.banco.candidatos_pvp(jogador, Math.trunc(lg["pontos"]), meu, Math.trunc(cfg["faixa_poder"]), Math.trunc(cfg["fantasmas"]["candidatos"]));
     return L.escolher_adversario(s, candidatos);
   },
-  comprar_recibo: (s, [loja, produto, recibo], dep, jogador) => comprar_recibo(s, jogador, loja, produto, recibo, dep),
+  // A partida de PvP conta como vitória no torneio da ordem (quem está numa).
+  concluir_pvp_conferido: async (s, [entradas], ctx, jogador) => {
+    const r = L.concluir_pvp_conferido(s, entradas);
+    if (r.ok && r["venceu"]) {
+      const p = await ctx.banco.ordem_do_jogador(jogador);
+      if (p) S.ops(r, S.op_vitoria_torneio(s, p.ordem_id));
+    }
+    return r;
+  },
+  comprar_recibo: (s, [loja, produto, recibo], ctx, jogador) =>
+    comprar_recibo(s, jogador, loja, produto, recibo, { verificador: ctx.verificador, compra_existente: ctx.banco.compra_existente.bind(ctx.banco) }),
+  criar_ordem: (s, [nome, brasao, idioma], ctx, j) => S.criar_ordem(s, j, nome, brasao, idioma, ctx.banco),
+  entrar_ordem: (s, [id], ctx, j) => S.entrar_ordem(s, j, id, ctx.banco),
+  sair_ordem: (s, _a, ctx, j) => S.sair_ordem(s, j, ctx.banco),
+  dissolver_ordem: (s, _a, ctx, j) => S.dissolver_ordem(s, j, ctx.banco),
+  agir_sobre_membro: (s, [alvo, acao], ctx, j) => S.agir_sobre_membro(s, j, alvo, acao, ctx.banco),
+  passar_lideranca: (s, [alvo], ctx, j) => S.passar_lideranca(s, j, alvo, ctx.banco),
+  editar_ordem: (s, [nome, brasao], ctx, j) => S.editar_ordem(s, j, nome === "" ? null : nome, brasao, ctx.banco),
+  pedir_ajuda: (s, [timer], ctx, j) => S.pedir_ajuda(s, j, timer, ctx.banco),
+  ajudar_pedido: (s, [id], ctx, j) => S.ajudar_pedido(s, j, id, ctx.banco),
+  doar: (s, [para, material, qtd], ctx, j) => S.doar(s, j, para, material, qtd, ctx.banco),
+  torneio_semana: (s, _a, ctx, j) => S.torneio_semana(s, j, ctx.banco),
+  resgatar_torneio: (s, _a, ctx, j) => S.resgatar_torneio(s, j, ctx.banco),
+  chat_enviar: (s, [canal, texto, rapida, idioma], ctx, j) => S.chat_enviar(s, j, canal, texto, rapida, idioma, ctx.banco),
+  adicionar_amigo_por_codigo: (s, [codigo], ctx, j) => S.adicionar_amigo_por_codigo(s, j, codigo, ctx.banco),
 };
 
 /** Comandos só do servidor (nunca expostos ao cliente). */

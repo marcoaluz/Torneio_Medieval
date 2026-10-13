@@ -5,7 +5,9 @@
 		"acoes_por_minuto": 60,
 		"chat_por_minuto": 20,
 		"tentativas_conflito": 3,
-		"idempotencia_dias": 7
+		"idempotencia_dias": 7,
+		"denuncias_para_silenciar": 5,
+		"silenciar_horas": 24
 	},
 	"aceitar_loja_teste": false,
 	"temporadas": {

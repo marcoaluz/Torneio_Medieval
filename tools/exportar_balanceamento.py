@@ -13,6 +13,9 @@ EXTRAS = {
     "historia": "game/data/historia/historia.json",
     "nomes_proibidos": "game/data/texto/nomes_proibidos.json",
     "acessibilidade": "game/data/ui/acessibilidade.json",
+    "nomes_sorteio": "game/data/texto/nomes_sorteio.json",
+    "paletas": "game/data/personagem/paletas.json",
+    "chat_rapido": "game/data/social/chat.json",
 }
 SAIDA = os.path.join(RAIZ, "supabase", "seed", "balanceamento.sql")
 # Só a Edge Function lê estas (limites do anticheat e lista de palavras): publico = false.

@@ -45,6 +45,22 @@ export const ESQUEMA: Record<string, string> = {
   procurar_adversario: "",
   concluir_pvp_conferido: "a",
   comprar_recibo: "sss",
+  criar_ordem: "sos",
+  entrar_ordem: "s",
+  sair_ordem: "",
+  dissolver_ordem: "",
+  agir_sobre_membro: "ss",
+  passar_lideranca: "s",
+  editar_ordem: "so",
+  pedir_ajuda: "s",
+  ajudar_pedido: "s",
+  doar: "ssn",
+  torneio_semana: "",
+  resgatar_torneio: "",
+  comprar_da_ordem: "s",
+  chat_enviar: "ssss",
+  adicionar_amigo_por_codigo: "s",
+  remover_amigo: "s",
 };
 
 const PERIGOSAS = ["__proto__", "constructor", "prototype"];
