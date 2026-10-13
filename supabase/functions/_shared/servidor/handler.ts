@@ -7,14 +7,18 @@
 // A lógica não conhece Deno nem Supabase: o banco entra por `Banco` (testado
 // com um banco falso); a função do Supabase (acao/index.ts) só liga os fios.
 
-import { PUBLICOS } from "./comandos.ts";
+import { ASSINCRONOS, PUBLICOS } from "./comandos.ts";
+import type { VerificadorLoja } from "./compras.ts";
+import type { DepsComando } from "./comandos.ts";
+import { resumo_publico } from "./liga.ts";
+import { codigo_amigo } from "../regra/ordem.ts";
 import { validar_argumentos } from "./esquema.ts";
 import { novo_estado } from "./estado.ts";
 import { copiar } from "./base.ts";
 import type { Dados, Resultado, Servico } from "./base.ts";
 import { anuncio_sem_assistir } from "./jogador.ts";
 
-export interface Banco {
+export interface Banco extends Omit<DepsComando, "verificador"> {
   /** Estado e revisão atuais do jogador; null se ainda não tem. */
   carregar(jogador: string): Promise<{ estado: Dados; revisao: number } | null>;
   /**
@@ -23,8 +27,10 @@ export interface Banco {
    * revisão, "repetida" se o id já tinha resposta, ou null se houve conflito
    * (outra ação gravou antes). Atomicidade: nunca há estado gravado sem resposta.
    */
-  gravar(jogador: string, estado: Dados, revisao_esperada: number | null, log: { id: string; tipo: string; resposta: Dados }):
-    Promise<number | "repetida" | null>;
+  gravar(
+    jogador: string, estado: Dados, revisao_esperada: number | null,
+    log: { id: string; tipo: string; resposta: Dados }, efeitos: Dados,
+  ): Promise<number | "repetida" | null>;
   /** Resposta já dada a esta ação (idempotência), se houver. */
   resposta_guardada(jogador: string, id: string): Promise<Dados | null>;
   /** Guarda a resposta; false se outra chamada com o mesmo id chegou antes. */
@@ -41,6 +47,8 @@ export interface Dependencias {
   agora(): number;
   /** Inteiro aleatório de 31 bits (semente do jogador novo). */
   sorteio(): number;
+  /** Confere recibos com a Google Play / App Store (3.7). */
+  verificador: VerificadorLoja;
   /** Confere o comprovante de um anúncio premiado com o provedor (SSV). */
   verificar_anuncio(jogador: string, token: string, tipo: string): Promise<boolean>;
 }
@@ -66,7 +74,8 @@ function recusar(status: number, codigo: string): Saida {
 export async function tratar_acao(e: Entrada, dep: Dependencias): Promise<Saida> {
   const cfg = dep.bal("servidor");
   if (typeof e.id !== "string" || !UUID.test(e.id)) return recusar(400, "id_invalido");
-  if (typeof e.tipo !== "string" || !Object.hasOwn(PUBLICOS, e.tipo)) return recusar(400, "comando_inexistente");
+  const publico = typeof e.tipo === "string" && (Object.hasOwn(PUBLICOS, e.tipo) || Object.hasOwn(ASSINCRONOS, e.tipo));
+  if (!publico) return recusar(400, "comando_inexistente");
   const aviso = validar_argumentos(e.tipo, e.args, cfg["argumentos"]);
   if (aviso !== "") return recusar(400, aviso);
 
@@ -94,18 +103,37 @@ export async function tratar_acao(e: Entrada, dep: Dependencias): Promise<Saida>
 
     let r: Resultado;
     try {
-      r = PUBLICOS[e.tipo](s, ...args);
+      r = Object.hasOwn(ASSINCRONOS, e.tipo)
+        ? await ASSINCRONOS[e.tipo](s, args, {
+          candidatos_pvp: dep.banco.candidatos_pvp.bind(dep.banco),
+          compra_existente: dep.banco.compra_existente.bind(dep.banco),
+          verificador: dep.verificador,
+        }, e.jogador_id)
+        : PUBLICOS[e.tipo](s, ...args);
     } catch (_erro) {
       // Dado inesperado numa função de regra: recusa sem mudar nada (e sem expor detalhe).
       return await responder(e, dep, 200, { ok: false, erro: "falha_interna" });
     }
     if (!r.ok) return await responder(e, dep, 200, r);
 
-    const nova = await dep.banco.gravar(e.jogador_id, estado, atual ? atual.revisao : null, { id: e.id, tipo: e.tipo, resposta: r });
+    // Efeitos relacionais do comando (ranking, defesa, partida) e o resumo público do jogador:
+    // saem da resposta e vão na MESMA transação do estado.
+    const efeitos: Dados = (r["_efeitos"] as Dados) ?? {};
+    delete r["_efeitos"];
+    const confirmar = r["_confirmar"] as { loja: string; produto: string; recibo: string } | undefined;
+    delete r["_confirmar"];
+    efeitos["publico"] = resumo_publico(s, String(estado["social"]?.["codigo"] || codigo_amigo(Number(estado["baus"]["semente"]))));
+    const nova = await dep.banco.gravar(e.jogador_id, estado, atual ? atual.revisao : null, { id: e.id, tipo: e.tipo, resposta: r }, efeitos);
     if (nova === null) continue; // alguém gravou antes: refaz sobre o estado novo
     if (nova === "repetida") {
       const primeira = await dep.banco.resposta_guardada(e.jogador_id, e.id);
       return primeira ? await repetida(e, dep, primeira) : recusar(409, "conflito");
+    }
+    // Compra gravada: confirma a entrega com a loja (o Google reembolsa sem isso em 3 dias).
+    if (confirmar) {
+      try {
+        await dep.verificador.confirmar(confirmar.loja as "google" | "apple" | "teste", confirmar.produto, confirmar.recibo);
+      } catch (_e) { /* repetida pela rotina de compras pendentes */ }
     }
     return { status: 200, corpo: { ...r, estado, revisao: nova } };
   }

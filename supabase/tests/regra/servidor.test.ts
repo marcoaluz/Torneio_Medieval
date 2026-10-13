@@ -6,92 +6,15 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { tratar_acao } from "../../functions/_shared/servidor/handler.ts";
-import type { Banco, Dependencias } from "../../functions/_shared/servidor/handler.ts";
 import { novo_estado } from "../../functions/_shared/servidor/estado.ts";
 import { refazer_justa, validar_entradas } from "../../functions/_shared/servidor/disputa.ts";
 import { Justa } from "../../functions/_shared/regra/justa.ts";
 import { Fase } from "../../functions/_shared/regra/justa_fases.ts";
 import type { Dados } from "./comum.ts";
 
+import { agir, bal, BancoFalso, JOGADOR, montar, PERS, uuid } from "./fixtura.ts";
+
 const RAIZ = new URL("../../../", import.meta.url);
-const ARQUIVOS: Record<string, string> = {
-  historia: "game/data/historia/historia.json",
-  nomes_proibidos: "game/data/texto/nomes_proibidos.json",
-  acessibilidade: "game/data/ui/acessibilidade.json",
-};
-const cache: Record<string, Dados> = {};
-function bal(nome: string): Dados {
-  if (!(nome in cache)) {
-    cache[nome] = JSON.parse(readFileSync(new URL(ARQUIVOS[nome] ?? `game/data/balance/${nome}.json`, RAIZ), "utf-8"));
-  }
-  return cache[nome];
-}
-
-const JOGADOR = "11111111-1111-4111-8111-111111111111";
-let contador = 0;
-const uuid = () => `00000000-0000-4000-8000-${String(++contador).padStart(12, "0")}`;
-
-class BancoFalso implements Banco {
-  estados = new Map<string, { estado: Dados; revisao: number }>();
-  respostas = new Map<string, Dados>();
-  chamadas = new Map<string, number>();
-  /** Gancho para simular outra ação gravando antes (conflito). */
-  antes_de_gravar: (() => void) | null = null;
-  gravacoes = 0;
-
-  async carregar(j: string) {
-    const e = this.estados.get(j);
-    return e ? { estado: structuredClone(e.estado), revisao: e.revisao } : null;
-  }
-  async gravar(j: string, estado: Dados, esperada: number | null, log: { id: string; tipo: string; resposta: Dados }) {
-    if (this.antes_de_gravar) {
-      const g = this.antes_de_gravar;
-      this.antes_de_gravar = null;
-      g();
-    }
-    if (this.respostas.has(`${j}/${log.id}`)) return "repetida" as const;
-    const atual = this.estados.get(j);
-    if ((atual?.revisao ?? null) !== esperada) return null;
-    const nova = (atual?.revisao ?? 0) + 1;
-    this.estados.set(j, { estado: structuredClone(estado), revisao: nova });
-    this.respostas.set(`${j}/${log.id}`, structuredClone(log.resposta));
-    this.gravacoes += 1;
-    return nova;
-  }
-  async resposta_guardada(j: string, id: string) {
-    return this.respostas.get(`${j}/${id}`) ?? null;
-  }
-  async guardar_resposta(j: string, id: string, _tipo: string, resposta: Dados) {
-    if (this.respostas.has(`${j}/${id}`)) return false;
-    this.respostas.set(`${j}/${id}`, structuredClone(resposta));
-    return true;
-  }
-  async contar_chamada(j: string, janela: number) {
-    const k = `${j}/${janela}`;
-    this.chamadas.set(k, (this.chamadas.get(k) ?? 0) + 1);
-    return this.chamadas.get(k) as number;
-  }
-}
-
-function montar(inicio = 1790000000) {
-  const banco = new BancoFalso();
-  let agora = inicio;
-  const anuncios: string[] = [];
-  const dep: Dependencias = {
-    banco, bal, agora: () => agora, sorteio: () => 123456789,
-    verificar_anuncio: async (_j, token) => { anuncios.push(token); return token === "bom"; },
-  };
-  return { banco, dep, anuncios, relogio: { avancar: (s: number) => { agora += s; }, ir_para: (t: number) => { agora = t; } } };
-}
-
-const PERS = {
-  nome: "Isolda", nome_casa: "Casa Pardal", corpo: "feminino", rosto: "1", cabelo: "1", pele: "clara",
-  cor_principal: "azul_real", cor_secundaria: "ouro_velho", pelagem: "preto",
-};
-
-async function agir(dep: Dependencias, tipo: string, args: unknown[], id = uuid()) {
-  return await tratar_acao({ jogador_id: JOGADOR, id, tipo, args }, dep);
-}
 
 describe("ações do servidor", () => {
   test("primeiro uso cria o estado e a ação grava com revisão 1", async () => {
@@ -376,21 +299,24 @@ describe("banco do Supabase (cliente falso)", () => {
   test("gravar usa a função transacional e traduz -1 (repetida) e null (conflito)", async () => {
     const { cliente, chamadas } = falso({ aplicar_acao: { data: "7", error: null } });
     const banco = new BancoSupabase(cliente);
-    const r = await banco.gravar(JOGADOR, { versao: 11 }, 6, { id: "i", tipo: "t", resposta: { ok: true } });
+    const r = await banco.gravar(JOGADOR, { versao: 11 }, 6, { id: "i", tipo: "t", resposta: { ok: true } }, { publico: { nome: "x" } });
     assert.equal(r, 7);
     assert.deepEqual(chamadas[0], {
       rpc: "aplicar_acao",
-      args: { p_jogador: JOGADOR, p_estado: { versao: 11 }, p_revisao_esperada: 6, p_id: "i", p_tipo: "t", p_resposta: { ok: true } },
+      args: {
+        p_jogador: JOGADOR, p_estado: { versao: 11 }, p_revisao_esperada: 6, p_id: "i", p_tipo: "t",
+        p_resposta: { ok: true }, p_efeitos: { publico: { nome: "x" } },
+      },
     });
     const rep = new BancoSupabase(falso({ aplicar_acao: { data: -1, error: null } }).cliente);
-    assert.equal(await rep.gravar(JOGADOR, {}, null, { id: "i", tipo: "t", resposta: {} }), "repetida");
+    assert.equal(await rep.gravar(JOGADOR, {}, null, { id: "i", tipo: "t", resposta: {} }, {}), "repetida");
     const conf = new BancoSupabase(falso({ aplicar_acao: { data: null, error: null } }).cliente);
-    assert.equal(await conf.gravar(JOGADOR, {}, 1, { id: "i", tipo: "t", resposta: {} }), null);
+    assert.equal(await conf.gravar(JOGADOR, {}, 1, { id: "i", tipo: "t", resposta: {} }, {}), null);
   });
 
   test("erro do banco vira exceção (a função responde falha_interna, sem detalhe)", async () => {
     const banco = new BancoSupabase(falso({ aplicar_acao: { data: null, error: { message: "boom" } } }).cliente);
-    await assert.rejects(() => banco.gravar(JOGADOR, {}, 1, { id: "i", tipo: "t", resposta: {} }), /gravar: boom/);
+    await assert.rejects(() => banco.gravar(JOGADOR, {}, 1, { id: "i", tipo: "t", resposta: {} }, {}), /gravar: boom/);
   });
 
   test("carregar e resposta_guardada leem do jogador certo; contar usa a janela", async () => {

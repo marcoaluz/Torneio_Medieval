@@ -11,6 +11,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { BancoSupabase, carregar_balanceamento } from "../_shared/servidor/banco_supabase.ts";
 import { tratar_acao } from "../_shared/servidor/handler.ts";
 import type { Dependencias } from "../_shared/servidor/handler.ts";
+import { VerificadorGoogle } from "../_shared/servidor/loja_google.ts";
+import type { VerificadorLoja } from "../_shared/servidor/compras.ts";
 
 const URL_PROJETO = Deno.env.get("SUPABASE_URL")!;
 const CHAVE_SERVICO = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -24,6 +26,17 @@ async function balanceamento() {
   if (!cache_bal || agora - cache_bal.em > 60_000) cache_bal = { em: agora, dados: await carregar_balanceamento(cliente) };
   return cache_bal.dados;
 }
+
+// Recibos: Google Play com a conta de serviço (segredos da função); sem ela, recusa tudo.
+const verificador: VerificadorLoja = Deno.env.get("GOOGLE_PLAY_CLIENT_EMAIL")
+  ? new VerificadorGoogle({
+    pacote: Deno.env.get("GOOGLE_PLAY_PACOTE")!, email: Deno.env.get("GOOGLE_PLAY_CLIENT_EMAIL")!,
+    chave_privada: Deno.env.get("GOOGLE_PLAY_PRIVATE_KEY")!, assinaturas: ["vip_mensal"],
+  })
+  : {
+    verificar: async () => ({ valido: false, produto: "", transacao: "", erro: "loja_indisponivel" }),
+    confirmar: async () => {},
+  };
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -51,6 +64,7 @@ Deno.serve(async (req) => {
       },
       agora: () => Math.floor(Date.now() / 1000),
       sorteio: () => crypto.getRandomValues(new Uint32Array(1))[0] & 0x7FFFFFFF,
+      verificador,
       // SSV do provedor de anúncios (AdMob): a conferir quando a conta existir (3.9/3.10).
       verificar_anuncio: async () => false,
     };

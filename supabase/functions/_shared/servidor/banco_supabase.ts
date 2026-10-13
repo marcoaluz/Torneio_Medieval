@@ -5,6 +5,7 @@
 
 import type { Banco } from "./handler.ts";
 import type { Dados } from "./base.ts";
+import type { Candidato } from "./liga.ts";
 
 // O cliente do supabase-js, tipado de forma mínima (o servidor injeta o real).
 export interface ClienteSupabase {
@@ -27,15 +28,35 @@ export class BancoSupabase implements Banco {
     return data ? { estado: data.dados as Dados, revisao: Number(data.revisao) } : null;
   }
 
-  async gravar(jogador: string, estado: Dados, revisao_esperada: number | null, log: { id: string; tipo: string; resposta: Dados }) {
+  async gravar(jogador: string, estado: Dados, revisao_esperada: number | null, log: { id: string; tipo: string; resposta: Dados }, efeitos: Dados) {
     const { data, error } = await this.cliente.rpc("aplicar_acao", {
       p_jogador: jogador, p_estado: estado, p_revisao_esperada: revisao_esperada,
-      p_id: log.id, p_tipo: log.tipo, p_resposta: log.resposta,
+      p_id: log.id, p_tipo: log.tipo, p_resposta: log.resposta, p_efeitos: efeitos,
     });
     if (error) throw new Error("gravar: " + error.message);
     if (data === null) return null;
     if (Number(data) === -1) return "repetida" as const;
     return Number(data);
+  }
+
+  async candidatos_pvp(jogador: string, pontos: number, poder: number, faixa: number, limite: number): Promise<Candidato[]> {
+    const { data, error } = await this.cliente.rpc("candidatos_pvp", {
+      p_jogador: jogador, p_pontos: pontos, p_poder: poder, p_faixa: faixa, p_limite: limite,
+    });
+    if (error) throw new Error("candidatos: " + error.message);
+    return (data ?? []) as Candidato[];
+  }
+
+  async compra_existente(loja: string, recibo_hash: string) {
+    const { data, error } = await this.cliente.from("compra").select("jogador_id, estado").eq("loja", loja).eq("recibo_hash", recibo_hash).maybeSingle();
+    if (error) throw new Error("compra: " + error.message);
+    return data ? { jogador_id: String(data.jogador_id), estado: String(data.estado) } : null;
+  }
+
+  async compra_por_hash(loja: string, recibo_hash: string) {
+    const { data, error } = await this.cliente.from("compra").select("jogador_id, produto").eq("loja", loja).eq("recibo_hash", recibo_hash).maybeSingle();
+    if (error) throw new Error("compra: " + error.message);
+    return data ? { jogador_id: String(data.jogador_id), produto: String(data.produto) } : null;
   }
 
   async resposta_guardada(jogador: string, id: string) {

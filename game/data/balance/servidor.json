@@ -7,6 +7,11 @@
 		"tentativas_conflito": 3,
 		"idempotencia_dias": 7
 	},
+	"aceitar_loja_teste": false,
+	"temporadas": {
+		"_nota": "Grade global das temporadas (mesma para todos): epoca = uma segunda-feira 00:00 UTC; a duracao e economia.ligas.temporada_dias.",
+		"epoca": 1791763200
+	},
 	"anticheat": {
 		"toque_min_intervalo_ms": 40,
 		"reacao_largada_min_ms": 60,

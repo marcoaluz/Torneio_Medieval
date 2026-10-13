@@ -9,7 +9,11 @@ import { semente_servico } from "./base.ts";
 import * as J from "./jogador.ts";
 import * as P from "./pve.ts";
 import * as D from "./disputa.ts";
+import * as L from "./liga.ts";
 import type { Resultado, Servico } from "./base.ts";
+import type { Candidato } from "./liga.ts";
+import { comprar_recibo } from "./compras.ts";
+import type { DepsCompras } from "./compras.ts";
 
 // deno-lint-ignore no-explicit-any
 type Comando = (s: Servico, ...args: any[]) => Resultado;
@@ -55,6 +59,29 @@ export const PUBLICOS: Record<string, Comando> = {
   iniciar_disputa: D.iniciar_disputa,
   concluir_disputa_conferida: D.concluir_disputa_conferida,
   abandonar_disputa: D.abandonar_disputa,
+  salvar_defesa: L.salvar_defesa,
+  concluir_pvp_conferido: L.concluir_pvp_conferido,
+};
+
+/** O que um comando assíncrono pode pedir ao banco. */
+export interface DepsComando extends DepsCompras {
+  /** Jogadores reais com defesa salva, na faixa de poder, ordenados por proximidade de pontos. */
+  candidatos_pvp(jogador: string, pontos: number, poder: number, faixa: number, limite: number): Promise<Candidato[]>;
+}
+
+// deno-lint-ignore no-explicit-any
+type ComandoAssincrono = (s: Servico, args: any[], dep: DepsComando, jogador: string) => Promise<Resultado>;
+
+/** Comandos que precisam do banco para decidir (pareamento): públicos, também idempotentes. */
+export const ASSINCRONOS: Record<string, ComandoAssincrono> = {
+  procurar_adversario: async (s, _args, dep, jogador) => {
+    const cfg = L.cfg_ligas(s);
+    const lg = s.estado["liga"];
+    const meu = J.poder_jogador(s);
+    const candidatos = await dep.candidatos_pvp(jogador, Math.trunc(lg["pontos"]), meu, Math.trunc(cfg["faixa_poder"]), Math.trunc(cfg["fantasmas"]["candidatos"]));
+    return L.escolher_adversario(s, candidatos);
+  },
+  comprar_recibo: (s, [loja, produto, recibo], dep, jogador) => comprar_recibo(s, jogador, loja, produto, recibo, dep),
 };
 
 /** Comandos só do servidor (nunca expostos ao cliente). */

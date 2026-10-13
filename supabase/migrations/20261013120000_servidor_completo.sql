@@ -419,11 +419,102 @@ end;
 $$;
 revoke all on function public.guardar_resposta_acao(uuid, uuid, text, jsonb) from public, anon, authenticated;
 
+-- Efeitos relacionais de uma ação (decididos pela Edge Function, nunca pelo cliente):
+--   publico  : upsert do resumo público do jogador (ranking, pareamento, perfil);
+--   defesa   : retrato da defesa de PvP;
+--   defensor : {id, delta} pontos para o defensor de uma partida;
+--   partida  : registro da partida de PvP (investigação de denúncias);
+--   compra   : registro da compra (recibo conferido); repetido desfaz a ação;
+--   compra_estado : muda o estado de uma compra (reembolso, renovação...).
+create or replace function public.aplicar_efeitos(p_jogador uuid, p_efeitos jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+	pub jsonb := p_efeitos -> 'publico';
+	def jsonb := p_efeitos -> 'defesa';
+	dfn jsonb := p_efeitos -> 'defensor';
+	par jsonb := p_efeitos -> 'partida';
+	cmp jsonb := p_efeitos -> 'compra';
+	cmp_estado jsonb := p_efeitos -> 'compra_estado';
+begin
+	if pub is not null then
+		insert into public.jogador_publico (jogador_id, codigo, nome, casa, nivel, poder, pontos, liga, melhor_liga,
+			aparencia, brasao, titulo, atualizado_em)
+		values (p_jogador, pub ->> 'codigo', pub ->> 'nome', pub ->> 'casa', (pub ->> 'nivel')::integer,
+			(pub ->> 'poder')::integer, (pub ->> 'pontos')::integer, pub ->> 'liga', pub ->> 'melhor_liga',
+			pub -> 'aparencia', pub -> 'brasao', coalesce(pub ->> 'titulo', ''), now())
+		on conflict (jogador_id) do update set
+			nome = excluded.nome, casa = excluded.casa, nivel = excluded.nivel, poder = excluded.poder,
+			pontos = excluded.pontos, liga = excluded.liga, melhor_liga = excluded.melhor_liga,
+			aparencia = excluded.aparencia, brasao = excluded.brasao, titulo = excluded.titulo,
+			atualizado_em = now();
+	end if;
+	if def is not null then
+		insert into public.defesa_pvp (jogador_id, retrato, poder, salva_em)
+		values (p_jogador, def -> 'retrato', (def ->> 'poder')::integer, now())
+		on conflict (jogador_id) do update set retrato = excluded.retrato, poder = excluded.poder, salva_em = now();
+	end if;
+	if dfn is not null then
+		update public.jogador_publico
+		set pontos = pontos + (dfn ->> 'delta')::integer
+		where jogador_id = (dfn ->> 'id')::uuid;
+	end if;
+	if cmp is not null then
+		-- recibo repetido (corrida): desfaz esta ação inteira; o chamador refaz e vê a compra já registrada
+		insert into public.compra (jogador_id, loja, produto, recibo_hash, valido_ate)
+		values (p_jogador, cmp ->> 'loja', cmp ->> 'produto', cmp ->> 'recibo_hash',
+			case when cmp ->> 'valido_ate' is null then null else to_timestamp((cmp ->> 'valido_ate')::bigint) end)
+		on conflict (loja, recibo_hash) do nothing;
+		if not found then
+			raise exception 'conflito_de_revisao';
+		end if;
+	end if;
+	if cmp_estado is not null then
+		update public.compra
+		set estado = cmp_estado ->> 'estado',
+			valido_ate = case when cmp_estado ->> 'valido_ate' is null then valido_ate
+				else to_timestamp((cmp_estado ->> 'valido_ate')::bigint) end,
+			atualizado_em = now()
+		where loja = cmp_estado ->> 'loja' and recibo_hash = cmp_estado ->> 'recibo_hash';
+	end if;
+	if par is not null then
+		insert into public.partida_pvp (atacante_id, defensor_id, semente, entradas, venceu, pontos_atacante, pontos_defensor)
+		values (p_jogador, (par ->> 'defensor_id')::uuid, (par ->> 'semente')::bigint, par -> 'entradas',
+			(par ->> 'venceu')::boolean, (par ->> 'pontos_atacante')::integer, (par ->> 'pontos_defensor')::integer);
+	end if;
+end;
+$$;
+revoke all on function public.aplicar_efeitos(uuid, jsonb) from public, anon, authenticated;
+
+-- Candidatos de PvP: outros jogadores com defesa salva, na faixa de poder, mais
+-- perto em pontos primeiro. O retrato sai só para a Edge Function (chave de serviço).
+create or replace function public.candidatos_pvp(
+	p_jogador uuid, p_pontos integer, p_poder integer, p_faixa integer, p_limite integer)
+returns table (jogador_id uuid, nome text, pontos integer, poder integer, retrato jsonb, aparencia jsonb, brasao jsonb)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+	select p.jogador_id, p.nome, p.pontos, d.poder, d.retrato, p.aparencia, p.brasao
+	from public.jogador_publico p
+	join public.defesa_pvp d on d.jogador_id = p.jogador_id
+	where p.jogador_id <> p_jogador
+		and d.poder between p_poder - p_faixa and p_poder + p_faixa
+	order by abs(p.pontos - p_pontos), p.jogador_id
+	limit p_limite;
+$$;
+revoke all on function public.candidatos_pvp(uuid, integer, integer, integer, integer) from public, anon, authenticated;
+
 -- Grava o estado E a resposta da ação na MESMA transação, com controle de
 -- revisão. Devolve a nova revisão, -1 se o id já tinha resposta (repetida) ou
 -- null se a revisão mudou (conflito: nada é gravado, nem o log).
 create or replace function public.aplicar_acao(
-	p_jogador uuid, p_estado jsonb, p_revisao_esperada bigint, p_id uuid, p_tipo text, p_resposta jsonb)
+	p_jogador uuid, p_estado jsonb, p_revisao_esperada bigint, p_id uuid, p_tipo text, p_resposta jsonb,
+	p_efeitos jsonb default '{}'::jsonb)
 returns bigint
 language plpgsql
 security definer
@@ -458,6 +549,7 @@ begin
 		set nome = left(coalesce(p_estado -> 'cavaleiro' ->> 'nome', ''), 20),
 			casa = left(coalesce(p_estado -> 'casa' ->> 'nome', ''), 20)
 		where id = p_jogador;
+		perform public.aplicar_efeitos(p_jogador, p_efeitos);
 		return nova;
 	exception when raise_exception then
 		-- a subtransação desfaz o registro do log; o chamador refaz sobre o estado novo
@@ -468,4 +560,4 @@ begin
 	end;
 end;
 $$;
-revoke all on function public.aplicar_acao(uuid, jsonb, bigint, uuid, text, jsonb) from public, anon, authenticated;
+revoke all on function public.aplicar_acao(uuid, jsonb, bigint, uuid, text, jsonb, jsonb) from public, anon, authenticated;

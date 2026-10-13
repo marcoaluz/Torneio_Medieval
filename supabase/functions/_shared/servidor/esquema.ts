@@ -41,6 +41,10 @@ export const ESQUEMA: Record<string, string> = {
   iniciar_disputa: "sn",
   concluir_disputa_conferida: "a",
   abandonar_disputa: "",
+  salvar_defesa: "",
+  procurar_adversario: "",
+  concluir_pvp_conferido: "a",
+  comprar_recibo: "sss",
 };
 
 const PERIGOSAS = ["__proto__", "constructor", "prototype"];
