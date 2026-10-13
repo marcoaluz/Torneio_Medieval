@@ -1,0 +1,20 @@
+{
+	"versao": 1,
+	"_nota": "Parametros do SERVIDOR (Edge Functions, Parte 3): limites de chamadas, idempotencia e conferencia da justa. Nao e lido pelo jogo; fica na tabela de balanceamento remoto (3.3) para mudar sem lancar versao.",
+	"limites": {
+		"acoes_por_minuto": 60,
+		"chat_por_minuto": 20,
+		"tentativas_conflito": 3,
+		"idempotencia_dias": 7
+	},
+	"anticheat": {
+		"toque_min_intervalo_ms": 40,
+		"reacao_largada_min_ms": 60,
+		"entradas_max": 400
+	},
+	"argumentos": {
+		"texto_max": 200,
+		"lista_max": 50,
+		"profundidade_max": 4
+	}
+}

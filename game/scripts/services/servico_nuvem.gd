@@ -19,6 +19,7 @@ const SESSAO := "user://sessao.json"
 ## -> {codigo: int, corpo: String}. Pode ser corrotina (o padrão usa HTTPRequest).
 var transporte: Callable
 var caminho_sessao := SESSAO
+var caminho_cache_balanceamento := Balanceamento.CACHE_REMOTO
 var estado := "desligado"
 ## {access_token, refresh_token, expira_em, usuario, anonimo, revisao, pendente}
 var sessao := {}
@@ -51,7 +52,9 @@ func iniciar() -> Dictionary:
 	var r := await entrar()
 	if not r["ok"]:
 		return r
-	return await sincronizar()
+	var s := await sincronizar()
+	await baixar_balanceamento()  # vale na próxima abertura; falha não atrapalha
+	return s
 
 ## Garante uma sessão válida: reaproveita, renova ou cria um anônimo.
 func entrar() -> Dictionary:
@@ -74,6 +77,26 @@ func renovar() -> Dictionary:
 	var resp: Dictionary = await transporte.call(HTTPClient.METHOD_POST, _url("/auth/v1/token?grant_type=refresh_token"),
 		_cabecalhos(false), JSON.stringify({"refresh_token": sessao.get("refresh_token", "")}))
 	return _guardar_sessao(resp)
+
+## Baixa o balanceamento ativo (3.3) e guarda em cache para a próxima abertura
+## (Balanceamento.aplicar_cache_remoto). {ok, erro, tabelas}.
+func baixar_balanceamento() -> Dictionary:
+	var resp := await _autenticado(HTTPClient.METHOD_GET, _url("/rest/v1/balanceamento?select=nome,versao,dados&ativa=eq.true"), "")
+	if int(resp["codigo"]) != 200:
+		return {"ok": false, "erro": "nuvem_%d" % int(resp["codigo"])}
+	var lista: Variant = JSON.parse_string(str(resp["corpo"]))
+	if not lista is Array:
+		return {"ok": false, "erro": "nuvem_resposta"}
+	var tabelas := {}
+	var revisoes := {}
+	for linha: Variant in lista:
+		if linha is Dictionary and linha.get("dados") is Dictionary:
+			tabelas[str(linha["nome"])] = linha["dados"]
+			revisoes[str(linha["nome"])] = int(linha.get("versao", 0))
+	if tabelas.is_empty():
+		return {"ok": true, "erro": "", "tabelas": 0}
+	var e := Balanceamento.salvar_cache_remoto(tabelas, revisoes, caminho_cache_balanceamento)
+	return {"ok": e == OK, "erro": "" if e == OK else error_string(e), "tabelas": tabelas.size()}
 
 ## Baixa o save da nuvem: {ok, existe, versao, revisao, dados}.
 func baixar_save() -> Dictionary:

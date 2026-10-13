@@ -6,8 +6,12 @@ extends RefCounted
 ## celular não acelera nada). Os testes adiantam o relógio com `deslocamento`.
 
 static var deslocamento := 0
+## Relógio parado (>= 0): só para gravações determinísticas (tools/gravar_cenarios.gd).
+static var fixo := -1
 
 static func agora() -> int:
+	if fixo >= 0:
+		return fixo
 	return int(Time.get_unix_time_from_system()) + deslocamento
 
 ## Segundos que faltam (0 se já terminou).

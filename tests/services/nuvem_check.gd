@@ -91,6 +91,23 @@ func _initialize() -> void:
 
 	for arq in ["jogador.json", "jogador.json.bak", "sessao.json", "sessao_outro.json"]:
 		DirAccess.remove_absolute("user://teste_nuvem/" + arq)
+	# Balanceamento remoto (3.3): baixa, guarda em cache e aplica na abertura seguinte.
+	var cache := "user://teste_nuvem/balanceamento_remoto.json"
+	nuvem.caminho_cache_balanceamento = cache
+	nuvem.sessao = {}
+	await nuvem.entrar()
+	var bb := await nuvem.baixar_balanceamento()
+	_checa("baixa o balanceamento ativo (3 tabelas)", bb["ok"] and int(bb["tabelas"]) == 3 and FileAccess.file_exists(cache))
+	var ganho_antes := int(Balanceamento.ler("treino")["ganho_pontos"])
+	var aplicadas := Balanceamento.aplicar_cache_remoto(true, cache)
+	_checa("aplica so as tabelas conhecidas e de esquema nao mais antigo (%d)" % aplicadas,
+		aplicadas == 1 and int(Balanceamento.ler("treino")["ganho_pontos"]) == 7)
+	Balanceamento.esquecer("treino")
+	_checa("esquecer volta ao pacote", int(Balanceamento.ler("treino")["ganho_pontos"]) == ganho_antes)
+	_checa("sem cache nao faz nada", Balanceamento.aplicar_cache_remoto(true, "user://teste_nuvem/nao_existe.json") == 0)
+	_checa("em headless nao aplica sozinho", Balanceamento.aplicar_cache_remoto(false, cache) == 0)
+	DirAccess.remove_absolute(cache)
+
 	print("NUVEM %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)
 
@@ -107,6 +124,13 @@ func _falso(metodo: int, url: String, cabecalhos: PackedStringArray, corpo: Stri
 		if c.begins_with("Authorization: Bearer "):
 			token = c.trim_prefix("Authorization: Bearer ")
 	match caminho:
+		"/rest/v1/balanceamento":
+			if not _tokens.has(token):
+				return {"codigo": 401, "corpo": "{}"}
+			return {"codigo": 200, "corpo": JSON.stringify([
+				{"nome": "treino", "versao": 3, "dados": {"versao": 1, "ganho_pontos": 7}},
+				{"nome": "tabela_que_nao_existe", "versao": 1, "dados": {"versao": 1}},
+				{"nome": "vila", "versao": 2, "dados": {"versao": 0, "predios": {}}}])}
 		"/auth/v1/signup":
 			_usuarios += 1
 			return _sessao("u%d" % _usuarios, "r%d" % _usuarios)

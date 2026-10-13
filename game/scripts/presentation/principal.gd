@@ -7,6 +7,8 @@ func _ready() -> void:
 	_abrir.call_deferred()
 
 func _abrir() -> void:
+	# Balanceamento baixado na abertura anterior (3.3), antes de qualquer sistema ler os dados.
+	Balanceamento.aplicar_cache_remoto()
 	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
 	if nuvem and nuvem.configurado():
 		await nuvem.iniciar()

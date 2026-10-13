@@ -1,0 +1,5 @@
+{
+  "_nota": "Configuração do Deno para as Edge Functions (supabase functions serve/deploy). Os testes da regra rodam no Node (package.json).",
+  "compilerOptions": { "strict": true },
+  "lint": { "rules": { "exclude": ["no-explicit-any"] } }
+}
