@@ -10,12 +10,27 @@ func _ready() -> void:
 	$Coluna/Comecar.pressed.connect(comecar)
 	$Coluna/Pular.pressed.connect(pular)
 
+const CENA_PRIVACIDADE := preload("res://game/scenes/ui/tela_privacidade.tscn")
+
 func comecar() -> void:
-	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
-	if f:
-		f.concluiu("titulo")
+	_com_privacidade(func():
+		var f := get_node_or_null("/root/Fluxo") as FluxoTelas
+		if f:
+			f.concluiu("titulo"))
 
 func pular() -> void:
-	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
-	if f:
-		f.pular_tutorial()
+	_com_privacidade(func():
+		var f := get_node_or_null("/root/Fluxo") as FluxoTelas
+		if f:
+			f.pular_tutorial())
+
+## Política de privacidade e termos (3.9): precisa do aceite da versão atual
+## antes de começar; depois disso segue direto.
+func _com_privacidade(depois: Callable) -> void:
+	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	if jog == null or jog.privacidade_aceita():
+		depois.call()
+		return
+	var t: TelaPrivacidade = CENA_PRIVACIDADE.instantiate()
+	t.aceita.connect(func(_p): depois.call())
+	add_child(t)

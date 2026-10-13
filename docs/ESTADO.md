@@ -1,9 +1,9 @@
 # Estado atual
 
 > **Retomada rápida (2026-10-13):**
-> - **Servidor (3.1–3.4 feitos e testados, nada publicado):** regra da justa e economia solo em TypeScript (`supabase/functions/_shared/`), com paridade contra o GDScript; função `acao`, banco, balanceamento remoto. Ver `docs/SERVIDOR.md`.
-> - **Próximo:** 3.5 PvP e 3.6 ligas com jogadores de verdade, 3.7 compras (recibos), 3.8 ordens/chat no servidor, 3.9 obrigações, 3.10 operação, 3.11 auditoria; depois a troca do cliente para chamar `acao` (fila de ações pendentes, estado do servidor vence) e a Parte 4. Só publicar/aplicar o que o usuário autorizar.
-> - **Validação:** `bash tests/rodar_testes.sh` passa com 45 arquivos do GDScript (981 checagens) e 294 checagens em TypeScript (`cd supabase && node --test "tests/regra/*.test.ts"`).
+> - **Servidor 3.1–3.11 escrito e testado, nada publicado** (`docs/SERVIDOR.md`, `docs/OPERACAO.md`, `docs/AUDITORIA.md`): regra e economia em TypeScript com paridade contra o GDScript; função `acao` (idempotente, com limite e conferência da justa), PvP/ligas, compras com recibo, ordem/chat/amigos, exclusão de conta, balanceamento remoto, painel e registro de erros.
+> - **Próximo:** o **cliente chamar `acao`** (fila de ações pendentes, estado do servidor vence; ver A1 em `docs/AUDITORIA.md`), depois publicar na branch (com autorização do usuário) e a Parte 4 (4.1–4.3).
+> - **Validação:** `bash tests/rodar_testes.sh` passa com os arquivos do GDScript e 334 checagens em TypeScript (`cd supabase && node --test "tests/regra/*.test.ts"`).
 > - **Save:** versão 11.
 > - **Armadilhas e convenções:** veja "Onde paramos" no `CLAUDE.md`.
 

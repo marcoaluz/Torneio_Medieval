@@ -1684,6 +1684,31 @@ func definir_config(chave: String, valor: Variant) -> Dictionary:
 	estado["config"][chave] = valor
 	return _concluir("config")
 
+## Versão atual da política de privacidade (game/data/ui/privacidade.json).
+func versao_politica() -> int:
+	return int(Balanceamento.ler_json("res://game/data/ui/privacidade.json")["versao_politica"])
+
+## O jogador já aceitou a versão atual da política e dos termos?
+func privacidade_aceita() -> bool:
+	return int(config_valor("privacidade_aceita")) >= versao_politica()
+
+## Registra o aceite da versão atual e a escolha de anúncios personalizados.
+func aceitar_privacidade(personalizados: bool) -> Dictionary:
+	if not estado.has("config"):
+		estado["config"] = {"notificacoes": {}}
+	estado["config"]["privacidade_aceita"] = versao_politica()
+	estado["config"]["anuncios_personalizados"] = personalizados
+	return _concluir("config")
+
+## Apaga tudo que é do jogador neste aparelho (exclusão de conta, 3.9): volta
+## ao estado inicial, sem personagem e sem aceite da política.
+func apagar_dados_locais() -> void:
+	for sufixo in ["", ".bak", ".tmp"]:
+		if FileAccess.file_exists(caminho_save + sufixo):
+			DirAccess.remove_absolute(caminho_save + sufixo)
+	estado = novo_estado()
+	_concluir("tudo")
+
 func definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
 	if not estado.has("config"):
 		estado["config"] = {"notificacoes": {}}

@@ -23,9 +23,18 @@ func _initialize() -> void:
 	_fluxo.iniciar_jogo()
 	var cena := await _cena()
 	_checa("comeca no titulo", cena is TelaTitulo)
+	# Sem aceitar a política de privacidade (3.9) o título não deixa começar.
+	_checa("sem aceite da politica", not _jog.privacidade_aceita())
 	(cena as TelaTitulo).comecar()
+	await process_frame
+	var priv: TelaPrivacidade = null
+	for c0 in cena.get_children():
+		if c0 is TelaPrivacidade:
+			priv = c0
+	_checa("titulo pede o aceite da politica", priv != null and _jog.tutorial_passo() == 0)
+	priv._ao_aceitar()
 	cena = await _cena()
-	_checa("titulo -> criacao", cena is CriacaoPersonagem and _jog.tutorial_passo() == 1)
+	_checa("aceitou: titulo -> criacao", cena is CriacaoPersonagem and _jog.tutorial_passo() == 1 and _jog.privacidade_aceita())
 	var cri := cena as CriacaoPersonagem
 	cri.sortear()
 	cri.confirmar()
@@ -105,6 +114,7 @@ func _initialize() -> void:
 
 	# Pular o tutorial
 	_jog.estado = _jog.novo_estado()
+	_jog.aceitar_privacidade(false)  # reinstalou, mas já aceitou (a política vale por versão)
 	_fluxo.pulando_tutorial = false
 	_fluxo.iniciar_jogo()
 	cena = await _cena()

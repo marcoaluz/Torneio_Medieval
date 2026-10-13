@@ -12,6 +12,9 @@ func _abrir() -> void:
 	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
 	if nuvem and nuvem.configurado():
 		await nuvem.iniciar()
+	var m := get_node_or_null("/root/Metricas") as ServicoMetricas
+	if m:
+		m.registrar("sessao")  # jogadores ativos por dia (painel, 3.10)
 	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
 	if f:
 		f.iniciar_jogo()

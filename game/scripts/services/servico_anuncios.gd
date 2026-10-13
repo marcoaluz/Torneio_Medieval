@@ -24,6 +24,12 @@ func _ready() -> void:
 	if not provedor.is_valid():
 		provedor = _provedor_padrao
 
+## Anúncios personalizados só com o consentimento do jogador (3.9); sem ele,
+## o provedor recebe o pedido de anúncio NÃO personalizado.
+func personalizados() -> bool:
+	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
+	return jog != null and bool(jog.config_valor("anuncios_personalizados"))
+
 func disponivel() -> bool:
 	return _plugin != null or OS.is_debug_build()
 
@@ -54,6 +60,8 @@ func _fim(r: Dictionary) -> Dictionary:
 func _provedor_padrao(tipo: String) -> Dictionary:
 	if _plugin != null and _plugin.has_method("show_rewarded"):
 		# Plugin real: o resultado chega por sinal; o nome depende do plugin.
+		if _plugin.has_method("set_personalized_ads"):
+			_plugin.call("set_personalized_ads", personalizados())
 		_plugin.call("show_rewarded", tipo)
 		if _plugin.has_signal("rewarded"):
 			var a: Array = await Signal(_plugin, "rewarded")

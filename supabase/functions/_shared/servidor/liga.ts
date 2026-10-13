@@ -157,6 +157,17 @@ export function escolher_adversario(s: Servico, candidatos: Candidato[]): Result
   sincronizar_liga(s);
   const cfg = cfg_ligas(s);
   const lg = s.estado["liga"];
+  // Procurar outro com um adversário ainda pendente é desistir da partida: conta como derrota
+  // (senão dava para espiar adversários de graça até achar um fraco).
+  const pendente = lg["adversario"];
+  if (pendente && Object.keys(pendente).length > 0 && !(pendente["campeonato"] ?? false)) {
+    const antes = inteiro(lg["pontos"]);
+    lg["pontos"] = Liga.depois_da_partida(antes, false, cfg);
+    (lg["partidas"] as Dados[]).unshift({
+      quando: s.agora(), adversario: pendente["nome"], venceu: false, pontos: inteiro(lg["pontos"]) - antes, campeonato: false, abandonou: true,
+    });
+    while (lg["partidas"].length > 30) lg["partidas"].pop();
+  }
   const meu = poder_jogador(s);
   const por_id: Record<string, Candidato> = {};
   for (const c of candidatos) por_id[c.jogador_id] = c;

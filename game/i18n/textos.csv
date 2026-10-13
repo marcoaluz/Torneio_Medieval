@@ -916,3 +916,26 @@ ERRO_CODIGO_NAO_ENCONTRADO,Nenhum jogador com esse código.,No player with that 
 ERRO_JA_AMIGO,Já são amigos.,Already friends.
 ERRO_BLOQUEADO,Você bloqueou esse jogador.,You blocked this player.
 ERRO_AMIGOS_CHEIO,Lista de amigos cheia.,Friends list is full.
+PRIVACIDADE_TITULO,Privacidade e termos de uso,Privacy and terms of use
+PRIVACIDADE_P1,"1. O que coletamos. Uma conta anônima criada ao abrir o jogo; o progresso do seu cavaleiro (nome, casa, equipamentos, vila e histórico de justas); o resultado de partidas de PvP; as mensagens que você manda no chat; e dados de uso do jogo (onde você avança ou desiste), sem nome, e-mail nem telefone.","1. What we collect. An anonymous account created when you open the game; your knight's progress (name, house, gear, village and joust history); PvP match results; the messages you send in chat; and game usage data (where you advance or quit), with no name, e-mail or phone number."
+PRIVACIDADE_P2,"2. Para que usamos. Guardar e sincronizar seu progresso entre aparelhos, parear você com outros jogadores, conferir que as partidas são limpas, moderar o chat e melhorar o jogo. Não vendemos seus dados.","2. What we use it for. To save and sync your progress across devices, match you with other players, check that matches are fair, moderate chat and improve the game. We do not sell your data."
+PRIVACIDADE_P3,"3. Compras e anúncios. Compras são feitas pela loja do seu aparelho (Google Play ou App Store); recebemos só a confirmação da compra. Os anúncios são opcionais, sempre com recompensa; com o seu consentimento eles podem ser personalizados pelo provedor de anúncios.",3. Purchases and ads. Purchases are made through your device's store (Google Play or App Store); we only receive the purchase confirmation. Ads are optional and always rewarded; with your consent they may be personalized by the ad provider.
+PRIVACIDADE_P4,"4. Jogador e conversas. Seu nome de cavaleiro, casa, brasão, liga e títulos ficam visíveis a outros jogadores. O que você escreve no chat pode ser visto por quem está no canal, e pode ser revisto se houver denúncia.","4. Players and chats. Your knight name, house, crest, league and titles are visible to other players. What you write in chat can be seen by those in the channel, and may be reviewed if reported."
+PRIVACIDADE_P5,"5. Seus direitos. Você pode apagar a conta e todos os seus dados dentro do jogo, em Configurações > Privacidade e dados > Excluir minha conta. Os registros de compra ficam sem identificação, apenas pelo tempo que a lei exige.","5. Your rights. You can delete your account and all your data inside the game, in Settings > Privacy and data > Delete my account. Purchase records are kept without identification, only for as long as the law requires."
+PRIVACIDADE_P6,"6. Crianças. O jogo não é dirigido a menores de 13 anos. Se achar que uma criança nos deu dados, apague a conta ou fale com a gente.","6. Children. The game is not directed at children under 13. If you think a child gave us data, delete the account or contact us."
+TERMOS_TITULO,Termos de uso,Terms of use
+TERMOS_P1,"Respeite os outros jogadores: nada de ofensas, assédio, spam ou nomes ofensivos. Quem for denunciado repetidas vezes é silenciado e pode ser banido.","Respect other players: no abuse, harassment, spam or offensive names. Players reported repeatedly are muted and may be banned."
+TERMOS_P2,"Não é permitido trapacear: alterar o jogo, usar programas que jogam por você, explorar falhas ou repetir compras. Ganhos obtidos assim podem ser desfeitos e a conta suspensa.","Cheating is not allowed: modifying the game, using programs that play for you, exploiting bugs or replaying purchases. Gains obtained this way may be reversed and the account suspended."
+TERMOS_P3,Itens e moedas do jogo não têm valor em dinheiro e não podem ser vendidos fora dele. Compras reembolsadas pela loja revertem o que foi entregue.,In-game items and currencies have no cash value and cannot be sold outside the game. Purchases refunded by the store revert what was delivered.
+TERMOS_P4,"Podemos mudar o jogo, o equilíbrio e estes termos; quando a política mudar de forma importante, pedimos seu aceite de novo.","We may change the game, its balance and these terms; when the policy changes in an important way, we ask for your acceptance again."
+PRIVACIDADE_ANUNCIOS_PERSONALIZADOS,Aceito anúncios personalizados (opcional),I accept personalized ads (optional)
+PRIVACIDADE_ACEITAR,Aceitar e continuar,Accept and continue
+PRIVACIDADE_SALVAR,Salvar escolha,Save choice
+PRIVACIDADE_SAIR,Não aceito (sair),I do not accept (quit)
+CONFIG_PRIVACIDADE,Privacidade e dados,Privacy and data
+CONFIG_ANUNCIOS_PERSONALIZADOS,Anúncios personalizados,Personalized ads
+CONFIG_VER_POLITICA,Ver política de privacidade e termos,View privacy policy and terms
+CONFIG_EXCLUIR_CONTA,Excluir minha conta e meus dados,Delete my account and data
+CONFIG_EXCLUIR_CONFIRMA,Toque de novo para APAGAR a conta (não dá para desfazer),Tap again to DELETE the account (cannot be undone)
+CONFIG_EXCLUIR_CANCELAR,Cancelar,Cancel
+CONFIG_EXCLUIR_FALHOU,Não consegui excluir agora. Tente de novo com internet.,Could not delete right now. Try again with internet.

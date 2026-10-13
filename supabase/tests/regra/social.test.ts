@@ -195,6 +195,17 @@ describe("chat, moderação e amigos", () => {
     assert.equal((await agir(dep, "chat_enviar", ["sala", "oi", "", "pt"])).corpo["erro"], "canal_inexistente");
   });
 
+  test("limite do chat por minuto", async () => {
+    const { banco, dep } = await ordem_pronta();
+    const max = bal("servidor")["limites"]["chat_por_minuto"];
+    let ultimo = "";
+    for (let i = 0; i < max + 1; i++) {
+      ultimo = String((await agir(dep, "chat_enviar", ["global", "", "boa_justa", "pt"])).corpo["erro"] ?? "ok");
+    }
+    assert.equal(ultimo, "enviando_rapido");
+    assert.equal(banco.chat.length, max);
+  });
+
   test("filtro de palavras, vazio, longo, rápida inexistente e silenciamento", async () => {
     const { banco, dep, relogio } = await ordem_pronta();
     assert.equal((await agir(dep, "chat_enviar", ["global", "seu P0RR4", "", "pt"])).corpo["erro"], "mensagem_ofensiva");

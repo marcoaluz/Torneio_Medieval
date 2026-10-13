@@ -27,6 +27,20 @@ export function iniciar_disputa(s: Servico, torneio: string, indice: number): Re
   if (!p.ok) return p;
   if (typeof indice !== "number" || !Number.isInteger(indice)) return erro("disputa_inexistente");
   const prep = preparar_disputa(s, torneio, indice);
+  // Já tem esta disputa em andamento: devolve a MESMA (a semente não se re-sorteia: senão o
+  // cliente simularia semente por semente e só enviaria a que dá 3 estrelas).
+  const atual = s.estado["disputa"];
+  if (atual && atual["torneio"] === torneio && inteiro(atual["indice"]) === indice) {
+    return {
+      ...concluir(), semente: atual["semente"], cfg: atual["cfg"], lado_jogador: atual["lado_jogador"],
+      rival: { ...prep["rival"], lado: atual["lado_rival"], perfil: atual["perfil_rival"] },
+      desafios: prep["desafios"], visuais: prep["visuais"], gasta_folego: atual["gasta_folego"], retomada: true,
+    };
+  }
+  // Depois de abandonar uma, espera um pouco antes de pedir outra semente.
+  const espera = inteiro(s.bal("servidor")["limites"]["cooldown_disputa_s"] ?? 0);
+  const ultimo = inteiro((s.estado["pve"] ?? {})["abandonou_em"] ?? 0);
+  if (espera > 0 && ultimo > 0 && s.agora() - ultimo < espera) return erro("aguarde");
   const semente = new Aleatorio(semente_servico(s)).proximo();
   s.estado["disputa"] = {
     torneio, indice, semente, iniciada_em: s.agora(), cfg: prep["cfg"], lado_jogador: prep["lado_jogador"],
@@ -121,6 +135,9 @@ export function concluir_disputa_conferida(s: Servico, entradas: unknown): Resul
 export function abandonar_disputa(s: Servico): Resultado {
   if (!("disputa" in s.estado)) return erro("sem_disputa_ativa");
   delete s.estado["disputa"];
+  // Sair no meio conta como derrota na sequência e tem espera para pedir outra semente.
+  s.estado["metas"]["sequencia"] = 0;
+  s.estado["pve"]["abandonou_em"] = s.agora();
   return concluir();
 }
 

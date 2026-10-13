@@ -50,6 +50,8 @@ export interface Dependencias {
   sorteio(): number;
   /** Confere recibos com a Google Play / App Store (3.7). */
   verificador: VerificadorLoja;
+  /** Aceita a "loja" de teste (só ambiente de desenvolvimento; nunca em produção). */
+  loja_teste?: boolean;
   /** Confere o comprovante de um anúncio premiado com o provedor (SSV). */
   verificar_anuncio(jogador: string, token: string, tipo: string): Promise<boolean>;
 }
@@ -108,7 +110,7 @@ export async function tratar_acao(e: Entrada, dep: Dependencias): Promise<Saida>
     let r: Resultado;
     try {
       r = Object.hasOwn(ASSINCRONOS, e.tipo)
-        ? await ASSINCRONOS[e.tipo](s, args, { banco: dep.banco, verificador: dep.verificador }, e.jogador_id)
+        ? await ASSINCRONOS[e.tipo](s, args, { banco: dep.banco, verificador: dep.verificador, loja_teste: dep.loja_teste }, e.jogador_id)
         : PUBLICOS[e.tipo](s, ...args);
     } catch (_erro) {
       // Dado inesperado numa função de regra: recusa sem mudar nada (e sem expor detalhe).

@@ -1,0 +1,5 @@
+{
+	"versao": 1,
+	"_nota": "Politica de privacidade e termos (3.9). versao_politica: sobe quando o texto muda de forma que exige novo aceite; o jogador aceita uma vez por versao (config.privacidade_aceita). Os textos estao em textos.csv (PRIVACIDADE_*, TERMOS_*) e precisam de revisao juridica antes do lancamento.",
+	"versao_politica": 1
+}

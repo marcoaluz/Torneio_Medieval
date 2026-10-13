@@ -78,6 +78,26 @@ func renovar() -> Dictionary:
 		_cabecalhos(false), JSON.stringify({"refresh_token": sessao.get("refresh_token", "")}))
 	return _guardar_sessao(resp)
 
+## Exclusão de conta (3.9): pede ao servidor (Edge Function `excluir_conta`, que
+## apaga tudo da conta) e esquece a sessão e os caches deste aparelho. Sem
+## conta na nuvem só limpa o aparelho. Quem chama apaga o save local
+## (Jogador.apagar_dados_locais) e volta ao título. {ok, erro}.
+func excluir_conta() -> Dictionary:
+	if configurado() and conectado():
+		var resp := await _autenticado(HTTPClient.METHOD_POST, _url("/functions/v1/excluir_conta"), JSON.stringify({"confirmacao": "EXCLUIR"}))
+		if int(resp["codigo"]) != 200:
+			return {"ok": false, "erro": "nuvem_%d" % int(resp["codigo"])}
+	for caminho in [caminho_sessao, caminho_cache_balanceamento]:
+		if FileAccess.file_exists(caminho):
+			DirAccess.remove_absolute(caminho)
+	sessao = {}
+	_envio_em = -1.0
+	_mudar("desligado" if not configurado() else "entrando")
+	var m := get_node_or_null("/root/Metricas") as ServicoMetricas
+	if m:
+		m.limpar()
+	return {"ok": true, "erro": ""}
+
 ## Baixa o balanceamento ativo (3.3) e guarda em cache para a próxima abertura
 ## (Balanceamento.aplicar_cache_remoto). {ok, erro, tabelas}.
 func baixar_balanceamento() -> Dictionary:

@@ -71,11 +71,14 @@ export interface BancoDeComandos extends BancoSocial {
   /** Jogadores reais com defesa salva, na faixa de poder, ordenados por proximidade de pontos. */
   candidatos_pvp(jogador: string, pontos: number, poder: number, faixa: number, limite: number): Promise<Candidato[]>;
   compra_existente: DepsCompras["compra_existente"];
+  /** Conta uma chamada na janela (a mesma tabela do limite de ações, com outra faixa de chaves). */
+  contar_chamada(jogador: string, janela: number): Promise<number>;
 }
 
 export interface DepsComando {
   banco: BancoDeComandos;
   verificador: DepsCompras["verificador"];
+  loja_teste?: boolean;
 }
 
 // deno-lint-ignore no-explicit-any
@@ -100,7 +103,9 @@ export const ASSINCRONOS: Record<string, ComandoAssincrono> = {
     return r;
   },
   comprar_recibo: (s, [loja, produto, recibo], ctx, jogador) =>
-    comprar_recibo(s, jogador, loja, produto, recibo, { verificador: ctx.verificador, compra_existente: ctx.banco.compra_existente.bind(ctx.banco) }),
+    comprar_recibo(s, jogador, loja, produto, recibo, {
+      verificador: ctx.verificador, loja_teste: ctx.loja_teste, compra_existente: ctx.banco.compra_existente.bind(ctx.banco),
+    }),
   criar_ordem: (s, [nome, brasao, idioma], ctx, j) => S.criar_ordem(s, j, nome, brasao, idioma, ctx.banco),
   entrar_ordem: (s, [id], ctx, j) => S.entrar_ordem(s, j, id, ctx.banco),
   sair_ordem: (s, _a, ctx, j) => S.sair_ordem(s, j, ctx.banco),
@@ -113,7 +118,13 @@ export const ASSINCRONOS: Record<string, ComandoAssincrono> = {
   doar: (s, [para, material, qtd], ctx, j) => S.doar(s, j, para, material, qtd, ctx.banco),
   torneio_semana: (s, _a, ctx, j) => S.torneio_semana(s, j, ctx.banco),
   resgatar_torneio: (s, _a, ctx, j) => S.resgatar_torneio(s, j, ctx.banco),
-  chat_enviar: (s, [canal, texto, rapida, idioma], ctx, j) => S.chat_enviar(s, j, canal, texto, rapida, idioma, ctx.banco),
+  chat_enviar: async (s, [canal, texto, rapida, idioma], ctx, j) => {
+    // Limite próprio do chat por minuto (além do geral de ações): evita inundar o canal.
+    const janela = 4_000_000_000_000 + Math.floor(s.agora() / 60);
+    const n = await ctx.banco.contar_chamada(j, janela);
+    if (n > Number(s.bal("servidor")["limites"]["chat_por_minuto"])) return { ok: false, erro: "enviando_rapido" };
+    return await S.chat_enviar(s, j, canal, texto, rapida, idioma, ctx.banco);
+  },
   adicionar_amigo_por_codigo: (s, [codigo], ctx, j) => S.adicionar_amigo_por_codigo(s, j, codigo, ctx.banco),
 };
 

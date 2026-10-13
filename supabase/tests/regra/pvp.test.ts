@@ -163,6 +163,18 @@ describe("partida de PvP conferida", () => {
     assert.ok(Number.isInteger(ef["partida"]["semente"]));
   });
 
+  test("procurar outro adversário com um pendente é desistir: conta como derrota", async () => {
+    const { banco, dep } = await preparar_partida(false);
+    const e = banco.estados.get(JOGADOR)!.estado;
+    e["liga"]["pontos"] = 200;
+    const r = await agir(dep, "procurar_adversario", []);
+    assert.equal(r.corpo["ok"], true);
+    const e2 = banco.estados.get(JOGADOR)!.estado;
+    assert.equal(e2["liga"]["pontos"], 200 + bal("economia")["ligas"]["derrota"]);
+    assert.equal(e2["liga"]["partidas"][0]["abandonou"], true);
+    assert.equal(e2["liga"]["partidas"][0]["venceu"], false);
+  });
+
   test("rápido demais, sem adversário e entradas impossíveis são recusados", async () => {
     const { banco, dep, relogio } = await preparar_partida(false);
     const r1 = await agir(dep, "concluir_pvp_conferido", [[]]);

@@ -29,6 +29,12 @@ func _ready() -> void:
 		if v is Array:
 			fila = v
 
+## Esquece tudo (exclusão de conta, 3.9).
+func limpar() -> void:
+	fila.clear()
+	if FileAccess.file_exists(caminho_fila):
+		DirAccess.remove_absolute(caminho_fila)
+
 ## Registra um evento (nome curto em minúsculas, dados pequenos).
 func registrar(evento: String, dados := {}) -> void:
 	if not ativo:

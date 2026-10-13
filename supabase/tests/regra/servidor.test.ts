@@ -261,6 +261,36 @@ describe("justa conferida pelo servidor", () => {
   });
 });
 
+describe("auditoria (3.11): re-sorteio, abandono e espera", () => {
+  test("iniciar de novo a mesma disputa devolve a MESMA semente (nada de re-sortear)", async () => {
+    const { dep, d } = await preparar_disputa();
+    const r = await agir(dep, "iniciar_disputa", ["feira_moinho", 0]);
+    assert.equal(r.corpo["ok"], true);
+    assert.equal(r.corpo["semente"], d["semente"]);
+    assert.equal(r.corpo["retomada"], true);
+  });
+
+  test("abandonar zera a sequência e exige espera para pedir outra semente", async () => {
+    const { banco, dep, relogio } = await preparar_disputa();
+    banco.estados.get(JOGADOR)!.estado["metas"]["sequencia"] = 5;
+    const a = await agir(dep, "abandonar_disputa", []);
+    assert.equal(a.corpo["ok"], true);
+    assert.equal(banco.estados.get(JOGADOR)!.estado["metas"]["sequencia"], 0);
+    const logo = await agir(dep, "iniciar_disputa", ["feira_moinho", 0]);
+    assert.equal(logo.corpo["erro"], "aguarde");
+    relogio.avancar(bal("servidor")["limites"]["cooldown_disputa_s"] + 1);
+    const depois = await agir(dep, "iniciar_disputa", ["feira_moinho", 0]);
+    assert.equal(depois.corpo["ok"], true);
+  });
+
+  test("a loja de teste só existe quando o ambiente permite", async () => {
+    const m = montar();
+    await agir(m.dep, "criar_personagem", [PERS]);
+    const r = await agir(m.dep, "comprar_recibo", ["teste", "gemas_medio", "RECIBO-TESTE-1"]);
+    assert.equal(r.corpo["erro"], "loja_indisponivel");
+  });
+});
+
 describe("estado inicial", () => {
   test("novo_estado do servidor tem a mesma forma do GDScript (cenários gravados)", () => {
     const c = JSON.parse(readFileSync(new URL("tests/shared/cenarios_servico.json", RAIZ), "utf-8"))["cenarios"][0];
@@ -336,5 +366,37 @@ describe("banco do Supabase (cliente falso)", () => {
   test("balanceamento ativo vira {nome: dados}", async () => {
     const { cliente } = falso({ "from:balanceamento": { data: [{ nome: "treino", dados: { a: 1 } }, { nome: "vila", dados: { b: 2 } }], error: null } });
     assert.deepEqual(await carregar_balanceamento(cliente), { treino: { a: 1 }, vila: { b: 2 } });
+  });
+});
+
+// ------------------------------------------------------ exclusão de conta
+
+import { excluir_conta } from "../../functions/_shared/servidor/excluir_conta.ts";
+
+describe("exclusão de conta", () => {
+  test("só com a confirmação certa; prepara e depois apaga o usuário, nessa ordem", async () => {
+    const chamadas: string[] = [];
+    const cliente = {
+      async rpc(nome: string, args: Dados) {
+        chamadas.push(`rpc:${nome}:${args["p_jogador"]}`);
+        return { data: null, error: null };
+      },
+      auth: { admin: { async deleteUser(id: string) { chamadas.push(`apagar:${id}`); return { error: null }; } } },
+    };
+    assert.deepEqual(await excluir_conta(cliente, JOGADOR, "excluir"), { ok: false, erro: "confirmacao_invalida" });
+    assert.deepEqual(await excluir_conta(cliente, JOGADOR, undefined), { ok: false, erro: "confirmacao_invalida" });
+    assert.deepEqual(chamadas, []);
+    assert.deepEqual(await excluir_conta(cliente, JOGADOR, "EXCLUIR"), { ok: true, erro: "" });
+    assert.deepEqual(chamadas, [`rpc:preparar_exclusao_conta:${JOGADOR}`, `apagar:${JOGADOR}`]);
+  });
+
+  test("se preparar falha, não apaga o usuário (nada pela metade)", async () => {
+    const chamadas: string[] = [];
+    const cliente = {
+      async rpc() { return { data: null, error: { message: "boom" } }; },
+      auth: { admin: { async deleteUser(id: string) { chamadas.push(id); return { error: null }; } } },
+    };
+    assert.deepEqual(await excluir_conta(cliente, JOGADOR, "EXCLUIR"), { ok: false, erro: "falha_ao_preparar" });
+    assert.deepEqual(chamadas, []);
   });
 });

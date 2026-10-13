@@ -23,7 +23,9 @@
 		"vibracao": true,
 		"texto": "normal",
 		"idioma": "",
-		"economia_bateria": false
+		"economia_bateria": false,
+		"privacidade_aceita": 0,
+		"anuncios_personalizados": false
 	},
 	"bateria": {
 		"_nota": "Modo economia de bateria (3.25): limita os quadros por segundo e reduz as particulas (chuva da vila, faiscas, lascas, flamulas da torcida) a particulas_pct.",

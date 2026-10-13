@@ -12,6 +12,7 @@ import { BancoSupabase, carregar_balanceamento } from "../_shared/servidor/banco
 import { tratar_acao } from "../_shared/servidor/handler.ts";
 import type { Dependencias } from "../_shared/servidor/handler.ts";
 import { VerificadorGoogle } from "../_shared/servidor/loja_google.ts";
+import { registrar_erro } from "../_shared/servidor/erros.ts";
 import type { VerificadorLoja } from "../_shared/servidor/compras.ts";
 
 const URL_PROJETO = Deno.env.get("SUPABASE_URL")!;
@@ -54,6 +55,8 @@ Deno.serve(async (req) => {
     const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
     const { data: u, error } = await cliente.auth.getUser(token);
     if (error || !u.user) return json({ ok: false, erro: "nao_autenticado" }, 401);
+    // Corpo pequeno: uma ação cabe em poucos KB (a justa conferida tem no máximo ~400 entradas).
+    if (Number(req.headers.get("content-length") ?? 0) > 65536) return json({ ok: false, erro: "corpo_grande" }, 413);
     const corpo = await req.json();
     const dados = await balanceamento();
     const dep: Dependencias = {
@@ -65,14 +68,15 @@ Deno.serve(async (req) => {
       agora: () => Math.floor(Date.now() / 1000),
       sorteio: () => crypto.getRandomValues(new Uint32Array(1))[0] & 0x7FFFFFFF,
       verificador,
+      loja_teste: Deno.env.get("PERMITIR_LOJA_TESTE") === "1",
       // SSV do provedor de anúncios (AdMob): a conferir quando a conta existir (3.9/3.10).
       verificar_anuncio: async () => false,
     };
     const r = await tratar_acao({ jogador_id: u.user.id, id: corpo.id, tipo: corpo.tipo, args: corpo.args }, dep);
     return json(r.corpo, r.status);
-  } catch (_e) {
-    // Nunca devolve detalhe interno ao cliente; o registro fica nos logs da função.
-    console.error("acao falhou:", _e);
+  } catch (e) {
+    // Nunca devolve detalhe interno ao cliente; o registro fica na tabela erro_servidor.
+    await registrar_erro(cliente, "acao", e);
     return json({ ok: false, erro: "falha_interna" }, 500);
   }
 });

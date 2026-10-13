@@ -7,6 +7,8 @@ extends PanelContainer
 ## Tudo salvo pelo serviço Jogador (com o save, versionado).
 
 var _jog: ServicoJogador
+## Exclusão de conta em dois toques: o primeiro pede a confirmação.
+var _excluir_confirmando := false
 
 @onready var _titulo: Label = $Coluna/Titulo
 @onready var _lista: VBoxContainer = $Coluna/Rolagem/Lista
@@ -35,6 +37,12 @@ func montar() -> void:
 	_opcao(tr("CONFIG_CANHOTO"), "canhoto")
 	_opcao(tr("CONFIG_VIBRACAO"), "vibracao")
 	_opcao(tr("CONFIG_BATERIA"), "economia_bateria")
+	_secao(tr("CONFIG_PRIVACIDADE"))
+	_opcao(tr("CONFIG_ANUNCIOS_PERSONALIZADOS"), "anuncios_personalizados")
+	_botao(tr("CONFIG_VER_POLITICA"), _abrir_politica)
+	_botao(tr("CONFIG_EXCLUIR_CONFIRMA") if _excluir_confirmando else tr("CONFIG_EXCLUIR_CONTA"), _excluir)
+	if _excluir_confirmando:
+		_botao(tr("CONFIG_EXCLUIR_CANCELAR"), func(): _excluir_confirmando = false; montar())
 	_secao(tr("CONFIG_NOTIFICACOES"))
 	_chave(tr("CONFIG_NOTIF_TODAS"), "todas")
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ServicoNotificacoes.DADOS))
@@ -44,6 +52,40 @@ func montar() -> void:
 			nome += "  " + tr("CONFIG_PELO_SERVIDOR")
 		var b := _chave(nome, tipo)
 		b.disabled = not _jog.notificacao_ligada("todas")
+
+func _botao(texto: String, acao: Callable) -> void:
+	var b := Button.new()
+	b.focus_mode = Control.FOCUS_NONE
+	b.text = texto
+	b.pressed.connect(acao)
+	_lista.add_child(b)
+
+func _abrir_politica() -> void:
+	var t: TelaPrivacidade = load("res://game/scenes/ui/tela_privacidade.tscn").instantiate()
+	t.revisao = true
+	t.aceita.connect(func(_p): montar())
+	add_child(t)
+
+## Primeiro toque pede a confirmação; o segundo apaga a conta no servidor e
+## o que há neste aparelho, e volta ao título.
+func _excluir() -> void:
+	if not _excluir_confirmando:
+		_excluir_confirmando = true
+		montar()
+		return
+	_excluir_confirmando = false
+	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+	if nuvem:
+		var r := await nuvem.excluir_conta()
+		if not r["ok"]:
+			_titulo.text = tr("CONFIG_EXCLUIR_FALHOU")
+			montar()
+			return
+	_jog.apagar_dados_locais()
+	visible = false
+	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
+	if f:
+		f.iniciar_jogo()
 
 func _opcao(texto: String, chave: String) -> void:
 	var b := CheckButton.new()

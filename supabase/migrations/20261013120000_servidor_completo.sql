@@ -208,7 +208,7 @@ as $$
 		where m.ordem_id = p_ordem and m.jogador_id = (select auth.uid())
 	);
 $$;
-revoke all on function public.sou_da_ordem(uuid) from public;
+revoke all on function public.sou_da_ordem(uuid) from public, anon;
 grant execute on function public.sou_da_ordem(uuid) to authenticated;
 
 create policy "membros da minha ordem" on public.ordem_membro
@@ -342,12 +342,91 @@ alter table public.denuncia enable row level security;
 create policy "denuncia cria a propria" on public.denuncia
 	for insert to authenticated with check ((select auth.uid()) = denunciante_id);
 
+-- ---------------------------------------------------- operação e auditoria (3.10/3.11)
+
+-- Limite de eventos de métrica por jogador por hora (o app registra poucos por minuto):
+-- sem isto, um cliente hostil encheria a tabela.
+create or replace function public.limitar_metricas()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+	if (select count(*) from public.evento_metrica
+		where jogador_id = new.jogador_id and recebido_em > now() - interval '1 hour') >= 600 then
+		raise exception 'limite_de_metricas';
+	end if;
+	return new;
+end;
+$$;
+create trigger evento_metrica_limite
+	before insert on public.evento_metrica
+	for each row execute function public.limitar_metricas();
+
+-- Erros das Edge Functions guardados (os logs do Supabase duram pouco).
+create table if not exists public.erro_servidor (
+	id bigint generated always as identity primary key,
+	funcao text not null check (char_length(funcao) <= 40),
+	mensagem text not null check (char_length(mensagem) <= 600),
+	jogador_id uuid,
+	criado_em timestamptz not null default now()
+);
+create index if not exists erro_servidor_criado on public.erro_servidor (criado_em desc);
+alter table public.erro_servidor enable row level security;
+-- Sem políticas: só a chave de serviço e o painel leem e escrevem.
+
+-- Painel (3.10): consultas prontas. Views NÃO são protegidas por RLS (rodam como dono):
+-- por isso o acesso é revogado de quem vem pelo app; só o painel do Supabase (e a
+-- chave de serviço) as lê.
+create or replace view public.painel_jogadores_ativos_dia as
+	select date_trunc('day', recebido_em)::date as dia, count(distinct jogador_id) as jogadores
+	from public.evento_metrica where evento = 'sessao'
+	group by 1 order by 1 desc;
+
+create or replace view public.painel_novos_jogadores_dia as
+	select date_trunc('day', criado_em)::date as dia, count(*) as jogadores
+	from public.jogador group by 1 order by 1 desc;
+
+create or replace view public.painel_compras_dia as
+	select date_trunc('day', criado_em)::date as dia, loja, produto, estado, count(*) as compras
+	from public.compra group by 1, 2, 3, 4 order by 1 desc;
+
+create or replace view public.painel_denuncias_abertas as
+	select d.id, d.criado_em, d.motivo, d.canal, d.trecho, d.alvo_id, a.nome as alvo_nome,
+		d.denunciante_id, (select count(*) from public.denuncia x where x.alvo_id = d.alvo_id and x.status = 'aberta') as total_do_alvo
+	from public.denuncia d left join public.jogador a on a.id = d.alvo_id
+	where d.status = 'aberta' order by total_do_alvo desc, d.criado_em;
+
+create or replace view public.painel_funil_tutorial as
+	select dados ->> 'passo' as passo, count(distinct jogador_id) as jogadores
+	from public.evento_metrica where evento = 'tutorial_passo'
+	group by 1 order by 1;
+
+create or replace view public.painel_desistencias as
+	select dados ->> 'fase' as fase, count(*) as vezes
+	from public.evento_metrica where evento = 'desistencia'
+	group by 1 order by 2 desc;
+
+create or replace view public.painel_erros_recentes as
+	select 'servidor' as origem, funcao as onde, mensagem, criado_em from public.erro_servidor
+	union all
+	select 'jogo', dados ->> 'arquivo', dados ->> 'mensagem', recebido_em
+	from public.evento_metrica where evento = 'erro_jogo'
+	order by criado_em desc limit 200;
+
+revoke all on public.painel_jogadores_ativos_dia, public.painel_novos_jogadores_dia, public.painel_compras_dia,
+	public.painel_denuncias_abertas, public.painel_funil_tutorial, public.painel_desistencias,
+	public.painel_erros_recentes from public, anon, authenticated;
+
 -- ---------------------------------------------------------------- compras (3.7)
 
 -- Só a Edge Function (depois de validar o recibo na loja) insere aqui.
+-- Ao excluir a conta, o registro da compra FICA (obrigação contábil/fiscal e de reembolso)
+-- sem dono: jogador_id vira null (anonimizado).
 create table if not exists public.compra (
 	id bigint generated always as identity primary key,
-	jogador_id uuid not null references public.jogador (id) on delete cascade,
+	jogador_id uuid references public.jogador (id) on delete set null,
 	loja text not null check (loja in ('google', 'apple', 'teste')),
 	produto text not null,
 	recibo_hash text not null,
@@ -361,6 +440,41 @@ create index if not exists compra_jogador on public.compra (jogador_id, criado_e
 alter table public.compra enable row level security;
 create policy "compra le as proprias" on public.compra
 	for select to authenticated using ((select auth.uid()) = jogador_id);
+
+-- Prepara a exclusão da conta (3.9): passa a liderança e apaga a ordem vazia.
+-- Depois disso a Edge Function apaga o usuário do Auth e o cascade leva o resto.
+create or replace function public.preparar_exclusao_conta(p_jogador uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+	minha uuid;
+	meu_cargo text;
+	sucessor uuid;
+begin
+	select ordem_id, cargo into minha, meu_cargo from public.ordem_membro where jogador_id = p_jogador;
+	if minha is not null then
+		if meu_cargo = 'lider' then
+			-- o oficial mais antigo; senão o membro mais antigo
+			select jogador_id into sucessor from public.ordem_membro
+			where ordem_id = minha and jogador_id <> p_jogador
+			order by (cargo = 'oficial') desc, entrou_em, jogador_id
+			limit 1;
+			if sucessor is null then
+				delete from public.ordem where id = minha; -- cascade leva o membro
+			else
+				update public.ordem_membro set cargo = 'oficial' where ordem_id = minha and jogador_id = p_jogador;
+				update public.ordem_membro set cargo = 'lider' where ordem_id = minha and jogador_id = sucessor;
+			end if;
+		end if;
+		delete from public.ordem_membro where jogador_id = p_jogador;
+	end if;
+	-- pedidos de ajuda e doações dele saem junto com a conta (cascade); amizades também.
+end;
+$$;
+revoke all on function public.preparar_exclusao_conta(uuid) from public, anon, authenticated;
 
 -- ------------------------------------------------------------ rotinas (3.6)
 
@@ -645,8 +759,13 @@ declare
 		from public.balanceamento where nome = 'servidor' and ativa limit 1), 24);
 	n integer;
 begin
-	select count(distinct denunciante_id) into n from public.denuncia
-	where alvo_id = new.alvo_id and criado_em > now() - interval '24 hours';
+	-- Só contam denúncias de contas com mais de 1 dia e perfil público (nível 3+): contas
+	-- anônimas novas são de graça, e cinco delas não podem silenciar ninguém.
+	select count(distinct d.denunciante_id) into n
+	from public.denuncia d
+	join public.jogador j on j.id = d.denunciante_id and j.criado_em < now() - interval '1 day'
+	join public.jogador_publico p on p.jogador_id = d.denunciante_id and p.nivel >= 3
+	where d.alvo_id = new.alvo_id and d.criado_em > now() - interval '24 hours';
 	if n >= limite then
 		insert into public.silenciamento (jogador_id, ate, motivo)
 		values (new.alvo_id, now() + make_interval(hours => horas), 'denuncias')

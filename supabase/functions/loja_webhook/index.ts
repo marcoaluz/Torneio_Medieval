@@ -14,6 +14,7 @@ import { hash_do_recibo } from "../_shared/servidor/compras.ts";
 import type { NotificacaoLoja } from "../_shared/servidor/compras.ts";
 import { VerificadorGoogle } from "../_shared/servidor/loja_google.ts";
 import { tratar_notificacao } from "../_shared/servidor/webhook.ts";
+import { registrar_erro } from "../_shared/servidor/erros.ts";
 import type { DepsWebhook } from "../_shared/servidor/webhook.ts";
 
 const cliente = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -80,7 +81,7 @@ Deno.serve(async (req) => {
     if (!r.ok && r.erro !== "compra_desconhecida") return new Response(r.erro, { status: 500 });
     return new Response("ok", { status: 200 });
   } catch (e) {
-    console.error("loja_webhook falhou:", e);
+    await registrar_erro(cliente, "loja_webhook", e);
     return new Response("falha_interna", { status: 500 });
   }
 });

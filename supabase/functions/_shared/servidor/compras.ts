@@ -35,6 +35,8 @@ export interface VerificadorLoja {
 /** Lê o que o banco sabe de uma compra já registrada: de quem é e em que estado está. */
 export interface DepsCompras {
   verificador: VerificadorLoja;
+  /** O ambiente permite a "loja" de teste (variável de ambiente, nunca em produção). */
+  loja_teste?: boolean;
   compra_existente(loja: string, recibo_hash: string): Promise<{ jogador_id: string; estado: string } | null>;
 }
 
@@ -61,7 +63,7 @@ export async function comprar_recibo(
   s: Servico, jogador: string, loja: string, produto: string, recibo: string, dep: DepsCompras,
 ): Promise<Resultado> {
   if (!LOJAS.includes(loja as Loja)) return erro("loja_invalida");
-  if (loja === "teste" && !s.bal("servidor")["aceitar_loja_teste"]) return erro("loja_indisponivel");
+  if (loja === "teste" && !dep.loja_teste) return erro("loja_indisponivel");
   if (!produto_existe(s, produto)) return erro("produto_inexistente");
   if (recibo.length < 8 || recibo.length > 4096) return erro("recibo_invalido");
   const hash = await hash_do_recibo(recibo);

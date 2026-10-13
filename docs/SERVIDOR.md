@@ -53,4 +53,16 @@ Estado do lado servidor e o que ainda falta. **Nada aqui foi publicado** nas Edg
 - Estado e resposta da ação gravados na mesma transação: nunca há entrega sem registro (nem registro sem entrega).
 - Parâmetros do anticheat e da lista de palavras ficam em tabelas `publico = false`, que só a função lê.
 
-**Falta (próximos prompts):** 3.5 PvP assíncrono e 3.6 ligas/temporadas/campeonatos com os jogadores de verdade; 3.7 validação de recibos da Google Play/App Store; 3.8 ordens, chat (Realtime), amigos e moderação no servidor; 3.9 obrigações (exclusão de conta, privacidade); 3.10 operação (branch, backup, painel); 3.11 auditoria. O cliente ainda grava o save direto (2.12) e joga a justa localmente: a troca para chamar `acao` é uma mudança de `ServicoJogador` (comandos viram `await Nuvem.acao(...)`), a fazer junto com a publicação.
+## PvP, ligas, compras, social e obrigações (3.5–3.11, escrito e testado; não publicado)
+
+| Peça | Arquivo | Para quê |
+| --- | --- | --- |
+| PvP e ligas (3.5/3.6) | `liga.ts` | defesa como retrato (`defesa_pvp`), adversário real pareado pela regra ou fantasma do servidor, partida conferida (justa refeita), pontos do defensor, temporada **global** (grade fixa, virada preguiçosa por jogador), resumo público (`jogador_publico`) |
+| Efeitos relacionais | `aplicar_efeitos`, `aplicar_ops_sociais`, `candidatos_pvp` (SQL) | tudo que não é o documento do jogador sai em `resultado._efeitos` e é gravado **na mesma transação** do estado |
+| Compras (3.7) | `compras.ts`, `loja_google.ts`, `webhook.ts`, `functions/loja_webhook` | recibo conferido, entrega única, reembolso/renovação/cancelamento por webhook; Apple e SSV de anúncios ainda não existem |
+| Social (3.8) | `social.ts` | ordem (criar, entrar, cargos, líder, editar), ajuda e doação aplicadas por quem recebe, torneio semanal real, loja da ordem, chat (ordem e global por idioma, filtro, limite, silenciamento), amigos por código; denúncia e bloqueio direto por RLS + gatilho de silenciamento |
+| Obrigações (3.9) | `excluir_conta.ts`, `functions/excluir_conta`, `tela_privacidade`, Configurações | exclusão de conta no app (servidor e aparelho), política e termos com aceite por versão, consentimento de anúncios personalizados |
+| Operação (3.10) | `docs/OPERACAO.md`, views `painel_*`, `erro_servidor`, autoload `Registro` | branch, backup, registro de erros do jogo e das funções, painel |
+| Auditoria (3.11) | `docs/AUDITORIA.md`, `migracoes.test.ts` | achados e correções; guarda estática de RLS e privilégios |
+
+**Falta:** o **cliente chamar `acao`** (hoje ele aplica local e grava o save direto; ver A1 na auditoria): fila de ações pendentes em `Nuvem`, estado do servidor vence na sincronização, justa de PvE e PvP com `iniciar_disputa`/`procurar_adversario` e envio das entradas, tela social ligada às funções reais (no lugar das simuladas) e a migração `economia_so_servidor`. Depois, publicar (ver `docs/OPERACAO.md`) com a autorização do usuário.

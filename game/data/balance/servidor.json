@@ -6,10 +6,10 @@
 		"chat_por_minuto": 20,
 		"tentativas_conflito": 3,
 		"idempotencia_dias": 7,
+		"cooldown_disputa_s": 30,
 		"denuncias_para_silenciar": 5,
 		"silenciar_horas": 24
 	},
-	"aceitar_loja_teste": false,
 	"temporadas": {
 		"_nota": "Grade global das temporadas (mesma para todos): epoca = uma segunda-feira 00:00 UTC; a duracao e economia.ligas.temporada_dias.",
 		"epoca": 1791763200
