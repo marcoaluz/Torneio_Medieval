@@ -1,0 +1,9 @@
+{
+  "name": "torneio-medieval-servidor",
+  "private": true,
+  "type": "module",
+  "description": "Regra da justa e da economia em TypeScript (Edge Functions do Supabase), testada contra os casos compartilhados de ../tests/shared/ com o Node 24 (roda .ts direto).",
+  "scripts": {
+    "test": "node --test \"tests/regra/*.test.ts\""
+  }
+}
