@@ -1,8 +1,8 @@
 {
 	"versao": 1,
-	"_nota": "Servidor (Supabase). url = https://<ref>.supabase.co; chave_publica = a chave publicavel/anon do projeto (pode ir no app; NUNCA a de servico). Vazio = jogo so com save local (offline). Preencher quando o projeto existir (docs/NUVEM.md).",
-	"url": "",
-	"chave_publica": "",
+	"_nota": "Servidor (Supabase). url = https://<ref>.supabase.co; chave_publica = a chave publicavel do projeto (pode ir no app; NUNCA a de servico). Vazio = jogo so com save local (offline). Ver docs/NUVEM.md.",
+	"url": "https://zhecikwngzhqajlpydrp.supabase.co",
+	"chave_publica": "sb_publishable_seEdeSg0Fb94EdnpsRAlhQ_Lka02ARe",
 	"envio_atraso_s": 5,
 	"tentativas": 3
 }

@@ -1,6 +1,16 @@
 # Conta e save na nuvem (Supabase)
 
-O que foi feito no prompt 2.12 e o que falta para ligar de verdade. **Nada foi criado nem aplicado no Supabase**: criar um projeto pode ter custo e é uma ação externa, e isso fica para você autorizar. Na conta conectada só existe o projeto "Agro GFI", que não é deste jogo.
+O que foi feito no prompt 2.12 e o estado da ligação com o servidor.
+
+## Estado do projeto (2026-10-13)
+
+- **Projeto:** `Torneio_Medieval`, ref `zhecikwngzhqajlpydrp`, região `sa-east-1`, Postgres 17. URL e chave publicável já estão em `game/data/servidor.json` (a chave publicável pode ir no repositório; a de serviço nunca).
+- **Autenticação:** Anonymous sign-ins e Manual linking ligados no painel. Testado: o cadastro anônimo devolve sessão, e o RLS deixa cada um gravar só o próprio `jogador`/`save_jogador` (a `revisao` sobe sozinha 1, 2…; sem login, a leitura volta vazia). CAPTCHA (Turnstile) ainda não ligado.
+- **Aplicado:** `contas_e_save` (`jogador`, `save_jogador`, RLS, gatilhos). `get_advisors` de segurança sem alertas.
+- **Não aplicado:** `metricas` (a ferramenta de migração foi negada pelo modo automático; aplicar pelo conector com permissão ou colando o SQL no painel), `push` (falta Firebase) e `economia_rascunho` (Parte 3; o cliente não usa).
+- **Sem branch de teste:** o projeto estava vazio e sem jogadores, e branch é recurso pago; a migração foi direto na produção (ver `docs/DECISOES.md`). A partir do primeiro jogador de verdade, toda mudança de esquema passa por branch.
+- As migrações aplicadas pelo conector recebem a versão (data/hora) do momento da aplicação, não a do nome do arquivo local.
+- Um usuário anônimo de teste (com uma linha em `jogador` e outra em `save_jogador`, `dados = {"teste": 2}`) ficou no projeto desse teste; pode apagar em Authentication → Users.
 
 ## Como funciona
 
@@ -17,14 +27,14 @@ O que foi feito no prompt 2.12 e o que falta para ligar de verdade. **Nada foi c
 1. `20261011120000_contas_e_save.sql` — tabelas `jogador` e `save_jogador`, com RLS (cada um lê e grava só o próprio), sem delete pelo cliente e com gatilhos que controlam `atualizado_em` e `revisao`. **Esta é a do 2.12.**
 2. `20261011120100_economia_rascunho.sql` — **rascunho da Parte 3, não aplicar ainda.** Traz as tabelas de economia (`cavaleiro`, `carteira`, `cavalo`, `item`, `equipamento`, `predio`, `timer`, `pve_progresso`) com RLS só de leitura; quem escreve é a Edge Function. Na 3.1/3.2 o servidor vira o dono do estado e o save do cliente vira só cache.
 
-## Para ligar (precisa da sua autorização)
+## Para ligar (feito em 2026-10-13, menos o item 3)
 
-1. Criar um projeto para o jogo no Supabase, na organização "Projetos Marco Luz", região `sa-east-1`. Confira o plano e o custo; posso fazer pelo conector quando você autorizar.
-2. Em **Authentication → Sign In / Providers**, ligar **Anonymous sign-ins** e **Manual linking** (este último para vincular conta depois).
-3. Recomendado pela documentação: ligar CAPTCHA (Turnstile) para o login anônimo, que tem limite de 30 contas por hora por IP.
-4. Aplicar a migração 1, de preferência numa branch de teste primeiro (skill `supabase-jogo`), e rodar `get_advisors` de segurança.
-5. Preencher `game/data/servidor.json` com a URL do projeto e a **chave publicável** (anon/publishable). Nunca a de serviço.
-6. Rodar o jogo; o painel do Supabase deve mostrar o usuário anônimo e a linha em `save_jogador`.
+1. ~~Criar um projeto~~ feito pelo usuário.
+2. ~~Anonymous sign-ins e Manual linking~~ ligados.
+3. Recomendado: CAPTCHA (Turnstile) para o login anônimo, que tem limite de 30 contas por hora por IP. **Pendente.**
+4. ~~Aplicar a migração 1 e `get_advisors`~~ feito (sem branch, ver acima).
+5. ~~Preencher `game/data/servidor.json`~~ feito.
+6. Rodar o jogo de verdade (cena principal) e conferir no painel o usuário anônimo e a linha em `save_jogador`. **Pendente:** o teste feito foi pela API REST, com as mesmas chamadas do cliente.
 
 ## Vincular Google Play Games (sem perder o progresso)
 
