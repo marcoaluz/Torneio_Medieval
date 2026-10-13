@@ -1,8 +1,9 @@
 # Estado atual
 
 > **Retomada rápida (2026-10-13):**
-> - **Próximo:** preparação local do servidor (3.1–3.11: porte da regra para TypeScript, migrações e Edge Functions; só publicar/aplicar o que o usuário autorizar) e, por fim, a Parte 4. O Supabase já existe (ver `docs/NUVEM.md`).
-> - **Validação:** a suíte `bash tests/rodar_testes.sh` passa com 45 arquivos e 981 checagens.
+> - **Servidor (3.1–3.4 feitos e testados, nada publicado):** regra da justa e economia solo em TypeScript (`supabase/functions/_shared/`), com paridade contra o GDScript; função `acao`, banco, balanceamento remoto. Ver `docs/SERVIDOR.md`.
+> - **Próximo:** 3.5 PvP e 3.6 ligas com jogadores de verdade, 3.7 compras (recibos), 3.8 ordens/chat no servidor, 3.9 obrigações, 3.10 operação, 3.11 auditoria; depois a troca do cliente para chamar `acao` (fila de ações pendentes, estado do servidor vence) e a Parte 4. Só publicar/aplicar o que o usuário autorizar.
+> - **Validação:** `bash tests/rodar_testes.sh` passa com 45 arquivos do GDScript (981 checagens) e 294 checagens em TypeScript (`cd supabase && node --test "tests/regra/*.test.ts"`).
 > - **Save:** versão 11.
 > - **Armadilhas e convenções:** veja "Onde paramos" no `CLAUDE.md`.
 

@@ -60,10 +60,10 @@ Atualizado em 2026-10-13. O detalhe completo de cada sistema está em `docs/ESTA
   - Parte 2: 2.1–2.11; 2.12 ligado ao projeto Supabase `Torneio_Medieval` (2026-10-13, migrações `contas_e_save` e `metricas` aplicadas); falta só o CAPTCHA no painel.
   - Parte 3: 3.12–3.25, todos locais. PvP, ordens, chat, compras e anúncios estão simulados ou com provedor de teste até o servidor existir.
 - **Próximo, em ordem:**
-  1. **Preparação do servidor 3.1–3.11:**
-     - porte da regra para TypeScript em `supabase/functions/`, testado com Node 24 (já instalado; roda `.ts` direto) contra `tests/shared/*.json`;
-     - migrações em `supabase/migrations/`;
-     - Edge Functions escritas; só publicar o que o usuário autorizar.
+  1. **Servidor 3.5–3.11 (3.1–3.4 já feitos, ver `docs/SERVIDOR.md`):**
+     - regra e economia em TypeScript em `supabase/functions/_shared/`, testadas com Node 24 (`cd supabase && node --test "tests/regra/*.test.ts"`) contra `tests/shared/*.json` e os cenários gravados pelo GDScript;
+     - migrações em `supabase/migrations/` (rascunho, não aplicadas) e Edge Functions escritas; só publicar/aplicar o que o usuário autorizar;
+     - falta: PvP (3.5), ligas (3.6), compras (3.7), ordens/chat (3.8), obrigações (3.9), operação (3.10), auditoria (3.11) e o cliente chamar `acao`.
   2. **Supabase já existe** (usuário criou): falta ligar CAPTCHA e apagar os usuários de teste (ver `docs/NUVEM.md`). `push` e `economia_rascunho` seguem sem aplicar. Migração nova passa por branch a partir do primeiro jogador real.
   3. **Parte 4** (4.1–4.3: espada, arco, mêlée).
 - **Fica com o usuário:** os prompts de arte (A*/B*/C*, PixelLab) e de som (S*, ElevenLabs), porque gastam crédito.
@@ -77,6 +77,7 @@ Atualizado em 2026-10-13. O detalhe completo de cada sistema está em `docs/ESTA
   - `Balanceamento.ler(nome)` e `ler_json(caminho)` devolvem um cache somente leitura (alterar dá erro);
   - `Balanceamento.carregar(nome)` devolve uma cópia;
   - em caminho quente, use `ler`.
+- **Servidor em TypeScript:** mudou regra ou economia do GDScript? Mude o porte em `supabase/functions/_shared/`, regrave os cenários (`tools/gravar_cenarios.gd`) e rode os testes dos dois lados; sem enum/namespace/parâmetro-propriedade nos `.ts` (Node só apaga tipos). O relógio do GDScript pode ser parado com `ServicoTempo.fixo` (só para gravações).
 - **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
 - **Mudança na regra da justa:**
   - regere os casos compartilhados com o oráculo Python correspondente;
