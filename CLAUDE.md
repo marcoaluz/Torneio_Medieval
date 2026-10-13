@@ -57,7 +57,7 @@ Atualizado em 2026-10-11, depois do commit `d311e86`. O detalhe completo de cada
 - **Parar e perguntar antes de:** gastar crédito ou mexer em serviço externo. Isso inclui PixelLab, ElevenLabs, criar projeto ou aplicar migração no Supabase, Firebase, AdMob e lojas. Tudo o que é local, faça direto.
 - **Feito:**
   - Parte 1: código 1.0–1.10. O 1.9 (APK) depende de instalar JDK, SDK e templates Android.
-  - Parte 2: 2.1–2.11; 2.12 ligado ao projeto Supabase `Torneio_Medieval` (2026-10-13, só a migração `contas_e_save` aplicada); 2.13 (métricas) preparado, falta aplicar a migração `metricas`.
+  - Parte 2: 2.1–2.11; 2.12 ligado ao projeto Supabase `Torneio_Medieval` (2026-10-13, migrações `contas_e_save` e `metricas` aplicadas); falta só o CAPTCHA no painel.
   - Parte 3: 3.12–3.19 e 3.21–3.25, todos locais. PvP, compras e anúncios estão simulados ou com provedor de teste até o servidor existir.
 - **Próximo, em ordem:**
   1. **3.20** (telas sociais, local).
@@ -65,7 +65,7 @@ Atualizado em 2026-10-11, depois do commit `d311e86`. O detalhe completo de cada
      - porte da regra para TypeScript em `supabase/functions/`, testado com Node 24 (já instalado; roda `.ts` direto) contra `tests/shared/*.json`;
      - migrações em `supabase/migrations/`;
      - Edge Functions escritas, mas não publicadas.
-  3. **Supabase já existe** (usuário criou): falta aplicar `metricas`, ligar CAPTCHA e rodar o jogo contra o projeto (ver `docs/NUVEM.md`). Migração nova passa por branch a partir do primeiro jogador real.
+  3. **Supabase já existe** (usuário criou): falta ligar CAPTCHA e apagar os usuários de teste (ver `docs/NUVEM.md`). `push` e `economia_rascunho` seguem sem aplicar. Migração nova passa por branch a partir do primeiro jogador real.
   4. **Parte 4** (4.1–4.3: espada, arco, mêlée).
 - **Fica com o usuário:** os prompts de arte (A*/B*/C*, PixelLab) e de som (S*, ElevenLabs), porque gastam crédito.
 - **Fim de cada prompt:** rodar a suíte, atualizar ESTADO, DECISOES e SESSOES, e fazer commit, como faz a skill `/passagem`.
