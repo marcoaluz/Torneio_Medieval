@@ -2,7 +2,7 @@ extends Node
 ## Demonstração da vila viva para o `driver.sh shot`. Hora e clima por
 ## variáveis de ambiente (TM_HORA, ex. 22; TM_CLIMA: limpo, nublado, chuva,
 ## neblina) e TM_TELA (campo_treino ou estabulo abre a tela). Põe o campo de treino e o armeiro ocupados (timers falsos, sem
-## salvar: save em user://teste_vila_demo/).
+## salvar: save em user://teste_vila_demo/). TM_ORDEM=1 entra numa ordem simulada.
 
 func _ready() -> void:
 	var jog: ServicoJogador = get_node("/root/Jogador")
@@ -16,6 +16,10 @@ func _ready() -> void:
 	var agora := ServicoTempo.agora()
 	for alvo in ["campo_treino", "armeiro"]:
 		jog.estado["timers"].append({"id": "demo_" + alvo, "tipo": "demo", "alvo": alvo, "inicio_em": agora, "termina_em": agora + 600})
+	if OS.get_environment("TM_ORDEM") == "1":
+		# Com ordem (simulada): bandeira da ordem na casa senhorial e cavaleiros na praça.
+		jog.estado["cavaleiro"]["nivel"] = 8
+		jog.entrar_ordem(jog.ordens_para_entrar()[1]["id"])
 	var vila: Vila = load("res://game/scenes/village/vila.tscn").instantiate()
 	var amb: AmbienteVila = vila.get_node("Ambiente")
 	if OS.get_environment("TM_HORA") != "":

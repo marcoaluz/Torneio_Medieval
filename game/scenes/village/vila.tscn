@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/vila.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/chao_vila_provisorio.gd" id="2"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_liga.tscn" id="15"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/tela_loja.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/janela_oferta.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://game/scenes/ui/tela_social.tscn" id="18"]
 
 [node name="Vila" type="Node2D"]
 script = ExtResource("1")
@@ -67,6 +68,10 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
 
 [node name="Missoes" type="Button" parent="Interface/Topo/Linha"]
+layout_mode = 2
+focus_mode = 0
+
+[node name="Social" type="Button" parent="Interface/Topo/Linha"]
 layout_mode = 2
 focus_mode = 0
 
@@ -161,6 +166,9 @@ visible = false
 visible = false
 
 [node name="TelaLoja" parent="Interface" instance=ExtResource("16")]
+visible = false
+
+[node name="TelaSocial" parent="Interface" instance=ExtResource("18")]
 visible = false
 
 [node name="JanelaOferta" parent="Interface" instance=ExtResource("17")]

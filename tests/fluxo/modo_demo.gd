@@ -3,7 +3,7 @@ extends Node
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
-## TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
+## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
 ## a vila tocando uma cena. Save em
 ## user://teste_modo_demo/.
 
@@ -138,6 +138,39 @@ func _ready() -> void:
 		add_child(camada_l)
 		camada_l.add_child(tl)
 		tl.abrir.call_deferred(OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "liga")
+		return
+	if tela == "social":
+		# Telas sociais (TM_ABA = ordem|chat|amigos|perfil, TM_SUB = membros|ajuda|doacoes|
+		# torneio|loja|gerir, TM_CANAL = ordem|global, TM_ORDEM=0 = sem ordem).
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["cavaleiro"]["nivel"] = 8
+		jog.estado["inventario"]["ouro"] = 2000
+		jog.estado["liga"]["pontos"] = 340
+		if OS.get_environment("TM_ORDEM") != "0":
+			jog.entrar_ordem(jog.ordens_para_entrar()[1]["id"])
+			jog.treinar_cavaleiro("forca")
+			for tm: Dictionary in jog.estado["timers"]:
+				tm["termina_em"] = ServicoTempo.agora() + 5400
+			jog.pedir_ajuda(jog.estado["timers"][0]["id"])
+			jog.estado["social"]["moeda"] = 87
+			jog.estado["social"]["torneio"]["vitorias"] = 4
+			jog.adicionar_amigo(jog.ordem()["membros"][1]["id"])
+			jog.adicionar_amigo_por_codigo(jog.codigos_de_teste(1)[0]["codigo"])
+		jog.chat_atualizar()
+		jog.chat_enviar("global", "", "boa_justa")
+		var ts: TelaSocial = load("res://game/scenes/ui/tela_social.tscn").instantiate()
+		var camada_s := CanvasLayer.new()
+		add_child(camada_s)
+		camada_s.add_child(ts)
+		if OS.get_environment("TM_SUB") != "":
+			ts.sub = OS.get_environment("TM_SUB")
+		if OS.get_environment("TM_CANAL") != "":
+			ts.canal = OS.get_environment("TM_CANAL")
+		var aba_s := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "ordem"
+		var perfil_s := ""
+		if aba_s == "perfil" and OS.get_environment("TM_ORDEM") != "0":
+			perfil_s = jog.ordem()["membros"][2]["id"]
+		ts.abrir.call_deferred(aba_s, perfil_s)
 		return
 	if tela == "loja":
 		# Loja com passe no nível 7 (premium comprado), ofertas e gemas (TM_ABA).

@@ -51,6 +51,8 @@ var tela_equipamentos: TelaEquipamentos:
 @onready var tela_configuracoes: TelaConfiguracoes = $Interface/TelaConfiguracoes
 @onready var tela_liga: TelaLiga = $Interface/TelaLiga
 @onready var tela_loja: TelaLoja = $Interface/TelaLoja
+@onready var tela_social: TelaSocial = $Interface/TelaSocial
+@onready var _botao_social: Button = $Interface/Topo/Linha/Social
 @onready var janela_oferta: JanelaOferta = $Interface/JanelaOferta
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
 
@@ -70,6 +72,7 @@ func _ready() -> void:
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
 	($Interface/Topo/Linha/Config as Button).text = tr("VILA_CONFIG")
+	_botao_social.pressed.connect(func(): fechar_painel(); tela_social.abrir())
 	($Interface/Topo/Linha/Config as Button).pressed.connect(func(): fechar_painel(); tela_configuracoes.abrir())
 	_botao_missoes.pressed.connect(func(): fechar_painel(); tela_missoes.abrir("login" if _jog.login_hoje()["pode"] else "diarias"))
 	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
@@ -101,6 +104,8 @@ func atualizar() -> void:
 	_botao_missoes.text = tr("VILA_MISSOES") + (" !" if prontas > 0 else "")
 	for c: String in _jog.conquistas_novas():
 		mostrar_letreiro(tr("VILA_CONQUISTA").format({"conquista": tr("CONQUISTA_" + c.to_upper())}))
+	_botao_social.text = tr("VILA_SOCIAL") + (" !" if _jog.social_alerta() else "")
+	_jog.atualizar_ajudas()
 	var prontos := _jog.baus().filter(func(b): return _jog.bau_pronto(b["id"])).size()
 	_botao_baus.text = tr("VILA_BAUS").format({"n": _jog.baus().size(), "max": int(_jog.cfg_baus()["espacos"])}) + (" !" if prontos > 0 else "")
 	for nome: String in predios:

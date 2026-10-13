@@ -16,7 +16,7 @@ extends Node
 
 signal mudou(secao: String)
 
-const VERSAO := 10
+const VERSAO := 11
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 @export var caminho_save := "user://jogador.json"
@@ -1117,6 +1117,9 @@ func concluir_pvp(eventos: Array) -> Dictionary:
 		return _erro("sem_adversario")
 	var cfg := cfg_ligas()
 	var venceu := RegraPve.estrelas(eventos) > 0
+	if venceu and tem_ordem():
+		_virar_semana_torneio()
+		_social()["torneio"]["vitorias"] = int(_social()["torneio"]["vitorias"]) + 1
 	var antes := int(lg["pontos"])
 	var pos_antes := RegraLiga.posicao(antes, cfg)
 	var ouro_g := 0
@@ -2193,6 +2196,834 @@ func _garantir_predio(nome: String) -> void:
 	if not estado["vila"]["predios"].has(nome):
 		estado["vila"]["predios"][nome] = {"nivel": 1}
 
+# ------------------------------------------------------------------- social
+# Ordens, ajuda nos timers, doações, torneio semanal, loja da ordem, chat,
+# amigos e perfil público (3.20; regra pura RegraOrdem, números em
+# ordem.json, mensagens em game/data/social/chat.json). Até o servidor (3.8)
+# TUDO isto é simulado: as ordens para entrar, os membros (fantasmas da liga),
+# os pedidos de ajuda e de doação, as mensagens e as ordens rivais do torneio
+# saem da semente do save, e as telas avisam. Dado de verdade, só o do próprio
+# jogador (cargo, moeda, bloqueios, denúncias a enviar, amigos).
+
+static func _social_novo() -> Dictionary:
+	return {"codigo": "", "ordem": {}, "pedidos": [], "ajudei": {"balde": -1, "ids": []},
+		"doacoes": {"dia": -1, "unidades": 0, "atendidos": []}, "ajuda_moeda": {"dia": -1, "moeda": 0}, "moeda": 0,
+		"torneio": {"semana": -1, "vitorias": 0, "participou": false, "pendente": {}}, "loja": {"semana": -1, "compras": {}},
+		"chat": {"ordem": [], "global": [], "ultimo_envio": 0, "sim_ordem": 0, "sim_global": 0, "contador": 0},
+		"bloqueados": [], "denuncias": [], "amigos": []}
+
+func cfg_ordem() -> Dictionary:
+	return Balanceamento.ler("ordem")
+
+func _social() -> Dictionary:
+	if not estado.has("social"):
+		estado["social"] = _social_novo()
+	return estado["social"]
+
+func moeda_ordem() -> int:
+	return int(_social()["moeda"])
+
+func tem_ordem() -> bool:
+	return not (_social()["ordem"] as Dictionary).is_empty()
+
+func cargo_na_ordem() -> String:
+	return str(_social()["ordem"].get("cargo", ""))
+
+## Brasão da ordem ({} sem ordem), para a bandeira da vila.
+func brasao_da_ordem() -> Dictionary:
+	return (_social()["ordem"].get("brasao", {}) as Dictionary).duplicate(true)
+
+func pode_na_ordem(acao: String) -> bool:
+	return tem_ordem() and RegraOrdem.pode(cargo_na_ordem(), acao, cfg_ordem())
+
+## A ordem do jogador: {id, nome, brasao, cargo, criada_em, simulada, membros:
+## [{id, nome, cargo, poder, pontos, simulado}]}; {} se não tem. A linha do
+## próprio jogador ("voce") sai com o poder e os pontos de agora.
+func ordem() -> Dictionary:
+	var o: Dictionary = (_social()["ordem"] as Dictionary).duplicate(true)
+	if o.is_empty():
+		return o
+	for m: Dictionary in o["membros"]:
+		if m["id"] == "voce":
+			m["nome"] = cavaleiro().get("nome", "")
+			m["poder"] = poder_jogador()
+			m["pontos"] = int(estado["liga"]["pontos"])
+	return o
+
+func _nomes_ordens() -> Array:
+	var casas: Array = Balanceamento.ler_json("res://game/data/texto/nomes_sorteio.json")["casas"]
+	return casas.map(func(c): return str(c).replace("Casa", "Ordem"))
+
+## Ordens simuladas para entrar (até o servidor): [{id, nome, membros, poder, brasao}].
+func ordens_para_entrar() -> Array:
+	var op := GeradorBrasao.opcoes()
+	return RegraOrdem.ordens_simuladas(int(estado["baus"]["semente"]), cfg_ordem(), _nomes_ordens(), op["cores"], op["simbolos"].keys(), op["divisoes"])
+
+func _membro_simulado(ordem_n: int, k: int, cargo: String) -> Dictionary:
+	var n := 900000 + ordem_n * 64 + k
+	var base := int(estado["liga"]["pontos"])
+	var f := _fantasma(n, base)
+	return {"id": "m%d_%d" % [ordem_n, k], "nome": f["nome"], "cargo": cargo, "n": n, "base": base, "poder": int(f["poder"]),
+		"pontos": int(f["pontos"]), "simulado": true}
+
+func _brasao_da_casa() -> Dictionary:
+	var b: Dictionary = casa().get("brasao", {})
+	if b.is_empty():
+		var cores: Dictionary = casa()["cores"]
+		b = {"cor1": cores["principal"], "cor2": cores["secundaria"], "cor_simbolo": cores["secundaria"]}
+	return b.duplicate(true)
+
+## {ok, erro, ouro}: dá para criar uma ordem (com este nome, se informado)?
+func pode_criar_ordem(nome := "") -> Dictionary:
+	var cfg := cfg_ordem()
+	if tem_ordem():
+		return _erro("ja_tem_ordem")
+	if int(cavaleiro()["nivel"]) < int(cfg["nivel_minimo"]):
+		return _erro("nivel_baixo")
+	if nome != "":
+		var e := ServicoNomes.validar(nome)
+		if e == "" and ServicoNomes.limpar(nome).length() < int(cfg["nome"]["min"]):
+			e = "nome_curto"
+		if e != "":
+			return _erro(e)
+	if ouro() < int(cfg["criar"]["ouro"]):
+		return _erro("ouro_insuficiente")
+	return {"ok": true, "erro": "", "ouro": int(cfg["criar"]["ouro"])}
+
+func criar_ordem(nome: String) -> Dictionary:
+	var p := pode_criar_ordem(nome)
+	if not p["ok"]:
+		return p
+	var cfg := cfg_ordem()
+	estado["inventario"]["ouro"] = ouro() - int(cfg["criar"]["ouro"])
+	var membros: Array = [{"id": "voce", "nome": cavaleiro().get("nome", ""), "cargo": "lider", "n": 0, "base": 0,
+		"poder": poder_jogador(), "pontos": int(estado["liga"]["pontos"]), "simulado": false}]
+	for k in int(cfg["criar"]["recrutas"]):
+		membros.append(_membro_simulado(40, k, "membro"))
+	_social()["ordem"] = {"id": "o_voce", "nome": ServicoNomes.limpar(nome), "brasao": _brasao_da_casa(), "cargo": "lider",
+		"criada_em": ServicoTempo.agora(), "simulada": true, "membros": membros}
+	_marcar_participacao()
+	return _concluir("social")
+
+func entrar_ordem(id: String) -> Dictionary:
+	var cfg := cfg_ordem()
+	if tem_ordem():
+		return _erro("ja_tem_ordem")
+	if int(cavaleiro()["nivel"]) < int(cfg["nivel_minimo"]):
+		return _erro("nivel_baixo")
+	for o: Dictionary in ordens_para_entrar():
+		if o["id"] != id:
+			continue
+		if not RegraOrdem.tem_vaga(int(o["membros"]), cfg):
+			return _erro("ordem_cheia")
+		var idx := int(str(id).substr(1))
+		var membros: Array = []
+		for k in int(o["membros"]):
+			membros.append(_membro_simulado(idx, k, "lider" if k == 0 else ("oficial" if k <= 2 else "membro")))
+		membros.append({"id": "voce", "nome": cavaleiro().get("nome", ""), "cargo": "membro", "n": 0, "base": 0,
+			"poder": poder_jogador(), "pontos": int(estado["liga"]["pontos"]), "simulado": false})
+		_social()["ordem"] = {"id": str(o["id"]), "nome": o["nome"], "brasao": (o["brasao"] as Dictionary).duplicate(true), "cargo": "membro",
+			"criada_em": ServicoTempo.agora(), "simulada": true, "membros": membros}
+		_marcar_participacao()
+		return _concluir("social")
+	return _erro("ordem_inexistente")
+
+func _marcar_participacao() -> void:
+	_virar_semana_torneio()
+	_social()["torneio"]["participou"] = true
+
+## Sair: o líder precisa passar a liderança antes (ou dissolver).
+func sair_ordem() -> Dictionary:
+	if not tem_ordem():
+		return _erro("sem_ordem")
+	var o: Dictionary = _social()["ordem"]
+	if o["cargo"] == "lider" and (o["membros"] as Array).size() > 1:
+		return _erro("passe_a_lideranca")
+	_limpar_ordem()
+	return _concluir("social")
+
+func _limpar_ordem() -> void:
+	var s := _social()
+	s["ordem"] = {}
+	s["pedidos"] = []
+	s["chat"]["ordem"] = []
+	s["chat"]["sim_ordem"] = 0
+
+func dissolver_ordem() -> Dictionary:
+	if not pode_na_ordem("dissolver"):
+		return _erro("sem_permissao")
+	_limpar_ordem()
+	return _concluir("social")
+
+## Promover, rebaixar ou expulsar (acao) o membro `id`, pelas permissões do cargo.
+func agir_sobre_membro(id: String, acao: String) -> Dictionary:
+	var o: Dictionary = _social()["ordem"]
+	if o.is_empty():
+		return _erro("sem_ordem")
+	for m: Dictionary in o["membros"]:
+		if m["id"] != id:
+			continue
+		if id == "voce" or not RegraOrdem.pode_sobre(str(o["cargo"]), str(m["cargo"]), acao, cfg_ordem()):
+			return _erro("sem_permissao")
+		if acao == "expulsar":
+			(o["membros"] as Array).erase(m)
+		else:
+			m["cargo"] = RegraOrdem.cargo_depois(str(m["cargo"]), acao)
+		return _concluir("social")
+	return _erro("membro_inexistente")
+
+func passar_lideranca(id: String) -> Dictionary:
+	if not pode_na_ordem("passar_lideranca"):
+		return _erro("sem_permissao")
+	var o: Dictionary = _social()["ordem"]
+	for m: Dictionary in o["membros"]:
+		if m["id"] == id and id != "voce":
+			m["cargo"] = "lider"
+			o["cargo"] = "oficial"
+			for eu: Dictionary in o["membros"]:
+				if eu["id"] == "voce":
+					eu["cargo"] = "oficial"
+			return _concluir("social")
+	return _erro("membro_inexistente")
+
+func editar_brasao_ordem(brasao: Dictionary) -> Dictionary:
+	if not pode_na_ordem("editar_brasao"):
+		return _erro("sem_permissao")
+	_social()["ordem"]["brasao"] = GeradorBrasao.completar(brasao)
+	return _concluir("social")
+
+func renomear_ordem(nome: String) -> Dictionary:
+	if not pode_na_ordem("editar_nome"):
+		return _erro("sem_permissao")
+	var e := ServicoNomes.validar(nome)
+	if e == "" and ServicoNomes.limpar(nome).length() < int(cfg_ordem()["nome"]["min"]):
+		e = "nome_curto"
+	if e != "":
+		return _erro(e)
+	_social()["ordem"]["nome"] = ServicoNomes.limpar(nome)
+	return _concluir("social")
+
+func _membros_visiveis() -> Array:
+	var r: Array = []
+	for m: Dictionary in _social()["ordem"].get("membros", []):
+		if m["id"] != "voce" and not (_social()["bloqueados"] as Array).has(m["id"]):
+			r.append(m)
+	return r
+
+# ----- ajuda nos timers
+
+## Timers do jogador que a ordem pode ajudar: [{id, tipo, alvo, restante_s, pedido}].
+func timers_para_pedir_ajuda() -> Array:
+	var tipos: Array = cfg_ordem()["ajuda"]["tipos"]
+	var r: Array = []
+	for t: Dictionary in estado["timers"]:
+		if tipos.has(t["tipo"]) and not ServicoTempo.pronto(int(t["termina_em"])):
+			r.append({"id": t["id"], "tipo": t["tipo"], "alvo": t["alvo"], "restante_s": ServicoTempo.restante(int(t["termina_em"])),
+				"pedido": not pedido_do_timer(t["id"]).is_empty()})
+	return r
+
+func pedido_do_timer(timer_id: String) -> Dictionary:
+	for p: Dictionary in _social()["pedidos"]:
+		if p["timer"] == timer_id:
+			return p.duplicate(true)
+	return {}
+
+func _timer_ref(id: String) -> Dictionary:
+	for t: Dictionary in estado["timers"]:
+		if t["id"] == id:
+			return t
+	return {}
+
+## Pede ajuda da ordem para um timer: sorteia quem ajuda e quando (simulado).
+func pedir_ajuda(timer_id: String) -> Dictionary:
+	if not tem_ordem():
+		return _erro("sem_ordem")
+	var cfg: Dictionary = cfg_ordem()["ajuda"]
+	var t := _timer_ref(timer_id)
+	if t.is_empty() or ServicoTempo.pronto(int(t["termina_em"])) or not (cfg["tipos"] as Array).has(t["tipo"]):
+		return _erro("timer_inexistente")
+	if not pedido_do_timer(timer_id).is_empty():
+		return _erro("ja_pediu")
+	var pool := _membros_visiveis().map(func(m): return m["id"])
+	if pool.is_empty():
+		return _erro("sem_membros")
+	var rng := Aleatorio.new(_semente_servico())
+	var ajudantes: Array = []
+	var atrasos: Array = []
+	var acumulado := 0
+	for i in mini(int(cfg["ajudas_max_por_pedido"]), pool.size()):
+		ajudantes.append(pool.pop_at(rng.inteiro(0, pool.size() - 1)))
+		acumulado += rng.inteiro(int(cfg["resposta_s"][0]), int(cfg["resposta_s"][1]))
+		atrasos.append(acumulado)
+	(_social()["pedidos"] as Array).append({"id": _novo_id(estado, "a"), "timer": timer_id, "em": ServicoTempo.agora(),
+		"ajudantes": ajudantes, "atrasos": atrasos, "aplicadas": 0})
+	return _concluir("social")
+
+## Aplica as ajudas que já "chegaram" (os membros simulados respondem com
+## atraso) e descarta pedidos de timer que acabou. Devolve quantas aplicou.
+func atualizar_ajudas() -> int:
+	var pedidos: Array = _social()["pedidos"]
+	if pedidos.is_empty():
+		return 0
+	var cfg := cfg_ordem()
+	var agora := ServicoTempo.agora()
+	var aplicadas := 0
+	var manter: Array = []
+	for p: Dictionary in pedidos:
+		var t := _timer_ref(str(p["timer"]))
+		if t.is_empty() or ServicoTempo.pronto(int(t["termina_em"])):
+			continue
+		var atrasos: Array = p["atrasos"]
+		while int(p["aplicadas"]) < atrasos.size() and agora - int(p["em"]) >= int(atrasos[int(p["aplicadas"])]):
+			t["termina_em"] = int(t["termina_em"]) - RegraOrdem.segundos_da_ajuda(ServicoTempo.restante(int(t["termina_em"])), cfg)
+			p["aplicadas"] = int(p["aplicadas"]) + 1
+			aplicadas += 1
+		manter.append(p)
+	var mudou_lista := manter.size() != pedidos.size()
+	_social()["pedidos"] = manter
+	if aplicadas > 0 or mudou_lista:
+		_concluir("social")
+	return aplicadas
+
+## Pedidos de ajuda dos membros (simulados; trocam a cada `balde_s`):
+## [{id, membro_id, nome, tipo, ajudado}].
+func pedidos_da_ordem() -> Array:
+	if not tem_ordem():
+		return []
+	var cfg: Dictionary = cfg_ordem()["ajuda"]
+	var balde := ServicoTempo.agora() / int(cfg["balde_s"])
+	var rng := Aleatorio.new(int(estado["baus"]["semente"]) + 7919 * (balde + 1))
+	var candidatos := _membros_visiveis()
+	var feitos: Array = _social()["ajudei"]["ids"] if int(_social()["ajudei"]["balde"]) == balde else []
+	var tipos: Array = cfg["tipos"]
+	var r: Array = []
+	for i in mini(int(cfg["pedidos_simulados"]), candidatos.size()):
+		var m: Dictionary = candidatos.pop_at(rng.inteiro(0, candidatos.size() - 1))
+		var id := "p%d_%d" % [balde, i]
+		r.append({"id": id, "membro_id": m["id"], "nome": m["nome"], "tipo": tipos[rng.inteiro(0, tipos.size() - 1)], "ajudado": feitos.has(id)})
+	return r
+
+## Ajuda um pedido da ordem: ganha moeda da ordem (com teto por dia).
+func ajudar(id: String) -> Dictionary:
+	for p: Dictionary in pedidos_da_ordem():
+		if p["id"] != id:
+			continue
+		if p["ajudado"]:
+			return _erro("ja_ajudou")
+		var s := _social()
+		var am: Dictionary = s["ajuda_moeda"]
+		if int(am["dia"]) != dia_atual():
+			am["dia"] = dia_atual()
+			am["moeda"] = 0
+		var g := RegraOrdem.moeda_da_ajuda(int(am["moeda"]), cfg_ordem())
+		am["moeda"] = int(am["moeda"]) + g
+		s["moeda"] = int(s["moeda"]) + g
+		var balde := ServicoTempo.agora() / int(cfg_ordem()["ajuda"]["balde_s"])
+		if int(s["ajudei"]["balde"]) != balde:
+			s["ajudei"] = {"balde": balde, "ids": []}
+		(s["ajudei"]["ids"] as Array).append(id)
+		_evento("ajuda_ordem")
+		var r := _concluir("social")
+		r["moeda"] = g
+		return r
+	return _erro("pedido_inexistente")
+
+# ----- doações
+
+## Pedidos de material dos membros (simulados; trocam a cada dia):
+## [{id, membro_id, nome, material, quantidade, atendido}].
+func pedidos_de_doacao() -> Array:
+	if not tem_ordem():
+		return []
+	var cfg: Dictionary = cfg_ordem()["doacao"]
+	var dia := dia_atual()
+	var rng := Aleatorio.new(int(estado["baus"]["semente"]) + 104729 * (dia + 1))
+	var candidatos := _membros_visiveis()
+	var d: Dictionary = _social()["doacoes"]
+	var atendidos: Array = d["atendidos"] if int(d["dia"]) == dia else []
+	var mats: Array = (cfg["materiais"] as Dictionary).keys()
+	mats.sort()
+	var r: Array = []
+	for i in mini(int(cfg["pedidos_simulados"]), candidatos.size()):
+		var m: Dictionary = candidatos.pop_at(rng.inteiro(0, candidatos.size() - 1))
+		var mat: String = mats[rng.inteiro(0, mats.size() - 1)]
+		var faixa: Array = cfg["materiais"][mat]
+		var id := "d%d_%d" % [dia, i]
+		r.append({"id": id, "membro_id": m["id"], "nome": m["nome"], "material": mat,
+			"quantidade": rng.inteiro(int(faixa[0]), int(faixa[1])), "atendido": atendidos.has(id)})
+	return r
+
+## Unidades que ainda podem ser doadas hoje.
+func doacao_restante_hoje() -> int:
+	var d: Dictionary = _social()["doacoes"]
+	return RegraOrdem.doacao_restante(int(d["unidades"]) if int(d["dia"]) == dia_atual() else 0, cfg_ordem())
+
+func doar(id: String) -> Dictionary:
+	for p: Dictionary in pedidos_de_doacao():
+		if p["id"] != id:
+			continue
+		if p["atendido"]:
+			return _erro("ja_doou")
+		var q := int(p["quantidade"])
+		if q > doacao_restante_hoje():
+			return _erro("limite_diario")
+		if material(p["material"]) < q:
+			return _erro("material_insuficiente")
+		var s := _social()
+		var d: Dictionary = s["doacoes"]
+		if int(d["dia"]) != dia_atual():
+			d["dia"] = dia_atual()
+			d["unidades"] = 0
+			d["atendidos"] = []
+		_gastar_materiais({p["material"]: q})
+		d["unidades"] = int(d["unidades"]) + q
+		(d["atendidos"] as Array).append(id)
+		var g := int(cfg_ordem()["doacao"]["moeda_por_doacao"])
+		s["moeda"] = int(s["moeda"]) + g
+		_evento("doacao_ordem")
+		var r := _concluir("social")
+		r["moeda"] = g
+		return r
+	return _erro("pedido_inexistente")
+
+# ----- torneio semanal e loja da ordem
+
+## Início da semana `semana` (a segunda na hora da virada do dia).
+func _inicio_da_semana(semana: int) -> int:
+	return (semana * 7 - 3) * 86400 + int(cfg_metas()["virada_hora_utc"]) * 3600
+
+## Fecha a semana que passou (guarda o prêmio a resgatar) e abre a atual.
+func _virar_semana_torneio() -> void:
+	var t: Dictionary = _social()["torneio"]
+	var semana := semana_atual()
+	if int(t["semana"]) == semana:
+		return
+	if int(t["semana"]) >= 0 and t.get("participou", false) and tem_ordem():
+		var fin := _resultado_torneio(int(t["semana"]), 1000, int(t["vitorias"]))
+		var pr := RegraOrdem.premio_do_torneio(int(fin["posicao"]), cfg_ordem())
+		t["pendente"] = {"semana": int(t["semana"]), "posicao": int(fin["posicao"]), "moeda": int(pr["moeda"]), "bau": pr["bau"]}
+	t["semana"] = semana
+	t["vitorias"] = 0
+	t["participou"] = tem_ordem()
+
+## {minhas, posicao, ordens: [{nome, pontos, voce}] por pontos}. fracao = 0..1000 da semana.
+func _resultado_torneio(semana: int, fracao: int, vitorias_jogador: int) -> Dictionary:
+	var cfg := cfg_ordem()
+	var sem := int(estado["baus"]["semente"])
+	var o: Dictionary = _social()["ordem"]
+	var minhas := mini(vitorias_jogador, int(cfg["torneio"]["vitorias_do_jogador_max"]))
+	var idx := 0
+	for m: Dictionary in o.get("membros", []):
+		if m["id"] != "voce":
+			minhas += RegraOrdem.vitorias_simuladas(sem + 17, semana, idx, fracao, cfg)
+			idx += 1
+	var nomes := _nomes_ordens()
+	nomes.erase(o.get("nome", ""))
+	var rng := Aleatorio.new(sem + 5003 * (semana + 1))
+	var lista: Array = []
+	var outras: Array = []
+	for i in mini(int(cfg["torneio"]["ordens_simuladas"]), nomes.size()):
+		var nome: String = nomes.pop_at(rng.inteiro(0, nomes.size() - 1))
+		var membros := rng.inteiro(int(cfg["simuladas"]["membros"][0]), int(cfg["simuladas"]["membros"][1]))
+		var pontos := 0
+		for k in membros:
+			pontos += RegraOrdem.vitorias_simuladas(sem + 977 * (i + 1), semana, k, fracao, cfg)
+		lista.append({"nome": nome, "pontos": pontos, "voce": false})
+		outras.append(pontos)
+	lista.append({"nome": o.get("nome", ""), "pontos": minhas, "voce": true})
+	lista.sort_custom(func(a, b): return int(a["pontos"]) > int(b["pontos"]) or (int(a["pontos"]) == int(b["pontos"]) and a["voce"]))
+	return {"minhas": minhas, "posicao": RegraOrdem.posicao_no_torneio(minhas, outras), "ordens": lista}
+
+## Torneio de Ordens desta semana (simulado): {semana, restante_s, minhas_vitorias,
+## pontos, posicao, premio, ordens, pendente}; {} sem ordem.
+func torneio_semana() -> Dictionary:
+	if not tem_ordem():
+		return {}
+	_virar_semana_torneio()
+	var t: Dictionary = _social()["torneio"]
+	var semana := semana_atual()
+	var inicio := _inicio_da_semana(semana)
+	var fracao := clampi((ServicoTempo.agora() - inicio) * 1000 / (7 * 86400), 0, 1000)
+	var r := _resultado_torneio(semana, fracao, int(t["vitorias"]))
+	return {"semana": semana, "restante_s": maxi(0, inicio + 7 * 86400 - ServicoTempo.agora()), "minhas_vitorias": int(t["vitorias"]),
+		"pontos": int(r["minhas"]), "posicao": int(r["posicao"]), "ordens": r["ordens"],
+		"premio": RegraOrdem.premio_do_torneio(int(r["posicao"]), cfg_ordem()), "pendente": (t["pendente"] as Dictionary).duplicate(true)}
+
+## Resgata o prêmio da semana passada (moeda da ordem e baú).
+func resgatar_torneio() -> Dictionary:
+	if tem_ordem():
+		_virar_semana_torneio()
+	var t: Dictionary = _social()["torneio"]
+	var p: Dictionary = t["pendente"]
+	if p.is_empty():
+		return _erro("sem_premio")
+	var s := _social()
+	s["moeda"] = int(s["moeda"]) + int(p["moeda"])
+	var bau := {}
+	if str(p["bau"]) != "":
+		bau = _guardar_bau(str(p["bau"]))
+	t["pendente"] = {}
+	var r := _concluir("social")
+	r.merge({"moeda": int(p["moeda"]), "bau_ganho": bau, "posicao": int(p["posicao"])}, true)
+	return r
+
+## Itens da loja da ordem: [{id, moeda, conteudo, projeto, restantes, erro, pode}].
+func loja_ordem() -> Array:
+	var l: Dictionary = _social()["loja"]
+	if int(l["semana"]) != semana_atual():
+		l["semana"] = semana_atual()
+		l["compras"] = {}
+	var r: Array = []
+	for it: Dictionary in cfg_ordem()["loja"]["itens"]:
+		var comprados := int(l["compras"].get(it["id"], 0))
+		var erro := RegraOrdem.erro_da_compra(moeda_ordem(), comprados, it)
+		if erro == "" and it.has("projeto") and (estado["inventario"]["projetos"] as Array).has(it["projeto"]):
+			erro = "projeto_ja_tenho"
+		r.append({"id": it["id"], "moeda": int(it["moeda"]), "conteudo": (it.get("conteudo", {}) as Dictionary).duplicate(), "projeto": str(it.get("projeto", "")),
+			"restantes": int(it["limite_semana"]) - comprados, "erro": erro, "pode": erro == ""})
+	return r
+
+func comprar_da_ordem(id: String) -> Dictionary:
+	for it: Dictionary in loja_ordem():
+		if it["id"] != id:
+			continue
+		if not it["pode"]:
+			return _erro(str(it["erro"]))
+		var s := _social()
+		s["moeda"] = int(s["moeda"]) - int(it["moeda"])
+		s["loja"]["compras"][id] = int(s["loja"]["compras"].get(id, 0)) + 1
+		if str(it["projeto"]) != "":
+			(estado["inventario"]["projetos"] as Array).append(it["projeto"])
+		else:
+			_entregar_conteudo(it["conteudo"])
+		return _concluir("social")
+	return _erro("produto_inexistente")
+
+# ----- chat, denúncia e bloqueio
+
+func _idioma_chat() -> String:
+	return "en" if TranslationServer.get_locale().begins_with("en") else "pt"
+
+func mensagens_rapidas() -> Array:
+	return (Balanceamento.ler_json("res://game/data/social/chat.json")["rapidas"] as Array).duplicate()
+
+func _chat_msg(canal: String, de_id: String, de_nome: String, texto: String, chave: String, em := -1) -> void:
+	var c: Dictionary = _social()["chat"]
+	c["contador"] = int(c["contador"]) + 1
+	var lista: Array = c[canal]
+	lista.append({"id": int(c["contador"]), "de_id": de_id, "de_nome": de_nome, "texto": texto, "chave": chave,
+		"em": ServicoTempo.agora() if em < 0 else em, "idioma": _idioma_chat(), "simulado": de_id != "voce"})
+	while lista.size() > int(cfg_ordem()["chat"]["mensagens_max"]):
+		lista.pop_front()
+
+## Mensagens do canal ("ordem" ou "global") sem as de bloqueados; o global só
+## mostra o idioma atual.
+func chat_mensagens(canal: String) -> Array:
+	var s := _social()
+	var r: Array = []
+	var idioma := _idioma_chat()
+	for m: Dictionary in s["chat"].get(canal, []):
+		if (s["bloqueados"] as Array).has(m["de_id"]):
+			continue
+		if canal == "global" and m["idioma"] != idioma:
+			continue
+		r.append(m.duplicate())
+	return r
+
+## Os membros e jogadores simulados "falam" com o tempo (no máximo
+## `simulado_por_abertura_max` de uma vez). Devolve quantas mensagens entraram.
+func chat_atualizar() -> int:
+	var cfg: Dictionary = cfg_ordem()["chat"]
+	var dados := Balanceamento.ler_json("res://game/data/social/chat.json")
+	var c: Dictionary = _social()["chat"]
+	var agora := ServicoTempo.agora()
+	var intervalo := int(cfg["simulado_intervalo_s"])
+	var novas := 0
+	for canal: String in ["ordem", "global"]:
+		if canal == "ordem" and not tem_ordem():
+			continue
+		var chave_t := "sim_" + canal
+		var ultimo := int(c[chave_t])
+		if ultimo == 0:
+			ultimo = agora - 3 * intervalo
+		var n := mini((agora - ultimo) / intervalo, int(cfg["simulado_por_abertura_max"]))
+		if n <= 0:
+			continue
+		var rng := Aleatorio.new(int(estado["baus"]["semente"]) + 31337 * (int(c["contador"]) + 1) + (1 if canal == "global" else 2))
+		var falas: Array = dados["simuladas_" + canal]
+		var remetentes := _membros_visiveis()
+		for i in n:
+			var de_id := ""
+			var de_nome := ""
+			if canal == "ordem":
+				if remetentes.is_empty():
+					break
+				var m: Dictionary = remetentes[rng.inteiro(0, remetentes.size() - 1)]
+				de_id = m["id"]
+				de_nome = m["nome"]
+			else:
+				var k := rng.inteiro(0, int(cfg_ordem()["amigos"]["pool_simulado"]) - 1)
+				de_id = "f%d" % (1100000 + k)
+				de_nome = _fantasma(1100000 + k, int(estado["liga"]["pontos"]))["nome"]
+			_chat_msg(canal, de_id, de_nome, "", falas[rng.inteiro(0, falas.size() - 1)], agora - (n - 1 - i) * 20)
+			novas += 1
+		c[chave_t] = agora
+	if novas > 0:
+		_concluir("chat")
+	return novas
+
+## Envia uma mensagem (rápida pelo id, ou texto livre filtrado). Só vai para
+## a tela local até o servidor.
+func chat_enviar(canal: String, texto := "", rapida := "") -> Dictionary:
+	var cfg: Dictionary = cfg_ordem()["chat"]
+	var c: Dictionary = _social()["chat"]
+	if canal != "ordem" and canal != "global":
+		return _erro("canal_inexistente")
+	if canal == "ordem" and not tem_ordem():
+		return _erro("sem_ordem")
+	if ServicoTempo.agora() - int(c["ultimo_envio"]) < int(cfg["intervalo_envio_s"]):
+		return _erro("enviando_rapido")
+	var nome: String = cavaleiro().get("nome", "")
+	if rapida != "":
+		if not mensagens_rapidas().has(rapida):
+			return _erro("mensagem_inexistente")
+		_chat_msg(canal, "voce", nome, "", rapida)
+	else:
+		var t := ServicoNomes.limpar(texto)
+		if t == "":
+			return _erro("mensagem_vazia")
+		if t.length() > int(cfg["texto_max"]):
+			return _erro("mensagem_longa")
+		if ServicoNomes.texto_ofensivo(t):
+			return _erro("mensagem_ofensiva")
+		_chat_msg(canal, "voce", nome, t, "")
+	c["ultimo_envio"] = ServicoTempo.agora()
+	return _concluir("chat")
+
+func bloqueados() -> Array:
+	return (_social()["bloqueados"] as Array).duplicate()
+
+func esta_bloqueado(id: String) -> bool:
+	return (_social()["bloqueados"] as Array).has(id)
+
+func bloquear(id: String) -> Dictionary:
+	if id == "" or id == "voce":
+		return _erro("alvo_invalido")
+	var s := _social()
+	if not (s["bloqueados"] as Array).has(id):
+		s["bloqueados"].append(id)
+	var amigo_id := id
+	for m: Dictionary in s["ordem"].get("membros", []):
+		if m["id"] == id:
+			amigo_id = "f%d" % int(m["n"])
+	s["amigos"] = (s["amigos"] as Array).filter(func(a): return a["id"] != id and a["id"] != amigo_id)
+	return _concluir("social")
+
+func desbloquear(id: String) -> Dictionary:
+	_social()["bloqueados"] = (_social()["bloqueados"] as Array).filter(func(b): return b != id)
+	return _concluir("social")
+
+## Denúncia guardada para enviar ao servidor (fila de moderação, 3.8).
+func denunciar(alvo_id: String, nome: String, motivo: String, trecho := "") -> Dictionary:
+	var cfg: Dictionary = cfg_ordem()["chat"]
+	if alvo_id == "" or alvo_id == "voce":
+		return _erro("alvo_invalido")
+	if not (cfg["motivos_denuncia"] as Array).has(motivo):
+		return _erro("motivo_invalido")
+	var lista: Array = _social()["denuncias"]
+	var recorte := trecho.substr(0, int(cfg["texto_max"]))
+	for d: Dictionary in lista:
+		if d["alvo"] == alvo_id and d["trecho"] == recorte and not d["enviada"]:
+			return _erro("ja_denunciado")
+	lista.append({"alvo": alvo_id, "nome": nome, "motivo": motivo, "trecho": recorte, "em": ServicoTempo.agora(), "enviada": false})
+	while lista.size() > int(cfg["denuncias_max"]):
+		lista.pop_front()
+	return _concluir("social")
+
+func denuncias_pendentes() -> Array:
+	return (_social()["denuncias"] as Array).filter(func(d): return not d["enviada"]).map(func(d): return d.duplicate())
+
+# ----- amigos e perfil público
+
+## Código para os outros te adicionarem (pela semente do save).
+func meu_codigo() -> String:
+	var s := _social()
+	if str(s["codigo"]) == "":
+		s["codigo"] = RegraOrdem.codigo_amigo(int(estado["baus"]["semente"]))
+	return s["codigo"]
+
+func amigos() -> Array:
+	return (_social()["amigos"] as Array).duplicate(true)
+
+func _ehamigo(id: String) -> bool:
+	return (_social()["amigos"] as Array).any(func(a): return a["id"] == id)
+
+## Jogadores simulados que o código pode achar (até o servidor): do pool e
+## da própria ordem. {n, base, nome} ou {}.
+func _achar_por_codigo(codigo: String) -> Dictionary:
+	var base := int(estado["liga"]["pontos"])
+	for k in int(cfg_ordem()["amigos"]["pool_simulado"]):
+		if RegraOrdem.codigo_amigo(1100000 + k) == codigo:
+			return {"n": 1100000 + k, "base": base}
+	for m: Dictionary in _social()["ordem"].get("membros", []):
+		if m["id"] != "voce" and RegraOrdem.codigo_amigo(int(m["n"])) == codigo:
+			return {"n": int(m["n"]), "base": int(m["base"])}
+	return {}
+
+## Código de um jogador simulado (do pool ou membro): para a tela de perfil.
+func codigo_de(n: int) -> String:
+	return RegraOrdem.codigo_amigo(n)
+
+## Códigos de teste (os primeiros do pool simulado), só para build de depuração.
+func codigos_de_teste(quantos := 3) -> Array:
+	var r: Array = []
+	for k in quantos:
+		r.append({"codigo": RegraOrdem.codigo_amigo(1100000 + k), "nome": _fantasma(1100000 + k, int(estado["liga"]["pontos"]))["nome"]})
+	return r
+
+func adicionar_amigo_por_codigo(texto: String) -> Dictionary:
+	if not RegraOrdem.codigo_valido(texto):
+		return _erro("codigo_invalido")
+	var codigo := RegraOrdem.normalizar_codigo(texto)
+	if codigo == meu_codigo():
+		return _erro("codigo_proprio")
+	var a := _achar_por_codigo(codigo)
+	if a.is_empty():
+		return _erro("codigo_nao_encontrado")
+	return _fazer_amigo("f%d" % int(a["n"]), int(a["n"]), int(a["base"]))
+
+## Adiciona como amigo um membro da ordem ("m…") ou um jogador simulado
+## que apareceu num perfil ("f<n>").
+func adicionar_amigo(id: String) -> Dictionary:
+	var p := perfil_publico(id)
+	if p.is_empty() or id == "voce" or id == "":
+		return _erro("membro_inexistente")
+	return _fazer_amigo(str(p["id"]), int(str(p["id"]).substr(1)), int(p["base"]))
+
+func adicionar_amigo_membro(id: String) -> Dictionary:
+	return adicionar_amigo(id)
+
+## Números (n) dos membros da ordem que estão bloqueados (pelo id do membro).
+func _membros_bloqueados_n() -> Array:
+	var r: Array = []
+	for m: Dictionary in _social()["ordem"].get("membros", []):
+		if (_social()["bloqueados"] as Array).has(m["id"]):
+			r.append(int(m["n"]))
+	return r
+
+func _fazer_amigo(id: String, n: int, base: int) -> Dictionary:
+	var s := _social()
+	if _ehamigo(id):
+		return _erro("ja_amigo")
+	if esta_bloqueado(id) or _membros_bloqueados_n().has(n):
+		return _erro("bloqueado")
+	if (s["amigos"] as Array).size() >= int(cfg_ordem()["amigos"]["max"]):
+		return _erro("amigos_cheio")
+	var f := _fantasma(n, base)
+	(s["amigos"] as Array).append({"id": id, "nome": f["nome"], "n": n, "base": base, "desde": ServicoTempo.agora()})
+	return _concluir("social")
+
+func remover_amigo(id: String) -> Dictionary:
+	var s := _social()
+	s["amigos"] = (s["amigos"] as Array).filter(func(a): return a["id"] != id)
+	return _concluir("social")
+
+## Perfil público: cavaleiro, cavalo, brasão, liga e títulos. `id` = "voce" (ou
+## "") para o próprio; membro da ordem ("m…"), amigo ("f<n>") ou jogador de
+## ranking simulado ("f<n>"). {} se não existe.
+func perfil_publico(id := "voce") -> Dictionary:
+	if id == "" or id == "voce":
+		return _perfil_proprio()
+	var n := -1
+	var base := int(estado["liga"]["pontos"])
+	var cargo := ""
+	for m: Dictionary in _social()["ordem"].get("membros", []):
+		if m["id"] == id and id != "voce":
+			n = int(m["n"])
+			base = int(m["base"])
+			cargo = str(m["cargo"])
+	if n < 0:
+		for a: Dictionary in _social()["amigos"]:
+			if a["id"] == id:
+				n = int(a["n"])
+				base = int(a["base"])
+	if n < 0 and id.begins_with("f") and id.substr(1).is_valid_int():
+		n = int(id.substr(1))
+	if n < 0:
+		return {}
+	var p := _perfil_fantasma(n, base)
+	p["cargo"] = cargo
+	if cargo != "":
+		p["ordem_nome"] = str(_social()["ordem"].get("nome", ""))
+	p["amigo"] = _ehamigo("f%d" % n)
+	p["codigo"] = RegraOrdem.codigo_amigo(n)
+	p["base"] = base
+	return p
+
+func _perfil_proprio() -> Dictionary:
+	var cav := cavaleiro()
+	var cont: Dictionary = estado["metas"]["contadores"]
+	var lg := liga_atual()
+	var cores: Dictionary = casa()["cores"]
+	return {"id": "voce", "simulado": false, "nome": cav.get("nome", ""), "nivel": int(cav["nivel"]), "casa_nome": casa().get("nome", ""),
+		"casa": {"principal": cores["principal"], "secundaria": cores["secundaria"], "metal": cores.get("metal", "ferro"),
+			"pele": cav.get("pele", "media"), "cabelo": cav.get("cor_cabelo", "castanho")},
+		"brasao": _brasao_da_casa(), "corpo": cav.get("corpo", "masculino"), "rosto": cav.get("rosto", "1"), "cabelo": cav.get("cabelo", "1"),
+		"pelagem": cavalo_ativo().get("pelagem", "alazao"), "liga": {"nome": lg["nome"], "divisao": lg["divisao"], "pontos": lg["pontos"]},
+		"melhor_liga": str(estado["liga"]["melhor"]), "poder": poder_jogador(), "titulo": titulo(), "titulos": titulos(), "renome": renome(),
+		"ordem_nome": str(_social()["ordem"].get("nome", "")), "cargo": cargo_na_ordem(), "amigo": false, "codigo": meu_codigo(),
+		"melhores": {"vitorias": int(cont.get("vitoria", 0)), "tres_estrelas": int(cont.get("tres_estrelas", 0)),
+			"derrubadas": int(cont.get("derrubada", 0)), "regioes": int(cont.get("regiao_vencida", 0))}}
+
+## Perfil de um jogador simulado (n = o número do fantasma; aparência e
+## títulos pela semente dele).
+func _perfil_fantasma(n: int, base: int) -> Dictionary:
+	var f := _fantasma(n, base)
+	var rng := Aleatorio.new(n * 31 + 7)
+	var op: Dictionary = Balanceamento.ler_json("res://game/data/personagem/opcoes_criacao.json")
+	var lg := RegraLiga.posicao(int(f["pontos"]), cfg_ligas())
+	var com_titulo: Array = cfg_metas()["conquistas"].filter(func(c): return c.has("titulo")).map(func(c): return c["titulo"])
+	var titulos_f: Array = []
+	for i in clampi(int(f["pontos"]) / 150, 0, 3):
+		var t: String = com_titulo[rng.inteiro(0, com_titulo.size() - 1)]
+		if not titulos_f.has(t):
+			titulos_f.append(t)
+	var brasao: Dictionary = GeradorBrasao.opcoes().get("rivais", {}).get(f["brasao_perfil"], {})
+	var peles: Array = op["peles"]
+	var cabelos: Array = op["cores_cabelo"]
+	return {"id": "f%d" % n, "simulado": true, "nome": str(f["nome"]).get_slice(" · ", 0), "nivel": clampi(int(f["poder"]) / 2 + 1, 1, 60),
+		"casa_nome": str(f["nome"]).get_slice(" · ", 1),
+		"casa": {"principal": f["casa"]["principal"], "secundaria": f["casa"]["secundaria"], "metal": "ferro",
+			"pele": peles[rng.inteiro(0, peles.size() - 1)], "cabelo": cabelos[rng.inteiro(0, cabelos.size() - 1)]},
+		"brasao": brasao, "corpo": (op["corpos"] as Array)[rng.inteiro(0, (op["corpos"] as Array).size() - 1)], "rosto": "1",
+		"cabelo": (op["cabelos"] as Array)[rng.inteiro(0, (op["cabelos"] as Array).size() - 1)],
+		"pelagem": (op["pelagens"] as Array)[rng.inteiro(0, (op["pelagens"] as Array).size() - 1)],
+		"liga": {"nome": lg["nome"], "divisao": lg["divisao"], "pontos": int(f["pontos"])}, "melhor_liga": str(lg["nome"]),
+		"poder": int(f["poder"]), "titulo": titulos_f[0] if not titulos_f.is_empty() else "", "titulos": titulos_f,
+		"renome": int(f["pontos"]) / 4, "ordem_nome": "", "cargo": "", "amigo": false,
+		"melhores": {"vitorias": int(f["pontos"]) / 12, "tres_estrelas": int(f["pontos"]) / 20, "derrubadas": int(f["pontos"]) / 8,
+			"regioes": clampi(int(f["pontos"]) / 400, 0, 5)}}
+
+## Cavaleiros da ordem para a praça da vila (até `praca_max`, sem bloqueados):
+## [{id, nome, casa, corpo, pelagem, brasao}] com o brasão da ordem.
+func cavaleiros_da_ordem() -> Array:
+	var r: Array = []
+	if not tem_ordem():
+		return r
+	var brasao: Dictionary = _social()["ordem"]["brasao"]
+	for m: Dictionary in _membros_visiveis():
+		if r.size() >= int(cfg_ordem()["praca_max"]):
+			break
+		var p := _perfil_fantasma(int(m["n"]), int(m["base"]))
+		r.append({"id": m["id"], "nome": m["nome"], "casa": p["casa"], "corpo": p["corpo"], "pelagem": p["pelagem"], "brasao": brasao.duplicate(true)})
+	return r
+
+## Vale chamar a atenção na vila? (prêmio do torneio esperando)
+func social_alerta() -> bool:
+	if tem_ordem():
+		_virar_semana_torneio()
+	return not (_social()["torneio"]["pendente"] as Dictionary).is_empty()
+
 # ------------------------------------------------------------ persistência
 
 func novo_estado() -> Dictionary:
@@ -2223,6 +3054,7 @@ func novo_estado() -> Dictionary:
 	e["liga"] = _liga_nova(int(e["criado_em"]))
 	e["loja"] = _loja_nova()
 	e["anuncios"] = {"dia": -1, "usados": 0, "timers": [], "ultima_vitoria": {}}
+	e["social"] = _social_novo()
 	var cid := _novo_id(e, "c")
 	e["cavalos"].append({"id": cid, "nome": "", "pelagem": "alazao", "atributos": ini["cavalo"]["atributos"].duplicate(),
 		"folego": int(Balanceamento.ler("treino")["folego_cavalo"]["maximo"]), "folego_em": e["criado_em"]})
@@ -2323,6 +3155,11 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("anuncios"):
 			d["anuncios"] = {"dia": -1, "usados": 0, "timers": [], "ultima_vitoria": {}}
 		v = 10
+	if v < 11:
+		# 3.20: ordem, ajuda, chat, amigos, bloqueios e denúncias (simulados até o servidor).
+		if not d.has("social"):
+			d["social"] = _social_novo()
+		v = 11
 	d["versao"] = maxi(v, VERSAO)
 	return d
 

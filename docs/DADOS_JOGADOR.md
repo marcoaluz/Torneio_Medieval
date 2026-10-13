@@ -52,6 +52,17 @@ loja: vip_ate, passe {temporada, premium, xp, gratis [n],              (v9, 3.18
       ofertas [{id, ate, vista}], ultima_oferta {gatilho: quando}
 anuncios: dia, usados, timers [id já cortado], ultima_vitoria          (v10, 3.19)
           {ouro, quando, usada}
+social: codigo, moeda, bloqueados [id], denuncias [{alvo, nome, motivo,    (v11, 3.20)
+        trecho, em, enviada}], amigos [{id "f<n>", nome, n, base, desde}],
+        ordem {id, nome, brasao, cargo, criada_em, simulada,
+               membros [{id, nome, cargo, n, base, poder, pontos, simulado}]},
+        pedidos [{id, timer, em, ajudantes, atrasos, aplicadas}],
+        ajudei {balde, ids}, ajuda_moeda {dia, moeda},
+        doacoes {dia, unidades, atendidos}, torneio {semana, vitorias,
+        participou, pendente {semana, posicao, moeda, bau}},
+        loja {semana, compras {id: n}},
+        chat {ordem [msg], global [msg], ultimo_envio, sim_ordem,
+              sim_global, contador}  # msg: {id, de_id, de_nome, texto, chave, em, idioma, simulado}
 ```
 
 - `lado_para_justa()` monta o lado da regra (`{cavaleiro, cavalo, equipamento, habilidade}`) a partir das peças equipadas: o `status` do modelo mais a durabilidade atual (peça com 0 perde os bônus na regra).

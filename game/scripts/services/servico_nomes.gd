@@ -29,6 +29,14 @@ static func validar(nome: String) -> String:
 			return "nome_ofensivo"
 	return ""
 
+## Texto livre (chat): tem alguma raiz ofensiva da lista? Mesmo filtro dos nomes.
+static func texto_ofensivo(texto: String) -> bool:
+	var norm := normalizar(texto)
+	for raiz: String in _carregar().get("raizes", []):
+		if norm.contains(raiz):
+			return true
+	return false
+
 ## Tira espaços das pontas e espaços repetidos.
 static func limpar(nome: String) -> String:
 	var r := RegEx.create_from_string(r"\s+")

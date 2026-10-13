@@ -10,6 +10,10 @@ signal brasao_definido(brasao: Dictionary)
 
 ## Escolhas atuais: {forma, divisao, cor1, cor2, simbolo, posicao, cor_simbolo}.
 var brasao := {}
+## Edita o brasão da ORDEM do jogador (3.20) em vez do da casa: parte do
+## brasão da ordem e confirmar só avisa (`brasao_definido`); quem abriu grava.
+## Definir antes de entrar na árvore.
+var alvo_ordem := false
 
 var _seletores := {}
 var _amostras := {}
@@ -22,13 +26,15 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	var cfg := GeradorBrasao.opcoes()
-	$Titulo.text = tr("BRASAO_TITULO")
+	$Titulo.text = tr("ORDEM_BRASAO_TITULO" if alvo_ordem else "BRASAO_TITULO")
 	$Formulario/Coluna/Botoes/Sortear.text = tr("CRIACAO_SORTEAR")
 	$Formulario/Coluna/Botoes/Confirmar.text = tr("CRIACAO_CONFIRMAR")
 	$Formulario/Coluna/Botoes/Sortear.pressed.connect(sortear)
 	$Formulario/Coluna/Botoes/Confirmar.pressed.connect(confirmar)
 	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
 	var atual: Dictionary = jog.casa().get("brasao", {}) if jog else {}
+	if alvo_ordem and jog:
+		atual = jog.ordem().get("brasao", atual)
 	if atual.is_empty() and jog:
 		var cores: Dictionary = jog.casa()["cores"]
 		atual = {"cor1": cores["principal"], "cor2": cores["secundaria"], "cor_simbolo": cores["secundaria"]}
@@ -66,9 +72,11 @@ func sortear() -> void:
 
 func confirmar() -> void:
 	var jog := get_node_or_null("/root/Jogador") as ServicoJogador
-	if jog:
+	if jog and not alvo_ordem:
 		jog.definir_brasao(brasao)
 	brasao_definido.emit(brasao.duplicate())
+	if alvo_ordem:
+		return
 	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
 	if f and jog and not jog.tutorial_concluido():
 		f.concluiu("brasao")

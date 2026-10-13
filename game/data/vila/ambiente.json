@@ -21,6 +21,9 @@
 	"vida": {
 		"estabulo_troca_s": 8,
 		"treino_volta_s": 3.2,
-		"martelo_s": 0.6
+		"martelo_s": 0.6,
+		"praca_volta_s": 16,
+		"praca_y": 336,
+		"praca_escala": 0.3
 	}
 }

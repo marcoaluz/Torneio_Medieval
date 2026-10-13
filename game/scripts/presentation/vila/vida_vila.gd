@@ -7,7 +7,9 @@ extends Node2D
 ##   Estábulo: o cavalo do jogador escovado pelo cavalariço / comendo feno,
 ##     alternando; deitado quando cansado.
 ##   Armeiro e ferreiro: martelando com faíscas (ocupado) ou parados.
-##   Casa senhorial: a bandeira com o brasão da casa no alto.
+##   Casa senhorial: a bandeira com o brasão da casa no alto e, se o jogador
+##     tem ordem, a bandeira da ordem no outro mastro (3.20).
+##   Praça: até `praca_max` cavaleiros da ordem (simulados) passando a cavalo.
 ##   Arena: o arauto parado.
 ##   Tochas em frente aos prédios (AmbienteVila acende à noite).
 ## Arte provisória (camadas provisórias e desenhos por código).
@@ -33,6 +35,9 @@ var ferreira: CamadasPersonagem
 var mestre_armas: CamadasPersonagem
 var arauto: CamadasPersonagem
 var bandeira: Sprite2D
+var bandeira_ordem: Sprite2D
+var mastro_ordem: Node2D
+var cavaleiros_ordem: Array[Cavaleiro] = []
 var estado_estabulo := "escovado"
 
 func configurar(v: Vila, jog: ServicoJogador) -> void:
@@ -85,6 +90,13 @@ func _montar() -> void:
 	bandeira.centered = false
 	bandeira.position = mastro.position + Vector2(1, -58)
 	add_child(bandeira)
+	mastro_ordem = Mastro.new()
+	mastro_ordem.position = cs + Vector2(-64, -20)
+	add_child(mastro_ordem)
+	bandeira_ordem = Sprite2D.new()
+	bandeira_ordem.centered = false
+	bandeira_ordem.position = mastro_ordem.position + Vector2(1, -58)
+	add_child(bandeira_ordem)
 	# Tochas em frente aos prédios
 	for nome: String in vila.predios:
 		var t := Tocha.new()
@@ -126,6 +138,39 @@ func atualizar() -> void:
 	feno.visible = estado_estabulo == "comendo"
 	# Bandeira da casa
 	bandeira.texture = GeradorBrasao.textura(AparenciaJogador.brasao(_jog), Vector2i(14, 20), false)
+	# Bandeira da ordem e cavaleiros dela na praça
+	var tem_ordem := _jog.tem_ordem()
+	mastro_ordem.visible = tem_ordem
+	bandeira_ordem.visible = tem_ordem
+	if tem_ordem:
+		bandeira_ordem.texture = GeradorBrasao.textura(_jog.brasao_da_ordem(), Vector2i(14, 20), false)
+	_atualizar_cavaleiros_ordem()
+
+## Cria ou refaz os cavaleiros da ordem na praça quando a lista muda.
+func _atualizar_cavaleiros_ordem() -> void:
+	var lista := _jog.cavaleiros_da_ordem()
+	var ids: Array = lista.map(func(c): return c["id"])
+	var atuais: Array = cavaleiros_ordem.map(func(c): return c.get_meta("membro_id"))
+	if ids == atuais:
+		return
+	for c in cavaleiros_ordem:
+		c.queue_free()
+	cavaleiros_ordem.clear()
+	for i in lista.size():
+		var d: Dictionary = lista[i]
+		var cav: Cavaleiro = CAVALEIRO.instantiate()
+		cav.scale = Vector2.ONE * float(_cfg.get("praca_escala", 0.3))
+		cav.set_meta("membro_id", d["id"])
+		cav.set_meta("fase", float(i) / float(maxi(lista.size(), 1)))
+		add_child(cav)
+		cav.definir_casa(d["casa"])
+		var pecas := _jog.visual_das_pecas()
+		pecas["pelagem"] = d["pelagem"]
+		pecas["corpo"] = d["corpo"]
+		cav.camadas().vestir(pecas)
+		cav.definir_brasao(d["brasao"])
+		cav.animar("galope")
+		cavaleiros_ordem.append(cav)
 
 func ocupado(nome: String) -> bool:
 	var t := _jog.timer_do_predio(nome)
@@ -144,6 +189,15 @@ func _process(delta: float) -> void:
 		cavaleiro_treino.direcao = 1 if ida else -1
 		if absf(k - 0.5) < 0.03:
 			estafermo.girar()
+	# Cavaleiros da ordem: ida e volta pela praça, cada um com seu passo.
+	for i in cavaleiros_ordem.size():
+		var cav := cavaleiros_ordem[i]
+		var periodo := float(_cfg.get("praca_volta_s", 16.0)) + 3.0 * i
+		var fase := fmod(_t / periodo + float(cav.get_meta("fase")), 1.0)
+		var ida := fase < 0.5
+		var k := fase * 2.0 if ida else (1.0 - fase) * 2.0
+		cav.position = Vector2(lerpf(30.0, 930.0, k), float(_cfg.get("praca_y", 336.0)) + 4.0 * i)
+		cav.direcao = 1 if ida else -1
 	var es_antes := estado_estabulo
 	if not _jog.cavalo_cansado():
 		estado_estabulo = "escovado" if int(_t / float(_cfg["estabulo_troca_s"])) % 2 == 0 else "comendo"

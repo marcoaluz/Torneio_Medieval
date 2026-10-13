@@ -1,0 +1,63 @@
+{
+	"versao": 1,
+	"_nota": "Ordens (guildas), ajuda, doacoes, torneio semanal, loja da ordem, chat e amigos (GDD, Funcoes sociais; Pacote 3.20). Ate o servidor (3.8) tudo isso e SIMULADO no aparelho: ordens, membros, pedidos, chat e rivais do torneio saem da semente do save e a tela avisa. Os numeros daqui sao a base do que a Edge Function vai ler.",
+	"membros_max": 30,
+	"nivel_minimo": 5,
+	"criar": { "ouro": 300, "recrutas": 3 },
+	"nome": { "min": 3, "max": 20 },
+	"cargos": ["lider", "oficial", "membro"],
+	"permissoes": {
+		"lider": ["promover", "rebaixar", "expulsar_oficial", "expulsar_membro", "editar_brasao", "editar_nome", "passar_lideranca", "dissolver"],
+		"oficial": ["expulsar_membro", "editar_brasao"],
+		"membro": []
+	},
+	"simuladas": { "quantas": 5, "membros": [6, 24], "poder": [30, 70] },
+	"ajuda": {
+		"segundos_por_ajuda": 300,
+		"ajudas_max_por_pedido": 4,
+		"moeda_por_ajuda": 2,
+		"moeda_max_dia": 30,
+		"resposta_s": [20, 120],
+		"pedidos_simulados": 3,
+		"balde_s": 1800,
+		"tipos": ["treino_cavaleiro", "treino_cavalo", "forja", "fundicao", "melhoria"]
+	},
+	"doacao": {
+		"limite_dia_unidades": 15,
+		"moeda_por_doacao": 1,
+		"pedidos_simulados": 3,
+		"materiais": { "sucata": [3, 8], "couro": [1, 3], "lingote_ferro": [1, 3] }
+	},
+	"torneio": {
+		"ordens_simuladas": 7,
+		"vitorias_por_membro_semana": [1, 6],
+		"vitorias_do_jogador_max": 40,
+		"premios": [
+			{ "ate_posicao": 1, "moeda": 60, "bau": "ouro" },
+			{ "ate_posicao": 3, "moeda": 40, "bau": "ferro" },
+			{ "ate_posicao": 5, "moeda": 25 },
+			{ "ate_posicao": 99, "moeda": 10 }
+		]
+	},
+	"loja": {
+		"_nota": "Moeda da ordem so compra projetos e materiais (nada de gemas). limite_semana = quantas vezes por semana.",
+		"itens": [
+			{ "id": "lingote_aco", "moeda": 30, "limite_semana": 3, "conteudo": { "lingote_aco": 2 } },
+			{ "id": "couro", "moeda": 15, "limite_semana": 4, "conteudo": { "couro": 3 } },
+			{ "id": "tecido_nobre", "moeda": 40, "limite_semana": 2, "conteudo": { "tecido_nobre": 2 } },
+			{ "id": "fragmentos", "moeda": 20, "limite_semana": 5, "conteudo": { "fragmentos": 10 } },
+			{ "id": "projeto_cavaleiro_andante", "moeda": 400, "limite_semana": 1, "projeto": "cavaleiro_andante" }
+		]
+	},
+	"chat": {
+		"mensagens_max": 40,
+		"texto_max": 120,
+		"intervalo_envio_s": 2,
+		"simulado_intervalo_s": 150,
+		"simulado_por_abertura_max": 4,
+		"motivos_denuncia": ["ofensa", "spam", "outro"],
+		"denuncias_max": 50
+	},
+	"amigos": { "max": 50, "pool_simulado": 40 },
+	"praca_max": 3
+}

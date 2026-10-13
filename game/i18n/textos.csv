@@ -755,3 +755,164 @@ ERRO_ANUNCIO_INEXISTENTE,Benefício desconhecido.,Unknown reward.
 ERRO_ANUNCIO_INDISPONIVEL,Anúncios indisponíveis agora.,Ads unavailable right now.
 ERRO_ANUNCIO_NAO_ASSISTIDO,O anúncio não foi até o fim.,The ad did not finish.
 ERRO_ANUNCIO_SEM_COMPROVANTE,Sem confirmação do anúncio.,No ad confirmation.
+VILA_SOCIAL,Ordem,Order
+SOCIAL_TITULO,"Ordem, chat e amigos","Order, chat and friends"
+SOCIAL_ABA_ORDEM,Ordem,Order
+SOCIAL_ABA_CHAT,Chat,Chat
+SOCIAL_ABA_AMIGOS,Amigos,Friends
+SOCIAL_ABA_PERFIL,Perfil,Profile
+SOCIAL_SIMULADO,"Simulado até o servidor existir: ordens, jogadores e mensagens são de teste.","Simulated until the server exists: orders, players and messages are test data."
+SOCIAL_VER_PERFIL,Perfil,Profile
+SOCIAL_MEU_PERFIL,Meu perfil,My profile
+ORDEM_MOEDA,{moeda} moedas da ordem,{moeda} order coins
+ORDEM_MOEDAS_N,{n} moedas da ordem,{n} order coins
+ORDEM_CABECALHO,{nome} · {cargo} · {membros}/{max} membros,{nome} · {cargo} · {membros}/{max} members
+ORDEM_SEM_ORDEM,Você ainda não tem uma ordem,You are not in an order yet
+ORDEM_NIVEL_MINIMO,Ordens abrem no nível {nivel}.,Orders open at level {nivel}.
+ORDEM_CRIAR_TITULO,Criar uma ordem,Create an order
+ORDEM_CRIAR_INFO,"Custa {ouro} de ouro. Você vira o líder, com o brasão da sua casa (dá para mudar depois).","Costs {ouro} gold. You become the leader, with your house crest (you can change it later)."
+ORDEM_NOME_PLACEHOLDER,Nome da ordem,Order name
+ORDEM_CRIAR,Criar,Create
+ORDEM_ENTRAR_TITULO,Entrar numa ordem,Join an order
+ORDEM_LINHA,"{nome} — {membros}/{max} membros, poder {poder}","{nome} — {membros}/{max} members, power {poder}"
+ORDEM_ENTRAR,Entrar,Join
+CARGO_LIDER,Líder,Leader
+CARGO_OFICIAL,Oficial,Officer
+CARGO_MEMBRO,Membro,Member
+ORDEM_SUB_MEMBROS,Membros,Members
+ORDEM_SUB_AJUDA,Ajuda,Help
+ORDEM_SUB_DOACOES,Doações,Donations
+ORDEM_SUB_TORNEIO,Torneio,Tournament
+ORDEM_SUB_LOJA,Loja,Shop
+ORDEM_SUB_GERIR,Gerir,Manage
+ORDEM_MEMBRO_LINHA,{nome} — {cargo} · poder {poder} · {pontos} pts,{nome} — {cargo} · power {poder} · {pontos} pts
+ORDEM_PROMOVER,Promover,Promote
+ORDEM_REBAIXAR,Rebaixar,Demote
+ORDEM_EXPULSAR,Expulsar,Kick
+ORDEM_AJUDA_MEUS,Peça ajuda da ordem para o que está em andamento:,Ask the order to help with what is in progress:
+ORDEM_AJUDA_NENHUM_TIMER,"Nenhum treino, forja ou obra em andamento.","No training, forge or construction in progress."
+ORDEM_AJUDA_TIMER,{tipo} — falta {tempo},{tipo} — {tempo} left
+ORDEM_AJUDA_PEDIDO,ajudas {n}/{max},helps {n}/{max}
+ORDEM_AJUDA_PEDIR,Pedir ajuda,Ask for help
+ORDEM_AJUDA_DOS_MEMBROS,Pedidos dos membros (ajudar rende moeda da ordem):,Member requests (helping earns order coins):
+ORDEM_AJUDA_NENHUM_PEDIDO,Nenhum pedido agora.,No requests right now.
+ORDEM_AJUDA_PEDIDO_MEMBRO,{nome} pede ajuda: {tipo},{nome} asks for help: {tipo}
+ORDEM_AJUDAR,Ajudar (+{moeda}),Help (+{moeda})
+ORDEM_AJUDADO,Ajudado,Helped
+ORDEM_AJUDOU,Você ajudou: +{moeda} moedas da ordem.,You helped: +{moeda} order coins.
+AJUDA_TIPO_TREINO_CAVALEIRO,Treino do cavaleiro,Knight training
+AJUDA_TIPO_TREINO_CAVALO,Treino do cavalo,Horse training
+AJUDA_TIPO_FORJA,Forja,Forge
+AJUDA_TIPO_FUNDICAO,Fundição,Smelting
+AJUDA_TIPO_MELHORIA,Obra,Construction
+ORDEM_DOACAO_RESTANTE,Você ainda pode doar {n} de {max} unidades hoje.,You can still donate {n} of {max} units today.
+ORDEM_DOACAO_PEDIDO,{nome} pede {quantidade}× {material} (você tem {tenho}),{nome} asks for {quantidade}× {material} (you have {tenho})
+ORDEM_DOAR,Doar (+{moeda}),Donate (+{moeda})
+ORDEM_DOADO,Doado,Donated
+ORDEM_DOOU,Doação feita: +{moeda} moeda da ordem.,Donation made: +{moeda} order coin.
+ORDEM_TORNEIO_TITULO,Torneio de Ordens da semana (soma das vitórias de PvP dos membros),Weekly Order Tournament (sum of the members' PvP wins)
+ORDEM_TORNEIO_SUA,Sua ordem: {pontos} vitórias ({minhas} suas) — {posicao}º lugar,Your order: {pontos} wins ({minhas} yours) — place {posicao}
+ORDEM_TORNEIO_FIM,Termina em {tempo},Ends in {tempo}
+ORDEM_TORNEIO_PREMIO,Prêmio hoje: {premio},Prize today: {premio}
+ORDEM_TORNEIO_LINHA,{pos}. {nome} — {pontos},{pos}. {nome} — {pontos}
+ORDEM_TORNEIO_PENDENTE,Prêmio da semana passada ({posicao}º lugar): {premio},Last week's prize (place {posicao}): {premio}
+ORDEM_TORNEIO_RESGATAR,Resgatar,Claim
+ORDEM_TORNEIO_RESGATADO,Prêmio resgatado: {premio},Prize claimed: {premio}
+ORDEM_LOJA_AVISO,"Loja da ordem: só moeda da ordem, nada de gemas.","Order shop: order coins only, no gems."
+ORDEM_LOJA_ITEM,{nome} — {moeda} moedas ({restantes} nesta semana),{nome} — {moeda} coins ({restantes} this week)
+ORDEM_COMPRAR,Comprar,Buy
+ORDEM_ITEM_LINGOTE_ACO,2 lingotes de aço,2 steel ingots
+ORDEM_ITEM_COURO,3 couros,3 leather
+ORDEM_ITEM_TECIDO_NOBRE,2 tecidos nobres,2 fine cloth
+ORDEM_ITEM_FRAGMENTOS,10 fragmentos de peça,10 piece fragments
+ORDEM_ITEM_PROJETO_CAVALEIRO_ANDANTE,Projeto: Cavaleiro Andante,Blueprint: Knight-Errant
+ORDEM_EDITAR_BRASAO,Editar brasão,Edit crest
+ORDEM_BRASAO_TITULO,Brasão da ordem,Order crest
+ORDEM_CANCELAR,Cancelar,Cancel
+ORDEM_RENOMEAR,Renomear a ordem,Rename the order
+ORDEM_RENOMEAR_ACAO,Renomear,Rename
+ORDEM_SAIR,Sair da ordem,Leave the order
+ORDEM_SAIR_DICA,O líder precisa passar a liderança antes de sair.,The leader must hand over leadership before leaving.
+ORDEM_CONFIRMAR_SAIR,Toque de novo para sair,Tap again to leave
+ORDEM_DISSOLVER,Dissolver a ordem,Disband the order
+ORDEM_CONFIRMAR_DISSOLVER,Toque de novo para dissolver,Tap again to disband
+ORDEM_PASSAR_LIDERANCA_INFO,Passar a liderança para:,Hand over leadership to:
+ORDEM_PASSAR_LIDERANCA,Passar,Hand over
+CHAT_CANAL_ORDEM,Ordem,Order
+CHAT_CANAL_GLOBAL,Global,Global
+CHAT_SEM_ORDEM,Entre numa ordem para usar o chat dela.,Join an order to use its chat.
+CHAT_PLACEHOLDER,Escreva uma mensagem,Write a message
+CHAT_ENVIAR,Enviar,Send
+CHAT_VAZIO,Nada por aqui ainda. Mande uma mensagem rápida!,Nothing here yet. Send a quick message!
+CHAT_DENUNCIAR,Denunciar,Report
+CHAT_DENUNCIAR_MOTIVO,Denunciar {nome}: qual o motivo?,Report {nome}: what is the reason?
+CHAT_DENUNCIA_GUARDADA,Denúncia guardada; ela é enviada quando o servidor existir.,Report saved; it is sent when the server exists.
+CHAT_BLOQUEAR,Bloquear,Block
+CHAT_BLOQUEADO,{nome} foi bloqueado.,{nome} was blocked.
+DENUNCIA_OFENSA,Ofensa,Abuse
+DENUNCIA_SPAM,Spam,Spam
+DENUNCIA_OUTRO,Outro,Other
+MSG_BOA_JUSTA,Boa justa!,Good joust!
+MSG_REVANCHE,Revanche?,Rematch?
+MSG_OBRIGADO,Obrigado!,Thanks!
+MSG_AJUDA_POR_FAVOR,Preciso de ajuda!,I need help!
+MSG_PARABENS,Parabéns!,Congratulations!
+MSG_BOA_SORTE,Boa sorte!,Good luck!
+MSG_VAMOS_ORDEM,"Vamos, ordem!","Let's go, order!"
+MSG_ATE_LOGO,Até logo!,See you!
+MSG_TORNEIO_SEMANA,Vamos subir no torneio da semana!,Let's climb the weekly tournament!
+MSG_NOVO_MEMBRO,Bem-vindo à ordem!,Welcome to the order!
+MSG_PROCURO_ORDEM,"Procuro uma ordem, alguém recruta?","Looking for an order, anyone recruiting?"
+AMIGOS_MEU_CODIGO,Seu código de amigo: {codigo},Your friend code: {codigo}
+AMIGOS_PLACEHOLDER,Código do amigo (TM-XXXXXX),Friend's code (TM-XXXXXX)
+AMIGOS_ADICIONAR,Adicionar,Add
+AMIGOS_ADICIONAR_CURTO,Amigo +,Add friend
+AMIGOS_ADICIONADO,{nome} agora é seu amigo.,{nome} is now your friend.
+AMIGOS_CODIGOS_TESTE,Códigos de teste (só em depuração): {lista},Test codes (debug only): {lista}
+AMIGOS_LISTA,Amigos ({n}/{max}),Friends ({n}/{max})
+AMIGOS_NENHUM,Nenhum amigo ainda. Use um código ou adicione pela ordem.,No friends yet. Use a code or add from your order.
+AMIGOS_REMOVER,Remover,Remove
+AMIGOS_BLOQUEADOS,Bloqueados,Blocked
+AMIGOS_DESBLOQUEAR,Desbloquear,Unblock
+PERFIL_LINHA_1,"{nome} — nível {nivel}, {casa}","{nome} — level {nivel}, {casa}"
+PERFIL_LIGA,Liga {liga} {divisao} · {pontos} pontos · poder {poder},"{liga} league, division {divisao} · {pontos} points · power {poder}"
+PERFIL_MELHOR,Melhor liga: {liga},Best league: {liga}
+PERFIL_CAVALO,Cavalo: {pelagem},Horse: {pelagem}
+PERFIL_RENOME,Renome {renome},Renown {renome}
+PERFIL_ORDEM,Ordem: {ordem} ({cargo}),Order: {ordem} ({cargo})
+PERFIL_TITULOS,Títulos: {lista},Titles: {lista}
+PERFIL_SEM_TITULOS,nenhum ainda,none yet
+PERFIL_MELHORES,Vitórias {vitorias} · 3 estrelas {tres} · derrubadas {der} · regiões {reg},Wins {vitorias} · 3 stars {tres} · unhorsings {der} · regions {reg}
+PERFIL_CODIGO,Código de amigo: {codigo},Friend code: {codigo}
+ERRO_JA_TEM_ORDEM,Você já tem uma ordem.,You already have an order.
+ERRO_NIVEL_BAIXO,Seu nível ainda é baixo para isso.,Your level is too low for that.
+ERRO_SEM_ORDEM,Você não está em uma ordem.,You are not in an order.
+ERRO_SEM_PERMISSAO,Seu cargo não permite isso.,Your rank does not allow that.
+ERRO_MEMBRO_INEXISTENTE,Esse membro não existe mais.,That member no longer exists.
+ERRO_ORDEM_CHEIA,A ordem está cheia.,The order is full.
+ERRO_ORDEM_INEXISTENTE,Essa ordem não existe.,That order does not exist.
+ERRO_PASSE_A_LIDERANCA,Passe a liderança antes de sair (ou dissolva a ordem).,Hand over leadership before leaving (or disband the order).
+ERRO_JA_PEDIU,Você já pediu ajuda para isso.,You already asked for help with that.
+ERRO_SEM_MEMBROS,Não há membros para ajudar.,There are no members to help.
+ERRO_JA_AJUDOU,Você já ajudou esse pedido.,You already helped this request.
+ERRO_PEDIDO_INEXISTENTE,Esse pedido não existe mais.,That request no longer exists.
+ERRO_JA_DOOU,Você já atendeu esse pedido.,You already answered this request.
+ERRO_SEM_PREMIO,Nenhum prêmio para resgatar.,No prize to claim.
+ERRO_MOEDA_INSUFICIENTE,Moedas da ordem insuficientes.,Not enough order coins.
+ERRO_LIMITE_SEMANA,Limite da semana atingido.,This week's limit reached.
+ERRO_PROJETO_JA_TENHO,Você já tem esse projeto.,You already have that blueprint.
+ERRO_CANAL_INEXISTENTE,Canal inexistente.,Unknown channel.
+ERRO_ENVIANDO_RAPIDO,Devagar: espere um instante.,Slow down: wait a moment.
+ERRO_MENSAGEM_VAZIA,Escreva algo.,Write something.
+ERRO_MENSAGEM_LONGA,Mensagem longa demais.,Message too long.
+ERRO_MENSAGEM_OFENSIVA,Mensagem não permitida.,Message not allowed.
+ERRO_MENSAGEM_INEXISTENTE,Mensagem rápida inexistente.,Unknown quick message.
+ERRO_ALVO_INVALIDO,Alvo inválido.,Invalid target.
+ERRO_MOTIVO_INVALIDO,Motivo inválido.,Invalid reason.
+ERRO_JA_DENUNCIADO,Você já denunciou isso.,You already reported this.
+ERRO_CODIGO_INVALIDO,Código inválido (formato TM-XXXXXX).,Invalid code (format TM-XXXXXX).
+ERRO_CODIGO_PROPRIO,Esse é o seu próprio código.,That is your own code.
+ERRO_CODIGO_NAO_ENCONTRADO,Nenhum jogador com esse código.,No player with that code.
+ERRO_JA_AMIGO,Já são amigos.,Already friends.
+ERRO_BLOQUEADO,Você bloqueou esse jogador.,You blocked this player.
+ERRO_AMIGOS_CHEIO,Lista de amigos cheia.,Friends list is full.

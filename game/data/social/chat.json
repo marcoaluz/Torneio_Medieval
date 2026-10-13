@@ -1,0 +1,7 @@
+{
+	"versao": 1,
+	"_nota": "Mensagens rapidas (botoes do chat) e falas dos membros simulados. Cada id vira o texto MSG_<ID> em game/i18n/textos.csv (pt_BR e en). Acrescente aqui e la.",
+	"rapidas": ["boa_justa", "revanche", "obrigado", "ajuda_por_favor", "parabens", "boa_sorte", "vamos_ordem", "ate_logo"],
+	"simuladas_ordem": ["boa_justa", "parabens", "vamos_ordem", "ajuda_por_favor", "obrigado", "torneio_semana", "novo_membro"],
+	"simuladas_global": ["boa_justa", "revanche", "boa_sorte", "procuro_ordem", "parabens", "ate_logo"]
+}

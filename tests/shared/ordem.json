@@ -1,0 +1,863 @@
+{
+	"descricao": "Ordens (game/scripts/rules/ordem.gd), gerados por um oraculo Python independente (xorshift32 reimplementado). Divisoes inteiras truncam. O servidor (Edge Function, 3.8) roda os mesmos casos.",
+	"cfg": {
+		"membros_max": 30,
+		"permissoes": {
+			"lider": [
+				"promover",
+				"rebaixar",
+				"expulsar_oficial",
+				"expulsar_membro",
+				"editar_brasao",
+				"editar_nome",
+				"passar_lideranca",
+				"dissolver"
+			],
+			"oficial": [
+				"expulsar_membro",
+				"editar_brasao"
+			],
+			"membro": []
+		},
+		"simuladas": {
+			"quantas": 5,
+			"membros": [
+				6,
+				24
+			],
+			"poder": [
+				30,
+				70
+			]
+		},
+		"ajuda": {
+			"segundos_por_ajuda": 300,
+			"ajudas_max_por_pedido": 4,
+			"moeda_por_ajuda": 2,
+			"moeda_max_dia": 30
+		},
+		"doacao": {
+			"limite_dia_unidades": 15
+		},
+		"torneio": {
+			"vitorias_por_membro_semana": [
+				1,
+				6
+			],
+			"premios": [
+				{
+					"ate_posicao": 1,
+					"moeda": 60,
+					"bau": "ouro"
+				},
+				{
+					"ate_posicao": 3,
+					"moeda": 40,
+					"bau": "ferro"
+				},
+				{
+					"ate_posicao": 5,
+					"moeda": 25
+				},
+				{
+					"ate_posicao": 99,
+					"moeda": 10
+				}
+			]
+		}
+	},
+	"nomes": [
+		"Ordem de Valcorvo",
+		"Ordem Ferreira",
+		"Ordem de Montenegro",
+		"Ordem Lobato",
+		"Ordem de Altaroca",
+		"Ordem Pardal"
+	],
+	"cores": [
+		"azul_real",
+		"vermelho_sangue",
+		"verde_floresta",
+		"ouro_velho",
+		"prata",
+		"preto_carvao",
+		"purpura",
+		"branco_osso"
+	],
+	"simbolos": [
+		"nenhum",
+		"cruz",
+		"estrela",
+		"torre",
+		"lua",
+		"espada",
+		"coroa"
+	],
+	"divisoes": [
+		"liso",
+		"partido",
+		"cortado",
+		"esquartelado",
+		"bandado"
+	],
+	"pode": [
+		{
+			"cargo": "lider",
+			"acao": "promover",
+			"esperado": true
+		},
+		{
+			"cargo": "lider",
+			"acao": "expulsar_membro",
+			"esperado": true
+		},
+		{
+			"cargo": "lider",
+			"acao": "editar_brasao",
+			"esperado": true
+		},
+		{
+			"cargo": "lider",
+			"acao": "dissolver",
+			"esperado": true
+		},
+		{
+			"cargo": "lider",
+			"acao": "voar",
+			"esperado": false
+		},
+		{
+			"cargo": "oficial",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"cargo": "oficial",
+			"acao": "expulsar_membro",
+			"esperado": true
+		},
+		{
+			"cargo": "oficial",
+			"acao": "editar_brasao",
+			"esperado": true
+		},
+		{
+			"cargo": "oficial",
+			"acao": "dissolver",
+			"esperado": false
+		},
+		{
+			"cargo": "oficial",
+			"acao": "voar",
+			"esperado": false
+		},
+		{
+			"cargo": "membro",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"cargo": "membro",
+			"acao": "expulsar_membro",
+			"esperado": false
+		},
+		{
+			"cargo": "membro",
+			"acao": "editar_brasao",
+			"esperado": false
+		},
+		{
+			"cargo": "membro",
+			"acao": "dissolver",
+			"esperado": false
+		},
+		{
+			"cargo": "membro",
+			"acao": "voar",
+			"esperado": false
+		}
+	],
+	"pode_sobre": [
+		{
+			"ator": "lider",
+			"alvo": "lider",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "lider",
+			"alvo": "lider",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "lider",
+			"alvo": "lider",
+			"acao": "expulsar",
+			"esperado": false
+		},
+		{
+			"ator": "lider",
+			"alvo": "oficial",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "lider",
+			"alvo": "oficial",
+			"acao": "rebaixar",
+			"esperado": true
+		},
+		{
+			"ator": "lider",
+			"alvo": "oficial",
+			"acao": "expulsar",
+			"esperado": true
+		},
+		{
+			"ator": "lider",
+			"alvo": "membro",
+			"acao": "promover",
+			"esperado": true
+		},
+		{
+			"ator": "lider",
+			"alvo": "membro",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "lider",
+			"alvo": "membro",
+			"acao": "expulsar",
+			"esperado": true
+		},
+		{
+			"ator": "oficial",
+			"alvo": "lider",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "lider",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "lider",
+			"acao": "expulsar",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "oficial",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "oficial",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "oficial",
+			"acao": "expulsar",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "membro",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "membro",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "oficial",
+			"alvo": "membro",
+			"acao": "expulsar",
+			"esperado": true
+		},
+		{
+			"ator": "membro",
+			"alvo": "lider",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "lider",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "lider",
+			"acao": "expulsar",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "oficial",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "oficial",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "oficial",
+			"acao": "expulsar",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "membro",
+			"acao": "promover",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "membro",
+			"acao": "rebaixar",
+			"esperado": false
+		},
+		{
+			"ator": "membro",
+			"alvo": "membro",
+			"acao": "expulsar",
+			"esperado": false
+		}
+	],
+	"cargo_depois": [
+		{
+			"cargo": "membro",
+			"acao": "promover",
+			"esperado": "oficial"
+		},
+		{
+			"cargo": "oficial",
+			"acao": "promover",
+			"esperado": "oficial"
+		},
+		{
+			"cargo": "oficial",
+			"acao": "rebaixar",
+			"esperado": "membro"
+		},
+		{
+			"cargo": "membro",
+			"acao": "rebaixar",
+			"esperado": "membro"
+		},
+		{
+			"cargo": "lider",
+			"acao": "rebaixar",
+			"esperado": "lider"
+		}
+	],
+	"vaga": [
+		{
+			"membros": 0,
+			"esperado": true
+		},
+		{
+			"membros": 1,
+			"esperado": true
+		},
+		{
+			"membros": 29,
+			"esperado": true
+		},
+		{
+			"membros": 30,
+			"esperado": false
+		},
+		{
+			"membros": 31,
+			"esperado": false
+		}
+	],
+	"segundos_da_ajuda": [
+		{
+			"restante": 0,
+			"esperado": 0
+		},
+		{
+			"restante": 1,
+			"esperado": 1
+		},
+		{
+			"restante": 299,
+			"esperado": 299
+		},
+		{
+			"restante": 300,
+			"esperado": 300
+		},
+		{
+			"restante": 301,
+			"esperado": 300
+		},
+		{
+			"restante": 7200,
+			"esperado": 300
+		}
+	],
+	"aceita_ajuda": [
+		{
+			"ajudas": 0,
+			"esperado": true
+		},
+		{
+			"ajudas": 3,
+			"esperado": true
+		},
+		{
+			"ajudas": 4,
+			"esperado": false
+		},
+		{
+			"ajudas": 5,
+			"esperado": false
+		}
+	],
+	"moeda_da_ajuda": [
+		{
+			"hoje": 0,
+			"esperado": 2
+		},
+		{
+			"hoje": 28,
+			"esperado": 2
+		},
+		{
+			"hoje": 29,
+			"esperado": 1
+		},
+		{
+			"hoje": 30,
+			"esperado": 0
+		},
+		{
+			"hoje": 31,
+			"esperado": 0
+		}
+	],
+	"doacao_restante": [
+		{
+			"hoje": 0,
+			"esperado": 15
+		},
+		{
+			"hoje": 5,
+			"esperado": 10
+		},
+		{
+			"hoje": 15,
+			"esperado": 0
+		},
+		{
+			"hoje": 20,
+			"esperado": 0
+		}
+	],
+	"posicao_torneio": [
+		{
+			"minhas": 0,
+			"outras": [],
+			"esperado": 1
+		},
+		{
+			"minhas": 5,
+			"outras": [
+				3,
+				4
+			],
+			"esperado": 1
+		},
+		{
+			"minhas": 5,
+			"outras": [
+				5,
+				5,
+				6
+			],
+			"esperado": 2
+		},
+		{
+			"minhas": 5,
+			"outras": [
+				9,
+				8,
+				7,
+				6,
+				5,
+				4
+			],
+			"esperado": 5
+		},
+		{
+			"minhas": 0,
+			"outras": [
+				0,
+				0,
+				0
+			],
+			"esperado": 1
+		}
+	],
+	"premio_torneio": [
+		{
+			"posicao": 1,
+			"esperado": {
+				"moeda": 60,
+				"bau": "ouro"
+			}
+		},
+		{
+			"posicao": 2,
+			"esperado": {
+				"moeda": 40,
+				"bau": "ferro"
+			}
+		},
+		{
+			"posicao": 3,
+			"esperado": {
+				"moeda": 40,
+				"bau": "ferro"
+			}
+		},
+		{
+			"posicao": 4,
+			"esperado": {
+				"moeda": 25,
+				"bau": ""
+			}
+		},
+		{
+			"posicao": 5,
+			"esperado": {
+				"moeda": 25,
+				"bau": ""
+			}
+		},
+		{
+			"posicao": 6,
+			"esperado": {
+				"moeda": 10,
+				"bau": ""
+			}
+		},
+		{
+			"posicao": 99,
+			"esperado": {
+				"moeda": 10,
+				"bau": ""
+			}
+		},
+		{
+			"posicao": 100,
+			"esperado": {
+				"moeda": 0,
+				"bau": ""
+			}
+		}
+	],
+	"vitorias_simuladas": [
+		{
+			"semente": 12345,
+			"semana": 2900,
+			"indice": 0,
+			"fracao": 1000,
+			"esperado": 5
+		},
+		{
+			"semente": 12345,
+			"semana": 2900,
+			"indice": 0,
+			"fracao": 500,
+			"esperado": 3
+		},
+		{
+			"semente": 12345,
+			"semana": 2900,
+			"indice": 7,
+			"fracao": 1000,
+			"esperado": 6
+		},
+		{
+			"semente": 987654321,
+			"semana": 2901,
+			"indice": 3,
+			"fracao": 250,
+			"esperado": 1
+		},
+		{
+			"semente": 4294967295,
+			"semana": 10,
+			"indice": 29,
+			"fracao": 1000,
+			"esperado": 2
+		},
+		{
+			"semente": 1,
+			"semana": 1,
+			"indice": 1,
+			"fracao": 0,
+			"esperado": 0
+		},
+		{
+			"semente": 777,
+			"semana": 5,
+			"indice": 2,
+			"fracao": 2000,
+			"esperado": 5
+		}
+	],
+	"codigo_amigo": [
+		{
+			"semente": 0,
+			"esperado": "TM-MNGRD4"
+		},
+		{
+			"semente": 1,
+			"esperado": "TM-LKK8VA"
+		},
+		{
+			"semente": 12345,
+			"esperado": "TM-ENN6BC"
+		},
+		{
+			"semente": 987654321,
+			"esperado": "TM-G4PAWP"
+		},
+		{
+			"semente": 4294967295,
+			"esperado": "TM-WR68RL"
+		},
+		{
+			"semente": 3405691582,
+			"esperado": "TM-SY7CD4"
+		}
+	],
+	"codigo_valido": [
+		{
+			"texto": "TM-ENN6BC",
+			"esperado": true
+		},
+		{
+			"texto": "tm-enn6bc",
+			"esperado": true
+		},
+		{
+			"texto": "ENN6BC",
+			"esperado": true
+		},
+		{
+			"texto": "TM-ABC",
+			"esperado": false
+		},
+		{
+			"texto": "TM-ABCDE0",
+			"esperado": false
+		},
+		{
+			"texto": "",
+			"esperado": false
+		}
+	],
+	"ordens_simuladas": [
+		{
+			"semente": 12345,
+			"esperado": [
+				{
+					"id": "s0",
+					"nome": "Ordem Ferreira",
+					"membros": 13,
+					"poder": 57,
+					"brasao": {
+						"cor1": "ouro_velho",
+						"cor2": "branco_osso",
+						"cor_simbolo": "branco_osso",
+						"simbolo": "estrela",
+						"divisao": "cortado"
+					}
+				},
+				{
+					"id": "s1",
+					"nome": "Ordem Lobato",
+					"membros": 22,
+					"poder": 52,
+					"brasao": {
+						"cor1": "verde_floresta",
+						"cor2": "ouro_velho",
+						"cor_simbolo": "ouro_velho",
+						"simbolo": "nenhum",
+						"divisao": "liso"
+					}
+				},
+				{
+					"id": "s2",
+					"nome": "Ordem de Altaroca",
+					"membros": 10,
+					"poder": 50,
+					"brasao": {
+						"cor1": "verde_floresta",
+						"cor2": "vermelho_sangue",
+						"cor_simbolo": "vermelho_sangue",
+						"simbolo": "lua",
+						"divisao": "bandado"
+					}
+				},
+				{
+					"id": "s3",
+					"nome": "Ordem Pardal",
+					"membros": 23,
+					"poder": 62,
+					"brasao": {
+						"cor1": "prata",
+						"cor2": "vermelho_sangue",
+						"cor_simbolo": "vermelho_sangue",
+						"simbolo": "cruz",
+						"divisao": "partido"
+					}
+				},
+				{
+					"id": "s4",
+					"nome": "Ordem de Valcorvo",
+					"membros": 22,
+					"poder": 52,
+					"brasao": {
+						"cor1": "ouro_velho",
+						"cor2": "prata",
+						"cor_simbolo": "prata",
+						"simbolo": "torre",
+						"divisao": "esquartelado"
+					}
+				}
+			]
+		},
+		{
+			"semente": 987654321,
+			"esperado": [
+				{
+					"id": "s0",
+					"nome": "Ordem Lobato",
+					"membros": 21,
+					"poder": 48,
+					"brasao": {
+						"cor1": "ouro_velho",
+						"cor2": "purpura",
+						"cor_simbolo": "purpura",
+						"simbolo": "coroa",
+						"divisao": "liso"
+					}
+				},
+				{
+					"id": "s1",
+					"nome": "Ordem de Altaroca",
+					"membros": 11,
+					"poder": 34,
+					"brasao": {
+						"cor1": "ouro_velho",
+						"cor2": "verde_floresta",
+						"cor_simbolo": "verde_floresta",
+						"simbolo": "coroa",
+						"divisao": "partido"
+					}
+				},
+				{
+					"id": "s2",
+					"nome": "Ordem Ferreira",
+					"membros": 19,
+					"poder": 46,
+					"brasao": {
+						"cor1": "prata",
+						"cor2": "azul_real",
+						"cor_simbolo": "azul_real",
+						"simbolo": "cruz",
+						"divisao": "cortado"
+					}
+				},
+				{
+					"id": "s3",
+					"nome": "Ordem Pardal",
+					"membros": 6,
+					"poder": 54,
+					"brasao": {
+						"cor1": "preto_carvao",
+						"cor2": "azul_real",
+						"cor_simbolo": "azul_real",
+						"simbolo": "nenhum",
+						"divisao": "liso"
+					}
+				},
+				{
+					"id": "s4",
+					"nome": "Ordem de Montenegro",
+					"membros": 17,
+					"poder": 48,
+					"brasao": {
+						"cor1": "branco_osso",
+						"cor2": "azul_real",
+						"cor_simbolo": "azul_real",
+						"simbolo": "nenhum",
+						"divisao": "bandado"
+					}
+				}
+			]
+		}
+	],
+	"erro_da_compra": [
+		{
+			"moeda": 100,
+			"comprados": 0,
+			"item": {
+				"moeda": 30,
+				"limite_semana": 3
+			},
+			"esperado": ""
+		},
+		{
+			"moeda": 29,
+			"comprados": 0,
+			"item": {
+				"moeda": 30,
+				"limite_semana": 3
+			},
+			"esperado": "moeda_insuficiente"
+		},
+		{
+			"moeda": 100,
+			"comprados": 3,
+			"item": {
+				"moeda": 30,
+				"limite_semana": 3
+			},
+			"esperado": "limite_semana"
+		},
+		{
+			"moeda": 0,
+			"comprados": 3,
+			"item": {
+				"moeda": 30,
+				"limite_semana": 3
+			},
+			"esperado": "limite_semana"
+		}
+	]
+}
