@@ -51,13 +51,13 @@ func sortear() -> void:
 	for chave: String in ["corpo", "rosto", "cabelo", "pelagem"]:
 		var lista: Array = _op[_plural(chave)]
 		(_seletores[chave] as Seletor).escolher(lista[_rng.randi() % lista.size()])
-	for chave: String in ["cor_cabelo", "pele", "cor_principal", "cor_secundaria"]:
+	for chave: String in ["cor_cabelo", "pele"]:
 		var lista: Array = _op[_lista_cor(chave)]
-		var v: String = lista[_rng.randi() % lista.size()]
-		if chave == "cor_secundaria":
-			while v == escolha["cor_principal"] and lista.size() > 1:
-				v = lista[_rng.randi() % lista.size()]
-		(_amostras[chave] as AmostrasCor).escolher(v)
+		(_amostras[chave] as AmostrasCor).escolher(lista[_rng.randi() % lista.size()])
+	# Cores da casa pela regra das tinturas (um metal e uma cor: sempre combinam).
+	var par := GeradorBrasao.sortear_cores(_rng, _op["cores_casa"])
+	(_amostras["cor_principal"] as AmostrasCor).escolher(par[0])
+	(_amostras["cor_secundaria"] as AmostrasCor).escolher(par[1])
 	var lista_nomes: Array = nomes["femininos"] if escolha["corpo"] == "feminino" else nomes["masculinos"]
 	_nome.text = lista_nomes[_rng.randi() % lista_nomes.size()]
 	_casa.text = nomes["casas"][_rng.randi() % nomes["casas"].size()]

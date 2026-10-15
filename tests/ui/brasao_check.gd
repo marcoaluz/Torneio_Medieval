@@ -71,6 +71,22 @@ func _initialize() -> void:
 
 	for f in ["jogador.json", "jogador.json.bak"]:
 		DirAccess.remove_absolute("user://teste_brasao/" + f)
+	# Regra das tinturas nos sorteios: nunca metal com metal nem cor com cor.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	var todas: Array = GeradorBrasao.opcoes()["cores"]
+	var quebrou := 0
+	var campos := {}
+	for k in 200:
+		var c := GeradorBrasao.sortear_cores(rng, todas, 3)
+		campos[c[0]] = true
+		var t := c.map(func(x): return GeradorBrasao.tintura(x))
+		if t[0] == t[1] or t[2] == t[0] or c[2] == c[1] or "" in t:
+			quebrou += 1
+	_checa("sorteio respeita a regra das tinturas (%d quebras)" % quebrou, quebrou == 0)
+	_checa("sorteio varia o campo (%d cores)" % campos.size(), campos.size() >= 6)
+	var cores_casa: Array = Balanceamento.ler_json(GeradorBrasao.PALETAS)["cores_casa"].keys()
+	_checa("toda cor da casa tem tintura", cores_casa.all(func(x): return GeradorBrasao.tintura(x) != ""))
 	print("BRASAO %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)
 

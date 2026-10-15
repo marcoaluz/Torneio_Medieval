@@ -58,6 +58,9 @@ var tela_equipamentos: TelaEquipamentos:
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio:
+		audio.musica("tema_vila")
 	var vila := Balanceamento.carregar("vila")
 	for nome: String in vila["ordem"]:
 		var p: PredioVila = CENA_PREDIO.instantiate()

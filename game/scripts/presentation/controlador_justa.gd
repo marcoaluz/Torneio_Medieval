@@ -72,6 +72,11 @@ var semente := 0
 
 ## Todos os eventos da justa atual (estrelas do PvE, envio ao servidor).
 var eventos_justa: Array[Dictionary] = []
+## Entradas do jogador [t_ms, acao, x, y] (o que o servidor refaz para conferir
+## a justa: disputa_conferida.ts). A mira entra no máximo a cada
+## servidor.json > cliente > registro_mira_ms e sempre o último ponto antes de
+## soltar ou do choque (só ele muda o golpe).
+var entradas: Array = []
 ## Chave de tradução do nome do rival e do jogador (vazio = "Você").
 var nome_rival := ""
 var nome_jogador := ""
@@ -92,6 +97,9 @@ var _gasta_folego := true
 
 var _resto_ms := 0.0
 var _desistencia_registrada := false
+var _mira_pendente: Array = []
+var _t_ultima_mira := -100000
+var _t_ultimo_toque := -100000
 var _px_por_mil := 0.0
 var _fim_corrida_j := 0.0  ## distâncias em px no fim da Corrida (para a Mira)
 var _fim_corrida_r := 0.0
@@ -147,7 +155,11 @@ func iniciar(semente_fixa := -1) -> void:
 	match modo:
 		"disputa":
 			if not disputa.is_empty() and jog_d:
-				var prep := jog_d.preparar_disputa(disputa["torneio"], int(disputa["indice"]))
+				# Com o servidor: exatamente a configuração, os lados e a semente dele.
+				var prep: Dictionary = disputa["servidor"] if disputa.has("servidor") \
+					else jog_d.preparar_disputa(disputa["torneio"], int(disputa["indice"]))
+				if disputa.has("servidor"):
+					semente_fixa = int(prep["semente"])
 				_cfg = prep["cfg"]
 				lado_jogador = prep["lado_jogador"]
 				rv = prep["rival"]
@@ -200,6 +212,10 @@ func iniciar(semente_fixa := -1) -> void:
 	else:
 		arena.rival.definir_brasao(rv["brasao"])
 	eventos_justa.clear()
+	entradas.clear()
+	_mira_pendente = []
+	_t_ultima_mira = -100000
+	_t_ultimo_toque = -100000
 	semente = semente_fixa if semente_fixa >= 0 else randi()
 	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente, perfil, perfil_jogador)
 	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)
@@ -210,15 +226,49 @@ func iniciar(semente_fixa := -1) -> void:
 	_metrica("justa_iniciada", {"modo": modo, "rival": nome_rival, "disputa": disputa})
 	_despachar(justa.iniciar())
 
+## Move a ponta e guarda a entrada (no máximo uma a cada registro_mira_ms;
+## a última fica pendente até soltar, outra entrada ou o fim da Mira).
+func _mirar(ponto: Vector2i) -> void:
+	if fase() != JustaFases.Fase.MIRA or justa.solto:
+		return
+	justa.mirar(ponto)
+	var t := justa.fases.tempo_total_ms
+	var p := justa.ponta
+	if not _mira_pendente.is_empty() and int(_mira_pendente[2]) == p.x and int(_mira_pendente[3]) == p.y:
+		return
+	if not entradas.is_empty() and _mira_pendente.is_empty() and entradas[-1][1] == "mirar" \
+			and int(entradas[-1][2]) == p.x and int(entradas[-1][3]) == p.y:
+		return
+	_mira_pendente = [t, "mirar", p.x, p.y]
+	if t - _t_ultima_mira >= int(Balanceamento.ler("servidor")["cliente"]["registro_mira_ms"]):
+		_gravar_mira_pendente()
+
+func _gravar_mira_pendente() -> void:
+	if _mira_pendente.is_empty():
+		return
+	entradas.append(_mira_pendente)
+	_t_ultima_mira = int(_mira_pendente[0])
+	_mira_pendente = []
+
+func _entrada(acao: String) -> void:
+	_gravar_mira_pendente()
+	entradas.append([justa.fases.tempo_total_ms, acao, 0, 0])
+
 ## Toque do jogador (qualquer ponto da tela).
 func tocar() -> void:
 	if justa and not justa.terminou():
+		# Dois toques mais próximos que isso não são de um dedo (o servidor recusa).
+		var t := justa.fases.tempo_total_ms
+		if t - _t_ultimo_toque < int(Balanceamento.ler("servidor")["anticheat"]["toque_min_intervalo_ms"]):
+			return
+		_t_ultimo_toque = t
+		_entrada("tocar")
 		_despachar(justa.tocar())
 
 ## Mira: começa a segurar (toque na tela).
 func segurar_mira() -> void:
 	if fase() == JustaFases.Fase.MIRA and not justa.solto:
-		justa.mirar(_ponto_mira())
+		_mirar(_ponto_mira())
 
 ## Mira: arrasto do dedo, em px da tela. Converte para o quadro do rival
 ## (desfaz zoom, escala e espelho) e move a ponta.
@@ -229,11 +279,12 @@ func arrastar_mira(delta_tela: Vector2) -> void:
 	# affine_inverse: basis_xform_inv só serve para base sem escala (usa a transposta).
 	var quadro := arena.rival.visual().global_transform.affine_inverse().basis_xform(mundo)
 	_base_mira = Vector2(Mira.limitar(_cfg["mira"], Vector2i((_base_mira + quadro * 10.0).round())))
-	justa.mirar(_ponto_mira())
+	_mirar(_ponto_mira())
 
 ## Mira: solta o dedo (golpeia).
 func soltar_mira() -> void:
-	if fase() == JustaFases.Fase.MIRA:
+	if fase() == JustaFases.Fase.MIRA and justa.segurando and not justa.solto:
+		_entrada("soltar")
 		_despachar(justa.soltar())
 
 ## Ponta da lança em coordenadas do mundo (para desenhar).
@@ -253,7 +304,10 @@ func aplicar_ajuste(arquivo: String, dados: Dictionary) -> void:
 ## Botão de habilidade (Corrida): liga a habilidade ativa nesta passada.
 func ativar_habilidade() -> void:
 	if justa and not justa.terminou():
-		_despachar(justa.ativar_habilidade())
+		var ev := justa.ativar_habilidade()
+		if not ev.is_empty():
+			_entrada("habilidade")
+		_despachar(ev)
 
 func fase() -> JustaFases.Fase:
 	return justa.fases.fase if justa else JustaFases.Fase.FIM
@@ -263,6 +317,11 @@ func _notification(what: int) -> void:
 	if what in [NOTIFICATION_EXIT_TREE, NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_APPLICATION_PAUSED]:
 		if justa != null and not justa.terminou() and modo != "exibicao" and not _desistencia_registrada:
 			_desistencia_registrada = true
+			# Saiu no meio da disputa do servidor: avisa (conta como derrota na sequência).
+			if disputa.has("servidor") and what != NOTIFICATION_APPLICATION_PAUSED:
+				var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+				if nuvem:
+					nuvem.enfileirar("abandonar_disputa", [])
 			_metrica("desistencia", {"modo": modo, "fase": JustaFases.NOMES_FASE[justa.fases.fase],
 				"passada": justa.fases.passada, "rival": nome_rival})
 
@@ -283,8 +342,10 @@ func _process(delta: float) -> void:
 	if fase() == JustaFases.Fase.MIRA:
 		_tempo_mira += delta
 		if justa.segurando:
-			justa.mirar(_ponto_mira())
+			_mirar(_ponto_mira())
 	_despachar(justa.avancar(ms))
+	if fase() != JustaFases.Fase.MIRA:
+		_gravar_mira_pendente()  # o choque usou o último ponto: ele entra com o instante dele
 	_atualizar_visual()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -427,6 +488,13 @@ func _registrar_no_jogador(e: Dictionary) -> void:
 			fluxo_p.ultimo_resultado = resultado_disputa
 	if jog and not disputa.is_empty():
 		resultado_disputa = jog.concluir_disputa(disputa["torneio"], int(disputa["indice"]), eventos_justa)
+		# O resultado acima aparece já; o servidor refaz a justa com as entradas e paga
+		# (mesma regra e semente: dá o mesmo). O estado dele vence quando a fila esvazia.
+		if disputa.has("servidor"):
+			_gravar_mira_pendente()
+			var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+			if nuvem:
+				nuvem.enfileirar("concluir_disputa_conferida", [entradas.duplicate(true)])
 		var fluxo := get_node_or_null("/root/Fluxo") as FluxoTelas
 		if fluxo:
 			fluxo.ultimo_resultado = resultado_disputa

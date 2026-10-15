@@ -51,7 +51,7 @@ Use a skill `/run-torneio-medieval` (`.claude/skills/run-torneio-medieval/driver
 - Se o plugin não estiver instalado nesta conta: `claude plugins marketplace add jame581/skillsmith` e `claude plugins install godot-prompter@skillsmith`.
 
 ## Onde paramos (para quem retomar)
-Atualizado em 2026-10-13. O detalhe completo de cada sistema está em `docs/ESTADO.md`; a decisão e o motivo de cada escolha, em `docs/DECISOES.md`.
+Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTADO.md`; a decisão e o motivo de cada escolha, em `docs/DECISOES.md`.
 
 - **Pedido do usuário:** executar **todos** os prompts de `docs/PACOTE_DE_PROMPTS.md` em sequência, sem parar para revisão; ele analisa tudo depois.
 - **Parar e perguntar antes de:** gastar crédito ou mexer em serviço externo. Isso inclui PixelLab, ElevenLabs, criar projeto ou aplicar migração no Supabase, Firebase, AdMob e lojas. Tudo o que é local, faça direto.
@@ -60,13 +60,14 @@ Atualizado em 2026-10-13. O detalhe completo de cada sistema está em `docs/ESTA
   - Parte 2: 2.1–2.11; 2.12 ligado ao projeto Supabase `Torneio_Medieval` (2026-10-13, migrações `contas_e_save` e `metricas` aplicadas); falta só o CAPTCHA no painel.
   - Parte 3: 3.12–3.25, todos locais. PvP, ordens, chat, compras e anúncios estão simulados ou com provedor de teste até o servidor existir.
 - **Próximo, em ordem:**
+  0. **Arte e som: o usuário autorizou gastar crédito (2026-10-14).** Geradores prontos: `tools/gerar_sons.py` (ElevenLabs, catálogo `game/data/audio/sons.json`) e `tools/gerar_arte.py` (PixelLab: prédios e retratos) + `tools/montar_folhas_vila.gd`. Falta só a chave em `.chaves.env` (fora do git; nunca ler nem mostrar). Rode `--simular` antes.
   1. **Servidor 3.1–3.11: escrito e testado, nada publicado** (`docs/SERVIDOR.md`, `docs/OPERACAO.md`, `docs/AUDITORIA.md`):
      - regra e economia em TypeScript em `supabase/functions/_shared/`, testadas com Node 24 (`cd supabase && node --test "tests/regra/*.test.ts"`) contra `tests/shared/*.json` e os cenários gravados pelo GDScript;
      - migrações em `supabase/migrations/` (rascunho, não aplicadas) e Edge Functions escritas; só publicar/aplicar o que o usuário autorizar;
-     - falta: o **cliente chamar `acao`** (fila de ações pendentes, estado do servidor vence; auditoria A1), publicar na branch e a Parte 4.
+     - **cliente chamando `acao` pronto e testado (2026-10-14), desligado** em `servidor.json > usar_acao`; falta PvP e social pelo servidor antes de ligar, aplicar `economia_so_servidor`, publicar na branch e a Parte 4.
   2. **Supabase já existe** (usuário criou): falta ligar CAPTCHA e apagar os usuários de teste (ver `docs/NUVEM.md`). `push` e `economia_rascunho` seguem sem aplicar. Migração nova passa por branch a partir do primeiro jogador real.
   3. **Parte 4** (4.1–4.3: espada, arco, mêlée).
-- **Fica com o usuário:** os prompts de arte (A*/B*/C*, PixelLab) e de som (S*, ElevenLabs), porque gastam crédito.
+- **Fica com o usuário:** a chave do PixelLab e do ElevenLabs (em `.chaves.env`) e a curadoria do que for gerado; o personagem em camadas (A*/B*) segue o processo manual de `docs/PERSONAGEM.md`.
 - **Fim de cada prompt:** rodar a suíte, atualizar ESTADO, DECISOES e SESSOES, e fazer commit, como faz a skill `/passagem`.
 
 ### Armadilhas já conhecidas
@@ -78,6 +79,8 @@ Atualizado em 2026-10-13. O detalhe completo de cada sistema está em `docs/ESTA
   - `Balanceamento.carregar(nome)` devolve uma cópia;
   - em caminho quente, use `ler`.
 - **Servidor em TypeScript:** mudou regra ou economia do GDScript? Mude o porte em `supabase/functions/_shared/`, regrave os cenários (`tools/gravar_cenarios.gd`) e rode os testes dos dois lados; sem enum/namespace/parâmetro-propriedade nos `.ts` (Node só apaga tipos). O relógio do GDScript pode ser parado com `ServicoTempo.fixo` (só para gravações).
+- **Comando público novo no `ServicoJogador`:** escreva como `_cmd_<nome>` e acrescente o invólucro na seção "comandos públicos" (é ele que avisa `acao_feita` para a fila do servidor); o nome tem que existir em `PUBLICOS` no TypeScript.
+- **Som:** todo som entra primeiro em `game/data/audio/sons.json`; o jogo acha `<pasta>/<id>_NN.(ogg|mp3|wav)`. Sem arquivo, não toca.
 - **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
 - **Mudança na regra da justa:**
   - regere os casos compartilhados com o oráculo Python correspondente;

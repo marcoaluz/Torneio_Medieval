@@ -939,3 +939,13 @@ CONFIG_EXCLUIR_CONTA,Excluir minha conta e meus dados,Delete my account and data
 CONFIG_EXCLUIR_CONFIRMA,Toque de novo para APAGAR a conta (não dá para desfazer),Tap again to DELETE the account (cannot be undone)
 CONFIG_EXCLUIR_CANCELAR,Cancelar,Cancel
 CONFIG_EXCLUIR_FALHOU,Não consegui excluir agora. Tente de novo com internet.,Could not delete right now. Try again with internet.
+ERRO_SEM_CONEXAO,Sem conexão com o servidor. Tente de novo em instantes.,No connection to the server. Try again in a moment.
+ERRO_AGUARDE,Aguarde um pouco antes de começar outra disputa.,Wait a little before starting another bout.
+ERRO_FALHA_INTERNA,"O servidor teve um problema. Tente de novo.","The server had a problem. Try again."
+ERRO_MUITAS_CHAMADAS,Muitas ações seguidas. Espere um instante.,Too many actions in a row. Wait a moment.
+CONFIG_SOM,Som,Sound
+CONFIG_VOLUME_MUSICA,Música,Music
+CONFIG_VOLUME_SFX,Efeitos,Effects
+CONFIG_VOLUME_VOZ,Voz do arauto,Herald voice
+CONFIG_VOLUME_AMBIENTE,Ambiente e torcida,Ambience and crowd
+CONFIG_VOLUME_UI,Interface,Interface

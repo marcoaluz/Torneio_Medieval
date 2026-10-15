@@ -15,6 +15,8 @@ extends Node
 ## Timers sempre como horário de término (ServicoTempo).
 
 signal mudou(secao: String)
+## Um comando público deu certo aqui (a Nuvem manda ao servidor; ver _comando).
+signal acao_feita(tipo: String, args: Array)
 
 const VERSAO := 11
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
@@ -218,7 +220,7 @@ func habilidades_em_uso() -> Array:
 
 ## Troca as habilidades escolhidas: até o número de espaços, conhecidas,
 ## sem repetir e no máximo uma por grupo (ofensiva, defensiva).
-func equipar_habilidades(lista: Array) -> Dictionary:
+func _cmd_equipar_habilidades(lista: Array) -> Dictionary:
 	if lista.size() > espacos_habilidade():
 		return _erro("sem_espaco_habilidade")
 	var conhecidas := habilidades_conhecidas()
@@ -243,7 +245,7 @@ func novo_jogo() -> Dictionary:
 
 ## Criação de personagem (2.2). Campos: nome, nome_casa, corpo, rosto,
 ## cabelo, pele, cor_principal, cor_secundaria, pelagem.
-func criar_personagem(d: Dictionary) -> Dictionary:
+func _cmd_criar_personagem(d: Dictionary) -> Dictionary:
 	for k in ["nome", "nome_casa", "corpo", "rosto", "cabelo", "pele", "cor_principal", "cor_secundaria", "pelagem"]:
 		if not d.has(k) or str(d[k]) == "":
 			return _erro("falta_" + k)
@@ -267,12 +269,12 @@ func criar_personagem(d: Dictionary) -> Dictionary:
 	return _concluir("cavaleiro")
 
 ## Brasão da casa (2.3): o dicionário do editor de brasão.
-func definir_brasao(brasao: Dictionary) -> Dictionary:
+func _cmd_definir_brasao(brasao: Dictionary) -> Dictionary:
 	estado["casa"]["brasao"] = brasao.duplicate(true)
 	return _concluir("casa")
 
 ## Equipa uma peça do inventário no espaço dela.
-func equipar(id: String) -> Dictionary:
+func _cmd_equipar(id: String) -> Dictionary:
 	var it := item(id)
 	if it.is_empty():
 		return _erro("item_inexistente")
@@ -283,7 +285,7 @@ func equipar(id: String) -> Dictionary:
 	return _concluir("equipamento")
 
 ## Guarda-roupa: aparência de `id_visual` no espaço (vazio = a da peça equipada).
-func definir_visual(espaco: String, id_visual: String) -> Dictionary:
+func _cmd_definir_visual(espaco: String, id_visual: String) -> Dictionary:
 	if id_visual == "":
 		estado["visual"].erase(espaco)
 	else:
@@ -349,7 +351,7 @@ func pode_melhorar(nome: String) -> Dictionary:
 	return {"ok": true, "erro": "", "ouro": int(m["ouro"]), "segundos": int(m["segundos"])}
 
 ## Começa a melhoria: cobra o ouro e cria o timer (horário de término).
-func melhorar_predio(nome: String) -> Dictionary:
+func _cmd_melhorar_predio(nome: String) -> Dictionary:
 	var p := pode_melhorar(nome)
 	if not p["ok"]:
 		return p
@@ -364,7 +366,7 @@ func melhorar_predio(nome: String) -> Dictionary:
 	return r
 
 ## Conclui um timer que já terminou (aplica o efeito e tira da lista).
-func concluir_timer(id: String) -> Dictionary:
+func _cmd_concluir_timer(id: String) -> Dictionary:
 	for i in estado["timers"].size():
 		var t: Dictionary = estado["timers"][i]
 		if t["id"] != id:
@@ -431,7 +433,7 @@ func _da_curva(curva: Array) -> int:
 
 ## Treina um atributo do cavaleiro (ocupa uma vaga do campo de treino, não o
 ## cavaleiro: ele continua disputando).
-func treinar_cavaleiro(atributo: String) -> Dictionary:
+func _cmd_treinar_cavaleiro(atributo: String) -> Dictionary:
 	var cfg := Balanceamento.ler("treino")
 	if not cfg["atributos_cavaleiro"].has(atributo):
 		return _erro("atributo_invalido")
@@ -445,7 +447,7 @@ func treinar_cavaleiro(atributo: String) -> Dictionary:
 
 ## Treina um atributo de um cavalo (ocupa uma vaga do estábulo; cavalo em
 ## treino não corre, então o cavalo ativo não pode treinar).
-func treinar_cavalo(id: String, atributo: String) -> Dictionary:
+func _cmd_treinar_cavalo(id: String, atributo: String) -> Dictionary:
 	var cfg := Balanceamento.ler("treino")
 	var c := cavalo(id)
 	if c.is_empty():
@@ -475,7 +477,7 @@ func _iniciar_treino(predio: String, extra: Dictionary) -> Dictionary:
 	return _concluir("treino")
 
 ## Escolhe o cavalo da justa (não pode estar treinando).
-func usar_cavalo(id: String) -> Dictionary:
+func _cmd_usar_cavalo(id: String) -> Dictionary:
 	if cavalo(id).is_empty():
 		return _erro("cavalo_inexistente")
 	if cavalo_treinando(id):
@@ -560,7 +562,7 @@ func pode_consertar(id: String) -> Dictionary:
 	return r
 
 ## Manda a peça para o armeiro: cobra e cria o timer (horário de término).
-func consertar(id: String) -> Dictionary:
+func _cmd_consertar(id: String) -> Dictionary:
 	var p := pode_consertar(id)
 	if not p["ok"]:
 		return p
@@ -663,7 +665,7 @@ func pode_forjar(modelo: String) -> Dictionary:
 	return {"ok": true, "erro": ""}
 
 ## Põe a peça na forja: cobra a receita e cria o timer.
-func forjar(modelo: String) -> Dictionary:
+func _cmd_forjar(modelo: String) -> Dictionary:
 	var p := pode_forjar(modelo)
 	if not p["ok"]:
 		return p
@@ -725,7 +727,7 @@ func pode_melhorar_peca(id: String) -> Dictionary:
 
 ## Tenta subir a peça um nível: cobra sempre; se falhar, a peça fica como
 ## estava (nunca é destruída). {ok, sucesso, nivel}.
-func melhorar_peca(id: String) -> Dictionary:
+func _cmd_melhorar_peca(id: String) -> Dictionary:
 	var p := pode_melhorar_peca(id)
 	if not p["ok"]:
 		return p
@@ -762,7 +764,7 @@ func pode_fundir(produto: String, quantidade: int) -> Dictionary:
 	var seg := quantidade * int(f["fundir_segundos_por_lingote"]) * (100 + bonus_companheiros("fundicao_tempo_pct")) / 100
 	return {"ok": true, "erro": "", "origem": origem, "custo": custo, "segundos": maxi(seg, 1)}
 
-func fundir(produto: String, quantidade: int) -> Dictionary:
+func _cmd_fundir(produto: String, quantidade: int) -> Dictionary:
 	var p := pode_fundir(produto, quantidade)
 	if not p["ok"]:
 		return p
@@ -865,7 +867,7 @@ func missoes() -> Dictionary:
 		r[tipo] = lista
 	return r
 
-func resgatar_missao(id: String) -> Dictionary:
+func _cmd_resgatar_missao(id: String) -> Dictionary:
 	_atualizar_missoes()
 	for tipo: String in ["diarias", "semanais"]:
 		for mi: Dictionary in estado["metas"][tipo]:
@@ -892,7 +894,7 @@ func login_hoje() -> Dictionary:
 		return {"dia": 0, "pode": false, "recompensa": {}}
 	return {"dia": feitos + 1, "pode": int(l["ultimo_dia"]) != dia_atual(), "recompensa": (tabela[feitos] as Dictionary).duplicate()}
 
-func resgatar_login() -> Dictionary:
+func _cmd_resgatar_login() -> Dictionary:
 	var h := login_hoje()
 	if not h["pode"]:
 		return _erro("login_ja_resgatado")
@@ -927,7 +929,7 @@ func titulos() -> Array:
 func titulo() -> String:
 	return str(estado["metas"]["titulo"])
 
-func definir_titulo(id: String) -> Dictionary:
+func _cmd_definir_titulo(id: String) -> Dictionary:
 	if id != "" and not titulos().has(id):
 		return _erro("titulo_bloqueado")
 	estado["metas"]["titulo"] = id
@@ -1383,7 +1385,7 @@ func _entregar_conteudo(c: Dictionary) -> Dictionary:
 	return dado
 
 ## Gasta gemas: cosmético (uma vez) ou material (limite por dia).
-func comprar_com_gemas(id: String) -> Dictionary:
+func _cmd_comprar_com_gemas(id: String) -> Dictionary:
 	var cfg := cfg_loja()
 	var lj: Dictionary = estado["loja"]
 	for c: Dictionary in cfg["cosmeticos"]:
@@ -1422,7 +1424,7 @@ func compras_restantes_hoje(material: String) -> int:
 	return 0
 
 ## Usa um cosmético comprado: frase do arauto ou cor da comemoração ("" tira).
-func usar_cosmetico(id: String) -> Dictionary:
+func _cmd_usar_cosmetico(id: String) -> Dictionary:
 	var lj: Dictionary = estado["loja"]
 	if id != "" and not (lj["cosmeticos"] as Array).has(id):
 		return _erro("cosmetico_bloqueado")
@@ -1441,7 +1443,7 @@ func custo_pular(restante_s: int) -> int:
 	return int(ceil(maxi(restante_s, 0) / 3600.0)) * int(cfg_loja()["gemas_por_hora_timer"])
 
 ## Termina agora um timer (treino, obra, forja...) ou o baú que está abrindo, com gemas.
-func pular_com_gemas(id: String) -> Dictionary:
+func _cmd_pular_com_gemas(id: String) -> Dictionary:
 	var alvo: Dictionary = {}
 	var chave := "termina_em"
 	for t: Dictionary in estado["timers"]:
@@ -1502,7 +1504,7 @@ func passe() -> Dictionary:
 		"gratis": (p["gratis"] as Array).duplicate(), "premium_resgatados": (p["premium_resgatados"] as Array).duplicate()}
 
 ## Pega a recompensa de um nível numa trilha ("gratis" ou "premium").
-func resgatar_passe(nivel: int, trilha: String) -> Dictionary:
+func _cmd_resgatar_passe(nivel: int, trilha: String) -> Dictionary:
 	var info := passe()
 	if nivel < 1 or nivel > int(info["nivel"]):
 		return _erro("nivel_do_passe_bloqueado")
@@ -1556,7 +1558,7 @@ func oferta_nova() -> Dictionary:
 			return o
 	return {}
 
-func marcar_oferta_vista(id: String) -> void:
+func _cmd_marcar_oferta_vista(id: String) -> void:
 	for x: Dictionary in estado["loja"]["ofertas"]:
 		if x["id"] == id:
 			x["vista"] = true
@@ -1619,7 +1621,7 @@ func pode_recompensa_anuncio(tipo: String, alvo := "") -> Dictionary:
 
 ## Entrega o benefício (depois do anúncio assistido, ou direto para o VIP).
 ## `token` é o comprovante do provedor (o servidor vai conferir). {ok, recompensa}.
-func recompensa_anuncio(tipo: String, alvo: String, token: String) -> Dictionary:
+func _cmd_recompensa_anuncio(tipo: String, alvo: String, token: String) -> Dictionary:
 	var p := pode_recompensa_anuncio(tipo, alvo)
 	if not p["ok"]:
 		return p
@@ -1671,7 +1673,7 @@ func config_valor(chave: String) -> Variant:
 	var padrao: Dictionary = Balanceamento.ler_json("res://game/data/ui/acessibilidade.json")["padrao"]
 	return estado.get("config", {}).get(chave, padrao.get(chave))
 
-func definir_config(chave: String, valor: Variant) -> Dictionary:
+func _cmd_definir_config(chave: String, valor: Variant) -> Dictionary:
 	var a: Dictionary = Balanceamento.ler_json("res://game/data/ui/acessibilidade.json")
 	if not a["padrao"].has(chave):
 		return _erro("opcao_inexistente")
@@ -1679,6 +1681,10 @@ func definir_config(chave: String, valor: Variant) -> Dictionary:
 		return _erro("opcao_invalida")
 	if chave == "idioma" and not (a["idiomas"] as Array).has(str(valor)):
 		return _erro("opcao_invalida")
+	if chave.begins_with("volume_"):
+		var inteiro: bool = valor is int or (valor is float and valor == floorf(valor))
+		if not inteiro or float(valor) < 0.0 or float(valor) > 100.0:
+			return _erro("opcao_invalida")
 	if not estado.has("config"):
 		estado["config"] = {"notificacoes": {}}
 	estado["config"][chave] = valor
@@ -1709,7 +1715,7 @@ func apagar_dados_locais() -> void:
 	estado = novo_estado()
 	_concluir("tudo")
 
-func definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
+func _cmd_definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
 	if not estado.has("config"):
 		estado["config"] = {"notificacoes": {}}
 	estado["config"]["notificacoes"][tipo] = ligada
@@ -1741,7 +1747,7 @@ func proxima_cena() -> String:
 			return id
 	return ""
 
-func marcar_cena_vista(id: String) -> Dictionary:
+func _cmd_marcar_cena_vista(id: String) -> Dictionary:
 	if not cfg_historia()["cenas"].has(id):
 		return _erro("cena_inexistente")
 	if not (estado["historia"]["vistas"] as Array).has(id):
@@ -1830,7 +1836,7 @@ func _bau(id: String) -> Dictionary:
 	return {}
 
 ## Começa a abrir um baú (um por vez); o tempo vem de economia.json.
-func comecar_abrir(id: String) -> Dictionary:
+func _cmd_comecar_abrir(id: String) -> Dictionary:
 	var b := _bau(id)
 	if b.is_empty():
 		return _erro("bau_inexistente")
@@ -1844,7 +1850,7 @@ func comecar_abrir(id: String) -> Dictionary:
 ## Abre um baú pronto, ou na hora gastando uma chave (`com_chave`). Entrega
 ## ouro, fragmentos e peças (repetidas viram fragmentos).
 ## {ok, tipo, ouro, fragmentos, itens: [{modelo, raridade, repetida, id}]}.
-func abrir_bau(id: String, com_chave := false) -> Dictionary:
+func _cmd_abrir_bau(id: String, com_chave := false) -> Dictionary:
 	var b := _bau(id)
 	if b.is_empty():
 		return _erro("bau_inexistente")
@@ -2187,7 +2193,7 @@ func tutorial_passo() -> int:
 func tutorial_concluido() -> bool:
 	return estado["tutorial"].get("concluido", false)
 
-func definir_passo_tutorial(passo: int) -> Dictionary:
+func _cmd_definir_passo_tutorial(passo: int) -> Dictionary:
 	estado["tutorial"]["passo"] = clampi(passo, 0, TUTORIAL_CONCLUIDO)
 	if passo >= TUTORIAL_CONCLUIDO:
 		estado["tutorial"]["concluido"] = true
@@ -2196,7 +2202,7 @@ func definir_passo_tutorial(passo: int) -> Dictionary:
 ## Recompensa do tutorial (uma vez só): ouro, XP até o nível 2 e a peça do
 ## primeiro baú, já equipada. Quem pula o tutorial também recebe.
 ## Devolve {ok, item (id), modelo, niveis}.
-func recompensa_tutorial() -> Dictionary:
+func _cmd_recompensa_tutorial() -> Dictionary:
 	var t: Dictionary = estado["tutorial"]
 	if t.get("recompensa_dada", false):
 		return {"ok": true, "erro": "", "item": t.get("item_bau", ""), "modelo": "", "niveis": []}
@@ -3188,7 +3194,116 @@ static func migrar(d: Dictionary) -> Dictionary:
 	d["versao"] = maxi(v, VERSAO)
 	return d
 
+# ------------------------------------------------------- comandos públicos
+# Os comandos que o servidor também tem (Edge Function `acao`, lista PUBLICOS
+# em supabase/functions/_shared/servidor/comandos.ts). Cada um roda aqui na
+# hora (a tela não espera a rede) e, se deu certo, avisa `acao_feita`; com o
+# servidor ligado, a Nuvem põe a ação na fila e o estado do servidor vence.
+
+func criar_personagem(d: Dictionary) -> Dictionary:
+	return _comando("criar_personagem", [d], _cmd_criar_personagem)
+
+func definir_brasao(brasao: Dictionary) -> Dictionary:
+	return _comando("definir_brasao", [brasao], _cmd_definir_brasao)
+
+func equipar(id: String) -> Dictionary:
+	return _comando("equipar", [id], _cmd_equipar)
+
+func definir_visual(espaco: String, id_visual: String) -> Dictionary:
+	return _comando("definir_visual", [espaco, id_visual], _cmd_definir_visual)
+
+func equipar_habilidades(lista: Array) -> Dictionary:
+	return _comando("equipar_habilidades", [lista], _cmd_equipar_habilidades)
+
+func melhorar_predio(nome: String) -> Dictionary:
+	return _comando("melhorar_predio", [nome], _cmd_melhorar_predio)
+
+func concluir_timer(id: String) -> Dictionary:
+	return _comando("concluir_timer", [id], _cmd_concluir_timer)
+
+func treinar_cavaleiro(atributo: String) -> Dictionary:
+	return _comando("treinar_cavaleiro", [atributo], _cmd_treinar_cavaleiro)
+
+func treinar_cavalo(id: String, atributo: String) -> Dictionary:
+	return _comando("treinar_cavalo", [id, atributo], _cmd_treinar_cavalo)
+
+func usar_cavalo(id: String) -> Dictionary:
+	return _comando("usar_cavalo", [id], _cmd_usar_cavalo)
+
+func consertar(id: String) -> Dictionary:
+	return _comando("consertar", [id], _cmd_consertar)
+
+func forjar(modelo: String) -> Dictionary:
+	return _comando("forjar", [modelo], _cmd_forjar)
+
+func melhorar_peca(id: String) -> Dictionary:
+	return _comando("melhorar_peca", [id], _cmd_melhorar_peca)
+
+func fundir(produto: String, quantidade: int) -> Dictionary:
+	return _comando("fundir", [produto, quantidade], _cmd_fundir)
+
+func resgatar_missao(id: String) -> Dictionary:
+	return _comando("resgatar_missao", [id], _cmd_resgatar_missao)
+
+func resgatar_login() -> Dictionary:
+	return _comando("resgatar_login", [], _cmd_resgatar_login)
+
+func definir_titulo(id: String) -> Dictionary:
+	return _comando("definir_titulo", [id], _cmd_definir_titulo)
+
+func comecar_abrir(id: String) -> Dictionary:
+	return _comando("comecar_abrir", [id], _cmd_comecar_abrir)
+
+func abrir_bau(id: String, com_chave := false) -> Dictionary:
+	return _comando("abrir_bau", [id, com_chave], _cmd_abrir_bau)
+
+func comprar_com_gemas(id: String) -> Dictionary:
+	return _comando("comprar_com_gemas", [id], _cmd_comprar_com_gemas)
+
+func usar_cosmetico(id: String) -> Dictionary:
+	return _comando("usar_cosmetico", [id], _cmd_usar_cosmetico)
+
+func pular_com_gemas(id: String) -> Dictionary:
+	return _comando("pular_com_gemas", [id], _cmd_pular_com_gemas)
+
+func resgatar_passe(nivel: int, trilha: String) -> Dictionary:
+	return _comando("resgatar_passe", [nivel, trilha], _cmd_resgatar_passe)
+
+func marcar_oferta_vista(id: String) -> void:
+	_comando("marcar_oferta_vista", [id], _cmd_marcar_oferta_vista)
+
+func recompensa_anuncio(tipo: String, alvo: String, token: String) -> Dictionary:
+	return _comando("recompensa_anuncio", [tipo, alvo, token], _cmd_recompensa_anuncio)
+
+func marcar_cena_vista(id: String) -> Dictionary:
+	return _comando("marcar_cena_vista", [id], _cmd_marcar_cena_vista)
+
+func definir_passo_tutorial(passo: int) -> Dictionary:
+	return _comando("definir_passo_tutorial", [passo], _cmd_definir_passo_tutorial)
+
+func recompensa_tutorial() -> Dictionary:
+	return _comando("recompensa_tutorial", [], _cmd_recompensa_tutorial)
+
+func definir_config(chave: String, valor: Variant) -> Dictionary:
+	return _comando("definir_config", [chave, valor], _cmd_definir_config)
+
+func definir_notificacao(tipo: String, ligada: bool) -> Dictionary:
+	return _comando("definir_notificacao", [tipo, ligada], _cmd_definir_notificacao)
+
 # ---------------------------------------------------------------- internos
+
+## Roda o comando aqui e, se deu certo, avisa quem envia ao servidor.
+func _comando(tipo: String, args: Array, f: Callable) -> Variant:
+	var r: Variant = f.callv(args)
+	if r == null or (r is Dictionary and r.get("ok", false)):
+		acao_feita.emit(tipo, args)
+	return r
+
+## Troca o estado pelo do servidor (que vence): migra, salva e avisa tudo.
+func adotar_estado(dados: Dictionary) -> void:
+	estado = migrar(_inteiros(dados))
+	salvar()
+	mudou.emit("tudo")
 
 func _concluir(secao: String) -> Dictionary:
 	var e := salvar()

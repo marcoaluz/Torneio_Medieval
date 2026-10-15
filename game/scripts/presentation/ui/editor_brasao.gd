@@ -61,14 +61,10 @@ func sortear() -> void:
 	for chave: String in _seletores:
 		var s: Seletor = _seletores[chave]
 		s.escolher(s.opcoes[_rng.randi() % s.opcoes.size()]["valor"])
-	var cores: Array = GeradorBrasao.opcoes()["cores"]
-	var usadas := []
-	for chave: String in ["cor1", "cor2", "cor_simbolo"]:
-		var c: String = cores[_rng.randi() % cores.size()]
-		while usadas.has(c) and usadas.size() < cores.size():
-			c = cores[_rng.randi() % cores.size()]
-		usadas.append(c)
-		(_amostras[chave] as AmostrasCor).escolher(c)
+	# Regra das tinturas: campo e partição de tinturas diferentes, símbolo oposto ao campo.
+	var cores := GeradorBrasao.sortear_cores(_rng, GeradorBrasao.opcoes()["cores"], 3)
+	for i in 3:
+		(_amostras[["cor1", "cor2", "cor_simbolo"][i]] as AmostrasCor).escolher(cores[i])
 
 func confirmar() -> void:
 	var jog := get_node_or_null("/root/Jogador") as ServicoJogador

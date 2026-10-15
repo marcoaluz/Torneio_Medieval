@@ -36,7 +36,7 @@ Gravidade: **Alta** (dá vantagem ou dinheiro de graça, ou expõe dados), **Mé
 
 | # | Gravidade | Problema | O que fazer |
 | --- | --- | --- | --- |
-| A1 | **Alta** | **O cliente ainda grava o save direto** (2.12): enquanto `20261013120100_economia_so_servidor.sql` não for aplicada, qualquer um edita ouro e itens | trocar o cliente para chamar `acao` e aplicar a migração junto (fila de ações pendentes; o estado do servidor vence) |
+| A1 | **Alta** | **O cliente ainda grava o save direto** (2.12): enquanto `20261013120100_economia_so_servidor.sql` não for aplicada, qualquer um edita ouro e itens | trocar o cliente para chamar `acao` e aplicar a migração junto (fila de ações pendentes; o estado do servidor vence). **2026-10-14: cliente pronto e testado (`usar_acao`), falta PvP/social pelo servidor, aplicar a migração e publicar** |
 | A2 | Alta | Verificador de recibos do **Google** nunca foi exercitado com a loja; **Apple** não existe | compra de teste licenciada (Play Console) ponta a ponta; implementar App Store Server API (JWS) antes de lançar no iOS |
 | A3 | Média | Anúncios premiados: **SSV não implementado** (`verificar_anuncio` recusa tudo; só o VIP recebe) | assinatura SSV do AdMob na função, quando a conta existir |
 | A4 | Média | **Contas anônimas gratuitas e sem limite por IP**: multi-conta, spam, fuga de silenciamento | CAPTCHA (Turnstile) no cadastro; limite por IP no Auth |

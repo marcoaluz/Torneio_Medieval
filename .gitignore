@@ -14,3 +14,7 @@ build/
 .claude/settings.local.json
 *.tmp
 override.cfg
+
+# Chaves de servicos (PixelLab, ElevenLabs): nunca no git
+.chaves.env
+__pycache__/

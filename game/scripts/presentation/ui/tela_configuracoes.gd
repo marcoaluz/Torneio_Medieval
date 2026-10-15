@@ -37,6 +37,9 @@ func montar() -> void:
 	_opcao(tr("CONFIG_CANHOTO"), "canhoto")
 	_opcao(tr("CONFIG_VIBRACAO"), "vibracao")
 	_opcao(tr("CONFIG_BATERIA"), "economia_bateria")
+	_secao(tr("CONFIG_SOM"))
+	for b: String in ServicoAudio.BARRAMENTOS:
+		_volume(tr("CONFIG_VOLUME_" + b.to_upper()), "volume_" + b.to_lower())
 	_secao(tr("CONFIG_PRIVACIDADE"))
 	_opcao(tr("CONFIG_ANUNCIOS_PERSONALIZADOS"), "anuncios_personalizados")
 	_botao(tr("CONFIG_VER_POLITICA"), _abrir_politica)
@@ -94,6 +97,25 @@ func _opcao(texto: String, chave: String) -> void:
 	b.button_pressed = bool(_jog.config_valor(chave))
 	b.toggled.connect(func(on: bool): _jog.definir_config(chave, on))
 	_lista.add_child(b)
+
+## Volume de um barramento (0 a 100). Grava só ao soltar o dedo (cada
+## gravação é uma ação no servidor).
+func _volume(texto: String, chave: String) -> void:
+	var linha := HBoxContainer.new()
+	var l := Label.new()
+	l.text = texto
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	linha.add_child(l)
+	var s := HSlider.new()
+	s.focus_mode = Control.FOCUS_NONE
+	s.min_value = 0
+	s.max_value = 100
+	s.step = 10
+	s.custom_minimum_size.x = 220
+	s.value = float(_jog.config_valor(chave))
+	s.drag_ended.connect(func(mudou: bool): if mudou: _jog.definir_config(chave, int(s.value)))
+	linha.add_child(s)
+	_lista.add_child(linha)
 
 func _escolha(texto: String, chave: String, valores: Array, nome: Callable) -> void:
 	var linha := HBoxContainer.new()

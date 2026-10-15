@@ -28,6 +28,11 @@ func _ready() -> void:
 		"chuva": _criar_chuva()
 		"neblina": _criar_neblina()
 	_aplicar()
+	# Som da chuva só com chuva (skill som: o som acompanha o estado visual).
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio:
+		audio.laco("chuva_vila", clima == "chuva")
+		tree_exiting.connect(func(): audio.laco("chuva_vila", false))
 
 func _process(delta: float) -> void:
 	_acumulado += delta

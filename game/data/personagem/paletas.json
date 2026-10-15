@@ -11,6 +11,17 @@
 		"purpura": "4a2a4f",
 		"branco_osso": "d8d0bf"
 	},
+	"tinturas": {
+		"_nota": "Regra das tinturas da heraldica: nunca metal sobre metal nem cor sobre cor. Os sorteios (criacao e brasao) juntam sempre um metal com uma cor, o que da contraste e combina. Toda cor de cores_casa esta em uma das listas.",
+		"metais": ["ouro_velho", "prata", "branco_osso"],
+		"cores": ["azul_real", "vermelho_sangue", "verde_floresta", "preto_carvao", "purpura"]
+	},
+	"mundo": {
+		"_nota": "Cores do cenario (vila, arena, retratos) mandadas ao PixelLab junto com as demais como paleta forcada (tools/gerar_arte.py): tudo sai do mesmo conjunto de cores.",
+		"pedra": "6e6a63", "pedra_clara": "9b958a", "lama": "4a3b2c", "terra": "6b5640",
+		"capim": "4f5a35", "musgo": "3c4630", "palha": "a08a55", "ardosia": "3d4250",
+		"ceu_nublado": "8c9196", "sombra": "1c1a1d", "fogo": "c86a2a"
+	},
 	"metais": { "ferro": "8a8f96", "aco_escuro": "4b5058", "latao": "a8874a" },
 	"neutros": { "couro": "6b4a33", "madeira": "8a6a45", "tecido_cru": "9a8c74" },
 	"peles": { "clara": "e0b89a", "media": "c08c66", "morena": "8f5f40", "escura": "5c3a28", "palida": "e8cfc0" },

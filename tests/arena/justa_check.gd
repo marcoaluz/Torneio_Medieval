@@ -116,6 +116,7 @@ func _initialize() -> void:
 	toque.pressed = true
 	c._unhandled_input(toque)
 	_checa("toque pula a apresentacao", c.fase() == JustaFases.Fase.LARGADA)
+	c._process(0.05)  # dois toques no mesmo instante não são de um dedo (a arena ignora)
 	c._unhandled_input(toque)
 	_checa("toque antes da bandeira queima a largada", c.justa.tocou_largada and c.justa.qualidade_largada == "ruim")
 

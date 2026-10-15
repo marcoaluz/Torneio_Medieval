@@ -30,6 +30,10 @@ fantasy glowing armor, anime
 
 Para prédios e vila (vista de cima) troque "side view facing right" por "top-down three-quarter view". Rival: "side view facing left" (ou espelhe depois, ver abaixo).
 
+## Gerar pelo script
+
+`python -I tools/gerar_arte.py --simular` lista o que falta; sem `--simular` gera (chave `PIXELLAB_API_KEY` em `.chaves.env`, fora do git). Cobre prédios da vila (cada estágio parte do anterior, mesma semente) e retratos da história, sempre com a **paleta do jogo forçada** (`color_image` montada de `paletas.json`: cores da casa, metais, neutros, peles, cabelos e `mundo`), para tudo combinar. Os estágios brutos ficam em `game/art/fontes/vila/` e `tools/montar_folhas_vila.gd` monta as folhas. Cores da casa sorteadas seguem a regra das tinturas (`paletas.json > tinturas`: metal com cor, nunca cor com cor).
+
 ## Tamanhos de quadro
 
 Resolução base do jogo: **960×540** (ver `docs/DECISOES.md`). Em celulares mais largos a altura fica 540 e a largura cresce (20:9 → 1200, 21:9 → ~1260): o que é essencial cabe em 960×540, mas fundos e cenários precisam se estender até 1280 de largura.

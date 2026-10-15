@@ -40,6 +40,7 @@ metas: renome, dia, diarias [{id, progresso, resgatada}], semana,      (v5, 3.21
        sequencia, conquistas [id], titulos [id], titulo, novas [id]
 historia: vistas [id da cena]                                           (v6, 3.22)
 config: notificacoes {todas, <tipo>: bool}                             (v7, 3.23)
+        volume_musica|sfx|voz|ambiente|ui: int 0..100 (ausente = 100; sem versão nova, 2026-10-14)
         canhoto, vibracao, texto, idioma, economia_bateria (3.24/3.25;
         ausente = padrão de game/data/ui/acessibilidade.json, sem versão nova)
 liga: pontos, melhor, temporada, temporada_inicio, defesa {equipamento,   (v8, 3.17)

@@ -9,10 +9,40 @@ extends RefCounted
 ## brasao = {forma, divisao, cor1, cor2, simbolo, posicao, cor_simbolo}
 
 const DADOS := "res://game/data/crests/brasao.json"
+const PALETAS := "res://game/data/personagem/paletas.json"
 
 static var _cfg: Dictionary
 static var _paleta: Dictionary
 static var _cache := {}
+
+## Tintura heráldica de uma cor da casa: "metal", "cor" ou "" (fora das listas).
+static func tintura(cor: String) -> String:
+	var t: Dictionary = Balanceamento.ler_json(PALETAS)["tinturas"]
+	if (t["metais"] as Array).has(cor):
+		return "metal"
+	return "cor" if (t["cores"] as Array).has(cor) else ""
+
+## Sorteia `n` cores (até 3) que respeitam a regra das tinturas: a 1ª e a 2ª
+## de tinturas diferentes (uma ao lado da outra), a 3ª (o símbolo, sobre a
+## 1ª) da tintura oposta à 1ª e diferente da 2ª. Só usa cores de `permitidas`.
+static func sortear_cores(rng: RandomNumberGenerator, permitidas: Array, n := 2) -> Array[String]:
+	var t: Dictionary = Balanceamento.ler_json(PALETAS)["tinturas"]
+	var metais: Array = (t["metais"] as Array).filter(func(c): return permitidas.has(c))
+	var cores: Array = (t["cores"] as Array).filter(func(c): return permitidas.has(c))
+	var r: Array[String] = []
+	if metais.is_empty() or cores.is_empty():
+		return r
+	var primeiro_cor := rng.randf() < 0.75  # o campo escuro com detalhe em metal é o mais comum (e o mais legível)
+	var a: Array = cores if primeiro_cor else metais
+	var b: Array = metais if primeiro_cor else cores
+	r.append(a[rng.randi() % a.size()])
+	r.append(b[rng.randi() % b.size()])
+	if n >= 3:
+		var opcoes_simbolo := b.filter(func(c): return c != r[1])
+		if opcoes_simbolo.is_empty():
+			opcoes_simbolo = b
+		r.append(opcoes_simbolo[rng.randi() % opcoes_simbolo.size()])
+	return r
 
 static func opcoes() -> Dictionary:
 	if _cfg.is_empty():

@@ -111,7 +111,7 @@ func _montar_chave() -> void:
 		justar.text = tr("VILA_JUSTAR")
 		justar.disabled = not _jog.pode_disputar(torneio, i)["ok"]
 		var idx := i
-		justar.pressed.connect(func(): (get_node("/root/Fluxo") as FluxoTelas).justar(torneio, idx))
+		justar.pressed.connect(func(): _justar(idx))
 		linha.add_child(justar)
 		var auto := Button.new()
 		auto.focus_mode = Control.FOCUS_NONE
@@ -130,9 +130,21 @@ func _trocar_regiao(passo: int) -> void:
 	regiao = abertas[clampi(abertas.find(regiao) + passo, 0, abertas.size() - 1)]
 	montar()
 
+## Abre a arena (com o servidor ligado, pede a semente antes; sem rede, avisa).
+func _justar(indice: int) -> void:
+	var r: Dictionary = await (get_node("/root/Fluxo") as FluxoTelas).justar(torneio, indice)
+	if not r["ok"]:
+		_info.text = tr("ERRO_" + str(r["erro"]).to_upper())
+
 ## Disputa no automático (mesma regra, IA de precisão média pelo jogador).
+## Com o servidor ligado, ele sorteia a semente e decide; aqui só mostra.
 func automatico(indice: int) -> void:
-	var r := _jog.disputa_automatica(torneio, indice, randi())
+	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+	var r: Dictionary
+	if nuvem and nuvem.usa_acao():
+		r = await nuvem.chamar("disputa_automatica", [torneio, indice])
+	else:
+		r = _jog.disputa_automatica(torneio, indice, randi())
 	if not r["ok"]:
 		_info.text = tr("ERRO_" + str(r["erro"]).to_upper())
 		return

@@ -1,0 +1,80 @@
+{
+	"versao": 1,
+	"_nota": "Catalogo de som (skill som). Cada id vira arquivos <pasta>/<id>_01.<ext>, _02... (3 a 4 variacoes; o jogo sorteia sem repetir seguido e varia o tom em +-tom). bus: Musica, SFX, Voz, Ambiente, UI. volume_db so para equilibrar um som com os outros do mesmo barramento. prompt e duracao_s alimentam tools/gerar_sons.py (ElevenLabs). Sem arquivo, o som simplesmente nao toca.",
+	"estilo": {
+		"_nota": "Juntado ao fim de todo prompt, para os sons combinarem entre si: o mesmo espaco (campo aberto de torneio), timbre quente e nada estridente.",
+		"efeito": "realistic foley, warm and full, not harsh or shrill, no music, no voices, dry close recording with a light natural outdoor reverb of an open medieval tournament field",
+		"ambiente": "realistic ambience, warm and soft, no music, seamless loop with no fade in or out",
+		"interface": "short, soft and warm, pleasant to hear many times, no reverb tail, no music",
+		"musica": "D dorian, warm analog mix, not harsh, instrumental, no vocals unless stated"
+	},
+	"formatos": {
+		"_nota": "wav para sons curtissimos de interface (latencia), mp3 para o resto (o Godot importa mp3 direto; sem ffmpeg nesta maquina). ogg tambem e aceito.",
+		"curto_ate_s": 0.5,
+		"extensoes": ["ogg", "mp3", "wav"]
+	},
+	"sons": {
+		"galope": {"pasta": "sfx/justa", "bus": "SFX", "loop": true, "tom": 0.04, "duracao_s": 4, "variacoes": 3, "prompt": "Heavy warhorse galloping on packed muddy dirt, armor and harness rattling, steady rhythm, close perspective"},
+		"largada_trompete": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.0, "duracao_s": 2, "variacoes": 3, "prompt": "Herald trumpet short fanfare in D, medieval natural brass, noble and bright but warm, outdoor reverb"},
+		"bandeira": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.08, "duracao_s": 1, "variacoes": 3, "prompt": "Cloth flag snapping down sharply in the wind"},
+		"toque_no_tempo": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "volume_db": -4, "duracao_s": 0.3, "variacoes": 4, "prompt": "Soft leather saddle creak with a subtle percussive thump"},
+		"toque_fora": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "volume_db": -6, "duracao_s": 0.3, "variacoes": 3, "prompt": "Dull muffled leather slap, slightly off and loose, very short"},
+		"impacto_escudo": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "duracao_s": 1, "variacoes": 4, "prompt": "Wooden lance striking a steel shield, loud crack, metallic ring"},
+		"impacto_capacete": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "duracao_s": 1, "variacoes": 4, "prompt": "Wooden lance hitting a steel helmet, sharp metallic clang, heavy"},
+		"impacto_peito": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "duracao_s": 1, "variacoes": 4, "prompt": "Wooden lance slamming into a steel breastplate, heavy dull metallic thud with a short ring"},
+		"impacto_cavalo": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.04, "duracao_s": 1.5, "variacoes": 3, "prompt": "Lance glancing off horse barding with a dull thump, then a short alarmed horse neigh"},
+		"lanca_estilhaca": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.07, "duracao_s": 1.5, "variacoes": 4, "prompt": "Wooden lance shattering into splinters, explosive wood crack"},
+		"derrubada": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.04, "duracao_s": 2, "variacoes": 3, "prompt": "Armored knight falling off a horse onto mud, heavy metal clatter, thud"},
+		"cavalo_bufando": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "volume_db": -3, "duracao_s": 2, "variacoes": 3, "prompt": "Warhorse snorting and blowing, tired"},
+		"habilidade_investida": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.03, "duracao_s": 1.5, "variacoes": 3, "prompt": "Rushing wind and pounding hooves accelerating"},
+		"habilidade_bloqueio": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.03, "duracao_s": 1, "variacoes": 3, "prompt": "Bright metallic ring of a parry, clean and resonant"},
+		"habilidade_golpe_pesado": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.03, "duracao_s": 1.5, "variacoes": 3, "prompt": "Deep boom with crunching metal"},
+		"torcida_fundo": {"pasta": "sfx/torcida", "bus": "Ambiente", "loop": true, "tom": 0.0, "volume_db": -6, "duracao_s": 10, "variacoes": 2, "prompt": "Medieval tournament crowd murmuring, outdoor, distant"},
+		"torcida_explode": {"pasta": "sfx/torcida", "bus": "Ambiente", "tom": 0.04, "duracao_s": 3, "variacoes": 3, "prompt": "Medieval crowd erupting in cheers after a hit, outdoor"},
+		"torcida_decepcionada": {"pasta": "sfx/torcida", "bus": "Ambiente", "tom": 0.04, "duracao_s": 2, "variacoes": 3, "prompt": "Medieval crowd groaning in disappointment"},
+		"porta_predio": {"pasta": "sfx/vila", "bus": "UI", "tom": 0.06, "duracao_s": 1, "variacoes": 3, "prompt": "Heavy wooden door creak opening, short"},
+		"martelo_bigorna": {"pasta": "sfx/vila", "bus": "SFX", "tom": 0.05, "duracao_s": 1, "variacoes": 4, "prompt": "Blacksmith hammer striking hot iron on an anvil, ringing"},
+		"forja": {"pasta": "sfx/vila", "bus": "Ambiente", "loop": true, "tom": 0.0, "volume_db": -6, "duracao_s": 8, "variacoes": 2, "prompt": "Bellows pumping and fire roaring in a forge"},
+		"estabulo": {"pasta": "sfx/vila", "bus": "Ambiente", "loop": true, "tom": 0.0, "volume_db": -6, "duracao_s": 8, "variacoes": 2, "prompt": "Horses shifting in straw, soft snorts"},
+		"campo_treino": {"pasta": "sfx/vila", "bus": "SFX", "tom": 0.05, "duracao_s": 2, "variacoes": 3, "prompt": "Lance striking a quintain shield, sandbag swinging and thudding"},
+		"treino_pronto": {"pasta": "sfx/vila", "bus": "UI", "tom": 0.0, "duracao_s": 2, "variacoes": 2, "prompt": "Short horn call in the distance, in D"},
+		"obra_predio": {"pasta": "sfx/vila", "bus": "SFX", "tom": 0.04, "duracao_s": 3, "variacoes": 3, "prompt": "Hammering, sawing and stones being placed"},
+		"chuva_vila": {"pasta": "sfx/vila", "bus": "Ambiente", "loop": true, "tom": 0.0, "volume_db": -8, "duracao_s": 10, "variacoes": 2, "prompt": "Steady rain on wooden roofs and mud"},
+		"botao": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.08, "volume_db": -6, "duracao_s": 0.2, "variacoes": 4, "prompt": "Soft leather and metal click"},
+		"equipar": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.05, "duracao_s": 1, "variacoes": 3, "prompt": "Plate armor buckle being fastened, metallic"},
+		"moedas": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.06, "duracao_s": 1, "variacoes": 3, "prompt": "Handful of medieval coins clinking into a leather pouch"},
+		"abrir_bau": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.03, "duracao_s": 2, "variacoes": 3, "prompt": "Heavy chest lid creaking open, then a shimmering reveal chime in D"},
+		"item_lendario": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.0, "duracao_s": 3, "variacoes": 2, "prompt": "Deep choir swell with a ringing bell, D major chord, uplifting"},
+		"forja_concluida": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.04, "duracao_s": 2, "variacoes": 3, "prompt": "Quenching hot steel in water, hiss, then a satisfied hammer tap"},
+		"melhoria_falhou": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.04, "duracao_s": 1, "variacoes": 3, "prompt": "Dull clank and a short disappointed metal scrape"},
+		"mensagem_chat": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.08, "volume_db": -6, "duracao_s": 0.5, "variacoes": 3, "prompt": "Soft quill scratch"},
+		"ordem_venceu": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.0, "duracao_s": 3, "variacoes": 2, "prompt": "War horn and distant cheering"},
+		"subir_liga": {"pasta": "sfx/ui", "bus": "UI", "tom": 0.0, "duracao_s": 3, "variacoes": 2, "prompt": "Rising brass fanfare with drums, in D"}
+	},
+	"musicas": {
+		"tema_vila": {"pasta": "music", "bus": "Musica", "loop": true, "volume_db": -4, "duracao_s": 120, "prompt": "Dark medieval folk, slow and atmospheric, hurdy-gurdy and lute over low drones, distant church bell, calm but brooding, seamless loop"},
+		"tema_justa": {"pasta": "music", "bus": "Musica", "loop": true, "volume_db": -6, "duracao_s": 120, "prompt": "Medieval rock anthem, war drums and distorted guitars, bagpipe melody, driving 140 bpm, epic and gritty, seamless loop"},
+		"tema_final": {"pasta": "music", "bus": "Musica", "loop": true, "volume_db": -6, "duracao_s": 120, "prompt": "Medieval rock anthem, war drums and distorted guitars, bagpipe melody, heavier and faster at 150 bpm, choir chants, rising tension, seamless loop"},
+		"vitoria": {"pasta": "music", "bus": "Musica", "duracao_s": 5, "prompt": "Short triumphant medieval rock sting, brass and guitar, crowd roar, ends on a D major chord"},
+		"derrota": {"pasta": "music", "bus": "Musica", "duracao_s": 4, "prompt": "Short somber medieval sting, low strings and a single drum, ends on D minor"},
+		"subir_nivel": {"pasta": "music", "bus": "Musica", "duracao_s": 3, "prompt": "Bright fanfare with bells and a guitar chord, D major"}
+	},
+	"voz": {
+		"_nota": "Arauto: voz propria grave, teatral e rouca, a mesma nas duas linguas. Arquivos em voice/<idioma>/arauto_<id>_01.mp3. O nome do cavaleiro nunca e falado (aparece escrito).",
+		"pasta": "voice",
+		"bus": "Voz",
+		"descricao_voz": "Deep, theatrical, slightly raspy middle-aged male herald, booming outdoor projection, medieval announcer, warm and commanding",
+		"falas": {
+			"senhoras_e_senhores": {"pt_BR": "Senhoras e senhores!", "en": "Ladies and gentlemen!"},
+			"da_casa_de": {"pt_BR": "Da casa de...", "en": "Of the house of..."},
+			"preparem_as_lancas": {"pt_BR": "Preparem as lanças!", "en": "Ready your lances!"},
+			"acerto_elmo": {"pt_BR": "Acerto no elmo!", "en": "A strike to the helm!"},
+			"acerto_peito": {"pt_BR": "Acerto no peito!", "en": "A strike to the chest!"},
+			"no_escudo": {"pt_BR": "No escudo!", "en": "On the shield!"},
+			"derrubado": {"pt_BR": "Derrubado!", "en": "Unhorsed!"},
+			"falta_cavalo": {"pt_BR": "Falta! Atingiu o cavalo!", "en": "Foul! The horse was struck!"},
+			"vitoria": {"pt_BR": "Vitória!", "en": "Victory!"},
+			"passada_decisiva": {"pt_BR": "Uma passada decisiva!", "en": "A deciding pass!"}
+		}
+	}
+}

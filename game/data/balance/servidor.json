@@ -1,6 +1,6 @@
 {
 	"versao": 1,
-	"_nota": "Parametros do SERVIDOR (Edge Functions, Parte 3): limites de chamadas, idempotencia e conferencia da justa. Nao e lido pelo jogo; fica na tabela de balanceamento remoto (3.3) para mudar sem lancar versao.",
+	"_nota": "Parametros do SERVIDOR (Edge Functions, Parte 3): limites de chamadas, idempotencia e conferencia da justa. So a secao cliente e lida pelo jogo; fica na tabela de balanceamento remoto (3.3) para mudar sem lancar versao.",
 	"limites": {
 		"acoes_por_minuto": 60,
 		"chat_por_minuto": 20,
@@ -18,6 +18,10 @@
 		"toque_min_intervalo_ms": 40,
 		"reacao_largada_min_ms": 60,
 		"entradas_max": 400
+	},
+	"cliente": {
+		"_nota": "Lido pelo jogo (arena): como gravar as entradas da justa que o servidor confere. A mira so muda o golpe pelo ultimo ponto, entao basta um ponto a cada registro_mira_ms (e o ultimo antes de soltar ou do choque).",
+		"registro_mira_ms": 150
 	},
 	"argumentos": {
 		"texto_max": 200,

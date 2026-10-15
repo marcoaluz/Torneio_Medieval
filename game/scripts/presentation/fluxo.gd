@@ -83,11 +83,22 @@ func ir_para_vila() -> void:
 	disputa = {}
 	_trocar(VILA)
 
-## Justa de uma disputa do PvE.
-func justar(torneio: String, indice: int) -> void:
-	disputa = {"torneio": torneio, "indice": indice}
+## Justa de uma disputa do PvE. Com o servidor dono da economia, a semente,
+## a configuração e os dois lados vêm dele (`iniciar_disputa`; ficam em
+## disputa["servidor"]) e a arena manda as entradas para ele conferir. Sem
+## conexão a disputa não começa. {ok, erro}.
+func justar(torneio: String, indice: int) -> Dictionary:
+	var d := {"torneio": torneio, "indice": indice}
+	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+	if nuvem and nuvem.usa_acao():
+		var r := await nuvem.chamar("iniciar_disputa", [torneio, indice])
+		if not r.get("ok", false):
+			return {"ok": false, "erro": r.get("erro", "sem_conexao")}
+		d["servidor"] = r
+	disputa = d
 	ultimo_resultado = {}
 	_justa("disputa")
+	return {"ok": true, "erro": ""}
 
 ## Justa de PvP contra o adversário escolhido no salão da liga (3.17).
 func justar_pvp() -> void:

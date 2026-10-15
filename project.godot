@@ -25,6 +25,7 @@ Registro="*res://game/scripts/services/registro_erros.gd"
 Acessibilidade="*res://game/scripts/presentation/acessibilidade.gd"
 Anuncios="*res://game/scripts/services/servico_anuncios.gd"
 Fluxo="*res://game/scripts/presentation/fluxo.gd"
+Audio="*res://game/scripts/presentation/audio/servico_audio.gd"
 Depuracao="*res://game/scenes/common/depuracao.tscn"
 
 [display]

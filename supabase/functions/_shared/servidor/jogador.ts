@@ -1276,6 +1276,9 @@ export function definir_config(s: Servico, chave: string, valor: unknown): Resul
   if (!tem(a["padrao"], chave)) return erro("opcao_inexistente");
   if (chave === "texto" && !tem(a["tamanhos_texto"], String(valor))) return erro("opcao_invalida");
   if (chave === "idioma" && !(a["idiomas"] as string[]).includes(String(valor))) return erro("opcao_invalida");
+  if (chave.startsWith("volume_") && !(Number.isInteger(valor) && (valor as number) >= 0 && (valor as number) <= 100)) {
+    return erro("opcao_invalida");
+  }
   if (!tem(s.estado, "config")) s.estado["config"] = { notificacoes: {} };
   s.estado["config"][chave] = valor;
   return concluir();

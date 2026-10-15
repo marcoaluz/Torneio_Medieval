@@ -4,5 +4,7 @@
 	"url": "https://zhecikwngzhqajlpydrp.supabase.co",
 	"chave_publica": "sb_publishable_seEdeSg0Fb94EdnpsRAlhQ_Lka02ARe",
 	"envio_atraso_s": 5,
-	"tentativas": 3
+	"tentativas": 3,
+	"_nota_usar_acao": "true = o servidor e o dono da economia (Edge Function acao, fila de acoes; docs/SERVIDOR.md). So ligar depois de publicar as funcoes e aplicar economia_so_servidor.",
+	"usar_acao": false
 }

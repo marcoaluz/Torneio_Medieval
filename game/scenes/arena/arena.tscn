@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/arena.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/retangulo_provisorio.gd" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://game/scenes/ui/interface_justa.tscn" id="9"]
 [ext_resource type="Script" path="res://game/scripts/presentation/efeitos_impacto.gd" id="10"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/painel_ajuste.tscn" id="11"]
+[ext_resource type="Script" path="res://game/scripts/presentation/audio/som_justa.gd" id="12"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1")
@@ -120,6 +121,10 @@ painel = NodePath("../PainelAjuste")
 
 [node name="Efeitos" type="Node" parent="." node_paths=PackedStringArray("controlador")]
 script = ExtResource("10")
+controlador = NodePath("../Justa")
+
+[node name="Som" type="Node" parent="." node_paths=PackedStringArray("controlador")]
+script = ExtResource("12")
 controlador = NodePath("../Justa")
 
 [node name="PainelAjuste" parent="." node_paths=PackedStringArray("controlador") instance=ExtResource("11")]

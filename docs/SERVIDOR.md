@@ -65,4 +65,11 @@ Estado do lado servidor e o que ainda falta. **Nada aqui foi publicado** nas Edg
 | Operação (3.10) | `docs/OPERACAO.md`, views `painel_*`, `erro_servidor`, autoload `Registro` | branch, backup, registro de erros do jogo e das funções, painel |
 | Auditoria (3.11) | `docs/AUDITORIA.md`, `migracoes.test.ts` | achados e correções; guarda estática de RLS e privilégios |
 
-**Falta:** o **cliente chamar `acao`** (hoje ele aplica local e grava o save direto; ver A1 na auditoria): fila de ações pendentes em `Nuvem`, estado do servidor vence na sincronização, justa de PvE e PvP com `iniciar_disputa`/`procurar_adversario` e envio das entradas, tela social ligada às funções reais (no lugar das simuladas) e a migração `economia_so_servidor`. Depois, publicar (ver `docs/OPERACAO.md`) com a autorização do usuário.
+## Cliente chamando `acao` (2026-10-14, feito e testado; desligado)
+
+- **Liga com** `game/data/servidor.json > "usar_acao": true`, só depois de publicar as funções e aplicar `economia_so_servidor` (as duas coisas juntas). Desligado, o jogo segue como antes (save inteiro pela REST).
+- **Fila:** os 30 comandos públicos do `ServicoJogador` (mesma lista de `PUBLICOS`, menos os simulados de liga e social) avisam `acao_feita` quando dão certo; a `Nuvem` põe na fila `user://acoes.json` com um UUID e envia em ordem. Falha de rede, 409, 429 ou 5xx: tenta de novo com espera crescente (até 60 s), mesmo id. 400/403/404/413 ou `ok: false`: a ação some. Fila vazia: o estado devolvido (ou baixado) substitui o local.
+- **Disputa do PvE:** `Fluxo.justar` pede `iniciar_disputa` e a arena joga com a semente, a configuração e os lados do servidor; no fim, `concluir_disputa_conferida` com as entradas gravadas. Disputa automática: `Nuvem.chamar("disputa_automatica")`. Sair no meio: `abandonar_disputa`.
+- **Teste:** `tests/services/nuvem_acao_check.gd` (servidor falso que aplica os comandos com uma segunda cópia do `ServicoJogador` e refaz a justa como `refazer_justa`: os eventos saem iguais).
+
+**Falta:** PvP pelo servidor (`procurar_adversario`, `concluir_pvp_conferido`, `salvar_defesa`), telas sociais ligadas às funções reais (no lugar das simuladas), a migração `economia_so_servidor`, e publicar (ver `docs/OPERACAO.md`) com a autorização do usuário. Enquanto o PvP e o social forem simulados, o modo servidor desfaz o que eles mudam no estado (o servidor vence) — ligar `usar_acao` só junto com eles.
