@@ -203,13 +203,7 @@ func _pecas_do_conjunto_equipadas(conjunto: String) -> int:
 func _vestir_previa(troca: Dictionary) -> void:
 	AparenciaJogador.vestir_camadas(_retrato, _jog)
 	_retrato.vestir(troca)
-	var cav := {"pelagem": _jog.cavalo_ativo().get("pelagem", "alazao")}
-	for k in ["corpo", "pernas", "peitoral", "sobreveste", "elmo", "cimeira", "escudo", "lanca"]:
-		cav[k] = "nenhum"
-	cav["caparacao"] = _jog.visual_das_pecas().get("caparacao", "provisorio")
-	cav.merge(troca, true)
-	_retrato_cavalo.definir_casa(AparenciaJogador.casa(_jog))
-	_retrato_cavalo.vestir(cav)
+	AparenciaJogador.vestir_cavalo(_retrato_cavalo, _jog, troca)
 
 func _aplicar(r: Dictionary) -> void:
 	if not r["ok"]:

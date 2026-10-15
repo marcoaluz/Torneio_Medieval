@@ -4,7 +4,7 @@ extends Node
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
 ## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
-## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada). Save em
+## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada); estabulo (TM_PELAGEM, TM_TROCAR=1). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -96,6 +96,24 @@ func _ready() -> void:
 		camada_m.add_child(tm)
 		var aba := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "diarias"
 		tm.abrir.call_deferred(aba)
+		return
+	if tela == "estabulo":
+		# Cena do estábulo: cavalo ativo (TM_PELAGEM) com a caparação da vigia e
+		# mais duas no inventário; TM_TROCAR=1 equipa a do dragão (reação).
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["cavaleiro"]["nivel"] = 6
+		if OS.get_environment("TM_PELAGEM") != "":
+			jog.estado["cavalos"][0]["pelagem"] = OS.get_environment("TM_PELAGEM")
+		for m in ["caparacao_vigia", "caparacao_dragao", "caparacao_rei_sol"]:
+			jog.estado["inventario"]["itens"].append({"id": "d_" + m, "modelo": m, "nivel": 0, "durabilidade": 0})
+		jog.equipar("d_caparacao_vigia")
+		var tt: TelaTreino = load("res://game/scenes/village/tela_treino.tscn").instantiate()
+		var camada_t := CanvasLayer.new()
+		add_child(camada_t)
+		camada_t.add_child(tt)
+		tt.abrir.call_deferred("estabulo")
+		if OS.get_environment("TM_TROCAR") == "1":
+			get_tree().create_timer(0.3).timeout.connect(func(): jog.equipar("d_caparacao_dragao"))
 		return
 	if tela == "vila":
 		# Vila no nível TM_NIVEL (padrão 8); TM_ORDEM=1 cria uma ordem (brasão na sede).

@@ -3,8 +3,10 @@ extends PanelContainer
 ## Telas do campo de treino e do estábulo (Pacote 2.7), abertas pela vila.
 ##   Campo de treino: atributos do cavaleiro, treinar (vagas, custo e tempo
 ##     pela curva dos dados) e treinos em andamento.
-##   Estábulo: os cavalos (pelagem, atributos, fôlego, estado), usar na justa
-##     e treinar (cavalo em treino não corre; o ativo não treina).
+##   Estábulo: a cena da baia com o cavalo ativo vestido e a troca das peças
+##     do cavalo (CenaEstabulo), e ao lado os cavalos (pelagem, atributos,
+##     fôlego, estado), usar na justa e treinar (cavalo em treino não corre;
+##     o ativo não treina). A tela fica mais larga para caber a cena.
 ## Tudo pelo serviço Jogador; a tela só mostra e pede.
 
 signal abrir_habilidades
@@ -16,7 +18,8 @@ var _acumulado := 0.0
 
 @onready var _titulo: Label = $Coluna/Titulo
 @onready var _info: Label = $Coluna/Info
-@onready var _lista: VBoxContainer = $Coluna/Rolagem/Lista
+@onready var _lista: VBoxContainer = $Coluna/Corpo/Rolagem/Lista
+@onready var _cena: CenaEstabulo = $Coluna/Corpo/Cena
 @onready var _melhorar: Button = $Coluna/Botoes/Melhorar
 @onready var _fechar: Button = $Coluna/Botoes/Fechar
 @onready var _erro: Label = $Coluna/Erro
@@ -34,6 +37,8 @@ func _ready() -> void:
 	_habilidades.pressed.connect(func(): abrir_habilidades.emit())
 	$Coluna/Botoes.add_child(_habilidades)
 	$Coluna/Botoes.move_child(_habilidades, 0)
+	_cena.configurar(_jog)
+	_cena.resultado.connect(_mostrar)
 	_jog.mudou.connect(func(_s): if visible: montar())
 
 func _notification(what: int) -> void:
@@ -47,12 +52,29 @@ func abrir(nome: String) -> void:
 	predio = nome
 	_erro.text = ""
 	_habilidades.visible = nome == "campo_treino"
+	_cena.visible = nome == "estabulo"
+	# Estábulo: largura para a cena (384) mais a lista dos cavalos.
+	var meia := Vector2(440, 250) if nome == "estabulo" else Vector2(300, 225)
+	offset_left = -meia.x
+	offset_right = meia.x
+	offset_top = -meia.y
+	offset_bottom = meia.y
 	visible = true
+	if nome == "estabulo":
+		_cena.reiniciar()
+	_som_do_estabulo(nome == "estabulo")
 	montar()
 
 func fechar() -> void:
 	visible = false
 	predio = ""
+	_som_do_estabulo(false)
+
+## Ambiente do estábulo em laço só com a cena aberta (skill som).
+func _som_do_estabulo(ligado: bool) -> void:
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio:
+		audio.laco("estabulo", ligado)
 
 func _process(delta: float) -> void:
 	_acumulado += delta
@@ -74,6 +96,7 @@ func montar() -> void:
 	if predio == "campo_treino":
 		_montar_campo()
 	else:
+		_cena.atualizar()
 		_montar_estabulo()
 
 func _montar_campo() -> void:

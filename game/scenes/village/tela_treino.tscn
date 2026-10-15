@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/vila/tela_treino.gd" id="1"]
 [ext_resource type="Theme" path="res://game/scenes/ui/tema_jogo.tres" id="2"]
+[ext_resource type="Script" path="res://game/scripts/presentation/vila/cena_estabulo.gd" id="3"]
+[ext_resource type="Script" path="res://game/scripts/presentation/personagem/camadas_personagem.gd" id="4"]
 
 [node name="TelaTreino" type="PanelContainer"]
 anchors_preset = 8
@@ -30,12 +32,54 @@ theme_override_font_sizes/font_size = 20
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 
-[node name="Rolagem" type="ScrollContainer" parent="Coluna"]
+[node name="Corpo" type="HBoxContainer" parent="Coluna"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Cena" type="VBoxContainer" parent="Coluna/Corpo"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+script = ExtResource("3")
+
+[node name="Palco" type="Control" parent="Coluna/Corpo/Cena"]
+clip_contents = true
+custom_minimum_size = Vector2(384, 216)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Fundo" type="TextureRect" parent="Coluna/Corpo/Cena/Palco"]
+texture_filter = 1
+layout_mode = 0
+offset_right = 384.0
+offset_bottom = 216.0
+mouse_filter = 2
+
+[node name="Cavalo" type="Node2D" parent="Coluna/Corpo/Cena/Palco"]
+position = Vector2(150, 204)
+script = ExtResource("4")
+
+[node name="Espacos" type="HBoxContainer" parent="Coluna/Corpo/Cena"]
+custom_minimum_size = Vector2(384, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="RolagemPecas" type="ScrollContainer" parent="Coluna/Corpo/Cena"]
+custom_minimum_size = Vector2(384, 50)
+layout_mode = 2
+vertical_scroll_mode = 0
+
+[node name="Pecas" type="HBoxContainer" parent="Coluna/Corpo/Cena/RolagemPecas"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Rolagem" type="ScrollContainer" parent="Coluna/Corpo"]
+layout_mode = 2
+size_flags_horizontal = 3
 horizontal_scroll_mode = 0
 
-[node name="Lista" type="VBoxContainer" parent="Coluna/Rolagem"]
+[node name="Lista" type="VBoxContainer" parent="Coluna/Corpo/Rolagem"]
 layout_mode = 2
 size_flags_horizontal = 3
 

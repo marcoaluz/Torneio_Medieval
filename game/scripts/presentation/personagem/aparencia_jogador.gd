@@ -23,6 +23,17 @@ static func vestir_camadas(c: CamadasPersonagem, jog: ServicoJogador) -> void:
 	pecas["cabelo"] = cav.get("cabelo", "1")
 	c.vestir(pecas)
 
+## Só o cavalo ativo (pelagem e peças do cavalo), sem cavaleiro: retrato do
+## cavalo em Equipamentos e cena do estábulo. `troca` sobrepõe peças (prévia).
+static func vestir_cavalo(c: CamadasPersonagem, jog: ServicoJogador, troca := {}) -> void:
+	var cav := {"pelagem": jog.cavalo_ativo().get("pelagem", "alazao")}
+	for k in ["corpo", "pernas", "peitoral", "sobreveste", "elmo", "cimeira", "escudo", "lanca"]:
+		cav[k] = "nenhum"
+	cav["caparacao"] = jog.visual_das_pecas().get("caparacao", "provisorio")
+	cav.merge(troca, true)
+	c.definir_casa(casa(jog))
+	c.vestir(cav)
+
 static func casa(jog: ServicoJogador) -> Dictionary:
 	var cores: Dictionary = jog.casa()["cores"]
 	var cav := jog.cavaleiro()
