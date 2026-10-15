@@ -75,13 +75,20 @@ func montar() -> void:
 ## Efeito em texto, tirado dos dados (ciclo, derrubada, dano, bloqueio).
 func descricao(h: String) -> String:
 	var d: Dictionary = Balanceamento.carregar("impacto")["habilidades"][h]
-	var partes: Array[String] = [tr("HABS_FAMILIA").format({"vence": tr("HABILIDADE_" + str(d["vence"]).to_upper())})]
+	var vence := str(d["vence"])
+	var partes: Array[String] = [tr("HABS_FAMILIA").format({"vence": tr("HABILIDADE_" + vence.to_upper())}) if vence != "" else tr("HABS_SEM_CICLO")]
 	if int(d["derrubada_bonus_milesimos"]) > 0:
 		partes.append(tr("HABS_EFEITO_DERRUBADA").format({"v": int(d["derrubada_bonus_milesimos"]) / 10}))
 	if int(d["dano_bonus_pct"]) > 0:
 		partes.append(tr("HABS_EFEITO_DANO").format({"v": int(d["dano_bonus_pct"])}))
 	if int(d["bloqueio_milesimos"]) > 0:
 		partes.append(tr("HABS_EFEITO_BLOQUEIO").format({"v": int(d["bloqueio_milesimos"]) / 10}))
+	if int(d.get("derrubada_reducao_milesimos", 0)) > 0:
+		partes.append(tr("HABS_EFEITO_FIRMEZA").format({"v": int(d["derrubada_reducao_milesimos"]) / 10}))
+	if int(d.get("precisao_bonus_pct", 0)) > 0:
+		partes.append(tr("HABS_EFEITO_PRECISAO").format({"v": int(d["precisao_bonus_pct"])}))
+	if int(d.get("exposicao_milesimos", 0)) > 0:
+		partes.append(tr("HABS_EFEITO_EXPOSICAO").format({"v": int(d["exposicao_milesimos"]) / 10}))
 	return " · ".join(partes)
 
 ## Usa ou tira: usar troca a do mesmo grupo; sem espaço, sai a mais antiga.

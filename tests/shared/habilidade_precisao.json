@@ -1,0 +1,142 @@
+{
+	"versao": 1,
+	"descricao": "Bônus de precisão das habilidades (mira_do_falcao: precisao_bonus_pct nas passivas) somado ao da largada. Base: config e lados de justa_referencia.json, com estas habilidades e este bonus_precisao_pct da largada. Justa.bonus_precisao_pct() do jogador (com qualidade_largada) e precisao_de_habilidades(lado_rival).",
+	"habilidades": {
+		"mira_do_falcao": {
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 0,
+			"precisao_bonus_pct": 8
+		},
+		"manto_do_corvo": {
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "golpe_pesado",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 660
+		},
+		"fantasma_do_corcel": {
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 0,
+			"derrubada_reducao_milesimos": 80
+		},
+		"golpe_do_campeao": {
+			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "golpe_pesado",
+			"vence": "investida",
+			"derrubada_bonus_milesimos": 90,
+			"dano_bonus_pct": 55,
+			"bloqueio_milesimos": 0,
+			"exposicao_milesimos": 70
+		},
+		"baluarte_real": {
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "golpe_pesado",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 700
+		}
+	},
+	"largada_bonus_precisao_pct": {
+		"perfeita": 10,
+		"boa": 0,
+		"ruim": 0
+	},
+	"casos": [
+		{
+			"nome": "sem habilidade e sem largada",
+			"habilidades_jogador": [],
+			"largada_jogador": "",
+			"habilidades_rival": [],
+			"esperado_jogador": 0,
+			"esperado_rival": 0
+		},
+		{
+			"nome": "mira do falcao sem largada",
+			"habilidades_jogador": [
+				"mira_do_falcao"
+			],
+			"largada_jogador": "",
+			"habilidades_rival": [],
+			"esperado_jogador": 8,
+			"esperado_rival": 0
+		},
+		{
+			"nome": "mira do falcao com largada perfeita (soma)",
+			"habilidades_jogador": [
+				"mira_do_falcao"
+			],
+			"largada_jogador": "perfeita",
+			"habilidades_rival": [],
+			"esperado_jogador": 18,
+			"esperado_rival": 0
+		},
+		{
+			"nome": "mira do falcao com largada boa",
+			"habilidades_jogador": [
+				"mira_do_falcao"
+			],
+			"largada_jogador": "boa",
+			"habilidades_rival": [],
+			"esperado_jogador": 8,
+			"esperado_rival": 0
+		},
+		{
+			"nome": "outras passivas nao mudam a mira",
+			"habilidades_jogador": [
+				"manto_do_corvo"
+			],
+			"largada_jogador": "perfeita",
+			"habilidades_rival": [],
+			"esperado_jogador": 10,
+			"esperado_rival": 0
+		},
+		{
+			"nome": "ativa nao conta (golpe do campeao)",
+			"habilidades_jogador": [
+				"golpe_do_campeao"
+			],
+			"largada_jogador": "",
+			"habilidades_rival": [],
+			"esperado_jogador": 0,
+			"esperado_rival": 0
+		},
+		{
+			"nome": "o rival tambem ganha com a mira do falcao",
+			"habilidades_jogador": [],
+			"largada_jogador": "",
+			"habilidades_rival": [
+				"mira_do_falcao"
+			],
+			"esperado_jogador": 0,
+			"esperado_rival": 8
+		},
+		{
+			"nome": "cada lado so com as suas",
+			"habilidades_jogador": [
+				"baluarte_real"
+			],
+			"largada_jogador": "",
+			"habilidades_rival": [
+				"mira_do_falcao",
+				"golpe_do_campeao"
+			],
+			"esperado_jogador": 0,
+			"esperado_rival": 8
+		}
+	]
+}

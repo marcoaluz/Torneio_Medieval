@@ -517,6 +517,10 @@ HABILIDADE_MARTELO_NEGRO,Martelo Negro,Black Hammer
 HABILIDADE_BALUARTE_REAL,Baluarte Real,Royal Bulwark
 HABILIDADE_FURIA_DO_DRAGAO,Fúria do Dragão,Dragon's Fury
 HABILIDADE_LANCA_DO_SOL,Lança do Sol,Sun Lance
+HABILIDADE_GOLPE_DO_CAMPEAO,Golpe do Campeão,Champion's Blow
+HABILIDADE_FANTASMA_DO_CORCEL,Fantasma do Corcel,Phantom Steed
+HABILIDADE_MANTO_DO_CORVO,Manto do Corvo,Raven's Mantle
+HABILIDADE_MIRA_DO_FALCAO,Mira do Falcão,Falcon's Aim
 HABILIDADE_DO_RIVAL,{nome} do rival!,Rival's {nome}!
 HABILIDADE_DISPAROU,{nome}!,{nome}!
 HABS_TITULO,Habilidades especiais,Special abilities
@@ -527,6 +531,10 @@ HABS_FAMILIA,vence {vence},beats {vence}
 HABS_EFEITO_DERRUBADA,+{v}% de chance de derrubar,+{v}% unhorse chance
 HABS_EFEITO_DANO,+{v}% dano,+{v}% damage
 HABS_EFEITO_BLOQUEIO,{v}% de desviar,{v}% to deflect
+HABS_EFEITO_EXPOSICAO,risco: +{v}% de você cair,risk: +{v}% chance you get unhorsed
+HABS_EFEITO_FIRMEZA,-{v}% de chance de você cair,-{v}% chance you get unhorsed
+HABS_EFEITO_PRECISAO,+{v}% nas zonas da mira,+{v}% aim zones
+HABS_SEM_CICLO,não anula nenhuma,cancels none
 HABS_EQUIPADA,Em uso,In use
 HABS_USAR,Usar,Use
 HABS_TIRAR,Tirar,Remove

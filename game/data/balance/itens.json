@@ -11,10 +11,10 @@
 		"guarda_real": {"bonus_2": {"equilibrio": 4}, "habilidade": "baluarte_real"},
 		"dragao": {"bonus_2": {"forca": 5}, "habilidade": "furia_do_dragao"},
 		"rei_sol": {"bonus_2": {"precisao": 5}, "habilidade": "lanca_do_sol"},
-		"falcao_justa": {"bonus_2": {"precisao": 4}, "habilidade": "", "_nota": "raro: Elmo do Falcão, Peitoral Leve de Torneio (Half-Plate), Escudo Leve de Freeshield, Lança Leve de Precisão, Adorno de Crina Colorida (Azul Elétrico)"},
-		"corvo_sombrio": {"bonus_2": {"precisao": 5}, "habilidade": "", "_nota": "épico: Elmo Escurecido de Aço Negro, Armadura Negra Sombria com Espigões, Escudo Corvo Negro, Lança Sombria com Detalhes em Aço Escuro, Gualdrapa Sombria com Símbolo do Grifo"},
-		"campeao_invicto": {"bonus_2": {"equilibrio": 5}, "habilidade": "", "_nota": "lendário: Elmo Dourado do Campeão Invicto, Armadura Real com Filigrana de Ouro, Escudo do Leão Dourado, Lança Cerimonial de Ouro, Arreios Dourados Ornamentados"},
-		"corcel_ancestral": {"bonus_2": {"forca": 5}, "habilidade": "", "_nota": "lendário: Elmo com Chifres de Carneiro Estilizados, Armadura Mítica do Dragão de Aço, Escudo com Brasão do Grifo Prateado, A Lança do Dragão Ancestral, Conjunto Mítico do Corcel de Guerra Fantasma"}
+		"falcao_justa": {"bonus_2": {"precisao": 4}, "habilidade": "mira_do_falcao", "_nota": "raro: Elmo do Falcão, Peitoral Leve de Torneio (Half-Plate), Escudo Leve de Freeshield, Lança Leve de Precisão, Adorno de Crina Colorida (Azul Elétrico)"},
+		"corvo_sombrio": {"bonus_2": {"precisao": 5}, "habilidade": "manto_do_corvo", "_nota": "épico: Elmo Escurecido de Aço Negro, Armadura Negra Sombria com Espigões, Escudo Corvo Negro, Lança Sombria com Detalhes em Aço Escuro, Gualdrapa Sombria com Símbolo do Grifo"},
+		"campeao_invicto": {"bonus_2": {"equilibrio": 5}, "habilidade": "golpe_do_campeao", "_nota": "lendário: Elmo Dourado do Campeão Invicto, Armadura Real com Filigrana de Ouro, Escudo do Leão Dourado, Lança Cerimonial de Ouro, Arreios Dourados Ornamentados"},
+		"corcel_ancestral": {"bonus_2": {"forca": 5}, "habilidade": "fantasma_do_corcel", "_nota": "lendário: Elmo com Chifres de Carneiro Estilizados, Armadura Mítica do Dragão de Aço, Escudo com Brasão do Grifo Prateado, A Lança do Dragão Ancestral, Conjunto Mítico do Corcel de Guerra Fantasma"}
 	},
 	"cores_raridade": {"comum": "c9c2b6", "incomum": "6fbf5a", "raro": "4f8fe0", "epico": "b062d8", "lendario": "f0a830"},
 	"cores_bau": {"madeira": "8a5a2b", "ferro": "7d8590", "ouro": "d4a72c", "real": "8e2a3a"},

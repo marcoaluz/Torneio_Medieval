@@ -138,6 +138,45 @@
 				"derrubada_bonus_milesimos": 120,
 				"dano_bonus_pct": 20,
 				"bloqueio_milesimos": 0
+			},
+			"golpe_do_campeao": {
+				"tipo": "ativa",
+				"grupo": "ofensiva",
+				"familia": "golpe_pesado",
+				"vence": "investida",
+				"derrubada_bonus_milesimos": 90,
+				"dano_bonus_pct": 55,
+				"bloqueio_milesimos": 0,
+				"exposicao_milesimos": 70
+			},
+			"fantasma_do_corcel": {
+				"tipo": "passiva",
+				"grupo": "defensiva",
+				"familia": "bloqueio",
+				"vence": "",
+				"derrubada_bonus_milesimos": 0,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 0,
+				"derrubada_reducao_milesimos": 80
+			},
+			"manto_do_corvo": {
+				"tipo": "passiva",
+				"grupo": "defensiva",
+				"familia": "bloqueio",
+				"vence": "golpe_pesado",
+				"derrubada_bonus_milesimos": 0,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 660
+			},
+			"mira_do_falcao": {
+				"tipo": "passiva",
+				"grupo": "defensiva",
+				"familia": "bloqueio",
+				"vence": "",
+				"derrubada_bonus_milesimos": 0,
+				"dano_bonus_pct": 0,
+				"bloqueio_milesimos": 0,
+				"precisao_bonus_pct": 8
 			}
 		},
 		"habilidade_carga_ms": 1000
@@ -2994,6 +3033,1120 @@
 					"habilidade_bloqueio": "",
 					"dano": {},
 					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "golpe do campeao: derrubada e dano maiores",
+			"semente": 7,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "golpe_do_campeao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 200,
+					"derrubou": false,
+					"habilidade": "golpe_do_campeao",
+					"habilidades": [
+						"golpe_do_campeao"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				}
+			}
+		},
+		{
+			"nome": "golpe do campeao: quem usa fica exposto",
+			"semente": 7,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "erro",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "golpe_do_campeao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "erro",
+					"zona_final": "erro",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 0,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "golpe_do_campeao",
+					"habilidades": [
+						"golpe_do_campeao"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {},
+					"dano_lanca": 0
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 180,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "golpe do campeao ainda nao acionado: sem bonus nem exposicao",
+			"semente": 7,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "golpe_do_campeao",
+							"ativa": false
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "golpe do campeao (golpe pesado) anula a carga andante",
+			"semente": 9,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "golpe_do_campeao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "carga_andante",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 200,
+					"derrubou": false,
+					"habilidade": "golpe_do_campeao",
+					"habilidades": [
+						"golpe_do_campeao"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 23
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 180,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "baluarte anula o golpe do campeao e a exposicao",
+			"semente": 9,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "golpe_do_campeao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "baluarte_real",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 50,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "baluarte_real",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "baluarte_real",
+					"habilidades": [
+						"baluarte_real"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "fantasma do corcel: menos chance de cair",
+			"semente": 11,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "fantasma_do_corcel",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "fantasma_do_corcel",
+					"habilidades": [
+						"fantasma_do_corcel"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 30,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "fantasma do corcel anulado pela investida",
+			"semente": 11,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "fantasma_do_corcel",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "investida",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 190,
+					"derrubou": false,
+					"habilidade": "investida",
+					"habilidades": [
+						"investida"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "fantasma do corcel nao anula o golpe pesado do outro",
+			"semente": 11,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "fantasma_do_corcel",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "martelo_negro",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "fantasma_do_corcel",
+					"habilidades": [
+						"fantasma_do_corcel"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 80,
+					"derrubou": false,
+					"habilidade": "martelo_negro",
+					"habilidades": [
+						"martelo_negro"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 24
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "fantasma do corcel: chance nunca negativa",
+			"semente": 11,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 90
+					},
+					"zona": "escudo",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "fantasma_do_corcel",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 10,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "escudo",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "escudo",
+					"zona_final": "escudo",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 50,
+					"derrubou": false,
+					"habilidade": "fantasma_do_corcel",
+					"habilidades": [
+						"fantasma_do_corcel"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "escudo",
+					"zona_final": "escudo",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 0,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "manto do corvo: sorteio do bloqueio semente 51",
+			"semente": 51,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "manto_do_corvo",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 50,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "manto_do_corvo",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "escudo",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 50,
+					"derrubou": false,
+					"habilidade": "manto_do_corvo",
+					"habilidades": [
+						"manto_do_corvo"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "manto do corvo: sorteio do bloqueio semente 52",
+			"semente": 52,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "capacete",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "manto_do_corvo",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "capacete",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "habilidade",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 50,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "manto_do_corvo",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "manto_do_corvo",
+					"habilidades": [
+						"manto_do_corvo"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "manto do corvo: falha semente 54",
+			"semente": 54,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "manto_do_corvo",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "manto_do_corvo",
+					"habilidades": [
+						"manto_do_corvo"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "manto do corvo falha e o escudo segura semente 68",
+			"semente": 68,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "manto_do_corvo",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "escudo",
+					"bloqueado": true,
+					"bloqueio_por": "escudo",
+					"falta": false,
+					"pontos": 1,
+					"chance_derrubar_milesimos": 50,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"escudo": 10
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "manto_do_corvo",
+					"habilidades": [
+						"manto_do_corvo"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "manto do corvo anula o golpe do campeao",
+			"semente": 13,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "golpe_do_campeao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "manto_do_corvo",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "",
+					"habilidades": [],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "manto_do_corvo",
+					"habilidades": [
+						"manto_do_corvo"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				}
+			}
+		},
+		{
+			"nome": "mira do falcao nao muda o impacto nem anula ninguem",
+			"semente": 15,
+			"entrada": {
+				"jogador": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "mira_do_falcao",
+							"ativa": true
+						}
+					]
+				},
+				"rival": {
+					"cavaleiro": {
+						"forca": 50,
+						"precisao": 50,
+						"equilibrio": 50
+					},
+					"zona": "peito",
+					"velocidade": 95,
+					"velocidade_nominal": 95,
+					"ritmo_milesimos": 500,
+					"habilidades": [
+						{
+							"nome": "martelo_negro",
+							"ativa": true
+						}
+					]
+				}
+			},
+			"esperado": {
+				"jogador": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 110,
+					"derrubou": false,
+					"habilidade": "mira_do_falcao",
+					"habilidades": [
+						"mira_do_falcao"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 15
+					},
+					"dano_lanca": 4
+				},
+				"rival": {
+					"zona": "peito",
+					"zona_final": "peito",
+					"bloqueado": false,
+					"bloqueio_por": "",
+					"falta": false,
+					"pontos": 2,
+					"chance_derrubar_milesimos": 160,
+					"derrubou": false,
+					"habilidade": "martelo_negro",
+					"habilidades": [
+						"martelo_negro"
+					],
+					"habilidade_bloqueio": "",
+					"dano": {
+						"peitoral": 24
+					},
+					"dano_lanca": 4
 				}
 			}
 		}

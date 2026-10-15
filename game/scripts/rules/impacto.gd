@@ -30,7 +30,11 @@ extends RefCounted
 ## (investida, bloqueio ou golpe_pesado; a de um conjunto herda o ciclo da
 ## família) e anula as do outro lado da família que ela "vence". Bônus de
 ## habilidades em efeito somam (derrubada, dano); no bloqueio vale a maior
-## chance entre as do defensor, num sorteio só.
+## chance entre as do defensor, num sorteio só. Campos opcionais (0 se faltar):
+## exposicao_milesimos (quem a usa fica mais fácil de derrubar) e
+## derrubada_reducao_milesimos (quem a tem fica mais difícil de derrubar), os
+## dois somados na chance de derrubar o DONO da habilidade; precisao_bonus_pct
+## é lido pela Justa (amplia as zonas da Mira de quem a tem).
 ##
 ## Ordem fixa dos sorteios (paridade com TypeScript): golpe do jogador e depois
 ## o do rival; em cada um, (1) bloqueio da habilidade do defensor, se houver,
@@ -146,7 +150,7 @@ static func resolver(cfg: Dictionary, entrada: Dictionary, rng: Aleatorio) -> Di
 static func _soma(cfg: Dictionary, hs: Array[String], chave: String) -> int:
 	var t := 0
 	for h in hs:
-		t += int(cfg["habilidades"][h][chave])
+		t += int(cfg["habilidades"][h].get(chave, 0))
 	return t
 
 ## Golpe de `a` (com as habilidades `ha` em efeito) em `d` (com `hd`).
@@ -205,6 +209,8 @@ static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: Array[Stri
 		chance += stat(equip_a, "lanca", "poder") * int(dr["poder_lanca_milesimos"])
 		chance -= stat(equip_d, peca, "defesa") * int(dr["defesa_peca_milesimos"])
 		chance += _soma(cfg, ha, "derrubada_bonus_milesimos")
+		chance += _soma(cfg, hd, "exposicao_milesimos")  # o defensor arriscou (golpe do campeão)
+		chance -= _soma(cfg, hd, "derrubada_reducao_milesimos")  # o defensor segura melhor (fantasma do corcel)
 		chance = suave(chance, int(dr["teto_milesimos"]), joelho)
 		r["chance_derrubar_milesimos"] = chance
 		r["derrubou"] = rng.chance_milesimos(chance)

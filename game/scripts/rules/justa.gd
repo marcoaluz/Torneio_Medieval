@@ -164,11 +164,22 @@ func distancia_corrida_mil() -> int:
 func distancia_total_mil() -> int:
 	return int(_cfg["galope"]["pista"]["distancia_total"]) * 1000
 
-## Bônus de precisão (%) desta passada, pela largada.
+## Bônus de precisão (%) desta passada: pela largada e pelas habilidades
+## passivas com precisao_bonus_pct (mira do falcão).
 func bonus_precisao_pct() -> int:
+	var b := precisao_de_habilidades(lado_jogador)
 	if qualidade_largada == "":
-		return 0
-	return int(_cfg["galope"]["largada"]["bonus_precisao_pct"][qualidade_largada])
+		return b
+	return b + int(_cfg["galope"]["largada"]["bonus_precisao_pct"][qualidade_largada])
+
+## Soma de precisao_bonus_pct das habilidades passivas equipadas por um lado.
+func precisao_de_habilidades(lado: Dictionary) -> int:
+	var t := 0
+	for h in _habilidades_de(lado):
+		var d: Dictionary = _cfg["impacto"]["habilidades"].get(h, {})
+		if d.get("tipo", "") == "passiva":
+			t += int(d.get("precisao_bonus_pct", 0))
+	return t
 
 ## Zonas efetivas do rival para o jogador nesta passada (para o realce na tela).
 func zonas_efetivas() -> Array[Dictionary]:
@@ -442,9 +453,9 @@ func _avaliar_golpe(t: int) -> Dictionary:
 func _resolver_impacto(golpe: Dictionary, t: int) -> Dictionary:
 	var zona_rival := Mira.ERRO
 	if rival_mirou:
-		var bonus_rival := 0
+		var bonus_rival := precisao_de_habilidades(lado_rival)
 		if qualidade_largada_rival != "":
-			bonus_rival = int(_cfg["galope"]["largada"]["bonus_precisao_pct"][qualidade_largada_rival])
+			bonus_rival += int(_cfg["galope"]["largada"]["bonus_precisao_pct"][qualidade_largada_rival])
 		zona_rival = Mira.zona_no_ponto(_cfg["mira"], ponta_rival, precisao_rival, bonus_rival)
 	var entrada := {
 		"jogador": _golpeador(lado_jogador, golpe["zona"], jogador, habilidade_na_passada_jogador),

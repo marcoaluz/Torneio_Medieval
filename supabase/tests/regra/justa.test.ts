@@ -90,3 +90,24 @@ describe("justa completa (gravações do GDScript)", () => {
     assert.equal(validar_justa(cfg), "");
   });
 });
+
+describe("habilidade de precisão (tests/shared/habilidade_precisao.json)", () => {
+  const dados = carregar_casos("habilidade_precisao");
+  const base = carregar_casos("justa_referencia");
+  const cfg = JSON.parse(JSON.stringify(base["config"]));
+  Object.assign(cfg["impacto"]["habilidades"], dados["habilidades"]);
+  cfg["galope"]["largada"]["bonus_precisao_pct"] = dados["largada_bonus_precisao_pct"];
+  test("config com as habilidades novas valida", () => assert.equal(validar_justa(cfg), ""));
+  for (const c of dados["casos"]) {
+    test(c["nome"], () => {
+      const lj = JSON.parse(JSON.stringify(base["lado_jogador"]));
+      const lr = JSON.parse(JSON.stringify(base["lado_rival"]));
+      lj["habilidades"] = c["habilidades_jogador"];
+      lr["habilidades"] = c["habilidades_rival"];
+      const j = new Justa(cfg, lj, lr, Math.trunc(base["semente"]));
+      j.qualidade_largada = c["largada_jogador"];
+      assert.equal(j.bonus_precisao_pct(), Math.trunc(c["esperado_jogador"]));
+      assert.equal(j.precisao_de_habilidades(lr), Math.trunc(c["esperado_rival"]));
+    });
+  }
+});

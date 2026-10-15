@@ -75,36 +75,38 @@ func _initialize() -> void:
 		p.tocar(anim)
 		_checa("%s anima (%s, %d quadros)" % [t, anim, p.camada("corpo").hframes], p.camada("corpo").hframes > 1)
 
-	# Todo conjunto de itens tem arte nos três tamanhos, em todas as animações.
+	# Toda peça do catálogo tem arte no espaço dela, nos tamanhos que a usam
+	# (elmo, peitoral e escudo nos três; lança e caparação só na justa), em todas
+	# as animações. Peça ainda sem arte própria vale pela arte provisória.
 	var dados: Dictionary = Balanceamento.ler_json("res://game/data/personagem/camadas.json")
 	var faltando: Array[String] = []
-	# Visual sem arte própria ainda (itens novos) vale pela arte provisória dele.
-	var conjuntos := {}
 	var pendentes := {}
 	for m: Dictionary in Balanceamento.ler("itens")["modelos"].values():
-		if m.has("visual_provisorio") and not ResourceLoader.exists("res://game/art/sprites/personagem/justa/%s_%s_parado.png" % [m["espaco"], m["visual"]]):
-			conjuntos[m["visual_provisorio"]] = true
-			pendentes[m["visual"]] = true
-		else:
-			conjuntos[m["visual"]] = true
-	for conj: String in conjuntos:
-		for t: String in ["justa", "vila", "equipamentos"]:
-			var pecas := ["elmo", "peitoral", "escudo"] + (["lanca", "caparacao"] if t == "justa" else [])
+		var esp: String = m["espaco"]
+		var visual: String = m["visual"]
+		if m.has("visual_provisorio") and not ResourceLoader.exists("res://game/art/sprites/personagem/justa/%s_%s_parado.png" % [esp, visual]):
+			pendentes[visual] = true
+			visual = m["visual_provisorio"]
+		for t: String in (["justa", "vila", "equipamentos"] if esp in ["elmo", "peitoral", "escudo"] else ["justa"]):
 			for anim: String in dados["tamanhos"][t]["animacoes"]:
-				for pc: String in pecas:
-					var arq := "res://game/art/sprites/personagem/%s/%s_%s_%s.png" % [t, pc, conj, anim]
-					if not ResourceLoader.exists(arq):
-						faltando.append(arq.get_file())
-	_checa("arte de todos os conjuntos (%d faltando: %s)" % [faltando.size(), ", ".join(faltando.slice(0, 4))], faltando.is_empty())
+				var arq := "res://game/art/sprites/personagem/%s/%s_%s_%s.png" % [t, esp, visual, anim]
+				if not ResourceLoader.exists(arq):
+					faltando.append(arq.get_file())
+	_checa("arte de todas as pecas (%d faltando: %s)" % [faltando.size(), ", ".join(faltando.slice(0, 4))], faltando.is_empty())
 	print("CAMADAS visuais ainda na arte provisoria: %d" % pendentes.size())
-	# A arte provisória de um item também aparece de fato na camada.
+	# A arte provisória aparece de fato na camada (um visual fictício sem arte).
+	CamadasPersonagem.visual_provisorio("")  # carrega o mapa
+	CamadasPersonagem._provisorios["visual_de_teste"] = "escudeiro"
 	var prov := CamadasPersonagem.new()
 	prov.tamanho = "justa"
 	root.add_child(prov)
 	await process_frame
-	prov.vestir({"elmo": "grande_elmo", "escudo": "heater_d2"})
-	_checa("visual sem arte usa a provisoria (e o estagio de dano)", prov.camada("elmo").visible 		and prov.camada("elmo").texture.resource_path.contains("elmo_escudeiro") 		and prov.camada("escudo").texture.resource_path.contains("escudo_escudeiro_d2"))
-	_checa("icone de item novo cai no da provisoria", ArteUi.icone_item("elmo_grande_elmo") != null)
+	prov.vestir({"elmo": "visual_de_teste", "escudo": "visual_de_teste_d2"})
+	_checa("visual sem arte usa a provisoria (e o estagio de dano)", prov.camada("elmo").visible \
+		and prov.camada("elmo").texture.resource_path.contains("elmo_escudeiro") \
+		and prov.camada("escudo").texture.resource_path.contains("escudo_escudeiro_d2"))
+	CamadasPersonagem._provisorios.erase("visual_de_teste")
+	_checa("icone de toda peca nova existe (propio ou provisorio)", Balanceamento.ler("itens")["modelos"].keys().all(func(k): return ArteUi.icone_item(k) != null))
 
 	print("CAMADAS %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)

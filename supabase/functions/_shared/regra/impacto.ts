@@ -126,7 +126,7 @@ export function resolver(cfg: Cfg, entrada: Dados, rng: Aleatorio): Dados {
 
 function _soma(cfg: Cfg, hs: string[], chave: string): number {
   let t = 0;
-  for (const h of hs) t += Math.trunc(cfg["habilidades"][h][chave]);
+  for (const h of hs) t += Math.trunc(cfg["habilidades"][h][chave] ?? 0);
   return t;
 }
 
@@ -194,6 +194,8 @@ function _golpe(cfg: Cfg, a: Dados, d: Dados, ha: string[], hd: string[], rng: A
     chance += stat(equip_a, "lanca", "poder") * Math.trunc(dr["poder_lanca_milesimos"]);
     chance -= stat(equip_d, peca, "defesa") * Math.trunc(dr["defesa_peca_milesimos"]);
     chance += _soma(cfg, ha, "derrubada_bonus_milesimos");
+    chance += _soma(cfg, hd, "exposicao_milesimos"); // o defensor arriscou (golpe do campeão)
+    chance -= _soma(cfg, hd, "derrubada_reducao_milesimos"); // o defensor segura melhor (fantasma do corcel)
     chance = suave(chance, Math.trunc(dr["teto_milesimos"]), joelho);
     r["chance_derrubar_milesimos"] = chance;
     r["derrubou"] = rng.chance_milesimos(chance);

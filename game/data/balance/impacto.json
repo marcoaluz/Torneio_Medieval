@@ -135,6 +135,49 @@
 			"derrubada_bonus_milesimos": 120,
 			"dano_bonus_pct": 20,
 			"bloqueio_milesimos": 0
+		},
+		"golpe_do_campeao": {
+			"_nota": "Conjunto campeao_invicto. Golpe pesado arriscado: derruba mais que o golpe pesado (90 contra 40, abaixo da lanca do sol) e fere bem (55%, abaixo da furia do dragao), mas quem usa fica 7% mais facil de derrubar na passada em que acionou.",
+			"tipo": "ativa",
+			"grupo": "ofensiva",
+			"familia": "golpe_pesado",
+			"vence": "investida",
+			"derrubada_bonus_milesimos": 90,
+			"dano_bonus_pct": 55,
+			"bloqueio_milesimos": 0,
+			"exposicao_milesimos": 70
+		},
+		"fantasma_do_corcel": {
+			"_nota": "Conjunto corcel_ancestral. O cavalo segura o tranco da propria carga: -8% na chance de quem a tem ser derrubado (os bonus ofensivos vao de 4% a 12%). Familia bloqueio (a investida a anula), mas nao anula ninguem.",
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 0,
+			"derrubada_reducao_milesimos": 80
+		},
+		"manto_do_corvo": {
+			"_nota": "Conjunto corvo_sombrio. Bloqueio entre o olhar da vigia (650) e o baluarte real (700).",
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "golpe_pesado",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 660
+		},
+		"mira_do_falcao": {
+			"_nota": "Conjunto falcao_justa. Amplia as zonas da Mira em 8% (a largada perfeita da 10%), como a precisao, em toda passada. Familia bloqueio (a investida a anula no impacto, onde ela nao tem efeito), mas nao anula ninguem.",
+			"tipo": "passiva",
+			"grupo": "defensiva",
+			"familia": "bloqueio",
+			"vence": "",
+			"derrubada_bonus_milesimos": 0,
+			"dano_bonus_pct": 0,
+			"bloqueio_milesimos": 0,
+			"precisao_bonus_pct": 8
 		}
 	},
 	"habilidade_carga_ms": 1000

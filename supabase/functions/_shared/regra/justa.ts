@@ -148,10 +148,21 @@ export class Justa {
     return (Math.trunc(p["distancia_total"]) - Math.trunc(p["distancia_mira"])) * 1000;
   }
 
-  /** Bônus de precisão (%) desta passada, pela largada. */
+  /** Bônus de precisão (%) desta passada: pela largada e pelas passivas com precisao_bonus_pct. */
   bonus_precisao_pct(): number {
-    if (this.qualidade_largada === "") return 0;
-    return Math.trunc(this._cfg["galope"]["largada"]["bonus_precisao_pct"][this.qualidade_largada]);
+    const b = this.precisao_de_habilidades(this.lado_jogador);
+    if (this.qualidade_largada === "") return b;
+    return b + Math.trunc(this._cfg["galope"]["largada"]["bonus_precisao_pct"][this.qualidade_largada]);
+  }
+
+  /** Soma de precisao_bonus_pct das habilidades passivas equipadas por um lado. */
+  precisao_de_habilidades(lado: Dados): number {
+    let t = 0;
+    for (const h of _habilidades_de(lado)) {
+      const d: Dados = this._cfg["impacto"]["habilidades"][h] ?? {};
+      if (d["tipo"] === "passiva") t += Math.trunc(d["precisao_bonus_pct"] ?? 0);
+    }
+    return t;
   }
 
   habilidade_carregada(do_jogador: boolean): boolean {
@@ -419,9 +430,9 @@ export class Justa {
   private _resolver_impacto(golpe: Evento, t: number): Evento {
     let zona_rival = Mira.ERRO;
     if (this.rival_mirou) {
-      let bonus_rival = 0;
+      let bonus_rival = this.precisao_de_habilidades(this.lado_rival);
       if (this.qualidade_largada_rival !== "") {
-        bonus_rival = Math.trunc(this._cfg["galope"]["largada"]["bonus_precisao_pct"][this.qualidade_largada_rival]);
+        bonus_rival += Math.trunc(this._cfg["galope"]["largada"]["bonus_precisao_pct"][this.qualidade_largada_rival]);
       }
       zona_rival = Mira.zona_no_ponto(this._cfg["mira"], this.ponta_rival, this.precisao_rival, bonus_rival);
     }
