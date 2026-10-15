@@ -121,7 +121,8 @@ func _initialize() -> void:
 	tela.abrir("armeiro")
 	await process_frame
 	_checa("armeiro: 3 abas", tela.get_node("Coluna/Cabecalho/Abas").get_child_count() == 3)
-	_checa("criar lista os dois projetos (12 linhas)", tela.get_node("Coluna/Rolagem/Lista").get_child_count() == 12)
+	_checa("armeiro: sem bancada", not tela.get_node("Coluna/Corpo/Cena").visible)
+	_checa("criar lista os dois projetos (12 linhas)", tela.get_node("Coluna/Corpo/Rolagem/Lista").get_child_count() == 12)
 	mats["lingote_ferro"] = 50
 	jog.forjar("lanca_vigia")
 	await process_frame
@@ -135,7 +136,43 @@ func _initialize() -> void:
 	_checa("pegar entrega a peca", tela.get_node("Coluna/Mensagem").text.contains("Lança"))
 	tela.abrir("ferreiro")
 	await process_frame
-	_checa("ferreiro: sem abas, com fundicao", tela.get_node("Coluna/Cabecalho/Abas").get_child_count() == 0 and tela.get_node("Coluna/Rolagem/Lista").get_child_count() >= 2)
+	# Ferreiro: bancada com a peça gasta (antes e depois), conserto, fila e fundir.
+	var pe := {"id": "t_peito", "modelo": "peitoral_vigia", "nivel": 0, "durabilidade": 100}  # 41% = amassada (d2)
+	jog.estado["inventario"]["itens"].append(pe)
+	jog.equipar("t_peito")
+	mats["sucata"] = 200
+	jog.estado["inventario"]["ouro"] = 5000
+	tela.abrir("ferreiro")
+	await process_frame
+	_checa("ferreiro: abas consertar e fundir", tela.get_node("Coluna/Cabecalho/Abas").get_child_count() == 2 and tela.aba == "consertar")
+	_checa("ferreiro: mostra a bancada", tela.get_node("Coluna/Corpo/Cena").visible)
+	var antes: VistaPeca = tela.get_node("Coluna/Corpo/Cena/Palco/Antes")
+	var depois: VistaPeca = tela.get_node("Coluna/Corpo/Cena/Palco/Depois")
+	_checa("a peca gasta vai para a bancada", tela._peca_da_bancada() == "t_peito" and tela.pecas_gastas().any(func(it): return it["id"] == "t_peito"))
+	_checa("antes: estagio de dano atual (amassada, arte _d2)", antes.espaco == "peitoral" and antes.visual == "vigia" and antes.estagio == 2
+		and antes.camada().texture != null and antes.camada().texture.resource_path.contains("peitoral_vigia_d2"))
+	_checa("depois: a peca inteira", depois.estagio == 0 and depois.camada().texture.resource_path.contains("peitoral_vigia_parado")
+		and not depois.camada().texture.resource_path.contains("_d"))
+	_checa("rotulos de antes e depois", tela.get_node("Coluna/Corpo/Cena/Palco/RotuloAntes").text.begins_with("Amassada")
+		and tela.get_node("Coluna/Corpo/Cena/Palco/RotuloDepois").text.ends_with("240/240"))
+	var b_cons: Button = tela.get_node("Coluna/Corpo/Cena/Consertar")
+	_checa("botao de conserto com o custo", b_cons.visible and not b_cons.disabled and b_cons.text.begins_with("Consertar ("))
+	b_cons.pressed.emit()
+	await process_frame
+	_checa("consertar entra na fila (a mesma do armeiro)", not jog.item_em_conserto("t_peito").is_empty()
+		and tela._lista.get_children().any(func(c): return c is Label and c.text == "Fila de conserto (1/%d)" % jog.vagas_conserto()))
+	_checa("na fila, o botao mostra o tempo", b_cons.disabled)
+	ServicoTempo.deslocamento += 999999
+	tela.montar()
+	_checa("pronto: buscar a peca", not b_cons.disabled and b_cons.text == tr("CONSERTO_CONCLUIR"))
+	b_cons.pressed.emit()
+	await process_frame
+	_checa("buscar deixa a peca inteira", int(jog.item("t_peito")["durabilidade"]) == 240 and jog.item_em_conserto("t_peito").is_empty())
+	_checa("depois do conserto a bancada mostra inteira", antes.estagio == 0)
+	(tela.get_node("Coluna/Cabecalho/Abas").get_child(1) as Button).pressed.emit()
+	await process_frame
+	_checa("ferreiro: fundir continua", tela.aba == "fundir" and tela._lista.get_child_count() >= 2
+		and tela._lista.get_children().all(func(c): return c is Button))
 	tela.queue_free()
 
 	ServicoTempo.deslocamento = 0

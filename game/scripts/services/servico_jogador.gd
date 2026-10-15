@@ -548,9 +548,7 @@ func pode_consertar(id: String) -> Dictionary:
 		return _erro("predio_bloqueado")
 	if not item_em_conserto(id).is_empty():
 		return _erro("ja_em_conserto")
-	var v: Dictionary = Balanceamento.ler("desgaste")["conserto"]["vagas"]
-	var vagas := int(v["base"]) + (1 if predio_nivel("armeiro") >= int(v["extra_no_nivel_do_predio"]) else 0)
-	if timers_do_predio("armeiro").filter(func(t): return t["tipo"] == "conserto").size() >= vagas:
+	if timers_do_predio("armeiro").filter(func(t): return t["tipo"] == "conserto").size() >= vagas_conserto():
 		return _erro("sem_vaga")
 	if ouro() < int(custo["ouro"]):
 		return _erro("ouro_insuficiente")
@@ -638,6 +636,11 @@ func projetos() -> Array:
 func receita(modelo: String) -> Dictionary:
 	var rar: String = Balanceamento.ler("itens")["modelos"][modelo]["raridade"]
 	return (cfg_forja()["receitas"][rar] as Dictionary).duplicate(true)
+
+## Vagas de conserto (fila do armeiro, também vista no ferreiro).
+func vagas_conserto() -> int:
+	var v: Dictionary = Balanceamento.ler("desgaste")["conserto"]["vagas"]
+	return int(v["base"]) + (1 if predio_nivel("armeiro") >= int(v["extra_no_nivel_do_predio"]) else 0)
 
 func vagas_forja() -> int:
 	var v: Dictionary = cfg_forja()["vagas_forja"]

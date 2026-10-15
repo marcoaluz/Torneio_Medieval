@@ -56,12 +56,24 @@ func _ready() -> void:
 		var mats: Dictionary = jog.estado["inventario"]["materiais"]
 		mats.merge({"sucata": 23, "lingote_ferro": 30, "couro": 6, "lingote_aco": 1, "fragmentos": 60}, true)
 		jog.forjar("escudo_vigia")
+		if OS.get_environment("TM_PREDIO") == "ferreiro":
+			# Peças gastas para a bancada: peitoral amassado, elmo riscado, escudo
+			# quebrado (TM_PECA escolhe qual vai para a bancada: peitoral, elmo, escudo, lanca).
+			var modelos_f: Dictionary = Balanceamento.ler("itens")["modelos"]
+			var fracao := {"peitoral": 0.45, "elmo": 0.8, "escudo": 0.0, "lanca": 0.3}
+			for it: Dictionary in jog.estado["inventario"]["itens"]:
+				var esp_f: String = modelos_f[it["modelo"]]["espaco"]
+				if fracao.has(esp_f) and jog.estado["equipamento"].get(esp_f, "") == it["id"]:
+					it["durabilidade"] = int(float(modelos_f[it["modelo"]]["durabilidade_max"]) * fracao[esp_f])
+			mats["couro"] = 40
 		var tf: TelaForja = load("res://game/scenes/village/tela_forja.tscn").instantiate()
 		var camada_f := CanvasLayer.new()
 		add_child(camada_f)
 		camada_f.add_child(tf)
 		var predio := OS.get_environment("TM_PREDIO") if OS.get_environment("TM_PREDIO") != "" else "armeiro"
 		tf.abrir.call_deferred(predio)
+		if OS.get_environment("TM_PECA") != "":
+			(func(): tf.selecionada = jog.estado["equipamento"].get(OS.get_environment("TM_PECA"), ""); tf.montar()).call_deferred()
 		if OS.get_environment("TM_ABA") == "melhorar":
 			(func(): tf.aba = "melhorar"; tf.montar()).call_deferred()
 		return

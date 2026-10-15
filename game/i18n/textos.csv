@@ -221,6 +221,17 @@ DANO_3,Rachada,Cracked
 DANO_QUEBRADA,Quebrada: sem bônus até consertar,Broken: no bonuses until repaired
 CONSERTO_CONSERTAR,Consertar ({ouro} ouro · {qtd} {material} · {tempo}),Repair ({ouro} gold · {qtd} {material} · {tempo})
 CONSERTO_EM_ANDAMENTO,No armeiro: falta {tempo},At the armorer: {tempo} left
+FORJA_ABA_CONSERTAR,Consertar,Repair
+FORJA_ABA_FUNDIR,Fundir,Smelt
+FERREIRO_PECAS_GASTAS,Peças gastas,Worn pieces
+FERREIRO_SEM_GASTAS,Nenhuma peça gasta.,No worn pieces.
+FERREIRO_FILA,Fila de conserto ({usadas}/{vagas}),Repair queue ({usadas}/{vagas})
+FERREIRO_FILA_VAZIA,Ninguém na fila.,Nothing in the queue.
+FERREIRO_INTEIRA,Inteira,Intact
+FERREIRO_QUEBRADA,Quebrada,Broken
+FERREIRO_DEPOIS,Depois do conserto,After repair
+FERREIRO_SEM_PECA,Nenhuma peça que gaste. Lanças e armaduras aparecem aqui depois das justas.,No pieces that wear out. Lances and armor show up here after jousts.
+FERREIRO_EM_CONSERTO,No conserto: falta {tempo},Being repaired: {tempo} left
 CONSERTO_CONCLUIR,Buscar a peça consertada,Collect the repaired piece
 MATERIAL_SUCATA,sucata,scrap
 MATERIAL_LINGOTE_FERRO,lingote de ferro,iron ingot
