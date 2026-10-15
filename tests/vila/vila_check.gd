@@ -68,6 +68,14 @@ func _initialize() -> void:
 
 	for f in ["jogador.json", "jogador.json.bak"]:
 		DirAccess.remove_absolute("user://teste_vila/" + f)
+	# Trocar o idioma com a vila aberta refaz a legenda dos prédios e os botões fixos.
+	TranslationServer.set_locale("en")
+	_checa("legenda do predio segue o idioma (en)", vila.predios["arena"]._nome.text == "Tournament arena"
+		and vila.predios["loja"]._nome.text == "Shop")
+	_checa("botao Fechar segue o idioma (en)", vila._fechar.text == "Close")
+	_checa("tela de treino segue o idioma (en)", vila.tela_treino._fechar.text == "Close" and vila.tela_treino._habilidades.text == "Abilities")
+	TranslationServer.set_locale("pt_BR")
+	_checa("volta ao portugues", vila.predios["arena"]._nome.text == "Arena de torneios" and vila._fechar.text == "Fechar")
 	print("VILA %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)
 

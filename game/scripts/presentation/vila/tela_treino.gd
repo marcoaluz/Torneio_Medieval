@@ -36,6 +36,13 @@ func _ready() -> void:
 	$Coluna/Botoes.move_child(_habilidades, 0)
 	_jog.mudou.connect(func(_s): if visible: montar())
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and _habilidades != null:
+		_fechar.text = tr("PAINEL_FECHAR")
+		_habilidades.text = tr("HABS_ABRIR")
+		if visible:
+			montar()
+
 func abrir(nome: String) -> void:
 	predio = nome
 	_erro.text = ""

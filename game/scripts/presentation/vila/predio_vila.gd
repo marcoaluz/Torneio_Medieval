@@ -41,9 +41,18 @@ func configurar(n: String, dados: Dictionary) -> void:
 	if ResourceLoader.exists(arte):
 		_sprite.texture = load(arte)
 		_sprite.hframes = estagios
-	_nome.text = tr("PREDIO_" + n.to_upper())
+	_texto_nome()
 	_nome.position = Vector2(-80, tamanho.y * 0.5 + 2)
 	_balao.position = Vector2(-60, -tamanho.y * 0.5 - 30)
+
+func _texto_nome() -> void:
+	if _nome:
+		_nome.text = tr("PREDIO_" + nome.to_upper())
+
+## O idioma mudou com a vila aberta (Configurações): refaz a legenda.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_texto_nome()
 
 ## Estágio visual (0 a estagios-1) para o nível atual.
 func estagio() -> int:

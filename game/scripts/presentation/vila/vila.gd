@@ -92,6 +92,13 @@ func _ready() -> void:
 		notif.pronto.connect(func(t): mostrar_letreiro(tr("NOTIF_" + str(t["tipo"]).to_upper())))
 	atualizar()
 
+## Textos fixos (montados uma vez no _ready) refeitos quando o idioma muda com a
+## vila aberta; o resto é refeito por atualizar().
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_fechar.text = tr("PAINEL_FECHAR")
+		atualizar()
+
 ## Chão da vila com arte (ChaoVila); trilhas até a frente de cada prédio.
 func _chao_com_arte() -> void:
 	var chao := ChaoVila.new()
