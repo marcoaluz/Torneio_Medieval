@@ -68,6 +68,28 @@ func _initialize() -> void:
 
 	for f in ["jogador.json", "jogador.json.bak"]:
 		DirAccess.remove_absolute("user://teste_vila/" + f)
+	# Sede da ordem: bloqueada abaixo do nível mínimo da ordem, brasão na fachada só com ordem, toque abre o social.
+	var nivel_ordem := int(Balanceamento.ler("ordem")["nivel_minimo"])
+	_checa("sede da ordem libera no nivel minimo da ordem", int(Balanceamento.ler("vila")["predios"]["guilda"]["libera_nivel"]) == nivel_ordem)
+	var guilda: PredioVila = vila.predios["guilda"]
+	_checa("sede bloqueada e sem estandarte antes da ordem", guilda.bloqueado and (guilda._estandarte == null or not guilda._estandarte.visible))
+	jog.estado["cavaleiro"]["nivel"] = nivel_ordem
+	jog.estado["inventario"]["ouro"] = 5000
+	vila.atualizar()
+	_checa("sede liberada no nivel da ordem", not guilda.bloqueado)
+	vila.tocar_predio("guilda")
+	_checa("tocar a sede abre a tela social na ordem", vila.tela_social.visible and vila.tela_social.aba == "ordem")
+	vila.tela_social.visible = false
+	_checa("sem ordem, sem brasao na fachada", guilda._estandarte == null or not guilda._estandarte.visible)
+	_checa("cria a ordem", jog.criar_ordem("Ordem da Rosa")["ok"])
+	vila.atualizar()
+	_checa("com ordem, o estandarte aparece", guilda._estandarte != null and guilda._estandarte.visible and guilda._estandarte_brasao.texture != null)
+	var textura_antes := guilda._estandarte_brasao.texture
+	var novo: Dictionary = jog.brasao_da_ordem().duplicate(true)
+	novo["cor1"] = "verde_floresta" if str(novo.get("cor1", "")) != "verde_floresta" else "azul_real"
+	jog.editar_brasao_ordem(novo)
+	vila.atualizar()
+	_checa("trocar o brasao da ordem refaz o estandarte", guilda._estandarte_brasao.texture != textura_antes)
 	# Trocar o idioma com a vila aberta refaz a legenda dos prédios e os botões fixos.
 	TranslationServer.set_locale("en")
 	_checa("legenda do predio segue o idioma (en)", vila.predios["arena"]._nome.text == "Tournament arena"

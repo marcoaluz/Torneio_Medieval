@@ -49,6 +49,7 @@ PREDIOS = {
     "arena": "a small jousting arena with a tilt barrier, wooden stands and pennants",
     "armeiro": "an armorer's workshop with armor stands, shields hanging on the walls and a workbench",
     "loja": "a merchant stall shop with a striped awning, crates and barrels",
+    "guilda": "a knights' order hall, a stately timber and stone lodge with a wide double door, a plain bare wooden signboard above the door and an empty flagpole, no heraldry, no emblems",
     "salao_liga": "a guild hall of champions with heraldic banners and a stone entrance",
 }
 ESTAGIOS = [
@@ -205,8 +206,11 @@ def main():
             n_est = int(dados["estagios"])
             # Estágio no espectro de 5 (prédio de 4 estágios pula o mais humilde).
             nivel = extra + (5 - n_est)
+            estagio = ESTAGIOS[nivel]
+            if quem == "guilda":  # o brasão da ordem entra pelo jogo, nunca desenhado
+                estagio = estagio.replace(", small heraldic banners", "").replace("large heraldic banners and iron details", "iron details")
             descricao = "%s, top-down three-quarter view, %s, %s, %s, transparent background" % (
-                ESTILO, PREDIOS.get(quem, quem), ESTAGIOS[nivel], SO_PREDIO)
+                ESTILO, PREDIOS.get(quem, quem), estagio, SO_PREDIO)
             corpo = {"description": descricao, "negative_description": NEGATIVO_PREDIO, "image_size": {"width": w, "height": hh},
                      "view": "high top-down", "no_background": True, "detail": "highly detailed", "shading": "detailed shading",
                      "outline": "selective outline", "seed": 1000 + (sorted(PREDIOS).index(quem) if quem in PREDIOS else 99),

@@ -27,6 +27,15 @@ var pronto := false:
 		pronto = v
 		queue_redraw()
 
+## Estandarte com o brasão da ordem (só a sede da ordem): mastro ao lado da porta,
+## travessa e pano com o brasão desenhado pelo GeradorBrasao. Fica escondido sem
+## ordem. `_estandarte_chave` evita refazer a textura quando nada mudou.
+const ESTANDARTE_BASE := Vector2(54, 42)  ## pé do mastro, a partir do centro do sprite
+const ESTANDARTE_BRASAO := Vector2i(22, 28)
+var _estandarte: Node2D
+var _estandarte_brasao: TextureRect
+var _estandarte_chave := ""
+
 @onready var _nome: Label = $Nome
 @onready var _balao: Label = $Balao
 @onready var _sprite: Sprite2D = $Sprite
@@ -53,6 +62,52 @@ func _texto_nome() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
 		_texto_nome()
+
+## Brasão da ordem na fachada ({} esconde). Só vale para a sede da ordem.
+func aplicar_brasao(brasao: Dictionary) -> void:
+	if nome != "guilda":
+		return
+	var chave := JSON.stringify(brasao, "", true)
+	if chave == _estandarte_chave:
+		return
+	_estandarte_chave = chave
+	if brasao.is_empty():
+		if _estandarte:
+			_estandarte.visible = false
+		return
+	if _estandarte == null:
+		_montar_estandarte()
+	_estandarte_brasao.texture = GeradorBrasao.textura(brasao, ESTANDARTE_BRASAO)
+	_estandarte.visible = true
+
+func _montar_estandarte() -> void:
+	_estandarte = Node2D.new()
+	_estandarte.name = "Estandarte"
+	_estandarte.position = ESTANDARTE_BASE
+	_estandarte.z_index = 5
+	add_child(_estandarte)
+	var madeira := Color(0.24, 0.16, 0.1)
+	var pano := Color(0.1, 0.07, 0.06)
+	var mastro := _retangulo(Rect2(-1, -72, 3, 72), madeira)
+	var travessa := _retangulo(Rect2(-17, -70, 34, 3), madeira.lightened(0.1))
+	var fundo := _retangulo(Rect2(-14, -67, 28, 38), pano)
+	var ponta := _retangulo(Rect2(-14, -29, 28, 3), pano.lightened(0.15))
+	for n: ColorRect in [mastro, travessa, fundo, ponta]:
+		_estandarte.add_child(n)
+	_estandarte_brasao = TextureRect.new()
+	_estandarte_brasao.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_estandarte_brasao.position = Vector2(-11, -64)
+	_estandarte_brasao.size = Vector2(ESTANDARTE_BRASAO)
+	_estandarte_brasao.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_estandarte.add_child(_estandarte_brasao)
+
+func _retangulo(r: Rect2, cor: Color) -> ColorRect:
+	var c := ColorRect.new()
+	c.position = r.position
+	c.size = r.size
+	c.color = cor
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return c
 
 ## Estágio visual (0 a estagios-1) para o nível atual.
 func estagio() -> int:

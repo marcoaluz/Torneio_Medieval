@@ -8,7 +8,7 @@ extends Node2D
 const PASTA := "res://game/art/sprites/vila/chao/"
 const PRACA := Vector2(480, 300)
 const MURO := Rect2(20, 40, 920, 490)
-const ARVORES := [Vector2(70, 120), Vector2(890, 120), Vector2(80, 480), Vector2(880, 480), Vector2(-60, 300), Vector2(1020, 300)]
+const ARVORES := [Vector2(70, 120), Vector2(890, 120), Vector2(80, 480), Vector2(915, 505), Vector2(-60, 300), Vector2(1020, 300)]
 
 ## `destinos`: a frente de cada prédio (onde a trilha chega).
 func montar(destinos: Array) -> bool:

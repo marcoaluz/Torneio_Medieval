@@ -651,6 +651,8 @@ ERRO_OPCAO_INEXISTENTE,Opção desconhecida.,Unknown option.
 ERRO_OPCAO_INVALIDA,Valor inválido.,Invalid value.
 CONFIG_BATERIA,"Economia de bateria (30 quadros, menos partículas)","Battery saver (30 fps, fewer particles)"
 PREDIO_SALAO_LIGA,Salão da liga,League hall
+PREDIO_GUILDA,Sede da ordem,Order hall
+PREDIO_DESC_GUILDA,"Amigos, ordem, ajuda e chat. O brasão da sua ordem fica na fachada.","Friends, order, help and chat. Your order's crest hangs on the facade."
 PREDIO_DESC_SALAO_LIGA,"PvP, ranking e temporadas.","PvP, rankings and seasons."
 LIGA_TITULO,Salão da liga,League hall
 LIGA_POSICAO,{liga} {divisao} · {pontos} pontos · seu poder {poder},{liga} {divisao} · {pontos} points · your power {poder}

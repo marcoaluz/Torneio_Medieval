@@ -181,6 +181,8 @@ func atualizar() -> void:
 		var p: PredioVila = predios[nome]
 		p.bloqueado = not _jog.predio_liberado(nome)
 		p.nivel = maxi(_jog.predio_nivel(nome), 1)
+		if nome == "guilda":
+			p.aplicar_brasao(_jog.brasao_da_ordem())  # {} sem ordem: estandarte some
 		# Balão: o timer que termina primeiro; "!" se algum já terminou.
 		var ts := _jog.timers_do_predio(nome)
 		ts.sort_custom(func(a, b): return int(a["termina_em"]) < int(b["termina_em"]))
@@ -247,6 +249,10 @@ func tocar_predio(nome: String) -> void:
 	if nome == "salao_liga":
 		fechar_painel()
 		tela_liga.abrir()
+		return
+	if nome == "guilda":
+		fechar_painel()
+		tela_social.abrir("ordem")
 		return
 	if nome == "loja":
 		fechar_painel()

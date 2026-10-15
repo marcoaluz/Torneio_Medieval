@@ -1,6 +1,6 @@
 {
 	"versao": 1,
-	"_nota": "Predios da vila (GDD, A vila). libera_nivel = nivel do cavaleiro que abre o predio. A casa senhorial define o teto de nivel dos outros. melhoria[i] = custo e tempo para ir do nivel i+1 ao i+2 (tempos da tabela Timers e ritmo do GDD: niveis 1 a 5 = 2 a 10 min). estagios = quantos visuais o predio tem (o estagio cresce com o nivel). posicao em px no mapa da vila (960x540, area segura).",
+	"_nota": "Predios da vila (GDD, A vila). A guilda e a sede da Ordem (abre a tela social; libera no nivel minimo da ordem, ordem.json); o brasao da ordem e aplicado em cima da fachada pelo jogo. libera_nivel = nivel do cavaleiro que abre o predio. A casa senhorial define o teto de nivel dos outros. melhoria[i] = custo e tempo para ir do nivel i+1 ao i+2 (tempos da tabela Timers e ritmo do GDD: niveis 1 a 5 = 2 a 10 min). estagios = quantos visuais o predio tem (o estagio cresce com o nivel). posicao em px no mapa da vila (960x540, area segura).",
 	"predios": {
 		"casa_senhorial": { "libera_nivel": 1, "nivel_max": 5, "estagios": 5, "posicao": [480, 150], "tamanho": [150, 96], "cor_telhado": "5c2a22",
 			"melhoria": [ { "ouro": 80, "segundos": 120 }, { "ouro": 160, "segundos": 240 }, { "ouro": 320, "segundos": 360 }, { "ouro": 640, "segundos": 480 } ] },
@@ -16,8 +16,10 @@
 			"melhoria": [ { "ouro": 90, "segundos": 180 }, { "ouro": 180, "segundos": 300 }, { "ouro": 360, "segundos": 420 }, { "ouro": 720, "segundos": 540 } ] },
 		"salao_liga": { "libera_nivel": 6, "nivel_max": 5, "estagios": 4, "posicao": [835, 140], "tamanho": [120, 80], "cor_telhado": "4a2a4f",
 			"melhoria": [ { "ouro": 120, "segundos": 240 }, { "ouro": 240, "segundos": 360 }, { "ouro": 480, "segundos": 480 }, { "ouro": 960, "segundos": 600 } ] },
+		"guilda": { "libera_nivel": 5, "nivel_max": 5, "estagios": 4, "posicao": [865, 395], "tamanho": [120, 80], "cor_telhado": "3a4a3a",
+			"melhoria": [ { "ouro": 100, "segundos": 210 }, { "ouro": 200, "segundos": 330 }, { "ouro": 400, "segundos": 450 }, { "ouro": 800, "segundos": 570 } ] },
 		"armeiro": { "libera_nivel": 3, "nivel_max": 5, "estagios": 4, "posicao": [710, 420], "tamanho": [120, 80], "cor_telhado": "2c3a5a",
 			"melhoria": [ { "ouro": 80, "segundos": 150 }, { "ouro": 160, "segundos": 270 }, { "ouro": 320, "segundos": 390 }, { "ouro": 640, "segundos": 540 } ] }
 	},
-	"ordem": ["casa_senhorial", "estabulo", "campo_treino", "ferreiro", "arena", "armeiro", "loja", "salao_liga"]
+	"ordem": ["casa_senhorial", "estabulo", "campo_treino", "ferreiro", "arena", "armeiro", "loja", "salao_liga", "guilda"]
 }

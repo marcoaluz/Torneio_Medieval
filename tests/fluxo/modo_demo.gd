@@ -4,7 +4,7 @@ extends Node
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
 ## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
-## a vila tocando uma cena. Save em
+## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -96,6 +96,16 @@ func _ready() -> void:
 		camada_m.add_child(tm)
 		var aba := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "diarias"
 		tm.abrir.call_deferred(aba)
+		return
+	if tela == "vila":
+		# Vila no nível TM_NIVEL (padrão 8); TM_ORDEM=1 cria uma ordem (brasão na sede).
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["tutorial"]["concluido"] = true
+		jog.estado["cavaleiro"]["nivel"] = int(OS.get_environment("TM_NIVEL")) if OS.get_environment("TM_NIVEL") != "" else 8
+		jog.estado["inventario"]["ouro"] = 3000
+		if OS.get_environment("TM_ORDEM") == "1":
+			jog.criar_ordem("Ordem da Rosa")
+		add_child(load("res://game/scenes/village/vila.tscn").instantiate())
 		return
 	if tela == "historia":
 		# Vila com a cena TM_CENA pendente (padrão: a do começo); TM_FALA avança falas.
