@@ -9,6 +9,36 @@ func _ready() -> void:
 	$Coluna/Pular.text = tr("INICIO_PULAR_TUTORIAL")
 	$Coluna/Comecar.pressed.connect(comecar)
 	$Coluna/Pular.pressed.connect(pular)
+	_arte_de_fundo()
+
+## Arte de abertura (PixelLab, 480x270 em 2x): cobre a tela; o título vai para a
+## faixa escura do alto e os botões para baixo, longe do choque das lanças.
+func _arte_de_fundo() -> void:
+	var arq := "res://game/art/sprites/titulo/arte.png"
+	if not ResourceLoader.exists(arq):
+		return
+	var arte := TextureRect.new()
+	arte.name = "Arte"
+	arte.texture = load(arq)
+	arte.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	arte.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	arte.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	arte.set_anchors_preset(Control.PRESET_FULL_RECT)
+	arte.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(arte)
+	move_child(arte, $Fundo.get_index() + 1)
+	var col := $Coluna as VBoxContainer
+	col.anchor_top = 0.0
+	col.anchor_bottom = 1.0
+	col.offset_top = 6.0
+	col.offset_bottom = -24.0
+	col.alignment = BoxContainer.ALIGNMENT_BEGIN
+	# O título fica no alto; um espaçador empurra os botões para baixo.
+	var espaco := Control.new()
+	espaco.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	espaco.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.add_child(espaco)
+	col.move_child(espaco, $Coluna/Titulo.get_index() + 1)
 
 const CENA_PRIVACIDADE := preload("res://game/scenes/ui/tela_privacidade.tscn")
 
