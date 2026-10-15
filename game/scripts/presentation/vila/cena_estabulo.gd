@@ -83,6 +83,7 @@ func reagindo() -> bool:
 
 func _montar_espacos() -> void:
 	for c in _botoes_espaco.get_children():
+		_botoes_espaco.remove_child(c)  # já fora: os novos usam o mesmo nome
 		c.queue_free()
 	for e: Dictionary in _espacos:
 		var nome: String = e["espaco"]
@@ -120,6 +121,7 @@ func _margens_curtas(b: Button) -> void:
 
 func _montar_pecas() -> void:
 	for c in _pecas.get_children():
+		_pecas.remove_child(c)  # já fora: os novos usam o mesmo nome
 		c.queue_free()
 	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var equipado_id: String = _jog.estado["equipamento"].get(espaco, "")

@@ -1,8 +1,9 @@
 class_name TelaTreino
 extends PanelContainer
 ## Telas do campo de treino e do estábulo (Pacote 2.7), abertas pela vila.
-##   Campo de treino: atributos do cavaleiro, treinar (vagas, custo e tempo
-##     pela curva dos dados) e treinos em andamento.
+##   Campo de treino: a cena do cavaleiro treinando contra o alvo do atributo
+##     escolhido e os cartões dos atributos (CenaCampoTreino); treinar (vagas,
+##     custo e tempo pela curva dos dados) e concluir pelo botão da cena.
 ##   Estábulo: a cena da baia com o cavalo ativo vestido e a troca das peças
 ##     do cavalo (CenaEstabulo), e ao lado os cavalos (pelagem, atributos,
 ##     fôlego, estado), usar na justa e treinar (cavalo em treino não corre;
@@ -20,6 +21,7 @@ var _acumulado := 0.0
 @onready var _info: Label = $Coluna/Info
 @onready var _lista: VBoxContainer = $Coluna/Corpo/Rolagem/Lista
 @onready var _cena: CenaEstabulo = $Coluna/Corpo/Cena
+@onready var _campo: CenaCampoTreino = $Coluna/Corpo/CenaCampo
 @onready var _melhorar: Button = $Coluna/Botoes/Melhorar
 @onready var _fechar: Button = $Coluna/Botoes/Fechar
 @onready var _erro: Label = $Coluna/Erro
@@ -39,6 +41,8 @@ func _ready() -> void:
 	$Coluna/Botoes.move_child(_habilidades, 0)
 	_cena.configurar(_jog)
 	_cena.resultado.connect(_mostrar)
+	_campo.configurar(_jog, _lista)
+	_campo.resultado.connect(_mostrar)
 	_jog.mudou.connect(func(_s): if visible: montar())
 
 func _notification(what: int) -> void:
@@ -53,8 +57,9 @@ func abrir(nome: String) -> void:
 	_erro.text = ""
 	_habilidades.visible = nome == "campo_treino"
 	_cena.visible = nome == "estabulo"
-	# Estábulo: largura para a cena (384) mais a lista dos cavalos.
-	var meia := Vector2(440, 250) if nome == "estabulo" else Vector2(300, 225)
+	_campo.visible = nome == "campo_treino"
+	# Largura para a cena (384) mais a lista ao lado.
+	var meia := Vector2(440, 250)
 	offset_left = -meia.x
 	offset_right = meia.x
 	offset_top = -meia.y
@@ -62,13 +67,24 @@ func abrir(nome: String) -> void:
 	visible = true
 	if nome == "estabulo":
 		_cena.reiniciar()
+	else:
+		for c in _lista.get_children():
+			c.queue_free()
+		_campo.reiniciar()
 	_som_do_estabulo(nome == "estabulo")
+	_som_do_campo(nome == "campo_treino")
 	montar()
 
 func fechar() -> void:
 	visible = false
 	predio = ""
 	_som_do_estabulo(false)
+	_som_do_campo(false)
+
+func _som_do_campo(ligado: bool) -> void:
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio:
+		audio.laco("campo_treino", ligado)
 
 ## Ambiente do estábulo em laço só com a cena aberta (skill som).
 func _som_do_estabulo(ligado: bool) -> void:
@@ -83,8 +99,6 @@ func _process(delta: float) -> void:
 		montar()
 
 func montar() -> void:
-	for c in _lista.get_children():
-		c.queue_free()
 	_titulo.text = tr("PREDIO_" + predio.to_upper())
 	var em_uso := _jog.treinos_em(predio).size()
 	_info.text = tr("TREINO_INFO").format({"nivel": _jog.predio_nivel(predio), "teto": _jog.teto_predio(predio),
@@ -94,33 +108,12 @@ func montar() -> void:
 	_melhorar.text = tr("VILA_MELHORAR").format({"ouro": p.get("ouro", 0), "tempo": Vila.formatar_tempo(_jog.duracao_timer(int(p.get("segundos", 0))))}) \
 		if p.has("ouro") else tr("ERRO_" + str(p["erro"]).to_upper())
 	if predio == "campo_treino":
-		_montar_campo()
+		_campo.atualizar()  # cartões na lista, refeitos só quando mudam
 	else:
+		for c in _lista.get_children():
+			c.queue_free()
 		_cena.atualizar()
 		_montar_estabulo()
-
-func _montar_campo() -> void:
-	var cfg := Balanceamento.carregar("treino")
-	var atr: Dictionary = _jog.cavaleiro()["atributos"]
-	var treinando := {}
-	for t: Dictionary in _jog.treinos_em("campo_treino"):
-		treinando[t["atributo"]] = t
-	for a: String in cfg["atributos_cavaleiro"]:
-		var linha := HBoxContainer.new()
-		var l := Label.new()
-		l.text = tr("ATRIBUTO_" + a.to_upper()) + ": %d" % int(atr[a])
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		linha.add_child(l)
-		if treinando.has(a):
-			linha.add_child(_botao_timer(treinando[a]))
-		else:
-			var b := Button.new()
-			b.focus_mode = Control.FOCUS_NONE
-			b.text = tr("TREINO_TREINAR").format({"ganho": int(cfg["ganho_pontos"]), "ouro": _jog.custo_treino(),
-				"tempo": Vila.formatar_tempo(_jog.duracao_timer(_jog.duracao_treino()))})
-			b.pressed.connect(func(): _mostrar(_jog.treinar_cavaleiro(a)))
-			linha.add_child(b)
-		_lista.add_child(linha)
 
 func _montar_estabulo() -> void:
 	var cfg := Balanceamento.carregar("treino")

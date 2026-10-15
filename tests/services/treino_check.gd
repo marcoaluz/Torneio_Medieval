@@ -90,6 +90,56 @@ func _initialize() -> void:
 	tela.abrir("campo_treino")
 	await process_frame
 	_checa("tela do campo lista os atributos", tela._lista.get_child_count() == 3)
+	# Cena do campo: cavaleiro montado, alvo do atributo, cartões e treinar pelo botão.
+	var campo: CenaCampoTreino = tela.get_node("Coluna/Corpo/CenaCampo")
+	_checa("campo mostra a cena (e o estabulo nao)", campo.visible and not tela.get_node("Coluna/Corpo/Cena").visible)
+	_checa("um cartao por atributo", tela._lista.get_children().map(func(c): return str(c.name)) == ["forca", "precisao", "equilibrio"])
+	_checa("cavaleiro montado no campo", campo._cav != null and campo._cav.camadas().pecas.get("pelagem", "") != "")
+	_checa("forca: estafermo", campo._braco != null and campo._argola == null)
+	(tela._lista.get_node("precisao") as Button).pressed.emit()
+	await process_frame
+	_checa("tocar no cartao troca o alvo (argola)", campo.atributo == "precisao" and campo._argola != null and campo._braco == null)
+	_checa("e ja chama uma passada", campo.passando())
+	for i in 90:
+		await process_frame
+		if campo._acertou:
+			break
+	_checa("a lanca fisga a argola", campo._acertou and campo._carregando_argola)
+	campo.escolher("forca")
+	for i in 90:
+		await process_frame
+		if campo._acertou:
+			break
+	_checa("a lanca acerta o estafermo e o braco gira", campo._acertou and campo._giro_vel > 0.0)
+	campo.escolher("equilibrio")
+	var subiu := false
+	for i in 120:
+		await process_frame
+		subiu = subiu or campo._cav.position.y < CenaCampoTreino.CHAO - 10.0
+		if campo._acertou:
+			break
+	_checa("o cavalo salta o tronco", subiu and campo._acertou)
+	# Treinar pelo botão da cena (vaga livre).
+	jog.estado["timers"] = jog.estado["timers"].filter(func(x): return x["alvo"] != "campo_treino")
+	jog.estado["inventario"]["ouro"] = 1000
+	campo.escolher("precisao", false)
+	var antes := int(jog.cavaleiro()["atributos"]["precisao"])
+	var botao: Button = campo.get_node("Treinar")
+	_checa("botao de treinar o atributo escolhido", not botao.disabled and botao.text.begins_with("Treinar Precisão"))
+	botao.pressed.emit()
+	await process_frame
+	campo.atualizar()
+	_checa("treinar ocupa a vaga e o cartao mostra o tempo", jog.treinos_em("campo_treino").size() == 1
+		and (tela._lista.get_node("precisao") as Button).find_children("*", "Label", true, false).any(func(l): return l.text.begins_with("Treinando")))
+	_checa("em andamento, o botao mostra o tempo", botao.disabled)
+	ServicoTempo.deslocamento += 999999
+	campo.atualizar()
+	_checa("pronto: concluir", not botao.disabled and botao.text.begins_with("Concluir"))
+	botao.pressed.emit()
+	await process_frame
+	ServicoTempo.deslocamento = 0
+	_checa("concluir soma o ganho", int(jog.cavaleiro()["atributos"]["precisao"]) == antes + int(Balanceamento.ler("treino")["ganho_pontos"]))
+	_checa("botao de habilidades continua no campo", tela._habilidades.visible)
 
 	for arq in ["jogador.json", "jogador.json.bak"]:
 		DirAccess.remove_absolute("user://teste_treino/" + arq)

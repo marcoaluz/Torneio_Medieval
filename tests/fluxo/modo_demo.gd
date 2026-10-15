@@ -4,7 +4,7 @@ extends Node
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
 ## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
-## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada); estabulo (TM_PELAGEM, TM_TROCAR=1). Save em
+## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada); estabulo (TM_PELAGEM, TM_TROCAR=1); campo (TM_ATRIBUTO, TM_TREINANDO=1). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -108,6 +108,22 @@ func _ready() -> void:
 		camada_m.add_child(tm)
 		var aba := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "diarias"
 		tm.abrir.call_deferred(aba)
+		return
+	if tela == "campo":
+		# Cena do campo de treino: TM_ATRIBUTO (forca, precisao, equilibrio) no
+		# palco; TM_TREINANDO=1 deixa um treino de força em andamento.
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["cavaleiro"]["nivel"] = 6
+		jog.estado["inventario"]["ouro"] = 500
+		if OS.get_environment("TM_TREINANDO") == "1":
+			jog.treinar_cavaleiro("forca")
+		var tc: TelaTreino = load("res://game/scenes/village/tela_treino.tscn").instantiate()
+		var camada_c := CanvasLayer.new()
+		add_child(camada_c)
+		camada_c.add_child(tc)
+		tc.abrir.call_deferred("campo_treino")
+		if OS.get_environment("TM_ATRIBUTO") != "":
+			(func(): tc._campo.escolher(OS.get_environment("TM_ATRIBUTO"))).call_deferred()
 		return
 	if tela == "estabulo":
 		# Cena do estábulo: cavalo ativo (TM_PELAGEM) com a caparação da vigia e

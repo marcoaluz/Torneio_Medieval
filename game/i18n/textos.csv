@@ -146,6 +146,15 @@ ATRIBUTO_FOLEGO,Fôlego,Stamina
 ATRIBUTO_TEMPERAMENTO,Temperamento,Temper
 TREINO_INFO,Nível {nivel} de {teto} · vagas de treino: {usadas}/{vagas},Level {nivel} of {teto} · training slots: {usadas}/{vagas}
 TREINO_TREINAR,+{ganho} ({ouro} ouro · {tempo}),+{ganho} ({ouro} gold · {tempo})
+TREINO_DESC_FORCA,Estafermo: mais chance de derrubar o rival quando acerta.,Quintain: better odds of unhorsing your rival when you hit.
+TREINO_DESC_PRECISAO,Argola: zona perfeita da mira maior.,Ring: a bigger perfect zone on your aim.
+TREINO_DESC_EQUILIBRIO,Tronco: resiste mais a cair quando é atingido.,Log jump: harder to knock you off when you're hit.
+TREINO_TREINAR_ATRIBUTO,Treinar {atributo} +{ganho} · {ouro} ouro · {tempo},Train {atributo} +{ganho} · {ouro} gold · {tempo}
+TREINO_CONCLUIR_ATRIBUTO,Concluir: +{ganho} {atributo},Collect: +{ganho} {atributo}
+TREINO_EM_ANDAMENTO,Treinando · falta {tempo},Training · {tempo} left
+TREINO_PRONTO_CARTAO,Pronto! Toque em Concluir.,Done! Tap Collect.
+TREINO_COMECOU,Ao treino!,To training!
+TREINO_TOQUE_CAMPO,Toque no campo para mais uma passada.,Tap the field for another pass.
 TREINO_CONCLUIR,Concluir,Collect
 CAVALO_ATIVO,na justa,jousting
 CAVALO_TREINANDO,treinando,training
