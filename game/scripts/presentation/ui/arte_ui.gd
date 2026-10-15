@@ -31,3 +31,12 @@ static func caixa(nome: String, margem := Vector2(10, 6), borda := -1, espelhar 
 	s.content_margin_top = margem.y
 	s.content_margin_bottom = margem.y
 	return s
+
+## Ícone da peça pelo modelo do item (tools/gerar_icones_itens.py); null sem arte.
+static func icone_item(modelo: String) -> Texture2D:
+	var m: Dictionary = Balanceamento.ler("itens")["modelos"].get(modelo, {})
+	if m.is_empty():
+		return null
+	var arq := "res://game/art/sprites/icones/%s_%s.png" % [m["espaco"], m["visual"]]
+	return load(arq) if ResourceLoader.exists(arq) else null
+

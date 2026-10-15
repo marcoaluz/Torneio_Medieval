@@ -87,6 +87,11 @@ func montar() -> void:
 			continue
 		var bau: Dictionary = baus[i]
 		var nome := tr("BAU_" + str(bau["tipo"]).to_upper())
+		var arte := _arte_bau(bau["tipo"], false)
+		if arte:
+			b.icon = arte
+			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.add_theme_color_override("font_color", _cor_bau(bau["tipo"]).lightened(0.2))
 		b.add_theme_color_override("font_disabled_color", _cor_bau(bau["tipo"]).darkened(0.1))
 		var id: String = bau["id"]
@@ -133,6 +138,7 @@ func mostrar_abertura(r: Dictionary) -> void:
 	_ganho.text = ""
 	for c in _itens.get_children():
 		c.queue_free()
+	var desenho := _desenho_bau(r["tipo"])
 	(_bau.get_node("Corpo") as ColorRect).color = _cor_bau(r["tipo"]).darkened(0.25)
 	(_bau.get_node("Tampa") as ColorRect).color = _cor_bau(r["tipo"])
 	var tampa: Control = _bau.get_node("Tampa")
@@ -145,7 +151,13 @@ func mostrar_abertura(r: Dictionary) -> void:
 	for k in 4:
 		_tween.tween_property(_bau, "rotation_degrees", 6.0 if k % 2 == 0 else -6.0, 0.07)
 	_tween.tween_property(_bau, "rotation_degrees", 0.0, 0.07)
-	_tween.tween_property(tampa, "rotation_degrees", -100.0, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if desenho:
+		# Arte do baú: troca para o aberto, com um pulinho.
+		_tween.tween_callback(func(): desenho.texture = _arte_bau(r["tipo"], true))
+		_tween.tween_property(desenho, "scale", Vector2(1.12, 1.12), 0.08)
+		_tween.tween_property(desenho, "scale", Vector2.ONE, 0.12)
+	else:
+		_tween.tween_property(tampa, "rotation_degrees", -100.0, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	for it: Dictionary in r["itens"]:
 		var cartao := _cartao(it)
 		cartao.scale = Vector2.ZERO
@@ -154,6 +166,36 @@ func mostrar_abertura(r: Dictionary) -> void:
 	_tween.tween_callback(func():
 		_ganho.text = tr("BAUS_GANHOU").format({"ouro": r["ouro"], "fragmentos": r["fragmentos"]})
 		_continuar.visible = true)
+
+## Arte do baú (game/art/sprites/baus/), fechado ou aberto; null sem arte.
+func _arte_bau(tipo: String, aberto: bool) -> Texture2D:
+	var arq := "res://game/art/sprites/baus/bau_%s%s.png" % [tipo, "_aberto" if aberto else ""]
+	return load(arq) if ResourceLoader.exists(arq) else null
+
+## Com arte: esconde os retângulos e mostra o baú fechado (2x, sem borrar).
+func _desenho_bau(tipo: String) -> TextureRect:
+	var tex := _arte_bau(tipo, false)
+	var d := _bau.get_node_or_null("Arte") as TextureRect
+	if tex == null:
+		if d:
+			d.visible = false
+		return null
+	if d == null:
+		d = TextureRect.new()
+		d.name = "Arte"
+		d.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		d.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		d.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		d.size = Vector2(128, 128)
+		d.position = Vector2(-4, -14)
+		d.pivot_offset = Vector2(64, 96)
+		_bau.add_child(d)
+	for n in ["Corpo", "Tampa", "Fecho"]:
+		(_bau.get_node(n) as CanvasItem).visible = false
+	d.visible = true
+	d.scale = Vector2.ONE
+	d.texture = tex
+	return d
 
 ## Texto das chances de cada baú (GDD: sempre visíveis).
 func texto_probabilidades() -> String:
@@ -173,8 +215,8 @@ func texto_probabilidades() -> String:
 
 func _cartao(it: Dictionary) -> Control:
 	var painel := PanelContainer.new()
-	painel.custom_minimum_size = Vector2(130, 110)
-	painel.pivot_offset = Vector2(65, 55)
+	painel.custom_minimum_size = Vector2(130, 150)
+	painel.pivot_offset = Vector2(65, 75)
 	var estilo := StyleBoxFlat.new()
 	estilo.bg_color = Color(0.12, 0.09, 0.07)
 	estilo.border_color = cor_raridade(it["raridade"])
@@ -188,7 +230,18 @@ func _cartao(it: Dictionary) -> Control:
 	var extra := tr("BAUS_REPETIDA").format({"n": int(_jog.cfg_baus()["fragmentos_por_repetida"])}) if it["repetida"] else tr("BAUS_NOVA")
 	l.text = "%s\n%s\n%s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), tr("RARIDADE_" + str(it["raridade"]).to_upper()), extra]
 	l.add_theme_color_override("font_color", cor_raridade(it["raridade"]))
-	painel.add_child(l)
+	var coluna := VBoxContainer.new()
+	coluna.alignment = BoxContainer.ALIGNMENT_CENTER
+	var tex := ArteUi.icone_item(str(it["modelo"]))
+	if tex:
+		var ic := TextureRect.new()
+		ic.texture = tex
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		ic.custom_minimum_size = Vector2(48, 48)
+		coluna.add_child(ic)
+	coluna.add_child(l)
+	painel.add_child(coluna)
 	return painel
 
 static func cor_raridade(raridade: String) -> Color:

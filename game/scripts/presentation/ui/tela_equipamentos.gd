@@ -121,6 +121,8 @@ func _montar_lista() -> void:
 		var nivel := int(it.get("nivel", 0))
 		b.text = "%s%s%s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), " +%d" % nivel if nivel > 0 else "", "  ✓" if it["id"] == equipado_id else ""]
 		b.add_theme_color_override("font_color", TelaBaus.cor_raridade(m["raridade"]))
+		b.icon = ArteUi.icone_item(it["modelo"])
+		b.add_theme_constant_override("icon_max_width", 32)
 		b.pressed.connect(func(): selecionar(it["id"]))
 		_lista.add_child(b)
 	_atualizar_detalhes()
