@@ -69,10 +69,10 @@ position = Vector2(90, 270)
 [node name="Jogador" type="Node2D" parent="Pistas"]
 
 [node name="Inicio" type="Marker2D" parent="Pistas/Jogador"]
-position = Vector2(90, 470)
+position = Vector2(90, 340)
 
 [node name="Fim" type="Marker2D" parent="Pistas/Jogador"]
-position = Vector2(870, 470)
+position = Vector2(870, 340)
 
 [node name="Rival" parent="." instance=ExtResource("5")]
 position = Vector2(870, 270)
@@ -88,7 +88,7 @@ position = Vector2(-160, 236)
 script = ExtResource("4")
 
 [node name="Jogador" parent="." instance=ExtResource("5")]
-position = Vector2(90, 470)
+position = Vector2(90, 340)
 
 [node name="PontaLanca" type="Node2D" parent="."]
 visible = false

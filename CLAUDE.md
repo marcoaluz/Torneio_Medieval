@@ -82,6 +82,7 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
 - **Comando público novo no `ServicoJogador`:** escreva como `_cmd_<nome>` e acrescente o invólucro na seção "comandos públicos" (é ele que avisa `acao_feita` para a fila do servidor); o nome tem que existir em `PUBLICOS` no TypeScript.
 - **Som:** todo som entra primeiro em `game/data/audio/sons.json`; o jogo acha `<pasta>/<id>_NN.(ogg|mp3|wav)`. Sem arquivo, não toca.
 - **Ferramentas de arte (PixelLab):** rodar com `python -E -P` (o Pillow está na pasta do usuário; `-I` a esconde). Cliente em `tools/pixellab_cliente.py` (cache em `game/art/fontes/cache/`, fora do git). Limites que já morderam: altura múltipla de 4; pixen até 768 de largura; edit/transfer de 160 px = 4/3 quadros por pedido; quadros em `{"image":…, "size":…}`; o servidor às vezes devolve 504 (o cliente reenvia).
+- **Arena:** pistas em y=270 (rival, atrás da cerca) e y=340 (jogador, na frente); a câmera de cada fase está em `controlador_justa.gd` (`_ao_entrar_na_fase`) e os zooms em `camera_arena.gd`/exports do controlador. Mexeu nas pistas? Confira as capturas de cada fase (16:9 e 20:9) e o `justa_check`.
 - **Mudou a geometria do cavaleiro?** Meça as zonas na arte, atualize `mira.json`, os pontos fixos dos testes e regrave as referências (`TM_GRAVAR=1`) e os cenários (`tools/gravar_cenarios.gd`).
 - **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
 - **Mudança na regra da justa:**

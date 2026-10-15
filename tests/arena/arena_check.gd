@@ -33,8 +33,11 @@ func _initialize() -> void:
 		and arena.cerca.get_index() < j.get_index())
 	_checa("alvos da mira existem", j.ponto_alvo("Capacete").y < j.ponto_alvo("Peito").y and r.ponto_alvo("Escudo") != Vector2.ZERO)
 
-	_checa("camera comeca aberta", cam.plano == CameraArena.Plano.ABERTO \
-		and cam.global_position == cam.centro_aberto and cam.zoom == Vector2.ONE * cam.zoom_aberto)
+	# A justa começa na Apresentação: plano aberto próximo, no rival (depois desliza ao jogador).
+	var meia_vista := arena.get_viewport_rect().size / cam.zoom * 0.5
+	_checa("camera comeca aberta, proxima, com o rival no quadro", cam.plano == CameraArena.Plano.ABERTO \
+		and cam.zoom == Vector2.ONE * cam.zoom_aberto and cam.zoom_aberto >= 1.3 \
+		and absf(cam.global_position.x - r.global_position.x) < meia_vista.x and absf(cam.global_position.y - r.global_position.y) < meia_vista.y)
 
 	cam.seguir(j)
 	j.global_position.x += 300.0

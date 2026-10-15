@@ -1,7 +1,10 @@
 class_name CameraArena
 extends Camera2D
 ## Câmera da justa. Três planos (GDD, tabela de fases):
-##   plano_aberto() - mostra a arena inteira (Apresentação, Largada)
+##   plano_aberto(centro, zoom) - plano largo; sem argumentos, o padrão
+##                    (centro_aberto/zoom_aberto). A justa usa um plano aberto
+##                    já próximo, num lado da pista (Apresentação, Largada,
+##                    Fim); a exibição usa a arena inteira (zoom 1)
 ##   seguir(alvo)   - acompanha um cavaleiro (Corrida)
 ##   focar(ponto)   - zoom num ponto fixo do mundo (Impacto)
 ##   focar_alvo(no) - zoom num nó que se move (Mira: o peito do rival)
@@ -24,9 +27,9 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 
 ## Centro do plano aberto, em coordenadas do mundo.
 @export var centro_aberto := Vector2(480, 270)
-@export var zoom_aberto := 1.0
-@export var zoom_seguir := 2.0
-@export var zoom_foco := 3.0
+@export var zoom_aberto := 1.5
+@export var zoom_seguir := 2.5
+@export var zoom_foco := 2.8
 ## Deslocamento a partir da origem (pés) do alvo seguido; x é multiplicado
 ## pela direção do cavaleiro, para a câmera olhar um pouco à frente.
 @export var deslocamento_seguir := Vector2(70, -80)
@@ -34,8 +37,8 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 @export var rapidez := 5.0
 ## Impacto: inclinação da imagem (graus) e quanto o corte entra mais fechado
 ## que o zoom final (1.2 = 20% mais perto, abrindo depois).
-@export var inclinacao_impacto := -7.0
-@export var soco_impacto := 1.1
+@export var inclinacao_impacto := -6.0
+@export var soco_impacto := 1.06
 ## Tremor (trauma): deslocamento e giro máximos com trauma 1, e quanto o
 ## trauma cai por segundo. O deslocamento é trauma² (tremor fraco fica sutil).
 @export var tremor_max_px := Vector2(14, 10)
@@ -43,6 +46,7 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 @export var tremor_queda := 1.8
 
 var plano := Plano.ABERTO
+var _centro := Vector2(480, 270)
 var _alvo: Node2D
 var _ponto := Vector2.ZERO
 var _zoom_destino := 1.0
@@ -63,10 +67,12 @@ func _ready() -> void:
 func tremer(quanto: float) -> void:
 	trauma = minf(trauma + maxf(quanto, 0.0), 1.0)
 
-func plano_aberto(imediato := false) -> void:
+## `centro` = Vector2.INF usa `centro_aberto`; `zoom_plano` <= 0 usa `zoom_aberto`.
+func plano_aberto(imediato := false, centro := Vector2.INF, zoom_plano := 0.0) -> void:
 	_alvo = null
 	_inclinacao_destino = 0.0
-	_trocar(Plano.ABERTO, zoom_aberto, imediato)
+	_centro = centro_aberto if centro == Vector2.INF else centro
+	_trocar(Plano.ABERTO, zoom_plano if zoom_plano > 0.0 else zoom_aberto, imediato)
 
 func seguir(alvo: Node2D, imediato := false) -> void:
 	_alvo = alvo
@@ -120,12 +126,12 @@ func destino() -> Vector2:
 				if dir != null:
 					d.x *= float(dir)
 				return _alvo.global_position + d
-			return centro_aberto
+			return _centro
 		Plano.FOCO:
 			if is_instance_valid(_alvo):
 				return _alvo.global_position
 			return _ponto
-	return centro_aberto
+	return _centro
 
 func _process(delta: float) -> void:
 	var k := 1.0 - exp(-rapidez * delta)
