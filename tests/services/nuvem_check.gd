@@ -28,6 +28,8 @@ func _initialize() -> void:
 
 	nuvem._cfg = {"url": "https://falso.supabase.co", "chave_publica": "pub_123", "envio_atraso_s": 0.1, "tentativas": 2}
 	nuvem.caminho_sessao = "user://teste_nuvem/sessao.json"
+	# entrar() já baixa o balanceamento: nunca gravar no cache do jogo de verdade.
+	nuvem.caminho_cache_balanceamento = "user://teste_nuvem/balanceamento_remoto.json"
 	nuvem.sessao = {}
 	nuvem.transporte = _falso
 
@@ -83,13 +85,14 @@ func _initialize() -> void:
 	root.add_child(outro)
 	outro._cfg = nuvem._cfg
 	outro.caminho_sessao = "user://teste_nuvem/sessao_outro.json"
+	outro.caminho_cache_balanceamento = "user://teste_nuvem/balanceamento_outro.json"
 	outro.sessao = {}
 	outro.transporte = _falso
 	await outro.entrar_anonimo()
 	var lido := await outro.baixar_save()
 	_checa("outro jogador nao ve o save (RLS)", lido["ok"] and not lido["existe"] and outro.sessao["usuario"] != uid)
 
-	for arq in ["jogador.json", "jogador.json.bak", "sessao.json", "sessao_outro.json"]:
+	for arq in ["jogador.json", "jogador.json.bak", "sessao.json", "sessao_outro.json", "balanceamento_outro.json"]:
 		DirAccess.remove_absolute("user://teste_nuvem/" + arq)
 	# Balanceamento remoto (3.3): baixa, guarda em cache e aplica na abertura seguinte.
 	var cache := "user://teste_nuvem/balanceamento_remoto.json"
@@ -102,6 +105,8 @@ func _initialize() -> void:
 	var aplicadas := Balanceamento.aplicar_cache_remoto(true, cache)
 	_checa("aplica so as tabelas conhecidas e de esquema nao mais antigo (%d)" % aplicadas,
 		aplicadas == 1 and int(Balanceamento.ler("treino")["ganho_pontos"]) == 7)
+	_checa("tabela remota incompleta guarda as chaves do pacote",
+		Balanceamento.ler("treino").has("folego_cavalo") and Balanceamento.ler("treino").has("duracao_por_nivel"))
 	Balanceamento.esquecer("treino")
 	_checa("esquecer volta ao pacote", int(Balanceamento.ler("treino")["ganho_pontos"]) == ganho_antes)
 	_checa("sem cache nao faz nada", Balanceamento.aplicar_cache_remoto(true, "user://teste_nuvem/nao_existe.json") == 0)

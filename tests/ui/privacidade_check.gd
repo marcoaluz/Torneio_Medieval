@@ -54,6 +54,8 @@ func _initialize() -> void:
 	nuvem._cfg = {"url": "https://falso.supabase.co", "chave_publica": "pub_123", "envio_atraso_s": 0.1, "tentativas": 1}
 	nuvem.caminho_sessao = "user://teste_privacidade/sessao.json"
 	nuvem.caminho_cache_balanceamento = "user://teste_privacidade/balanceamento.json"
+	# excluir_conta() limpa a fila de métricas: nunca a do jogo de verdade.
+	(root.get_node("Metricas") as ServicoMetricas).caminho_fila = "user://teste_privacidade/metricas.json"
 	nuvem.transporte = _falso
 	nuvem.sessao = {"access_token": "t", "refresh_token": "r", "expira_em": ServicoTempo.agora() + 3600, "usuario": "u1", "anonimo": true}
 	nuvem._salvar_sessao()

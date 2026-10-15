@@ -90,6 +90,7 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
 
   Os oráculos ficavam no scratchpad da sessão e podem não existir mais. Nesse caso, reescreva o oráculo a partir da especificação no topo do arquivo da regra.
 - **Demos e capturas:** `tests/fluxo/modo_demo.tscn` com as variáveis `TM_TELA`, `TM_ABA`, `TM_TORNEIO` e outras, listadas no topo de `modo_demo.gd`, mais `driver.sh shot` para gerar o PNG.
+- **Testes nunca tocam o `user://` real:** todo teste que usa um autoload (Nuvem, Metricas, Jogador) troca antes os caminhos (`caminho_save`, `caminho_sessao`, `caminho_cache_balanceamento`, `caminho_fila`) para uma pasta `user://teste_*`. Já aconteceu: `entrar()` baixou um balanceamento falso para o cache real e o jogo quebrou ao abrir (`folego_cavalo`).
 - **Desempenho:** `tools/benchmark.tscn`. **Economia:** `tools/simular_economia.gd`. Rode a simulação de novo se mexer em `economia.json`.
 
 ## Nunca

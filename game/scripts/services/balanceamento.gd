@@ -9,8 +9,10 @@ extends RefCounted
 ## `balanceamento`, mudada pelo painel do Supabase). A Nuvem baixa e guarda
 ## em cache (user://balanceamento_remoto.json); na abertura seguinte
 ## aplicar_cache_remoto() troca em memória as tabelas que o jogo conhece e que
-## não são de versão mais antiga que a do pacote. Sem cache ou sem rede, vale o
-## que veio no pacote (funciona com sinal fraco).
+## não são de versão mais antiga que a do pacote. A tabela remota vai POR CIMA
+## da do pacote: chave que ela não traz continua com o valor do pacote (uma
+## tabela parcial ou antiga no servidor não apaga campos que o jogo usa).
+## Sem cache ou sem rede, vale o que veio no pacote (funciona com sinal fraco).
 ##
 ## Painel de ajuste (só em desenvolvimento): definir() troca a tabela em
 ## memória para as próximas leituras, e salvar() grava o JSON de volta.
@@ -77,9 +79,19 @@ static func aplicar_cache_remoto(forcar := false, caminho := CACHE_REMOTO) -> in
 		var local := ler_json(arquivo)
 		if int((t as Dictionary).get("versao", 0)) < int(local.get("versao", 0)):
 			continue
-		definir(nome, _inteiros(t))
+		definir(nome, _por_cima(local, _inteiros(t)))
 		n += 1
 	return n
+
+## `remoto` sobre `base`, chave a chave (dicionários aninhados se juntam).
+static func _por_cima(base: Dictionary, remoto: Dictionary) -> Dictionary:
+	var d := base.duplicate(true)
+	for k in remoto:
+		if remoto[k] is Dictionary and d.get(k) is Dictionary:
+			d[k] = _por_cima(d[k], remoto[k])
+		else:
+			d[k] = remoto[k]
+	return d
 
 ## Guarda no cache as tabelas baixadas: {nome: dados}, com a revisão de cada uma.
 static func salvar_cache_remoto(tabelas: Dictionary, revisoes: Dictionary, caminho := CACHE_REMOTO) -> Error:
