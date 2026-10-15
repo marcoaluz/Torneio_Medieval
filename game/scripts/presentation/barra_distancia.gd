@@ -57,9 +57,16 @@ func _process(delta: float) -> void:
 		_lampejo = maxf(_lampejo - delta / duracao_lampejo, 0.0)
 		queue_redraw()
 
+var _moldura: StyleBoxTexture
+
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, size)
-	draw_rect(r, cor_fundo)
+	if _moldura == null:
+		_moldura = ArteUi.caixa("barra", Vector2.ZERO, -1, false, true)
+	if _moldura:
+		draw_style_box(_moldura, r)
+	else:
+		draw_rect(r, cor_fundo)
 	var trilho := Rect2(Vector2(4, size.y * 0.5 - 2), Vector2(size.x - 8, 4))
 	draw_rect(trilho, cor_trilho)
 	if brilho > 0.0:

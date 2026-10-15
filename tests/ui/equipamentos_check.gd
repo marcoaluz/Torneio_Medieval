@@ -43,8 +43,8 @@ func _initialize() -> void:
 	tela._aparencia.pressed.emit()
 	await process_frame
 	_checa("guarda-roupa: aparencia do escudeiro, status da vigia",
-		jog.visual_das_pecas()["peitoral"] == "provisorio" and jog.equipado("peitoral")["id"] == "v1"
-		and tela._retrato.camada("peitoral").texture.resource_path.contains("peitoral_provisorio"))
+		jog.visual_das_pecas()["peitoral"] == "escudeiro" and jog.equipado("peitoral")["id"] == "v1"
+		and tela._retrato.camada("peitoral").texture.resource_path.contains("peitoral_escudeiro"))
 	tela._restaurar.pressed.emit()
 	await process_frame
 	_checa("restaurar volta a aparencia da peca equipada", jog.visual_das_pecas()["peitoral"] == "vigia")

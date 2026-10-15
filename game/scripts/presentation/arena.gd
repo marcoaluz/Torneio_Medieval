@@ -24,7 +24,16 @@ extends Node2D
 @onready var fim_rival: Marker2D = $Pistas/Rival/Fim
 @onready var cerca: Node2D = $Cerca
 
+## Arte do cenário (tools/gerar_arena.py): encaixe -> (arquivo, topo em y).
+## O cenário vai de x = -160 a 1120. Sem o arquivo, fica o provisório.
+const ARTE_CENARIO := {
+	"Fundo/Arquibancada": ["res://game/art/sprites/arena/fundo.png", 0],
+	"Fundo/Chao": ["res://game/art/sprites/arena/chao.png", 194],
+	"Cerca": ["res://game/art/sprites/arena/cerca.png", 236],
+}
+
 func _ready() -> void:
+	encaixar_arte()
 	jogador.direcao = 1
 	jogador.escala = 1.0
 	vestir_jogador()
@@ -36,6 +45,29 @@ func _ready() -> void:
 	for c: Cavaleiro in [jogador, rival]:
 		if c.camadas():
 			c.camadas().pre_carregar()
+
+## Troca o provisório do cenário pela arte, onde ela existir.
+func encaixar_arte() -> void:
+	for caminho: String in ARTE_CENARIO:
+		var arq: String = ARTE_CENARIO[caminho][0]
+		var no := get_node_or_null(caminho) as Node2D
+		if no == null or not ResourceLoader.exists(arq):
+			continue
+		for filho in no.get_children():
+			if filho.is_in_group("provisorio"):
+				filho.visible = false
+		if caminho == "Fundo/Arquibancada":
+			for outro in ["Fundo/Ceu"]:
+				var n := get_node_or_null(outro) as CanvasItem
+				if n:
+					n.visible = false
+		var s := Sprite2D.new()
+		s.name = "Arte"
+		s.centered = false
+		s.texture = load(arq)
+		s.position = Vector2(-160, float(ARTE_CENARIO[caminho][1])) - no.position
+		no.add_child(s)
+		no.move_child(s, 0)
 
 ## Aparência do cavaleiro do jogador a partir dos dados do jogador (se houver).
 func vestir_jogador() -> void:

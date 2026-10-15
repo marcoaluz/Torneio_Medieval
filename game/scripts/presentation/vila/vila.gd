@@ -81,6 +81,8 @@ func _ready() -> void:
 	tela_forja.abrir_equipamentos.connect(func(): tela_equipamentos.abrir())
 	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())
 	janela_oferta.ver.connect(func(_id): fechar_painel(); tela_loja.abrir("ofertas"))
+	_icones_do_topo()
+	_chao_com_arte()
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	cena_historia.terminou.connect(_ao_terminar_cena)
@@ -90,13 +92,70 @@ func _ready() -> void:
 		notif.pronto.connect(func(t): mostrar_letreiro(tr("NOTIF_" + str(t["tipo"]).to_upper())))
 	atualizar()
 
+## Chão da vila com arte (ChaoVila); trilhas até a frente de cada prédio.
+func _chao_com_arte() -> void:
+	var chao := ChaoVila.new()
+	chao.name = "Arte"
+	$Chao.add_child(chao)
+	$Chao.move_child(chao, 0)
+	var destinos := []
+	for p: PredioVila in $Predios.get_children():
+		destinos.append(p.position + Vector2(0, p.tamanho.y * 0.45))
+	if chao.montar(destinos):
+		for f in $Chao.get_children():
+			if f.is_in_group("provisorio"):
+				f.visible = false
+	else:
+		chao.queue_free()
+
+var _recursos := {}  ## ouro/gemas/renome -> Label do número (com ícone ao lado)
+
+## Ícones da interface (tools/gerar_ui.py) no topo: ouro, gemas e renome com o
+## número ao lado, e nos botões. Sem a arte, fica o texto de antes.
+func _icones_do_topo() -> void:
+	var tex_ouro := ArteUi.textura("icone_ouro")
+	if tex_ouro == null:
+		return
+	var linha := _topo_ouro.get_parent()
+	var caixa := HBoxContainer.new()
+	caixa.name = "Recursos"
+	caixa.add_theme_constant_override("separation", 4)
+	linha.add_child(caixa)
+	linha.move_child(caixa, _topo_ouro.get_index())
+	_topo_ouro.visible = false
+	for par in [["ouro", "icone_ouro", "VILA_OURO_DICA"], ["gemas", "icone_gema", "VILA_GEMAS_DICA"], ["renome", "icone_renome", "VILA_RENOME_DICA"]]:
+		var ic := TextureRect.new()
+		ic.texture = ArteUi.textura(par[1])
+		ic.custom_minimum_size = Vector2(28, 28)
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ic.tooltip_text = tr(par[2])
+		caixa.add_child(ic)
+		var l := Label.new()
+		l.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
+		l.custom_minimum_size.x = 44
+		caixa.add_child(l)
+		_recursos[par[0]] = l
+	for b in [[_botao_missoes, "icone_missoes"], [_botao_social, "icone_ordem"], [_botao_baus, "icone_bau"],
+			[$Interface/Topo/Linha/Config as Button, "icone_config"]]:
+		var bt: Button = b[0]
+		bt.icon = ArteUi.textura(b[1])
+		bt.expand_icon = false
+	($Interface/Topo/Linha/Config as Button).text = ""
+
 ## Atualiza prédios e topo a partir dos dados (e o painel aberto).
 func atualizar() -> void:
 	var cav := _jog.cavaleiro()
 	_topo_nome.text = tr("VILA_TOPO").format({"nome": cav["nome"] if cav["nome"] != "" else "—",
 		"nivel": cav["nivel"], "casa": _jog.casa()["nome"]})
-	_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()}) + "  ·  " + tr("VILA_GEMAS").format({"gemas": _jog.gemas()}) \
-		+ "  ·  " + tr("VILA_RENOME").format({"renome": _jog.renome()}) + ("  ·  VIP" if _jog.vip_ativo() else "")
+	if _recursos.is_empty():
+		_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()}) + "  ·  " + tr("VILA_GEMAS").format({"gemas": _jog.gemas()}) \
+			+ "  ·  " + tr("VILA_RENOME").format({"renome": _jog.renome()}) + ("  ·  VIP" if _jog.vip_ativo() else "")
+	else:
+		_recursos["ouro"].text = str(_jog.ouro())
+		_recursos["gemas"].text = str(_jog.gemas())
+		_recursos["renome"].text = str(_jog.renome()) + ("   VIP" if _jog.vip_ativo() else "")
 	# Oferta nova (GDD: janela que fecha com um toque, sem bloquear).
 	if not janela_oferta.visible and not cena_historia.visible:
 		var of := _jog.oferta_nova()

@@ -93,6 +93,11 @@ func definir_brasao(dados: Dictionary) -> void:
 		if img:
 			img.texture = GeradorBrasao.textura(dados, LUGARES_BRASAO[caminho])
 
+## Textura do brasão do escudo (para a plaquinha da interface).
+func brasao_textura() -> Texture2D:
+	var img := get_node_or_null("Visual/Cavaleiro/Escudo/Brasao/Imagem") as Sprite2D
+	return img.texture if img else null
+
 ## Centro do quadro de 160×160 (cavalo e cavaleiro), já com a escala.
 func centro() -> Vector2:
 	return global_position + Vector2(0, -80 * escala)

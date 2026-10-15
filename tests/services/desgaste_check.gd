@@ -24,12 +24,12 @@ func _initialize() -> void:
 		estagios.append(jog.estagio_dano(elmo_id))
 	_checa("estagios por porcentagem %s" % [estagios], estagios == [0, 0, 1, 1, 2, 2, 3, 3])
 	_durabilidade(jog, elmo_id, 60)
-	_checa("visual da peca com o estagio", jog.visual_das_pecas()["elmo"] == "provisorio_d2")
+	_checa("visual da peca com o estagio", jog.visual_das_pecas()["elmo"] == "escudeiro_d2")
 	var cav: Cavaleiro = load("res://game/scenes/arena/cavaleiro.tscn").instantiate()
 	root.add_child(cav)
 	await process_frame
 	AparenciaJogador.vestir_cavaleiro(cav, jog)
-	_checa("arte do estagio de dano no cavaleiro", cav.camadas().camada("elmo").texture.resource_path.contains("elmo_provisorio_d2"))
+	_checa("arte do estagio de dano no cavaleiro", cav.camadas().camada("elmo").texture.resource_path.contains("elmo_escudeiro_d2"))
 	cav.camadas().vestir({"elmo": "semarte_d2"})
 	_checa("sem arte de dano usa a peca inteira (e some se nem ela existe)", not cav.camadas().camada("elmo").visible)
 

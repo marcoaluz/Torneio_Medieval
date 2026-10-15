@@ -949,3 +949,6 @@ CONFIG_VOLUME_SFX,Efeitos,Effects
 CONFIG_VOLUME_VOZ,Voz do arauto,Herald voice
 CONFIG_VOLUME_AMBIENTE,Ambiente e torcida,Ambience and crowd
 CONFIG_VOLUME_UI,Interface,Interface
+VILA_OURO_DICA,Ouro,Gold
+VILA_GEMAS_DICA,Gemas,Gems
+VILA_RENOME_DICA,Renome,Renown

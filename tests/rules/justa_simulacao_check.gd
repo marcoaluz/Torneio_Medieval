@@ -8,8 +8,8 @@ extends SceneTree
 
 const REFERENCIA := "res://tests/shared/justa_referencia.json"
 ## Centro do peito do alvo em décimos de px (ver mira.json).
-const PEITO := Vector2i(0, -1060)
-const CAPACETE := Vector2i(0, -1390)
+const PEITO := Vector2i(80, -860)
+const CAPACETE := Vector2i(120, -1280)
 const CAVALO := Vector2i(0, -620)
 
 var _falhas := 0

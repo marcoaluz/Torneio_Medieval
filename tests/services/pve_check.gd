@@ -92,7 +92,7 @@ func _initialize() -> void:
 	var quadros := 0
 	while not c.justa.terminou() and quadros < 30 * 90:
 		if c.fase() == JustaFases.Fase.MIRA:
-			preload("res://tests/arena/justa_check.gd").robo_mira(c, Vector2(-5, -106))
+			preload("res://tests/arena/justa_check.gd").robo_mira(c, Vector2(8, -86))
 		c._process(1.0 / 30.0)
 		quadros += 1
 	_checa("fim da justa conclui a disputa no jogador", not c.resultado_disputa.is_empty() and c.resultado_disputa["ok"])

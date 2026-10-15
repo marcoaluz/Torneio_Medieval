@@ -60,7 +60,7 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
   - Parte 2: 2.1–2.11; 2.12 ligado ao projeto Supabase `Torneio_Medieval` (2026-10-13, migrações `contas_e_save` e `metricas` aplicadas); falta só o CAPTCHA no painel.
   - Parte 3: 3.12–3.25, todos locais. PvP, ordens, chat, compras e anúncios estão simulados ou com provedor de teste até o servidor existir.
 - **Próximo, em ordem:**
-  0. **Arte e som gerados (2026-10-14)** com o crédito autorizado pelo usuário: todos os sons, a voz do arauto (`00x0gOIgUbOG6wYRHdVH`), os prédios e os retratos. Geradores: `tools/gerar_sons.py`, `tools/gerar_arte.py`, `tools/montar_folhas_vila.gd`; chaves em `.chaves.env` na raiz (fora do git; nunca ler nem mostrar). Gerar de novo gasta crédito: perguntar antes.
+  0. **Arte e som gerados (2026-10-14/15)** com o crédito autorizado pelo usuário: todos os sons, a voz do arauto (`00x0gOIgUbOG6wYRHdVH`), prédios, retratos, cavaleiro/cavalo/7 conjuntos em camadas nos 3 tamanhos, arena, chão da vila e interface (`docs/PERSONAGEM.md` > Geração automática; `tools/gerar_personagem*.py`, `gerar_arena.py`, `gerar_ui.py`). Geradores: `tools/gerar_sons.py`, `tools/gerar_arte.py`, `tools/montar_folhas_vila.gd`; chaves em `.chaves.env` na raiz (fora do git; nunca ler nem mostrar). Gerar de novo gasta crédito: perguntar antes.
   1. **Servidor 3.1–3.11: escrito e testado, nada publicado** (`docs/SERVIDOR.md`, `docs/OPERACAO.md`, `docs/AUDITORIA.md`):
      - regra e economia em TypeScript em `supabase/functions/_shared/`, testadas com Node 24 (`cd supabase && node --test "tests/regra/*.test.ts"`) contra `tests/shared/*.json` e os cenários gravados pelo GDScript;
      - migrações em `supabase/migrations/` (rascunho, não aplicadas) e Edge Functions escritas; só publicar/aplicar o que o usuário autorizar;
@@ -81,6 +81,8 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
 - **Servidor em TypeScript:** mudou regra ou economia do GDScript? Mude o porte em `supabase/functions/_shared/`, regrave os cenários (`tools/gravar_cenarios.gd`) e rode os testes dos dois lados; sem enum/namespace/parâmetro-propriedade nos `.ts` (Node só apaga tipos). O relógio do GDScript pode ser parado com `ServicoTempo.fixo` (só para gravações).
 - **Comando público novo no `ServicoJogador`:** escreva como `_cmd_<nome>` e acrescente o invólucro na seção "comandos públicos" (é ele que avisa `acao_feita` para a fila do servidor); o nome tem que existir em `PUBLICOS` no TypeScript.
 - **Som:** todo som entra primeiro em `game/data/audio/sons.json`; o jogo acha `<pasta>/<id>_NN.(ogg|mp3|wav)`. Sem arquivo, não toca.
+- **Ferramentas de arte (PixelLab):** rodar com `python -E -P` (o Pillow está na pasta do usuário; `-I` a esconde). Cliente em `tools/pixellab_cliente.py` (cache em `game/art/fontes/cache/`, fora do git). Limites que já morderam: altura múltipla de 4; pixen até 768 de largura; edit/transfer de 160 px = 4/3 quadros por pedido; quadros em `{"image":…, "size":…}`; o servidor às vezes devolve 504 (o cliente reenvia).
+- **Mudou a geometria do cavaleiro?** Meça as zonas na arte, atualize `mira.json`, os pontos fixos dos testes e regrave as referências (`TM_GRAVAR=1`) e os cenários (`tools/gravar_cenarios.gd`).
 - **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
 - **Mudança na regra da justa:**
   - regere os casos compartilhados com o oráculo Python correspondente;

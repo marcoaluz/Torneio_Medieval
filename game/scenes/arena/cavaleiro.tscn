@@ -11,7 +11,7 @@ script = ExtResource("1")
 [node name="Cavalo" type="Node2D" parent="Visual"]
 
 [node name="Manta" type="Node2D" parent="Visual/Cavalo"]
-position = Vector2(-4, -71)
+position = Vector2(-10, -70)
 
 [node name="BrasaoManta" type="Node2D" parent="Visual/Cavalo/Manta"]
 
@@ -20,27 +20,27 @@ position = Vector2(-4, -71)
 [node name="Cavaleiro" type="Node2D" parent="Visual"]
 
 [node name="Corpo" type="Node2D" parent="Visual/Cavaleiro"]
-position = Vector2(0, -100)
+position = Vector2(8, -100)
 
 [node name="Peito" type="Node2D" parent="Visual/Cavaleiro"]
-position = Vector2(0, -106)
+position = Vector2(9, -97)
 
 [node name="BrasaoPeito" type="Node2D" parent="Visual/Cavaleiro/Peito"]
 
 [node name="Imagem" type="Sprite2D" parent="Visual/Cavaleiro/Peito/BrasaoPeito"]
 
 [node name="Capacete" type="Node2D" parent="Visual/Cavaleiro"]
-position = Vector2(0, -139)
+position = Vector2(12, -128)
 
 [node name="Escudo" type="Node2D" parent="Visual/Cavaleiro"]
-position = Vector2(14, -108)
+position = Vector2(5, -102)
 
 [node name="Brasao" type="Node2D" parent="Visual/Cavaleiro/Escudo"]
 
 [node name="Imagem" type="Sprite2D" parent="Visual/Cavaleiro/Escudo/Brasao"]
 
 [node name="Lanca" type="Node2D" parent="Visual"]
-position = Vector2(8, -118)
+position = Vector2(20, -91)
 
 [node name="Camadas" type="Node2D" parent="." node_paths=PackedStringArray("raiz")]
 script = ExtResource("3")

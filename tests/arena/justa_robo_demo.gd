@@ -27,4 +27,4 @@ func _process(_delta: float) -> void:
 			if j.jogador.t_ms >= p / 2 and (resto <= 17 or resto > p - 17):
 				c.tocar()
 		JustaFases.Fase.MIRA:
-			preload("res://tests/arena/justa_check.gd").robo_mira(c, Vector2(-5, -106))
+			preload("res://tests/arena/justa_check.gd").robo_mira(c, Vector2(8, -86))

@@ -1,15 +1,15 @@
 {
-	"versao": 2,
-	"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn). v2 (3.16): o crescimento pela precisao tem teto suave (joelho_pct do maximo passa inteiro; acima, cada ponto rende menos). GDD: acerto ate o teto, perto dele cada ponto rende menos.",
+	"versao": 3,
+	"_nota": "Zonas em px do quadro 160x160 do cavaleiro (origem no chao entre as patas, x para a frente, y para cima negativo), retangulos [x, y, largura, altura]. Ordem de prioridade: a primeira zona que contem o ponto vence. Precisao aumenta so as zonas que pontuam; o cavalo (falta) nao cresce. Precisa bater com a arte (cavaleiro.tscn). v2 (3.16): o crescimento pela precisao tem teto suave (joelho_pct do maximo passa inteiro; acima, cada ponto rende menos). GDD: acerto ate o teto, perto dele cada ponto rende menos. v3 (2026-10-15): zonas medidas na arte do PixelLab (tools/gerar_personagem.py): escudo pequeno no ombro cobre a metade de tras do peito; a frente e a parte de baixo do tronco ficam expostas.",
 	"zonas": [
 		{
 			"nome": "escudo",
 			"retangulos": [
 				[
-					6,
-					-123,
+					-3,
+					-113,
 					16,
-					30
+					22
 				]
 			],
 			"cresce": true
@@ -18,10 +18,10 @@
 			"nome": "capacete",
 			"retangulos": [
 				[
-					-10,
-					-150,
+					2,
+					-140,
 					20,
-					22
+					24
 				]
 			],
 			"cresce": true
@@ -30,10 +30,10 @@
 			"nome": "peito",
 			"retangulos": [
 				[
-					-12,
-					-128,
+					-3,
+					-114,
 					24,
-					44
+					34
 				]
 			],
 			"cresce": true
@@ -42,22 +42,22 @@
 			"nome": "cavalo",
 			"retangulos": [
 				[
-					-50,
-					-84,
-					100,
-					42
+					-55,
+					-88,
+					105,
+					40
 				],
 				[
-					36,
-					-116,
-					38,
-					34
+					45,
+					-104,
+					33,
+					36
 				],
 				[
-					-60,
-					-80,
-					10,
-					26
+					-72,
+					-85,
+					17,
+					30
 				]
 			],
 			"cresce": false
@@ -70,7 +70,7 @@
 	},
 	"ponta_inicial": [
 		40,
-		-175
+		-165
 	],
 	"limites_ponta": [
 		-90,

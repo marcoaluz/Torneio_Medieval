@@ -1,80 +1,128 @@
 {
 	"versao": 1,
-	"_nota": "Gerado por tools/extrair_pontos.gd a partir das folhas pontos_<anim>.png. Nao edite a mao.",
+	"_nota": "justa: gerado por tools/gerar_personagem.py (centro do escudo, do peitoral e da caparacao em cada quadro; escudo rigido = igual em todos os conjuntos). equipamentos: tools/extrair_pontos.gd. Nao edite a mao.",
 	"justa": {
 		"parado": {
 			"brasao": [
 				[
-					14,
-					-108
+					5,
+					-103
 				]
 			],
 			"brasao_peito": [
 				[
-					0,
-					-100
+					7,
+					-81
 				]
 			],
 			"brasao_manta": [
 				[
-					-4,
-					-71
+					-30,
+					-59
 				]
 			]
 		},
 		"galope": {
 			"brasao": [
 				[
-					14,
-					-108
+					8,
+					-100
 				],
 				[
-					14,
-					-110
+					8,
+					-99
 				],
 				[
-					14,
-					-111
+					7,
+					-99
 				],
 				[
-					14,
-					-109
+					5,
+					-101
+				],
+				[
+					5,
+					-103
+				],
+				[
+					6,
+					-105
+				],
+				[
+					7,
+					-104
+				],
+				[
+					7,
+					-102
 				]
 			],
 			"brasao_peito": [
 				[
-					0,
-					-100
+					10,
+					-78
 				],
 				[
-					0,
-					-102
+					10,
+					-77
 				],
 				[
-					0,
-					-103
+					9,
+					-77
 				],
 				[
-					0,
-					-101
+					7,
+					-79
+				],
+				[
+					7,
+					-81
+				],
+				[
+					8,
+					-83
+				],
+				[
+					9,
+					-82
+				],
+				[
+					9,
+					-80
 				]
 			],
 			"brasao_manta": [
 				[
-					-4,
-					-71
+					-26,
+					-57
 				],
 				[
-					-4,
-					-73
+					-26,
+					-57
 				],
 				[
-					-4,
-					-74
+					-29,
+					-55
 				],
 				[
-					-4,
-					-72
+					-30,
+					-57
+				],
+				[
+					-30,
+					-59
+				],
+				[
+					-28,
+					-60
+				],
+				[
+					-28,
+					-61
+				],
+				[
+					-27,
+					-60
 				]
 			]
 		}
@@ -83,20 +131,20 @@
 		"parado": {
 			"brasao": [
 				[
-					76,
-					-82
+					-36,
+					-155
 				]
 			]
 		},
 		"respirar": {
 			"brasao": [
 				[
-					76,
-					-82
+					-36,
+					-155
 				],
 				[
-					76,
-					-84
+					-36,
+					-155
 				]
 			]
 		}

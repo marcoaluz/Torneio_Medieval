@@ -90,7 +90,7 @@ func _initialize() -> void:
 			if j.jogador.t_ms >= p / 2 and (resto <= 17 or resto > p - 17):
 				c.tocar()
 		elif c.fase() == JustaFases.Fase.MIRA:
-			preload("res://tests/arena/justa_check.gd").robo_mira(c, Vector2(-5, -106))
+			preload("res://tests/arena/justa_check.gd").robo_mira(c, Vector2(8, -86))
 		c._process(1.0 / 30.0)
 		quadros += 1
 	_checa("dica da largada aparece", viu_dica_largada)

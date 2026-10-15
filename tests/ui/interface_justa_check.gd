@@ -3,7 +3,7 @@ extends SceneTree
 ## plaquinhas, botão de habilidade (carga, uso único, não vira toque do jogo),
 ## letreiro, resultado no fim e recomeço com toque. Robô igual ao da arena.
 
-const PEITO := Vector2(-5, -106)
+const PEITO := Vector2(8, -86)
 
 var _falhas := 0
 

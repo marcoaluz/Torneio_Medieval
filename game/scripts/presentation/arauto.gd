@@ -12,8 +12,36 @@ extends Node2D
 var levantada := true
 var _tween: Tween
 
+## Arte gerada (tools: PixelLab): corpo com os pés na origem e a bandeira com o
+## pé do mastro na origem do giro, presa ao punho erguido. Sem ela, o provisório.
+const ARTE_CORPO := "res://game/art/sprites/arena/arauto_corpo.png"
+const ARTE_BANDEIRA := "res://game/art/sprites/arena/arauto_bandeira.png"
+const PUNHO := Vector2(12, -53)
+
 func _ready() -> void:
+	if not Engine.is_editor_hint():
+		_encaixar_arte()
 	levantar()
+
+func _encaixar_arte() -> void:
+	if not (ResourceLoader.exists(ARTE_CORPO) and ResourceLoader.exists(ARTE_BANDEIRA)):
+		return
+	for no in [get_node("Corpo"), get_node("Bandeira")]:
+		for f in no.get_children():
+			if f.is_in_group("provisorio"):
+				f.visible = false
+	var corpo := Sprite2D.new()
+	corpo.texture = load(ARTE_CORPO)
+	corpo.centered = false
+	corpo.position = Vector2(-corpo.texture.get_width() / 2, -corpo.texture.get_height())
+	get_node("Corpo").add_child(corpo)
+	var b := get_node("Bandeira") as Node2D
+	b.position = PUNHO
+	var pano := Sprite2D.new()
+	pano.texture = load(ARTE_BANDEIRA)
+	pano.centered = false
+	pano.position = Vector2(0, -3)
+	b.add_child(pano)
 
 func levantar() -> void:
 	levantada = true

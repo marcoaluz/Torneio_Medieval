@@ -28,6 +28,7 @@ var _armadura_inicial_rival := 0
 var _tempo_letreiro := 0.0
 
 func _ready() -> void:
+	_vestir_arte()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for c in find_children("*", "Control", true, false):
 		if c != botao:
@@ -96,8 +97,8 @@ func _ao_comecar_passada(numero: int) -> void:
 	resultado.visible = false
 	_armadura_inicial_jogador = _soma_armadura(j.lado_jogador)
 	_armadura_inicial_rival = _soma_armadura(j.lado_rival)
-	plaquinha_jogador.definir(tr(controlador.nome_jogador if controlador.nome_jogador != "" else "JUSTA_NOME_JOGADOR"), controlador.arena.jogador.cor_casa)
-	plaquinha_rival.definir(tr(controlador.nome_rival) if controlador.nome_rival != "" else "", controlador.arena.rival.cor_casa)
+	plaquinha_jogador.definir(tr(controlador.nome_jogador if controlador.nome_jogador != "" else "JUSTA_NOME_JOGADOR"), controlador.arena.jogador.cor_casa, controlador.arena.jogador.brasao_textura())
+	plaquinha_rival.definir(tr(controlador.nome_rival) if controlador.nome_rival != "" else "", controlador.arena.rival.cor_casa, controlador.arena.rival.brasao_textura())
 
 ## Exibição: o arauto explica cada fase. Tutorial: a dica da fase fica na tela.
 func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> void:
@@ -225,6 +226,7 @@ func mostrar_letreiro(texto: String) -> void:
 	letreiro.text = texto
 	letreiro.visible = true
 	_tempo_letreiro = duracao_letreiro
+	_ajustar_letreiro()
 
 ## Peças de armadura = todo o equipamento menos a lança.
 static func _soma_armadura(lado: Dictionary) -> int:
@@ -237,3 +239,35 @@ static func _soma_armadura(lado: Dictionary) -> int:
 
 static func _fracao_armadura(lado: Dictionary, inicial: int) -> float:
 	return 1.0 if inicial <= 0 else float(_soma_armadura(lado)) / inicial
+
+## Molduras desenhadas (tools/gerar_ui.py), quando existirem.
+func _vestir_arte() -> void:
+	var placar := get_node_or_null("Topo/Centro/Placar") as Label
+	var c := ArteUi.caixa("placar", Vector2(30, 4), -1, false, true)
+	if placar and c:
+		placar.add_theme_stylebox_override("normal", c)
+		placar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		placar.custom_minimum_size.x = 176
+	var letreiro := get_node_or_null("Letreiro") as Label
+	c = ArteUi.caixa("letreiro", Vector2(40, 8), -1, false, true)
+	if letreiro and c:
+		letreiro.add_theme_stylebox_override("normal", c)
+		# A fita fica do tamanho do texto, centrada (o Label ocupava a largura toda).
+		letreiro.anchor_left = 0.5
+		letreiro.anchor_right = 0.5
+		letreiro.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	var resultado := get_node_or_null("Resultado") as PanelContainer
+	c = ArteUi.caixa("painel", Vector2(26, 20))
+	if resultado and c:
+		resultado.add_theme_stylebox_override("panel", c)
+
+func _ajustar_letreiro() -> void:
+	var st := letreiro.get_theme_stylebox("normal")
+	if not st is StyleBoxTexture:
+		return
+	var fonte := letreiro.get_theme_font("font")
+	var tam := letreiro.get_theme_font_size("font_size")
+	var w := fonte.get_string_size(letreiro.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tam).x + st.content_margin_left + st.content_margin_right
+	letreiro.offset_left = -w * 0.5
+	letreiro.offset_right = w * 0.5
+

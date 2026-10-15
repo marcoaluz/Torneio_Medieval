@@ -6,7 +6,7 @@ extends SceneTree
 ## encontrando no fim da Mira.
 
 ## Parte do peito que o escudo não cobre, no quadro do alvo (px); ver mira.json.
-const PEITO := Vector2(-5, -106)
+const PEITO := Vector2(8, -86)
 
 var _falhas := 0
 var _log: Array[String] = []

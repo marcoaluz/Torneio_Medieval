@@ -18,7 +18,8 @@ func _ready() -> void:
 		c.casa_secundaria = casas[i][1]
 		c.casa_metal = casas[i][2]
 		add_child(c)
-		c.camadas().vestir({"pelagem": casas[i][3], "corpo": "feminino" if i == 1 else "masculino"})
+		c.camadas().vestir({"pelagem": casas[i][3], "corpo": "feminino" if i == 1 else "masculino",
+			"elmo": "vigia", "peitoral": "vigia", "escudo": "vigia", "lanca": "vigia", "caparacao": "vigia"})
 		c.animar("galope")
 	var rival: Cavaleiro = CAVALEIRO.instantiate()
 	rival.position = Vector2(700, 200)

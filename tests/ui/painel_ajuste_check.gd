@@ -30,9 +30,9 @@ func _initialize() -> void:
 
 	p.definir_valor("galope", "galope.compasso_ms", 600)
 	_checa("compasso muda na justa em andamento (%d)" % c.justa.jogador.compasso_ms(), c.justa.jogador.compasso_ms() == 600)
-	var antes := Mira.zona_no_ponto(c._cfg["mira"], Vector2i(150, -1390), 0, 0)
+	var antes := Mira.zona_no_ponto(c._cfg["mira"], Vector2i(250, -1290), 0, 0)
 	p.definir_valor("mira", "zonas.1.retangulos.0.2", 30)
-	var depois := Mira.zona_no_ponto(c._cfg["mira"], Vector2i(150, -1390), 0, 0)
+	var depois := Mira.zona_no_ponto(c._cfg["mira"], Vector2i(250, -1290), 0, 0)
 	_checa("zona do capacete alarga na hora (%s -> %s)" % [antes, depois], antes == "erro" and depois == "capacete")
 	_checa("valor lido de volta", p.ler_valor("mira", "zonas.1.retangulos.0.2") == 30)
 

@@ -14,6 +14,14 @@ var carga := 0.0:
 		carga = clampf(v, 0.0, 1.0)
 		queue_redraw()
 
+func _ready() -> void:
+	var tex := ArteUi.textura("botao_habilidade")
+	if tex:
+		for estado in ["normal", "hover", "pressed", "disabled", "focus"]:
+			var st := StyleBoxTexture.new()
+			st.texture = tex
+			add_theme_stylebox_override(estado, st)
+
 func _draw() -> void:
 	var centro := size * 0.5
 	var raio := minf(size.x, size.y) * 0.5 - espessura_anel * 0.5

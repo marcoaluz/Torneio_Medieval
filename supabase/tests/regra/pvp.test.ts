@@ -12,7 +12,7 @@ import type { Servico } from "../../functions/_shared/servidor/base.ts";
 import { agir, bal, JOGADOR, montar, OUTRO, PERS } from "./fixtura.ts";
 import type { Dados } from "./comum.ts";
 
-const PEITO = { x: 0, y: -1060 };
+const PEITO = { x: 80, y: -860 };
 
 /** Jogador-robô: larga 100 ms depois da bandeira, toca no compasso, mira no peito e solta. */
 function robo(cfg: Dados, lado_jogador: Dados, lado_rival: Dados, semente: number, perfil: Dados): [number, string, number, number][] {

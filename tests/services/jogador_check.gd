@@ -48,7 +48,7 @@ func _initialize() -> void:
 	var elmo_id: String = j.estado["equipamento"]["elmo"]
 	_checa("equipar item inexistente falha", not j.equipar("nada")["ok"])
 	_checa("guarda-roupa no espaco errado falha", j.definir_visual("peitoral", elmo_id)["erro"] == "espaco_errado")
-	_checa("guarda-roupa ok", j.definir_visual("elmo", elmo_id)["ok"] and j.visual_das_pecas()["elmo"] == "provisorio")
+	_checa("guarda-roupa ok", j.definir_visual("elmo", elmo_id)["ok"] and j.visual_das_pecas()["elmo"] == "escudeiro")
 
 	# Lado para a justa
 	var lado := j.lado_para_justa()

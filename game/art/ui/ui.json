@@ -1,0 +1,149 @@
+{
+ "botao": {
+  "tamanho": [
+   104,
+   34
+  ],
+  "borda": 12
+ },
+ "painel": {
+  "tamanho": [
+   122,
+   123
+  ],
+  "borda": 36
+ },
+ "campo": {
+  "tamanho": [
+   116,
+   29
+  ],
+  "borda": 8
+ },
+ "aba": {
+  "tamanho": [
+   76,
+   36
+  ],
+  "borda": 10
+ },
+ "placar": {
+  "tamanho": [
+   169,
+   47
+  ],
+  "borda": 16
+ },
+ "plaquinha": {
+  "tamanho": [
+   187,
+   26
+  ],
+  "borda": 16
+ },
+ "barra": {
+  "tamanho": [
+   230,
+   15
+  ],
+  "borda": 10
+ },
+ "botao_habilidade": {
+  "tamanho": [
+   56,
+   56
+  ],
+  "borda": 0
+ },
+ "letreiro": {
+  "tamanho": [
+   253,
+   34
+  ],
+  "borda": 20
+ },
+ "icone_ouro": {
+  "tamanho": [
+   24,
+   24
+  ],
+  "borda": 0
+ },
+ "icone_gema": {
+  "tamanho": [
+   22,
+   22
+  ],
+  "borda": 0
+ },
+ "icone_renome": {
+  "tamanho": [
+   26,
+   26
+  ],
+  "borda": 0
+ },
+ "icone_bau": {
+  "tamanho": [
+   24,
+   22
+  ],
+  "borda": 0
+ },
+ "icone_config": {
+  "tamanho": [
+   26,
+   26
+  ],
+  "borda": 0
+ },
+ "icone_missoes": {
+  "tamanho": [
+   22,
+   22
+  ],
+  "borda": 0
+ },
+ "icone_ordem": {
+  "tamanho": [
+   30,
+   30
+  ],
+  "borda": 0
+ },
+ "icone_fragmentos": {
+  "tamanho": [
+   28,
+   28
+  ],
+  "borda": 0
+ },
+ "icone_ferro": {
+  "tamanho": [
+   26,
+   26
+  ],
+  "borda": 0
+ },
+ "icone_aco": {
+  "tamanho": [
+   24,
+   24
+  ],
+  "borda": 0
+ },
+ "icone_sucata": {
+  "tamanho": [
+   28,
+   19
+  ],
+  "borda": 0
+ },
+ "icone_chave": {
+  "tamanho": [
+   26,
+   26
+  ],
+  "borda": 0
+ }
+}

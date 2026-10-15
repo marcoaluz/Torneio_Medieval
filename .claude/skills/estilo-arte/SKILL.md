@@ -34,6 +34,10 @@ Para prédios e vila (vista de cima) troque "side view facing right" por "top-do
 
 `python -I tools/gerar_arte.py --simular` lista o que falta; sem `--simular` gera (chave `PIXELLAB_API_KEY` em `.chaves.env`, fora do git). Cobre prédios da vila (cada estágio parte do anterior, mesma semente) e retratos da história, sempre com a **paleta do jogo forçada** (`color_image` montada de `paletas.json`: cores da casa, metais, neutros, peles, cabelos e `mundo`), para tudo combinar. Os estágios brutos ficam em `game/art/fontes/vila/` e `tools/montar_folhas_vila.gd` monta as folhas. Cores da casa sorteadas seguem a regra das tinturas (`paletas.json > tinturas`: metal com cor, nunca cor com cor).
 
+## Personagem, cenário e interface por script (2026-10-15)
+
+Personagem em camadas: `tools/gerar_personagem.py` (justa) e `tools/gerar_personagem_pe.py` (vila e retrato) — ver `docs/PERSONAGEM.md` > Geração automática. Cenário da arena: `tools/gerar_arena.py`. Interface: `tools/gerar_ui.py` (gerar, prancha para escolher, exportar). Peças novas pedem tecido vermelho, debrum azul e aço cinza (a máscara de cor da casa sai disso). Arte de fundo com baixo contraste (os cavaleiros têm que saltar à vista).
+
 ## Tamanhos de quadro
 
 Resolução base do jogo: **960×540** (ver `docs/DECISOES.md`). Em celulares mais largos a altura fica 540 e a largura cresce (20:9 → 1200, 21:9 → ~1260): o que é essencial cabe em 960×540, mas fundos e cenários precisam se estender até 1280 de largura.

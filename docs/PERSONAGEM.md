@@ -31,3 +31,21 @@ Como o cavaleiro e o cavalo são montados no jogo, e como exportar as peças do 
 7. **Nomes**: `game/art/sprites/personagem/<tamanho>/<camada>_<variante>_<animação>.png`, em minúsculas com sublinhado. Exemplos: `peitoral_ferro_negro_galope.png`, `peitoral_ferro_negro_galope_mascara.png`, `cavalo_preto_parado.png`, `peitoral_ferro_negro_galope_d2.png` (dano, 2.9).
 8. **Retoque obrigatório** antes de exportar: cavalo com a mesma altura em todos os quadros, a lança saindo sempre do mesmo ponto da mão, sem pixel semitransparente na borda (o filtro é nearest).
 9. **Depois de importar**: `tools/extrair_pontos.gd` (se houver pontos novos), `tests/personagem/camadas_check.gd` e uma captura da vitrine (`tests/personagem/vitrine.tscn`). Se a peça nova mudou o desenho das zonas de acerto, ajuste os retângulos em `game/data/balance/mira.json` para baterem com a arte.
+
+## Geração automática no PixelLab (2026-10-15)
+
+A arte do cavaleiro, do cavalo e dos 7 conjuntos foi gerada por script, nos três tamanhos, mantendo esta arquitetura de camadas. Ferramentas (rodar com `python -E -P`, o Pillow está na pasta do usuário):
+
+- **Justa** — `tools/gerar_personagem.py` (`base`, `cavaleiro <corpo>`, `pelagens`, `conjunto <c>`, `exportar_base`, `exportar <c>`):
+  - Cavalo: galope de 8 quadros (PixMiniMax, ciclo que fecha no mesmo quadro) e parado; quadro de trabalho 256×160 com a origem do jogo em (80, 160).
+  - Cavaleiro e armadura são **rígidos**: pintados uma vez sobre o galope 0 e levados a cada quadro pela posição da sela (`casar_sela`), como em muitos jogos 2D.
+  - **Recorte por cor**: o PixelLab pinta (inpaint-v3, só dentro da máscara) sobre o cavalo em verde e o corpo em magenta; o que não é verde nem magenta é a peça nova, separada sem ambiguidade.
+  - Caparação (deforma com o cavalo): pintada em grades 2×2 de 512×320 com o quadro pronto num canto como exemplo.
+  - Escudo (pequeno, no ombro, de frente para o brasão) e lança são objetos gerados à parte e presos ao braço e à mão.
+  - Pelagens preto e branco: o PixelLab repinta um quadro só para dizer o que é pelo; o tom vem de uma rampa pela luz original (mesma em todos os quadros).
+  - Pele e cabelo saem em camadas próprias, em cinza normalizado (materiais `pele` e `cabelo`): valem a pele e a cor de cabelo da criação. Cabelo 1 = curto, 2 = trança.
+- **Vila (96) e retrato de Equipamentos (256)** — `tools/gerar_personagem_pe.py` (`base`, `conjunto`, `exportar`): caminhada de 8 quadros (PixMiniMax) e armadura de cada conjunto pintada na referência e levada à caminhada numa grade; a respiração do retrato é o tronco descendo 1 px.
+- **Cor da casa**: as peças ficam na cor original com a máscara `_mascara` (vermelho = principal, verde = secundária, azul = metal; o resto, como couro, madeira e o dourado do Rei Sol, fica original). Os prompts pedem tecido vermelho, debrum azul e aço cinza para a máscara sair certa.
+- **Dano** `_d1.._d3`: riscos, amassados e rachadura desenhados por código sobre a própria peça, nos mesmos lugares em todos os quadros.
+- **Zonas da mira** (`mira.json` v3) medidas na arte nova; casos compartilhados e gravações regravados.
+- Brutos e referências em `game/art/fontes/personagem/` (o cache das respostas fica fora do git). Para refazer uma peça: apague o bruto e rode a etapa de novo.

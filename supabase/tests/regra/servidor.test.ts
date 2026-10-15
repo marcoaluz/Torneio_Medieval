@@ -155,7 +155,7 @@ describe("ações do servidor", () => {
 
 // ---------------------------------------------------------- justa conferida
 
-const PEITO = { x: 0, y: -1060 };
+const PEITO = { x: 80, y: -860 };
 
 /** Jogador-robô (o mesmo do teste do GDScript): larga 100 ms depois da bandeira, toca no compasso, mira no peito e solta. */
 function robo(d: Dados): [number, string, number, number][] {

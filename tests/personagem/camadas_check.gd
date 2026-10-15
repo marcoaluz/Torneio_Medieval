@@ -17,14 +17,17 @@ func _initialize() -> void:
 	root.add_child(cav)
 	await process_frame
 	var c := cav.camadas()
-	_checa("10 camadas na justa", c._camadas.size() == 10)
+	_checa("12 camadas na justa (com pele e cabelo)", c._camadas.size() == 12)
 	_checa("peitoral no encaixe do peito", c.camada("peitoral").get_parent() == cav.get_node("Visual/Cavaleiro/Peito"))
 	_checa("origem do quadro na origem do cavaleiro",
 		c.camada("peitoral").get_global_transform() * c.camada("peitoral").offset == cav.get_node("Visual").global_transform * Vector2(-80, -160))
 	_checa("escudo usa mascara", c.camada("escudo").material.get_shader_parameter("usa_mascara") == true)
-	_checa("peitoral sem mascara e material metal (3)",
-		c.camada("peitoral").material.get_shader_parameter("usa_mascara") == false
-		and c.camada("peitoral").material.get_shader_parameter("material_padrao") == 3)
+	_checa("peitoral em cor original com mascara da casa",
+		c.camada("peitoral").material.get_shader_parameter("usa_mascara") == true
+		and c.camada("peitoral").material.get_shader_parameter("material_padrao") == 0)
+	_checa("rosto pintado com a pele (5) e cabelo com a cor do cabelo (6)",
+		c.camada("rosto").material.get_shader_parameter("material_padrao") == 5
+		and c.camada("cabelo").material.get_shader_parameter("material_padrao") == 6)
 	_checa("cavalo em material original (0)", c.camada("cavalo").material.get_shader_parameter("material_padrao") == 0)
 	var cores: PackedColorArray = c.camada("escudo").material.get_shader_parameter("cores")
 	_checa("cor principal da casa no shader", cores[1].is_equal_approx(Color("7a2326")))
@@ -37,7 +40,7 @@ func _initialize() -> void:
 	for i in 8:
 		c._process(0.1)
 		for s in c._camadas:
-			if s.frame != c.quadro:
+			if s.visible and s.frame != c.quadro:
 				frames_iguais = false
 		var esperado: Vector2 = (cav.get_node("Visual") as Node2D).to_global(Vector2(pts[c.quadro][0], pts[c.quadro][1]))
 		if not cav.brasao().global_position.is_equal_approx(esperado):
@@ -67,10 +70,26 @@ func _initialize() -> void:
 		root.add_child(p)
 		await process_frame
 		var visiveis := p._camadas.filter(func(s): return s.visible).size()
-		_checa("%s monta %d camadas visiveis" % [t, visiveis], visiveis == p._camadas.size() and visiveis >= 6)
+		_checa("%s monta %d camadas visiveis" % [t, visiveis], visiveis >= 6)
 		var anim := "andar" if t == "vila" else "respirar"
 		p.tocar(anim)
 		_checa("%s anima (%s, %d quadros)" % [t, anim, p.camada("corpo").hframes], p.camada("corpo").hframes > 1)
+
+	# Todo conjunto de itens tem arte nos três tamanhos, em todas as animações.
+	var dados: Dictionary = Balanceamento.ler_json("res://game/data/personagem/camadas.json")
+	var faltando: Array[String] = []
+	var conjuntos := {}
+	for m: Dictionary in Balanceamento.ler("itens")["modelos"].values():
+		conjuntos[m["visual"]] = true
+	for conj: String in conjuntos:
+		for t: String in ["justa", "vila", "equipamentos"]:
+			var pecas := ["elmo", "peitoral", "escudo"] + (["lanca", "caparacao"] if t == "justa" else [])
+			for anim: String in dados["tamanhos"][t]["animacoes"]:
+				for pc: String in pecas:
+					var arq := "res://game/art/sprites/personagem/%s/%s_%s_%s.png" % [t, pc, conj, anim]
+					if not ResourceLoader.exists(arq):
+						faltando.append(arq.get_file())
+	_checa("arte de todos os conjuntos (%d faltando: %s)" % [faltando.size(), ", ".join(faltando.slice(0, 4))], faltando.is_empty())
 
 	print("CAMADAS %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)

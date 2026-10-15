@@ -25,7 +25,10 @@ func _initialize() -> void:
 	_checa("mesma semente com IA = mesma justa", a["eventos"] == b["eventos"])
 	_checa("a IA toca no galope (%d toques)" % a["toques_rival"], a["toques_rival"] > 0)
 	_checa("a IA larga", a["largadas_rival"] > 0)
-	_checa("a IA nao muda a bandeira (sorteio separado)", a["bandeiras"] == _jogar(3, "agressivo", true)["bandeiras"])
+	# Outro perfil pode derrubar antes (menos passadas): compara as passadas que as duas tiveram.
+	var outra: Array = _jogar(3, "agressivo", true)["bandeiras"]
+	var n := mini(a["bandeiras"].size(), outra.size())
+	_checa("a IA nao muda a bandeira (sorteio separado)", n > 0 and a["bandeiras"].slice(0, n) == outra.slice(0, n))
 
 	# Estatística por perfil, com o jogador parado (não mira): só a IA pontua.
 	var media := {}
@@ -131,8 +134,12 @@ func _anotar(r: Dictionary, eventos: Array[Dictionary]) -> void:
 					r["no_tempo_rival"] += 1
 			"largada_rival":
 				r["largadas_rival"] += 1
+			"fase":
+				if e.get("fase") == JustaFases.Fase.LARGADA:
+					r["largada_t"] = e["t"]
 			"bandeira":
-				r["bandeiras"].append(e["t"])
+				# Instante dentro da largada (o tempo absoluto muda com o ritmo de cada perfil).
+				r["bandeiras"].append(e["t"] - int(r.get("largada_t", 0)))
 			"impacto":
 				r["zonas_rival"].append(e["rival"]["zona"])
 

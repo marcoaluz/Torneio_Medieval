@@ -186,6 +186,11 @@ func _posicionar_pontos() -> void:
 			continue
 		var p: Array = pts[mini(quadro, pts.size() - 1)]
 		var no: Node2D = _nos_pontos[ponto]
+		# Brasão só aparece com a peça que o carrega (escudo, sobreveste, caparação).
+		var dona: String = _dados.get("pontos_camada", {}).get(ponto, "")
+		if dona != "":
+			var c := camada(dona)
+			no.visible = c != null and c.visible
 		no.position = (no.get_parent() as Node2D).to_local(visual.to_global(Vector2(float(p[0]), float(p[1]))))
 
 ## A origem do quadro fica na origem do personagem (Visual), mesmo com a
