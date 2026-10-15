@@ -1,0 +1,101 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/scripts/presentation/vila/tela_perfil.gd" id="1"]
+[ext_resource type="Theme" path="res://game/scenes/ui/tema_jogo.tres" id="2"]
+
+[node name="TelaPerfil" type="PanelContainer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -250.0
+offset_right = 420.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Coluna" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Corpo" type="HBoxContainer" parent="Coluna"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="Esquerda" type="VBoxContainer" parent="Coluna/Corpo"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Palco" type="Control" parent="Coluna/Corpo/Esquerda"]
+clip_contents = true
+custom_minimum_size = Vector2(260, 300)
+layout_mode = 2
+
+[node name="Fundo" type="ColorRect" parent="Coluna/Corpo/Esquerda/Palco"]
+layout_mode = 0
+offset_right = 260.0
+offset_bottom = 300.0
+mouse_filter = 2
+color = Color(0.2, 0.14, 0.12, 1)
+
+[node name="Identidade" type="HBoxContainer" parent="Coluna/Corpo/Esquerda"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Brasao" type="TextureRect" parent="Coluna/Corpo/Esquerda/Identidade"]
+texture_filter = 1
+custom_minimum_size = Vector2(36, 46)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="Textos" type="VBoxContainer" parent="Coluna/Corpo/Esquerda/Identidade"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Nome" type="Label" parent="Coluna/Corpo/Esquerda/Identidade/Textos"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
+theme_override_font_sizes/font_size = 22
+
+[node name="Casa" type="Label" parent="Coluna/Corpo/Esquerda/Identidade/Textos"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="Titulo" type="Label" parent="Coluna/Corpo/Esquerda"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="Direita" type="VBoxContainer" parent="Coluna/Corpo"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Aviso" type="Label" parent="Coluna"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+
+[node name="Rodape" type="HBoxContainer" parent="Coluna"]
+layout_mode = 2
+
+[node name="CasaNivel" type="Label" parent="Coluna/Rodape"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="Melhorar" type="Button" parent="Coluna/Rodape"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+
+[node name="Fechar" type="Button" parent="Coluna/Rodape"]
+layout_mode = 2
+focus_mode = 0

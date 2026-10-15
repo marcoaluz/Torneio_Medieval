@@ -819,6 +819,19 @@ func semana_atual() -> int:
 func renome() -> int:
 	return int(estado["metas"]["renome"])
 
+## Estatísticas do perfil (leitura, sem regra nova): justas disputadas (toda
+## justa registrada: PvE, PvP e automático), vitórias (PvE + PvP), derrotas
+## (o resto), taxa de vitória em %, maior sequência (do PvE: só ele a conta) e a
+## de agora. `taxa` é -1 sem nenhuma justa.
+func estatisticas() -> Dictionary:
+	var cont: Dictionary = estado["metas"]["contadores"]
+	var disputadas := int(cont.get("justa", 0))
+	var vitorias := mini(int(cont.get("vitoria", 0)) + int(cont.get("vitoria_pvp", 0)), disputadas)
+	return {"disputadas": disputadas, "vitorias": vitorias, "derrotas": disputadas - vitorias,
+		"taxa": -1 if disputadas == 0 else vitorias * 100 / disputadas,
+		"maior_sequencia": int(cont.get("sequencia", 0)), "sequencia": int(estado["metas"]["sequencia"]),
+		"derrubadas": int(cont.get("derrubada", 0)), "tres_estrelas": int(cont.get("tres_estrelas", 0))}
+
 ## Faixa de renome atual: {nome, minimo, torcida, proxima (mínimo da seguinte, -1 se é a última)}.
 func faixa_renome() -> Dictionary:
 	var faixas: Array = cfg_metas()["renome"]["faixas"]
@@ -1164,6 +1177,8 @@ func concluir_pvp(eventos: Array) -> Dictionary:
 	if venceu and ouro_g > 0:
 		_guardar_vitoria(ouro_g)
 	var niveis := _ganhar(ouro_g, xp_g)
+	if venceu:
+		_evento("vitoria_pvp")  # o servidor já conta (liga.ts); o perfil soma com as do PvE
 	var r := _concluir("liga")
 	r.merge({"venceu": venceu, "estrelas": 1 if venceu else 0, "pontos_antes": antes, "pontos": int(lg["pontos"]), "ouro": ouro_g, "xp": xp_g,
 		"niveis": niveis, "baus": baus_g, "subiu": int(pos["liga"]) > int(pos_antes["liga"]) or pos["divisao"] != pos_antes["divisao"] and int(lg["pontos"]) > antes,

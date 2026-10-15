@@ -896,6 +896,23 @@ AMIGOS_NENHUM,Nenhum amigo ainda. Use um código ou adicione pela ordem.,No frie
 AMIGOS_REMOVER,Remover,Remove
 AMIGOS_BLOQUEADOS,Bloqueados,Blocked
 AMIGOS_DESBLOQUEAR,Desbloquear,Unblock
+PERFIL_SEM_TITULO,Sem título ainda,No title yet
+PERFIL_NIVEL,Nível {nivel},Level {nivel}
+PERFIL_NIVEL_MAXIMO,Nível máximo,Maximum level
+PERFIL_XP_FALTA,Faltam {xp} de experiência para o nível {nivel},{xp} experience to level {nivel}
+PERFIL_LIGA_ROTULO,Liga,League
+PERFIL_LIGA_VALOR,{liga} {divisao} · {pontos} pontos,{liga} {divisao} · {pontos} points
+PERFIL_RENOME_ROTULO,Renome,Renown
+PERFIL_RENOME_VALOR,{renome} · {faixa},{renome} · {faixa}
+PERFIL_ORDEM_ROTULO,Ordem,Order
+PERFIL_SEM_ORDEM,nenhuma,none
+PERFIL_ESTATISTICAS,Estatísticas de justa,Joust statistics
+PERFIL_STAT_DISPUTADAS,disputadas,played
+PERFIL_STAT_VITORIAS,vitórias,wins
+PERFIL_STAT_DERROTAS,derrotas,losses
+PERFIL_STAT_TAXA,taxa de vitória,win rate
+PERFIL_STAT_MAIOR_SEQUENCIA,maior sequência,best streak
+PERFIL_STAT_DERRUBADAS,derrubadas,unhorsings
 PERFIL_LINHA_1,"{nome} — nível {nivel}, {casa}","{nome} — level {nivel}, {casa}"
 PERFIL_LIGA,Liga {liga} {divisao} · {pontos} pontos · poder {poder},"{liga} league, division {divisao} · {pontos} points · power {poder}"
 PERFIL_MELHOR,Melhor liga: {liga},Best league: {liga}

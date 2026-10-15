@@ -29,6 +29,7 @@ var _acumulado := 0.0
 @onready var _fechar: Button = $Interface/Painel/Coluna/Botoes/Fechar
 @onready var _letreiro: Label = $Interface/Letreiro
 @onready var tela_treino: TelaTreino = $Interface/TelaTreino
+@onready var tela_perfil: TelaPerfil = $Interface/TelaPerfil
 ## Tela de Equipamentos criada só na primeira vez que é usada (3.25: os
 ## retratos grandes custavam ~80 ms na abertura da vila).
 const CENA_EQUIPAMENTOS := preload("res://game/scenes/ui/tela_equipamentos.tscn")
@@ -71,6 +72,7 @@ func _ready() -> void:
 	_letreiro.text = ""
 	_melhorar.pressed.connect(func(): melhorar(aberto))
 	_fechar.pressed.connect(fechar_painel)
+	tela_perfil.melhorar_pedido.connect(func(r): if r["ok"]: _registrar_melhoria("casa_senhorial", r))
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
@@ -246,6 +248,10 @@ func tocar_predio(nome: String) -> void:
 		fechar_painel()
 		tela_forja.abrir(nome)
 		return
+	if nome == "casa_senhorial":
+		fechar_painel()
+		tela_perfil.abrir()
+		return
 	if nome == "salao_liga":
 		fechar_painel()
 		tela_liga.abrir()
@@ -278,6 +284,9 @@ func melhorar(nome: String) -> void:
 	if not r["ok"]:
 		mostrar_letreiro(tr("ERRO_" + str(r["erro"]).to_upper()))
 		return
+	_registrar_melhoria(nome, r)
+
+func _registrar_melhoria(nome: String, r: Dictionary) -> void:
 	var m := get_node_or_null("/root/Metricas") as ServicoMetricas
 	if m:
 		m.registrar("predio_melhorado", {"predio": nome, "para_nivel": _jog.predio_nivel(nome) + 1, "ouro": r.get("ouro", 0)})

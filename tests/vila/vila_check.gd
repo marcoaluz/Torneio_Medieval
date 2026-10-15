@@ -47,6 +47,41 @@ func _initialize() -> void:
 	_checa("teto dos outros sobe junto", jog.teto_predio("estabulo") == 2 and jog.pode_melhorar("estabulo")["ok"])
 	ServicoTempo.deslocamento = 0
 
+	# Perfil: tocar na casa senhorial abre o perfil com os dados do serviço (não o painel genérico).
+	var perfil: TelaPerfil = vila.tela_perfil
+	var cont: Dictionary = jog.estado["metas"]["contadores"]
+	cont.merge({"justa": 40, "vitoria": 20, "vitoria_pvp": 5, "sequencia": 7, "derrubada": 3}, true)
+	jog.estado["metas"]["titulos"] = ["o_inquebravel"]
+	jog.estado["metas"]["titulo"] = "o_inquebravel"
+	jog.estado["metas"]["renome"] = 150
+	jog.estado["inventario"]["ouro"] = 1000
+	vila.tocar_predio("casa_senhorial")
+	await process_frame
+	_checa("tocar a casa senhorial abre o perfil", perfil.visible and not vila._painel.visible)
+	var est := jog.estatisticas()
+	_checa("estatisticas: disputadas, vitorias (PvE+PvP), derrotas, taxa", int(est["disputadas"]) == 40 and int(est["vitorias"]) == 25
+		and int(est["derrotas"]) == 15 and int(est["taxa"]) == 62 and int(est["maior_sequencia"]) == 7)
+	var grade := perfil.get_node("Coluna/Corpo/Direita").find_children("*", "PanelContainer", true, false)
+	var valores := {}
+	for c in grade:
+		valores[str(c.name)] = (c.get_node("*/Valor") if false else c.find_child("Valor", true, false)).text
+	_checa("cartoes mostram os numeros", valores.get("disputadas") == "40" and valores.get("vitorias") == "25" and valores.get("derrotas") == "15"
+		and valores.get("taxa") == "62%" and valores.get("maior_sequencia") == "7" and valores.get("derrubadas") == "3")
+	_checa("nome, casa e titulo", perfil.get_node("Coluna/Corpo/Esquerda/Identidade/Textos/Nome").text == jog.cavaleiro()["nome"] or jog.cavaleiro()["nome"] == ""
+		and perfil.get_node("Coluna/Corpo/Esquerda/Titulo").text == "o Inquebrável")
+	_checa("retrato vestido como o jogador", perfil._retrato.pecas.get("peitoral") == jog.visual_das_pecas().get("peitoral", "escudeiro")
+		and perfil.get_node("Coluna/Corpo/Esquerda/Identidade/Brasao").texture != null)
+	var botao_melhorar: Button = perfil.get_node("Coluna/Rodape/Melhorar")
+	var nivel_casa := jog.predio_nivel("casa_senhorial")
+	_checa("melhorar a casa continua no perfil", not botao_melhorar.disabled and botao_melhorar.text.begins_with("Melhorar ("))
+	botao_melhorar.pressed.emit()
+	_checa("melhorar pelo perfil inicia a obra", not jog.timer_do_predio("casa_senhorial", "melhoria").is_empty())
+	_checa("em obra, o perfil avisa", perfil.get_node("Coluna/Rodape/CasaNivel").text.contains("Em obra") or perfil.get_node("Coluna/Rodape/CasaNivel").text.contains("obra"))
+	perfil.fechar()
+	jog.estado["timers"] = jog.estado["timers"].filter(func(x): return x["alvo"] != "casa_senhorial")
+	jog.estado["inventario"]["ouro"] = 10
+	_checa("a casa continua no mesmo nivel", jog.predio_nivel("casa_senhorial") == nivel_casa)
+
 	jog.estado["inventario"]["ouro"] = 10
 	_checa("sem ouro nao melhora", jog.pode_melhorar("estabulo")["erro"] == "ouro_insuficiente")
 

@@ -109,6 +109,26 @@ func _ready() -> void:
 		var aba := OS.get_environment("TM_ABA") if OS.get_environment("TM_ABA") != "" else "diarias"
 		tm.abrir.call_deferred(aba)
 		return
+	if tela == "perfil":
+		# Perfil na casa senhorial: nível 12, 47 justas (31 vitórias), título, liga e renome.
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["tutorial"]["concluido"] = true
+		jog.estado["cavaleiro"]["nivel"] = 12
+		jog.estado["cavaleiro"]["xp"] = 5700
+		jog.estado["inventario"]["ouro"] = 900
+		jog.estado["liga"]["pontos"] = 640
+		var cont_p: Dictionary = jog.estado["metas"]["contadores"]
+		cont_p.merge({"justa": 47, "vitoria": 24, "vitoria_pvp": 7, "sequencia": 6, "derrubada": 9}, true)
+		jog.estado["metas"]["renome"] = 520
+		jog.estado["historia"]["vistas"] = jog.cfg_historia()["ordem"].duplicate()  # sem cena de história na frente
+		jog.estado["metas"]["titulos"] = ["o_inquebravel"]
+		jog.estado["metas"]["titulo"] = "o_inquebravel"
+		if OS.get_environment("TM_ORDEM") == "1":
+			jog.criar_ordem("Ordem da Rosa")
+		var vp: Vila = load("res://game/scenes/village/vila.tscn").instantiate()
+		add_child(vp)
+		(func(): vp.tocar_predio("casa_senhorial")).call_deferred()
+		return
 	if tela == "campo":
 		# Cena do campo de treino: TM_ATRIBUTO (forca, precisao, equilibrio) no
 		# palco; TM_TREINANDO=1 deixa um treino de força em andamento.
