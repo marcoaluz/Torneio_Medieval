@@ -78,9 +78,15 @@ func _initialize() -> void:
 	# Todo conjunto de itens tem arte nos três tamanhos, em todas as animações.
 	var dados: Dictionary = Balanceamento.ler_json("res://game/data/personagem/camadas.json")
 	var faltando: Array[String] = []
+	# Visual sem arte própria ainda (itens novos) vale pela arte provisória dele.
 	var conjuntos := {}
+	var pendentes := {}
 	for m: Dictionary in Balanceamento.ler("itens")["modelos"].values():
-		conjuntos[m["visual"]] = true
+		if m.has("visual_provisorio") and not ResourceLoader.exists("res://game/art/sprites/personagem/justa/%s_%s_parado.png" % [m["espaco"], m["visual"]]):
+			conjuntos[m["visual_provisorio"]] = true
+			pendentes[m["visual"]] = true
+		else:
+			conjuntos[m["visual"]] = true
 	for conj: String in conjuntos:
 		for t: String in ["justa", "vila", "equipamentos"]:
 			var pecas := ["elmo", "peitoral", "escudo"] + (["lanca", "caparacao"] if t == "justa" else [])
@@ -90,6 +96,15 @@ func _initialize() -> void:
 					if not ResourceLoader.exists(arq):
 						faltando.append(arq.get_file())
 	_checa("arte de todos os conjuntos (%d faltando: %s)" % [faltando.size(), ", ".join(faltando.slice(0, 4))], faltando.is_empty())
+	print("CAMADAS visuais ainda na arte provisoria: %d" % pendentes.size())
+	# A arte provisória de um item também aparece de fato na camada.
+	var prov := CamadasPersonagem.new()
+	prov.tamanho = "justa"
+	root.add_child(prov)
+	await process_frame
+	prov.vestir({"elmo": "grande_elmo", "escudo": "heater_d2"})
+	_checa("visual sem arte usa a provisoria (e o estagio de dano)", prov.camada("elmo").visible 		and prov.camada("elmo").texture.resource_path.contains("elmo_escudeiro") 		and prov.camada("escudo").texture.resource_path.contains("escudo_escudeiro_d2"))
+	_checa("icone de item novo cai no da provisoria", ArteUi.icone_item("elmo_grande_elmo") != null)
 
 	print("CAMADAS %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)

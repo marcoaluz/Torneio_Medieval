@@ -38,5 +38,7 @@ static func icone_item(modelo: String) -> Texture2D:
 	if m.is_empty():
 		return null
 	var arq := "res://game/art/sprites/icones/%s_%s.png" % [m["espaco"], m["visual"]]
+	if not ResourceLoader.exists(arq) and m.has("visual_provisorio"):
+		arq = "res://game/art/sprites/icones/%s_%s.png" % [m["espaco"], m["visual_provisorio"]]  # arte própria ainda não feita
 	return load(arq) if ResourceLoader.exists(arq) else null
 

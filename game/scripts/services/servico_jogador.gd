@@ -624,7 +624,7 @@ func pecas_do_projeto(conjunto: String) -> Array:
 	var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
 	var r: Array = []
 	for m: String in modelos:
-		if modelos[m]["conjunto"] == conjunto:
+		if conjunto != "" and str(modelos[m].get("conjunto", "")) == conjunto:  # "" = avulsa, não é projeto
 			r.append(m)
 	r.sort()
 	return r
@@ -655,7 +655,7 @@ func pode_forjar(modelo: String) -> Dictionary:
 		return _erro("modelo_inexistente")
 	if not predio_liberado("armeiro"):
 		return _erro("predio_bloqueado")
-	if not (estado["inventario"]["projetos"] as Array).has(modelos[modelo]["conjunto"]):
+	if str(modelos[modelo].get("conjunto", "")) == "" or not (estado["inventario"]["projetos"] as Array).has(modelos[modelo]["conjunto"]):
 		return _erro("sem_projeto")
 	if forja_em_andamento().size() >= vagas_forja():
 		return _erro("forja_ocupada")

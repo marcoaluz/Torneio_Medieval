@@ -158,8 +158,9 @@ func _atualizar_detalhes() -> void:
 			partes.append(tr("DANO_QUEBRADA"))
 		elif e > 0:
 			partes.append(tr("DANO_%d" % e))
-	partes.append(tr("EQUIP_CONJUNTO").format({"conjunto": tr("CONJUNTO_" + str(m["conjunto"]).to_upper()),
-		"n": _pecas_do_conjunto_equipadas(str(m["conjunto"]))}))
+	if not str(m.get("conjunto", "")).is_empty():  # peça avulsa não tem linha de conjunto
+		partes.append(tr("EQUIP_CONJUNTO").format({"conjunto": tr("CONJUNTO_" + str(m["conjunto"]).to_upper()),
+			"n": _pecas_do_conjunto_equipadas(str(m["conjunto"]))}))
 	_detalhes.text = "\n".join(partes)
 
 ## Botão de conserto: custo e tempo; em conserto, o tempo; pronto, concluir.
@@ -195,7 +196,7 @@ func _pecas_do_conjunto_equipadas(conjunto: String) -> int:
 	var n := 0
 	for esp: String in _jog.estado["equipamento"]:
 		var it := _jog.item(_jog.estado["equipamento"][esp])
-		if not it.is_empty() and modelos[it["modelo"]]["conjunto"] == conjunto:
+		if not it.is_empty() and str(modelos[it["modelo"]].get("conjunto", "")) == conjunto:
 			n += 1
 	return n
 

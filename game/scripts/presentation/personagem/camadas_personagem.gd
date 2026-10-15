@@ -110,9 +110,7 @@ func tocar(nome: String, forcar := false) -> void:
 	var n := int(_tam["animacoes"][nome]["quadros"])
 	for s in _camadas:
 		var def: Dictionary = s.get_meta("def")
-		var base := _caminho(def)
-		if not ResourceLoader.exists(base + ".png"):
-			base = _sem_dano(base)  # sem arte do estágio de dano, usa a peça inteira
+		var base := _base_com_arte(def, nome)
 		var tex := load(base + ".png") as Texture2D if ResourceLoader.exists(base + ".png") else null
 		s.texture = tex
 		s.visible = tex != null
@@ -134,9 +132,7 @@ func pre_carregar() -> void:
 	for nome: String in _tam["animacoes"]:
 		for s in _camadas:
 			var def: Dictionary = s.get_meta("def")
-			var base := _caminho_animacao(def, nome)
-			if not ResourceLoader.exists(base + ".png"):
-				base = _sem_dano(base)
+			var base := _base_com_arte(def, nome)
 			for arq in [base + ".png", base + "_mascara.png"]:
 				if ResourceLoader.exists(arq):
 					_reservadas.append(load(arq))
@@ -205,6 +201,41 @@ func _alinhar(s: Sprite2D, encaixe: Node2D, def: Dictionary) -> void:
 	var origem: Array = def.get("origem", _tam["origem"])
 	s.position = -desloc
 	s.offset = -Vector2(float(origem[0]), float(origem[1]))
+
+## Caminho (sem .png) da arte de uma camada na animação `nome`, com as reservas:
+## sem o estágio de dano, usa a peça inteira; peça sem arte própria ainda usa a
+## arte provisória do item (itens.json > visual_provisorio), no mesmo estágio.
+func _base_com_arte(def: Dictionary, nome: String) -> String:
+	var base := _caminho_animacao(def, nome)
+	if ResourceLoader.exists(base + ".png"):
+		return base
+	if ResourceLoader.exists(_sem_dano(base) + ".png"):
+		return _sem_dano(base)
+	var antes := pecas
+	pecas = pecas.duplicate()
+	for chave: String in pecas:
+		var v := str(pecas[chave])
+		var r := RegEx.create_from_string(r"^(.*?)(_d[1-3])?$").search(v)
+		var prov := visual_provisorio(r.get_string(1))
+		if prov != "":
+			pecas[chave] = prov + r.get_string(2)
+	var alt := _caminho_animacao(def, nome)
+	pecas = antes
+	if ResourceLoader.exists(alt + ".png"):
+		return alt
+	return _sem_dano(alt)
+
+static var _provisorios := {}
+
+## Arte provisória de um visual sem arte própria ("" se não tem).
+static func visual_provisorio(visual: String) -> String:
+	if _provisorios.is_empty():
+		var modelos: Dictionary = Balanceamento.ler("itens")["modelos"]
+		for m: String in modelos:
+			if modelos[m].has("visual_provisorio"):
+				_provisorios[str(modelos[m]["visual"])] = str(modelos[m]["visual_provisorio"])
+		_provisorios["__lido"] = ""
+	return str(_provisorios.get(visual, ""))
 
 ## "peitoral_ferro_d2_galope" -> "peitoral_ferro_galope".
 static func _sem_dano(base: String) -> String:
