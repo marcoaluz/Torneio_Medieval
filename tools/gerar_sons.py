@@ -10,12 +10,17 @@
 # ELEVENLABS_API_KEY, ou o arquivo .chaves.env na raiz (ignorado pelo git) com
 # a linha ELEVENLABS_API_KEY=...
 #
+#   python -I tools/gerar_sons.py --tratar               trata de novo os WAV ja gerados
+#
 # Nao sobrescreve arquivo existente (gerar de novo = apagar o arquivo antes).
-# Sons curtos (ate formatos.curto_ate_s) saem em WAV (latencia), o resto em MP3.
+# Efeitos saem em WAV (PCM 44,1 kHz) TRATADOS: silencio do fim cortado com
+# fade curto e pico normalizado em -3 dBFS (loops: so a normalizacao, para a
+# emenda continuar perfeita). O Godot comprime na importacao. Musicas em MP3.
 # Cada prompt recebe o sufixo de estilo do catalogo, para os sons combinarem.
 # Depois de gerar: ouvir, apagar as variacoes ruins e rodar o import do Godot.
 import argparse
 import json
+import math
 import os
 import struct
 import sys
@@ -28,6 +33,7 @@ CATALOGO = os.path.join(RAIZ, "game", "data", "audio", "sons.json")
 AUDIO = os.path.join(RAIZ, "game", "audio")
 API = "https://api.elevenlabs.io"
 TAXA_PCM = 44100
+CANAIS = 2  # o PCM do ElevenLabs vem em estereo intercalado (conferido em 2026-10-14)
 
 
 def chave():
@@ -60,8 +66,39 @@ def pedir(caminho, corpo, k, consulta=""):
 def wav_de_pcm(pcm, caminho):
     with open(caminho, "wb") as f:
         f.write(b"RIFF" + struct.pack("<I", 36 + len(pcm)) + b"WAVE")
-        f.write(b"fmt " + struct.pack("<IHHIIHH", 16, 1, 1, TAXA_PCM, TAXA_PCM * 2, 2, 16))
+        f.write(b"fmt " + struct.pack("<IHHIIHH", 16, 1, CANAIS, TAXA_PCM, TAXA_PCM * 2 * CANAIS, 2 * CANAIS, 16))
         f.write(b"data" + struct.pack("<I", len(pcm)) + pcm)
+
+
+PICO_DBFS = -3.0
+LIMIAR = 0.02  # fração do pico abaixo da qual é "silêncio" no fim
+FADE_S = 0.03
+
+
+def tratar_pcm(pcm, loop):
+    """Corta o silêncio do fim (com fade) e normaliza o pico. PCM 16 bits, CANAIS intercalados."""
+    n = len(pcm) // 2
+    a = list(struct.unpack("<%dh" % n, pcm[:n * 2]))
+    if not a:
+        return pcm
+    pico = max(abs(x) for x in a) or 1
+    if not loop:
+        lim = pico * LIMIAR
+        fim = max((i for i, x in enumerate(a) if abs(x) > lim), default=n - 1)
+        fade = int(FADE_S * TAXA_PCM) * CANAIS
+        corte = min(n, fim + fade)
+        a = a[:corte - corte % CANAIS]
+        for k in range(min(fade, len(a))):
+            a[len(a) - 1 - k] = int(a[len(a) - 1 - k] * k / fade)
+    ganho = (32767 * 10 ** (PICO_DBFS / 20)) / pico
+    a = [max(-32768, min(32767, int(round(x * ganho)))) for x in a]
+    return struct.pack("<%dh" % len(a), *a)
+
+
+def pcm_de_wav(caminho):
+    d = open(caminho, "rb").read()
+    i = d.find(b"data")
+    return d[i + 8:i + 8 + struct.unpack("<I", d[i + 4:i + 8])[0]]
 
 
 def arquivos_existentes(pasta, nome):
@@ -74,7 +111,6 @@ def arquivos_existentes(pasta, nome):
 def plano(cat, grupos, so):
     """Lista de (grupo, id, pasta, nome_arquivo_sem_ext, numero, entrada) que faltam."""
     falta = []
-    curto = float(cat["formatos"]["curto_ate_s"])
     for grupo in ("sons", "musicas"):
         if grupo not in grupos:
             continue
@@ -87,7 +123,7 @@ def plano(cat, grupos, so):
                 base = "%s_%02d" % (id_, i)
                 if any(a.startswith(base + ".") for a in ja):
                     continue
-                ext = "wav" if grupo == "sons" and float(e["duracao_s"]) <= curto else "mp3"
+                ext = "wav" if grupo == "sons" else "mp3"
                 falta.append((grupo, id_, e["pasta"], base, ext, e))
     if "voz" in grupos:
         v = cat["voz"]
@@ -109,7 +145,7 @@ def gerar_efeito(cat, e, ext, k):
              "prompt_influence": 0.5}
     if e.get("loop"):
         corpo["loop"] = True
-    fmt = "pcm_44100" if ext == "wav" else "mp3_44100_128"
+    fmt = "pcm_44100"
     try:
         dados, _ = pedir("/v1/sound-generation", corpo, k, "output_format=" + fmt)
     except RuntimeError as erro:
@@ -153,8 +189,19 @@ def main():
     ap.add_argument("--so", default="")
     ap.add_argument("--grupo", default="sons,musicas,voz")
     ap.add_argument("--voz-id", default="")
+    ap.add_argument("--tratar", action="store_true")
     a = ap.parse_args()
     cat = json.load(open(CATALOGO, encoding="utf-8"))
+    if a.tratar:
+        n = 0
+        for id_, e in cat["sons"].items():
+            for arq in arquivos_existentes(e["pasta"], id_):
+                if arq.endswith(".wav"):
+                    c = os.path.join(AUDIO, *e["pasta"].split("/"), arq)
+                    wav_de_pcm(tratar_pcm(pcm_de_wav(c), e.get("loop", False)), c)
+                    n += 1
+        print("tratados %d WAV" % n)
+        return 0
     so = set(x for x in a.so.split(",") if x)
     falta = plano(cat, set(a.grupo.split(",")), so)
     segundos = sum(float(f[5].get("duracao_s", 2)) for f in falta if f[0] != "voz")
@@ -190,7 +237,7 @@ def main():
                 return 1
             continue
         if ext == "wav":
-            wav_de_pcm(dados, destino)
+            wav_de_pcm(tratar_pcm(dados, e.get("loop", False)), destino)
         else:
             open(destino, "wb").write(dados)
         feitos += 1

@@ -22,7 +22,7 @@ Os prompts e durações de cada som estão em `docs/PACOTE_DE_PROMPTS.md` (tabel
 
 - Pasta: `game/audio/sfx/<categoria>/`, `game/audio/music/`, `game/audio/voice/<pt_BR|en>/`.
 - Nome: minúsculas com sublinhado, variações numeradas: `impacto_escudo_01.ogg`, `impacto_escudo_02.ogg`. Voz: `arauto_derrubado_01.ogg`.
-- Formato: **MP3** (o ElevenLabs entrega assim e o Godot importa direto; sem ffmpeg nesta máquina) para música, loops e sons acima de 0,5 s; **WAV** só para sons curtíssimos de interface (toque no tempo, botão), onde a latência importa. OGG Vorbis também é aceito.
+- Formato: efeitos em **WAV** tratado pelo gerador (PCM estéreo 44,1 kHz, fim sem silêncio, pico em −3 dBFS; o Godot comprime em QOA na importação); música e voz em **MP3** (sem ffmpeg nesta máquina para tratar MP3). OGG Vorbis também é aceito.
 - Loops (galope, torcida, forja, chuva, estábulo, temas): emenda sem clique; no Godot, marque loop na importação.
 - Normalização: pico de efeitos em −3 dBFS, música por volta de −14 LUFS, para o volume relativo ser decidido nos barramentos e não arquivo a arquivo.
 

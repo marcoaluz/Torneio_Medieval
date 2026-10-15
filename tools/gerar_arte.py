@@ -13,8 +13,9 @@
 # Chave: variavel de ambiente PIXELLAB_API_KEY ou .chaves.env na raiz (fora do git).
 # Cores: toda geracao recebe a paleta do jogo como color_image (paletas.json:
 # cores da casa, metais, neutros, peles, cabelos e mundo), entao tudo sai com as
-# mesmas cores e combina. Estagio N do predio parte do estagio N-1 (init_image),
-# com a mesma semente, para o predio crescer sem mudar de cara.
+# mesmas cores e combina. Predios: mesma semente em todos os estagios e o
+# estagio 1 como init_image fraca dos demais (mesma cara, mas cresce). O
+# modelo bitforge foi testado e desenhou figuras fora do pedido: so pixflux.
 # Nao sobrescreve: gerar de novo = apagar o arquivo antes.
 import argparse
 import base64
@@ -51,12 +52,16 @@ PREDIOS = {
     "salao_liga": "a guild hall of champions with heraldic banners and a stone entrance",
 }
 ESTAGIOS = [
-    "humble and small, rough timber and thatch, patched and simple",
-    "modest, timber frame with plaster walls, wooden shingles",
-    "solid, stone foundation, timber upper floor, slate roof",
-    "large and well kept, dressed stone walls, slate roof, small heraldic banners",
-    "grand and imposing, fine stonework, tall slate roof, large heraldic banners and ironwork",
+    "tiny humble one-room version, rough timber walls and a sagging thatched roof, patched and poor",
+    "small modest version, timber frame with plaster walls and a wooden shingle roof",
+    "medium sturdy version, stone ground floor with timber upper floor and a slate roof",
+    "large prosperous version, dressed stone walls, two floors, slate roof, small heraldic banners",
+    "grand imposing version, fine stonework, three floors with a tower, tall slate roof, large heraldic banners and iron details",
 ]
+SO_PREDIO = ("single building only, sitting flat on the ground, no terrain base, no floating island, "
+             "no ground platform, no trees, no people")
+NEGATIVO_PREDIO = NEGATIVO + ", floating island, diorama base, terrain block, dirt platform, cliff, trees, bushes"
+FORCA_ESTAGIO1 = 120  # init_image_strength (1-999): baixo = so a cara, deixa o predio crescer
 RETRATO = {
     "arauto": "a jovial middle-aged royal herald with a feathered cap and a tabard, holding a brass trumpet",
     "ferreira": "a strong blacksmith woman with soot on her face, leather apron, rolled sleeves, braided hair",
@@ -195,20 +200,24 @@ def main():
     anterior = {}
     for grupo, quem, extra, destino, (w, hh), dados in falta:
         os.makedirs(os.path.dirname(destino), exist_ok=True)
+        caminho = "/generate-image-pixflux"
         if grupo == "vila":
-            descricao = "%s, top-down three-quarter view, %s, %s, transparent background" % (ESTILO, PREDIOS.get(quem, quem), ESTAGIOS[min(extra, 4)])
-            corpo = {"description": descricao, "negative_description": NEGATIVO, "image_size": {"width": w, "height": hh},
+            n_est = int(dados["estagios"])
+            # Estágio no espectro de 5 (prédio de 4 estágios pula o mais humilde).
+            nivel = extra + (5 - n_est)
+            descricao = "%s, top-down three-quarter view, %s, %s, %s, transparent background" % (
+                ESTILO, PREDIOS.get(quem, quem), ESTAGIOS[nivel], SO_PREDIO)
+            corpo = {"description": descricao, "negative_description": NEGATIVO_PREDIO, "image_size": {"width": w, "height": hh},
                      "view": "high top-down", "no_background": True, "detail": "highly detailed", "shading": "detailed shading",
-                     "outline": "selective outline", "seed": 1000 + sorted(PREDIOS).index(quem) if quem in PREDIOS else 999,
+                     "outline": "selective outline", "seed": 1000 + (sorted(PREDIOS).index(quem) if quem in PREDIOS else 99),
                      "color_image": {"type": "base64", "base64": paleta_png([dados["cor_telhado"]])}}
-            prev = anterior.get(quem)
-            if prev is None and extra > 0:
-                arq = os.path.join(FONTES_VILA, "%s_%d.png" % (quem, extra))
-                if os.path.exists(arq):
-                    prev = base64.b64encode(open(arq, "rb").read()).decode("ascii")
-            if prev:
-                corpo["init_image"] = {"type": "base64", "base64": prev}
-                corpo["init_image_strength"] = 350
+            primeiro = anterior.get(quem)
+            arq1 = os.path.join(FONTES_VILA, "%s_1.png" % quem)
+            if primeiro is None and extra > 0 and os.path.exists(arq1):
+                primeiro = base64.b64encode(open(arq1, "rb").read()).decode("ascii")
+            if primeiro and extra > 0:
+                corpo["init_image"] = {"type": "base64", "base64": primeiro}
+                corpo["init_image_strength"] = FORCA_ESTAGIO1
         else:
             descricao = "%s, portrait bust, head and shoulders, facing right, %s, %s, plain dark background" % (
                 ESTILO, RETRATO[quem], EXPRESSOES.get(extra, extra))
@@ -217,7 +226,7 @@ def main():
                      "seed": 2000 + sorted(RETRATO).index(quem),
                      "color_image": {"type": "base64", "base64": paleta_png([dados.get("cor", "")] if dados.get("cor") else [])}}
         try:
-            r = pedir("/generate-image-pixflux", corpo, k)
+            r = pedir(caminho, corpo, k)
         except RuntimeError as erro:
             print("FALHOU %s: %s" % (os.path.relpath(destino, RAIZ), erro))
             if "401" in str(erro) or "402" in str(erro):
@@ -225,7 +234,7 @@ def main():
             continue
         dados_png = b64_da_resposta(r)
         open(destino, "wb").write(base64.b64decode(dados_png))
-        if grupo == "vila":
+        if grupo == "vila" and extra == 0:
             anterior[quem] = dados_png
         feitos += 1
         print("ok %s (%s)" % (os.path.relpath(destino, RAIZ), r.get("usage", {})))

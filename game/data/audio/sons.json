@@ -9,8 +9,7 @@
 		"musica": "D dorian, warm analog mix, not harsh, instrumental, no vocals unless stated"
 	},
 	"formatos": {
-		"_nota": "wav para sons curtissimos de interface (latencia), mp3 para o resto (o Godot importa mp3 direto; sem ffmpeg nesta maquina). ogg tambem e aceito.",
-		"curto_ate_s": 0.5,
+		"_nota": "Efeitos em wav tratado (fim sem silencio, pico em -3 dBFS; o Godot comprime na importacao), musicas em mp3 (sem ffmpeg nesta maquina para tratar mp3). ogg tambem e aceito.",
 		"extensoes": ["ogg", "mp3", "wav"]
 	},
 	"sons": {

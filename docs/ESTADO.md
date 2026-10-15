@@ -3,8 +3,8 @@
 > **Retomada rápida (2026-10-14):**
 > - **Servidor 3.1–3.11 escrito e testado, nada publicado** (`docs/SERVIDOR.md`, `docs/OPERACAO.md`, `docs/AUDITORIA.md`): regra e economia em TypeScript com paridade contra o GDScript; função `acao` (idempotente, com limite e conferência da justa), PvP/ligas, compras com recibo, ordem/chat/amigos, exclusão de conta, balanceamento remoto, painel e registro de erros.
 > - **Cliente chamando `acao` (2026-10-14): pronto e testado, desligado** (`servidor.json > usar_acao`): fila de ações em disco, estado do servidor vence, disputa do PvE com semente do servidor e entradas conferidas. Falta PvP e social pelo servidor antes de ligar.
-> - **Som (estrutura) e geradores (2026-10-14):** autoload `Audio`, catálogo `game/data/audio/sons.json`, sons ligados na justa e na vila, volume por barramento; `tools/gerar_sons.py` (ElevenLabs) e `tools/gerar_arte.py` (PixelLab: prédios e retratos) prontos, **aguardando as chaves** (`.chaves.env`, fora do git). Cores da casa e do brasão sorteadas pela regra das tinturas.
-> - **Próximo:** gerar arte e som com as chaves do usuário; PvP e social pelo servidor; publicar na branch (com autorização) e a Parte 4 (4.1–4.3).
+> - **Som e arte gerados (2026-10-14):** todos os 129 arquivos de som (efeitos tratados em WAV, 6 músicas e 20 falas do arauto em MP3; voz `00x0gOIgUbOG6wYRHdVH`) e a arte dos 8 prédios da vila (34 estágios, folhas montadas) e dos 14 retratos da história, com a paleta do jogo forçada. Cores da casa e do brasão sorteadas pela regra das tinturas. **Falta ouvir e olhar com calma** (curadoria do usuário) e a arte do personagem em camadas (A*/B*, manual).
+> - **Próximo:** PvP e social pelo servidor; publicar na branch (com autorização) e a Parte 4 (4.1–4.3).
 > - **Validação:** `bash tests/rodar_testes.sh` passa: 49 arquivos do GDScript (1060 checagens) e 334 checagens em TypeScript (`cd supabase && node --test "tests/regra/*.test.ts"`).
 > - **Save:** versão 11.
 > - **Armadilhas e convenções:** veja "Onde paramos" no `CLAUDE.md`.
@@ -92,6 +92,6 @@ O usuário pediu (2026-10-11) para executar **todos os prompts do Pacote em sequ
 - O fôlego cai 10 por passada e não se recupera entre justas; a recuperação no estábulo é da Parte 2.
 
 ## Próximo passo
-0. **Arte e som (autorizado pelo usuário em 2026-10-14):** com `PIXELLAB_API_KEY` e `ELEVENLABS_API_KEY` em `.chaves.env`, rodar `python -I tools/gerar_sons.py` e `python -I tools/gerar_arte.py`, depois `tools/montar_folhas_vila.gd`, importar e conferir com `driver.sh shot`. Personagem em camadas (A*/B*) segue manual com `docs/PERSONAGEM.md`.
+0. **Arte e som gerados (2026-10-14).** Para refazer uma peça: apagar o arquivo e rodar o gerador de novo (`--so <id>`); prédios: depois `tools/montar_folhas_vila.gd`. Personagem em camadas (A*/B*) segue manual com `docs/PERSONAGEM.md`. Músicas podem não emendar perfeitamente no loop (conferir ouvindo).
 1. **Usuário (quando quiser):** instalar JDK/SDK/templates e testar no celular (`docs/ANDROID.md`).
 2. **Código:** preparação do servidor (3.1–3.11): porte da regra para TypeScript em `supabase/functions/` (Node 24 roda `.ts` direto) testado contra `tests/shared/*.json` (agora também `ordem.json`, `liga.json`, `baus.json`, `forja.json`…), migrações novas em `supabase/migrations/` (aplicar só com autorização, e passando por branch a partir do primeiro jogador real) e Edge Functions escritas; depois a Parte 4 (4.1–4.3: espada, arco, mêlée).

@@ -53,6 +53,20 @@ func _initialize() -> void:
 			falas_ruins.append(id)
 	_checa("falas do arauto nos dois idiomas", falas_ruins.is_empty())
 
+	# Todo som do catálogo tem arquivo (gerados no ElevenLabs em 2026-10-14).
+	var sem_arquivo: Array[String] = []
+	for grupo in ["sons", "musicas"]:
+		for id: String in cat[grupo]:
+			if not audio.existe(id):
+				sem_arquivo.append(id)
+	_checa("todo som tem arquivo (%s)" % ", ".join(sem_arquivo), sem_arquivo.is_empty())
+	var vozes_faltando := 0
+	for id: String in cat["voz"]["falas"]:
+		for idioma in ["pt_BR", "en"]:
+			if not ResourceLoader.exists("res://game/audio/voice/%s/arauto_%s_01.mp3" % [idioma, id]):
+				vozes_faltando += 1
+	_checa("toda fala do arauto tem arquivo (%d faltando)" % vozes_faltando, vozes_faltando == 0)
+
 	# Variações sorteadas: dois sons gerados na hora no lugar dos arquivos.
 	var r := AudioStreamRandomizer.new()
 	r.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
