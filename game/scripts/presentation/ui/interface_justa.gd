@@ -99,6 +99,8 @@ func _ao_comecar_passada(numero: int) -> void:
 	_armadura_inicial_rival = _soma_armadura(j.lado_rival)
 	plaquinha_jogador.definir(tr(controlador.nome_jogador if controlador.nome_jogador != "" else "JUSTA_NOME_JOGADOR"), controlador.arena.jogador.cor_casa, controlador.arena.jogador.brasao_textura())
 	plaquinha_rival.definir(tr(controlador.nome_rival) if controlador.nome_rival != "" else "", controlador.arena.rival.cor_casa, controlador.arena.rival.brasao_textura())
+	plaquinha_jogador.definir_retrato(controlador.arena.jogador.camadas())
+	plaquinha_rival.definir_retrato(controlador.arena.rival.camadas())
 
 ## Exibição: o arauto explica cada fase. Tutorial: a dica da fase fica na tela.
 func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> void:
