@@ -56,6 +56,12 @@ func _initialize() -> void:
 	var bandeira_baixada_ok := false
 	var ponta_visivel := false
 	var realce_peito := false
+	var mira_peito := false      ## mira visível com a cor do peito enquanto segura
+	var zoom_mira_inicio := -1.0
+	var zoom_mira_fim := -1.0
+	var golpe_antes_do_choque := false
+	var inclinou_no_choque := false
+	var close_no_contato := false
 	var quadros := 0
 	var passo := 1.0 / 30.0
 	while not c.justa.terminou() and quadros < 30 * 120:
@@ -76,9 +82,18 @@ func _initialize() -> void:
 			if c.justa.segurando:
 				ponta_visivel = ponta_visivel or arena.ponta_lanca.visible
 				realce_peito = realce_peito or arena.rival.get_node("Visual/Cavaleiro/Peito").modulate != Color.WHITE
+				var mv: MiraVisual = arena.ponta_lanca.get_node("Mira")
+				mira_peito = mira_peito or (mv.is_visible_in_tree() and mv.zona == "peito" and mv.cor() == MiraVisual.CORES["peito"] and mv.segurando)
+			if zoom_mira_inicio < 0.0:
+				zoom_mira_inicio = arena.camera._zoom_destino
+			zoom_mira_fim = arena.camera._zoom_destino
 		c._process(passo)
 		arena.camera._process(passo)
 		quadros += 1
+		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.IMPACTO and not inclinou_no_choque:
+			golpe_antes_do_choque = c._golpeou and arena.jogador._tween_gesto != null and arena.rival._tween_gesto != null
+			inclinou_no_choque = absf(arena.camera.inclinacao) > deg_to_rad(3.0) and absf(arena.camera.rotation) > deg_to_rad(3.0)
+			close_no_contato = arena.camera.zoom.x > c.zoom_mira_inicio * 0.5 and arena.camera.global_position.distance_to(c.ponta_no_mundo()) < 80.0
 		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.IMPACTO and dist_fim_mira < 0.0:
 			dist_fim_mira = absf(arena.jogador.global_position.x - arena.rival.global_position.x)
 			barra_fim_mira = absf(c.barra.posicao_jogador - c.barra.posicao_rival)
@@ -106,6 +121,26 @@ func _initialize() -> void:
 	_checa("camera foca na mira e no impacto",
 		_planos["mira"] == CameraArena.Plano.FOCO and _planos["impacto"] == CameraArena.Plano.FOCO)
 	_checa("camera volta ao aberto no fim", arena.camera.plano == CameraArena.Plano.ABERTO)
+	_checa("mira visivel sobre a zona, com a cor dela", mira_peito)
+	_checa("a camera fecha aos poucos na mira (%.2f -> %.2f)" % [zoom_mira_inicio, zoom_mira_fim],
+		zoom_mira_inicio == c.zoom_mira_inicio and zoom_mira_fim > zoom_mira_inicio + 0.3)
+	_checa("os dois golpeiam antes do choque", golpe_antes_do_choque)
+	_checa("choque: corte inclinado no contato", inclinou_no_choque and close_no_contato)
+	_checa("sem inclinacao fora do impacto", absf(arena.camera._inclinacao_destino) < 0.001)
+	# Gesto: estocada inclina o tronco em torno da sela e a lança vai junto (a guarda fica na mão).
+	var cav := arena.jogador
+	cav.restaurar()
+	var lanca0: Vector2 = (cav.get_node("Visual/Lanca") as Node2D).position
+	cav.gesto = 1.0
+	var corpo := cav.get_node("Visual/Cavaleiro") as Node2D
+	var lanca := cav.get_node("Visual/Lanca") as Node2D
+	var mao := Cavaleiro.PIVO_SELA + (lanca0 - Cavaleiro.PIVO_SELA).rotated(corpo.rotation)
+	_checa("estocada inclina o tronco para a frente", corpo.rotation > deg_to_rad(5.0))
+	_checa("a lanca acompanha a mao (%.1f px)" % lanca.position.distance_to(mao), lanca.position.distance_to(mao) <= Cavaleiro.GESTO_ESTOCADA_PX + 0.01)
+	cav.gesto = -0.7
+	_checa("preparar recolhe o tronco", corpo.rotation < 0.0)
+	cav.restaurar()
+	_checa("restaurar volta a guarda", corpo.rotation == 0.0 and lanca.position == lanca0 and cav.gesto == 0.0)
 	var segundos := quadros / 30.0
 	_checa("duracao da passada entre 10 e 12 s (%.2f s em %d)" % [segundos, _largadas.size()],
 		segundos / _largadas.size() > 10.0 and segundos / _largadas.size() < 12.0)

@@ -42,6 +42,19 @@ var cor_casa: Color:
 var caido := false
 var _posicao_lanca := Vector2.ZERO
 
+## Gesto do golpe (só apresentação): -1 = recolhido (preparando), 0 = em
+## guarda, 1 = estocada. O tronco (Visual/Cavaleiro) gira em torno da sela e a
+## lança avança junto, para o golpe se ler mesmo parado no hit-stop.
+const PIVO_SELA := Vector2(2, -80)
+const GESTO_INCLINACAO_GRAUS := 11.0
+const GESTO_ESTOCADA_PX := 3.0  ## mais que isso solta a guarda da mão desenhada
+const GESTO_RECUO_PX := 3.0
+var gesto := 0.0:
+	set(v):
+		gesto = v
+		_aplicar_gesto()
+var _tween_gesto: Tween
+
 func _ready() -> void:
 	_aplicar_orientacao()
 	if not Engine.is_editor_hint():
@@ -119,6 +132,44 @@ func realcar(zona: String) -> void:
 		else:
 			no.modulate = COR_REALCE
 
+## Recolhe o tronco e puxa a lança (o golpe vem a seguir).
+func preparar_golpe(duracao := 0.18) -> void:
+	if caido:
+		return
+	_novo_tween_gesto().tween_property(self, "gesto", -0.7, duracao).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+## Estocada: inclina para a frente e empurra a lança, segura um instante e
+## volta à guarda.
+func golpear(ida := 0.07, segura := 0.6, volta := 0.5) -> void:
+	if caido:
+		return
+	var t := _novo_tween_gesto()
+	t.tween_property(self, "gesto", 1.0, ida).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_interval(segura)
+	t.tween_property(self, "gesto", 0.0, volta).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+func _novo_tween_gesto() -> Tween:
+	if _tween_gesto and _tween_gesto.is_valid():
+		_tween_gesto.kill()
+	_tween_gesto = create_tween()
+	return _tween_gesto
+
+func _aplicar_gesto() -> void:
+	if caido:
+		return
+	var corpo := get_node_or_null("Visual/Cavaleiro") as Node2D
+	var lanca := get_node_or_null("Visual/Lanca") as Node2D
+	if corpo == null:
+		return
+	var a := deg_to_rad(GESTO_INCLINACAO_GRAUS) * gesto
+	# Gira em torno da sela: posição = pivô + (origem - pivô) girada.
+	corpo.rotation = a
+	corpo.position = PIVO_SELA - PIVO_SELA.rotated(a)
+	if lanca:
+		var avanco := gesto * (GESTO_ESTOCADA_PX if gesto > 0.0 else GESTO_RECUO_PX)
+		lanca.rotation = a * 0.35  # a ponta continua mirando o rival
+		lanca.position = PIVO_SELA + (_posicao_lanca - PIVO_SELA).rotated(a) + Vector2(avanco, 0)
+
 ## Derrubada: o cavaleiro (Visual/Cavaleiro, com a lança) cai para trás,
 ## saindo do cavalo. `giro_graus` e `distancia` em px do quadro.
 func cair(duracao: float, giro_graus: float, distancia: float) -> void:
@@ -126,6 +177,8 @@ func cair(duracao: float, giro_graus: float, distancia: float) -> void:
 	var lanca := get_node_or_null("Visual/Lanca") as Node2D
 	if corpo == null:
 		return
+	if _tween_gesto and _tween_gesto.is_valid():
+		_tween_gesto.kill()
 	caido = true
 	var t := create_tween().set_parallel(true).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	t.tween_property(corpo, "rotation_degrees", -giro_graus, duracao)
@@ -142,7 +195,10 @@ func quebrar_lanca(escala: float) -> void:
 
 ## Volta tudo ao normal (começo de passada).
 func restaurar() -> void:
+	if _tween_gesto and _tween_gesto.is_valid():
+		_tween_gesto.kill()
 	caido = false
+	gesto = 0.0
 	var corpo := get_node_or_null("Visual/Cavaleiro") as Node2D
 	if corpo:
 		corpo.rotation = 0.0

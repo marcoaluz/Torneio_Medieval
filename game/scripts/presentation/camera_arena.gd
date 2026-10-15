@@ -5,6 +5,14 @@ extends Camera2D
 ##   seguir(alvo)   - acompanha um cavaleiro (Corrida)
 ##   focar(ponto)   - zoom num ponto fixo do mundo (Impacto)
 ##   focar_alvo(no) - zoom num nó que se move (Mira: o peito do rival)
+##   impacto(ponto) - corte seco para um close inclinado (ângulo holandês) no
+##                    choque, um pouco mais fechado ("soco"), que depois abre
+##                    devagar até o zoom pedido
+##   deslizar(ponto, zoom, graus) - sem corte, leva o foco a outro ponto,
+##                    zoom e inclinação (o Impacto abre do contato para os dois)
+##   ajustar_zoom(z) - muda só o zoom de destino (aproximação lenta na Mira)
+## A inclinação volta a zero em qualquer outro plano. Com a imagem inclinada,
+## a posição é presa de modo que os cantos girados também fiquem no cenário.
 ## A troca de plano é suave: posição e zoom se aproximam do destino com
 ## decaimento exponencial a cada quadro, o que também funciona quando o
 ## alvo está em movimento. Os limites da Camera2D seguram a imagem dentro
@@ -24,6 +32,10 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 @export var deslocamento_seguir := Vector2(70, -80)
 ## Rapidez da transição (por segundo). Maior = mais seco.
 @export var rapidez := 5.0
+## Impacto: inclinação da imagem (graus) e quanto o corte entra mais fechado
+## que o zoom final (1.2 = 20% mais perto, abrindo depois).
+@export var inclinacao_impacto := -7.0
+@export var soco_impacto := 1.1
 ## Tremor (trauma): deslocamento e giro máximos com trauma 1, e quanto o
 ## trauma cai por segundo. O deslocamento é trauma² (tremor fraco fica sutil).
 @export var tremor_max_px := Vector2(14, 10)
@@ -34,6 +46,9 @@ var plano := Plano.ABERTO
 var _alvo: Node2D
 var _ponto := Vector2.ZERO
 var _zoom_destino := 1.0
+## Inclinação de base (radianos); o tremor soma por cima.
+var inclinacao := 0.0
+var _inclinacao_destino := 0.0
 var trauma := 0.0
 var _ruido := FastNoiseLite.new()
 var _tempo_ruido := 0.0
@@ -50,23 +65,50 @@ func tremer(quanto: float) -> void:
 
 func plano_aberto(imediato := false) -> void:
 	_alvo = null
+	_inclinacao_destino = 0.0
 	_trocar(Plano.ABERTO, zoom_aberto, imediato)
 
 func seguir(alvo: Node2D, imediato := false) -> void:
 	_alvo = alvo
+	_inclinacao_destino = 0.0
 	_trocar(Plano.SEGUIR, zoom_seguir, imediato)
 
 ## `zoom` <= 0 usa `zoom_foco`.
 func focar(ponto: Vector2, zoom_ponto := 0.0, imediato := false) -> void:
 	_alvo = null
 	_ponto = ponto
+	_inclinacao_destino = 0.0
 	_trocar(Plano.FOCO, zoom_ponto if zoom_ponto > 0.0 else zoom_foco, imediato)
 
 ## Zoom que acompanha um nó em movimento. `zoom` <= 0 usa `zoom_foco`.
 func focar_alvo(no: Node2D, zoom_ponto := 0.0, imediato := false) -> void:
 	_alvo = no
 	_ponto = no.global_position
+	_inclinacao_destino = 0.0
 	_trocar(Plano.FOCO, zoom_ponto if zoom_ponto > 0.0 else zoom_foco, imediato)
+
+## Choque: corte seco para o ponto, inclinado e mais fechado, abrindo devagar
+## até `zoom_ponto`. `graus` = 0 usa `inclinacao_impacto`.
+func impacto(ponto: Vector2, zoom_ponto: float, graus := 0.0) -> void:
+	_alvo = null
+	_ponto = ponto
+	_inclinacao_destino = deg_to_rad(graus if graus != 0.0 else inclinacao_impacto)
+	_trocar(Plano.FOCO, zoom_ponto, true)
+	inclinacao = _inclinacao_destino
+	zoom = Vector2.ONE * zoom_ponto * soco_impacto
+	global_position = _preso(destino())
+	_aplicar_tremor(0.0)
+
+## Sem corte: o foco vai deslizando até outro ponto, zoom e inclinação.
+func deslizar(ponto: Vector2, novo_zoom: float, graus: float) -> void:
+	_alvo = null
+	_ponto = ponto
+	_zoom_destino = novo_zoom
+	_inclinacao_destino = deg_to_rad(graus)
+
+## Só o zoom de destino, sem trocar de plano (a Mira aproxima aos poucos).
+func ajustar_zoom(novo_zoom: float) -> void:
+	_zoom_destino = novo_zoom
 
 ## Posição que a câmera persegue no plano atual.
 func destino() -> Vector2:
@@ -87,29 +129,48 @@ func destino() -> Vector2:
 
 func _process(delta: float) -> void:
 	var k := 1.0 - exp(-rapidez * delta)
-	global_position = global_position.lerp(destino(), k)
 	zoom = zoom.lerp(Vector2.ONE * _zoom_destino, k)
+	inclinacao = lerpf(inclinacao, _inclinacao_destino, k)
+	global_position = _preso(global_position.lerp(destino(), k))
 	_aplicar_tremor(delta)
+
+## Com a imagem inclinada, os cantos girados saem do retângulo da câmera: prende
+## o centro para a caixa girada caber nos limites do cenário. Sem inclinação, os
+## limites da própria Camera2D bastam.
+func _preso(p: Vector2) -> Vector2:
+	if absf(inclinacao) < 0.001:
+		return p
+	var meia := get_viewport_rect().size / zoom * 0.5
+	var c := absf(cos(inclinacao))
+	var s := absf(sin(inclinacao))
+	var caixa := Vector2(meia.x * c + meia.y * s, meia.x * s + meia.y * c)
+	var x_min := float(limit_left) + caixa.x
+	var x_max := float(limit_right) - caixa.x
+	var y_min := float(limit_top) + caixa.y
+	var y_max := float(limit_bottom) - caixa.y
+	return Vector2(clampf(p.x, x_min, x_max) if x_min <= x_max else (x_min + x_max) * 0.5,
+		clampf(p.y, y_min, y_max) if y_min <= y_max else (y_min + y_max) * 0.5)
 
 func _aplicar_tremor(delta: float) -> void:
 	if trauma <= 0.0:
 		offset = Vector2.ZERO
-		rotation = 0.0
+		rotation = inclinacao
 		return
 	trauma = maxf(trauma - tremor_queda * delta, 0.0)
 	_tempo_ruido += delta * 60.0
 	var forca := trauma * trauma
 	offset = Vector2(tremor_max_px.x * _ruido.get_noise_2d(_tempo_ruido, 0.0),
 		tremor_max_px.y * _ruido.get_noise_2d(0.0, _tempo_ruido)) * forca
-	rotation = deg_to_rad(tremor_max_graus) * forca * _ruido.get_noise_2d(_tempo_ruido, _tempo_ruido)
+	rotation = inclinacao + deg_to_rad(tremor_max_graus) * forca * _ruido.get_noise_2d(_tempo_ruido, _tempo_ruido)
 
 func _trocar(novo: Plano, novo_zoom: float, imediato: bool) -> void:
 	_zoom_destino = novo_zoom
 	var mudou := novo != plano
 	plano = novo
 	if imediato:
-		global_position = destino()
 		zoom = Vector2.ONE * _zoom_destino
+		inclinacao = _inclinacao_destino
+		global_position = _preso(destino())
 		reset_smoothing()
 	if mudou:
 		plano_mudou.emit(plano)

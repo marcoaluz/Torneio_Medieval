@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://game/scripts/presentation/arena.gd" id="1"]
 [ext_resource type="Script" path="res://game/scripts/presentation/provisorio/retangulo_provisorio.gd" id="2"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://game/scripts/presentation/efeitos_impacto.gd" id="10"]
 [ext_resource type="PackedScene" path="res://game/scenes/ui/painel_ajuste.tscn" id="11"]
 [ext_resource type="Script" path="res://game/scripts/presentation/audio/som_justa.gd" id="12"]
+[ext_resource type="Script" path="res://game/scripts/presentation/mira_visual.gd" id="13"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1")
@@ -98,6 +99,9 @@ position = Vector2(-1.5, -1.5)
 script = ExtResource("2")
 tamanho = Vector2(3, 3)
 cor = Color(0.95, 0.92, 0.8, 1)
+
+[node name="Mira" type="Node2D" parent="PontaLanca"]
+script = ExtResource("13")
 
 [node name="Camera" type="Camera2D" parent="."]
 position = Vector2(480, 270)
