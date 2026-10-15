@@ -376,6 +376,28 @@ create index if not exists erro_servidor_criado on public.erro_servidor (criado_
 alter table public.erro_servidor enable row level security;
 -- Sem políticas: só a chave de serviço e o painel leem e escrevem.
 
+-- ---------------------------------------------------------------- compras (3.7)
+
+-- Só a Edge Function (depois de validar o recibo na loja) insere aqui.
+-- Ao excluir a conta, o registro da compra FICA (obrigação contábil/fiscal e de reembolso)
+-- sem dono: jogador_id vira null (anonimizado).
+create table if not exists public.compra (
+	id bigint generated always as identity primary key,
+	jogador_id uuid references public.jogador (id) on delete set null,
+	loja text not null check (loja in ('google', 'apple', 'teste')),
+	produto text not null,
+	recibo_hash text not null,
+	estado text not null default 'validada' check (estado in ('validada', 'reembolsada', 'cancelada', 'expirada')),
+	valido_ate timestamptz,
+	criado_em timestamptz not null default now(),
+	atualizado_em timestamptz not null default now(),
+	unique (loja, recibo_hash)
+);
+create index if not exists compra_jogador on public.compra (jogador_id, criado_em desc);
+alter table public.compra enable row level security;
+create policy "compra le as proprias" on public.compra
+	for select to authenticated using ((select auth.uid()) = jogador_id);
+
 -- Painel (3.10): consultas prontas. Views NÃO são protegidas por RLS (rodam como dono):
 -- por isso o acesso é revogado de quem vem pelo app; só o painel do Supabase (e a
 -- chave de serviço) as lê.
@@ -418,28 +440,6 @@ create or replace view public.painel_erros_recentes as
 revoke all on public.painel_jogadores_ativos_dia, public.painel_novos_jogadores_dia, public.painel_compras_dia,
 	public.painel_denuncias_abertas, public.painel_funil_tutorial, public.painel_desistencias,
 	public.painel_erros_recentes from public, anon, authenticated;
-
--- ---------------------------------------------------------------- compras (3.7)
-
--- Só a Edge Function (depois de validar o recibo na loja) insere aqui.
--- Ao excluir a conta, o registro da compra FICA (obrigação contábil/fiscal e de reembolso)
--- sem dono: jogador_id vira null (anonimizado).
-create table if not exists public.compra (
-	id bigint generated always as identity primary key,
-	jogador_id uuid references public.jogador (id) on delete set null,
-	loja text not null check (loja in ('google', 'apple', 'teste')),
-	produto text not null,
-	recibo_hash text not null,
-	estado text not null default 'validada' check (estado in ('validada', 'reembolsada', 'cancelada', 'expirada')),
-	valido_ate timestamptz,
-	criado_em timestamptz not null default now(),
-	atualizado_em timestamptz not null default now(),
-	unique (loja, recibo_hash)
-);
-create index if not exists compra_jogador on public.compra (jogador_id, criado_em desc);
-alter table public.compra enable row level security;
-create policy "compra le as proprias" on public.compra
-	for select to authenticated using ((select auth.uid()) = jogador_id);
 
 -- Prepara a exclusão da conta (3.9): passa a liderança e apaga a ordem vazia.
 -- Depois disso a Edge Function apaga o usuário do Auth e o cascade leva o resto.
