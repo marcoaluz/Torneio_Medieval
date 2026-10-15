@@ -28,7 +28,7 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 ## Centro do plano aberto, em coordenadas do mundo.
 @export var centro_aberto := Vector2(480, 270)
 @export var zoom_aberto := 1.5
-@export var zoom_seguir := 2.5
+@export var zoom_seguir := 2.4
 @export var zoom_foco := 2.8
 ## Deslocamento a partir da origem (pés) do alvo seguido; x é multiplicado
 ## pela direção do cavaleiro, para a câmera olhar um pouco à frente.

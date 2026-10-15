@@ -54,6 +54,21 @@ var gesto := 0.0:
 		gesto = v
 		_aplicar_gesto()
 var _tween_gesto: Tween
+## Ângulo da lança apontada para o adversário (radianos, no quadro do Visual,
+## olhando à direita), somado ao do gesto. Limitado a LANCA_MAX_GRAUS.
+const LANCA_MAX_GRAUS := 28.0
+var mira_lanca := 0.0:
+	set(v):
+		mira_lanca = clampf(v, -deg_to_rad(LANCA_MAX_GRAUS), deg_to_rad(LANCA_MAX_GRAUS))
+		_aplicar_gesto()
+
+## Ângulo (no quadro do Visual) para a lança, saindo da mão, apontar a `alvo`.
+func angulo_para(alvo: Vector2) -> float:
+	var v := visual()
+	if v == null:
+		return 0.0
+	var d := v.to_local(alvo) - _posicao_lanca
+	return atan2(d.y, d.x)
 
 func _ready() -> void:
 	_aplicar_orientacao()
@@ -167,7 +182,7 @@ func _aplicar_gesto() -> void:
 	corpo.position = PIVO_SELA - PIVO_SELA.rotated(a)
 	if lanca:
 		var avanco := gesto * (GESTO_ESTOCADA_PX if gesto > 0.0 else GESTO_RECUO_PX)
-		lanca.rotation = a * 0.35  # a ponta continua mirando o rival
+		lanca.rotation = a * 0.35 + mira_lanca  # a ponta continua mirando o rival
 		lanca.position = PIVO_SELA + (_posicao_lanca - PIVO_SELA).rotated(a) + Vector2(avanco, 0)
 
 ## Derrubada: o cavaleiro (Visual/Cavaleiro, com a lança) cai para trás,
@@ -198,6 +213,7 @@ func restaurar() -> void:
 	if _tween_gesto and _tween_gesto.is_valid():
 		_tween_gesto.kill()
 	caido = false
+	mira_lanca = 0.0
 	gesto = 0.0
 	var corpo := get_node_or_null("Visual/Cavaleiro") as Node2D
 	if corpo:

@@ -16,8 +16,12 @@ extends Node
 ##   Impacto: corte seco para um close inclinado com os dois cavaleiros
 ##     grandes e a cerca entre eles (do elmo do rival ao pé do jogador; é o
 ##     quadro que o hit-stop congela), abrindo um pouco depois.
-## Na Mira o jogador (pista da frente) fica translúcido ao se aproximar, para
-## não cobrir as zonas do rival.
+## Como na referência de arte, o encontro é a uma lança de distância: as pistas
+## são encurtadas só no desenho (`vao_encontro`), para os dois se verem inteiros
+## no choque, e cada lança aponta para o adversário ao se aproximarem (a do
+## jogador segue a mira). A barra de distância e a regra não mudam.
+## Na Mira o jogador (pista da frente) fica translúcido se chegar a cobrir as
+## zonas do rival.
 ## Gesto do golpe (Cavaleiro.preparar_golpe/golpear): o jogador recolhe ao
 ## soltar o dedo e o rival um pouco antes do choque; os dois estocam um
 ## instante antes do contato, para o congelamento do impacto pegar o golpe
@@ -70,9 +74,13 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export_range(0.05, 1.0, 0.05) var camera_lenta := 0.3
 ## Close do Impacto: o quadro vai do elmo do rival (pista de trás) ao pé do
 ## jogador (pista da frente), com folga; zoom entre estes limites e inclinação.
-@export var zoom_impacto := 2.2
+@export var zoom_impacto := 1.7
 @export var zoom_impacto_max := 2.5
-@export var inclinacao_impacto := -6.0
+@export var inclinacao_impacto := -5.0
+## Vão (px) entre os dois no instante do choque (alcance da lança, em diagonal).
+@export var vao_encontro := 190.0
+## A partir de quantos px além do vão as lanças começam a apontar.
+@export var apontar_desde_px := 320.0
 ## Na Mira, transparência do jogador quando chega ao rival (1 = opaco).
 @export_range(0.2, 1.0, 0.05) var jogador_alfa_mira := 0.5
 @export var folga_impacto := 1.12
@@ -89,8 +97,6 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var zoom_exibicao := 1.0
 ## Fração da Apresentação em que a câmera sai do rival para o jogador.
 @export_range(0.0, 1.0, 0.05) var apresentacao_troca := 0.45
-## Centro do close do Impacto na horizontal: do meio dos dois (0) até o ponto de contato (1).
-@export_range(0.0, 1.0, 0.05) var impacto_para_contato := 0.3
 ## Antecedência do gesto em relação ao choque (ms do relógio da regra).
 @export var preparar_antes_ms := 420
 @export var golpear_antes_ms := 110
@@ -518,8 +524,9 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 			if not _golpeou:  # Mira curta demais para a antecedência
 				_golpear()
 			var q := quadro_do_impacto()
-			cam.impacto(q.get_center(), clampf(arena.get_viewport_rect().size.y / q.size.y, zoom_impacto, zoom_impacto_max),
-				inclinacao_impacto)
+			var z := clampf(arena.get_viewport_rect().size.y / q.size.y, zoom_impacto, zoom_impacto_max)
+			cam.impacto(q.get_center(), z, inclinacao_impacto)
+			cam.deslizar(q.get_center(), z, 0.0)  # o tranco inclinado volta ao horizonte reto
 	_atualizar_visual()
 
 ## Fim da justa: avisa o serviço Jogador (fôlego do cavalo; recompensas e
@@ -604,8 +611,12 @@ func _atualizar_visual() -> void:
 		_apresentou = true
 		arena.camera.plano_aberto(false, centro_aberto_em(arena.jogador))
 	var d := distancias_px()
-	arena.jogador.global_position = arena.inicio_jogador.global_position + Vector2(d.x, 0)
-	arena.rival.global_position = arena.inicio_rival.global_position - Vector2(d.y, 0)
+	# Pista encurtada no desenho: no encontro da regra, sobra o vão entre os dois.
+	var total_px := justa.distancia_total_mil() * _px_por_mil
+	var k := (total_px - vao_encontro) / total_px if total_px > vao_encontro else 1.0
+	arena.jogador.global_position = arena.inicio_jogador.global_position + Vector2(d.x * k, 0)
+	arena.rival.global_position = arena.inicio_rival.global_position - Vector2(d.y * k, 0)
+	_apontar_lancas()
 	_atualizar_mira()
 	if barra == null:
 		return
@@ -657,7 +668,7 @@ func quadro_do_impacto() -> Rect2:
 	var r := arena.rival
 	var topo := r.global_position.y - 150.0 * r.escala
 	var baixo := j.global_position.y
-	var x := lerpf((j.centro().x + r.centro().x) * 0.5, ponta_no_mundo().x, impacto_para_contato)
+	var x := (j.global_position.x + r.global_position.x) * 0.5
 	var alto := (baixo - topo) * folga_impacto
 	# O placar e o letreiro ocupam o alto da tela: a folga extra fica em cima.
 	var em_cima := alto * folga_topo_impacto
@@ -665,6 +676,21 @@ func quadro_do_impacto() -> Rect2:
 	var total := alto + em_cima + embaixo
 	var largo := total * arena.get_viewport_rect().size.x / arena.get_viewport_rect().size.y
 	return Rect2(x - largo * 0.5, (topo + baixo) * 0.5 - alto * 0.5 - em_cima, largo, total)
+
+## Lanças apontam para o adversário conforme se aproximam (a do jogador para a
+## mira na Mira; antes, para o peito do rival). Depois do choque, ficam como estão.
+func _apontar_lancas() -> void:
+	var f := justa.fases.fase
+	if not f in [JustaFases.Fase.CORRIDA, JustaFases.Fase.MIRA]:
+		return
+	var j := arena.jogador
+	var r := arena.rival
+	var dx := absf(r.global_position.x - j.global_position.x)
+	var peso := clampf(1.0 - (dx - vao_encontro) / apontar_desde_px, 0.0, 1.0)
+	peso = peso * peso * (3.0 - 2.0 * peso)  # suave
+	var alvo_j := ponta_no_mundo() if f == JustaFases.Fase.MIRA else r.ponto_alvo("Peito")
+	j.mira_lanca = j.angulo_para(alvo_j) * peso
+	r.mira_lanca = r.angulo_para(j.ponto_alvo("Peito")) * peso
 
 func _golpear() -> void:
 	_golpeou = true

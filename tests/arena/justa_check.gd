@@ -62,6 +62,7 @@ func _initialize() -> void:
 	var golpe_antes_do_choque := false
 	var inclinou_no_choque := false
 	var close_no_contato := false
+	var lancas_apontam := false
 	var quadros := 0
 	var passo := 1.0 / 30.0
 	while not c.justa.terminou() and quadros < 30 * 120:
@@ -92,8 +93,11 @@ func _initialize() -> void:
 		quadros += 1
 		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.IMPACTO and not inclinou_no_choque:
 			golpe_antes_do_choque = c._golpeou and arena.jogador._tween_gesto != null and arena.rival._tween_gesto != null
+			# Jogador (pista da frente) aponta para cima, rival (atrás, espelhado) para baixo: no quadro de cada um, ângulo < 0 e > 0.
+			lancas_apontam = arena.jogador.mira_lanca < -deg_to_rad(5.0) and arena.rival.mira_lanca > deg_to_rad(5.0)
 			inclinou_no_choque = absf(arena.camera.inclinacao) > deg_to_rad(3.0) and absf(arena.camera.rotation) > deg_to_rad(3.0)
-			close_no_contato = arena.camera.zoom.x > c.zoom_mira_inicio * 0.5 and arena.camera.global_position.distance_to(c.ponta_no_mundo()) < 80.0
+			var meio := (arena.jogador.global_position + arena.rival.global_position) * 0.5
+			close_no_contato = arena.camera.zoom.x >= c.zoom_impacto and absf(arena.camera.global_position.x - meio.x) < 40.0
 		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.IMPACTO and dist_fim_mira < 0.0:
 			dist_fim_mira = absf(arena.jogador.global_position.x - arena.rival.global_position.x)
 			barra_fim_mira = absf(c.barra.posicao_jogador - c.barra.posicao_rival)
@@ -113,7 +117,8 @@ func _initialize() -> void:
 	_checa("ponta da lanca aparece na mira", ponta_visivel)
 	_checa("zona sob a ponta brilha no rival", realce_peito)
 	_checa("brilho apaga fora da mira", arena.rival.get_node("Visual/Cavaleiro/Peito").modulate == Color.WHITE and not arena.ponta_lanca.visible)
-	_checa("cavaleiros se encontram no fim da mira (%.1f px)" % dist_fim_mira, dist_fim_mira >= 0.0 and dist_fim_mira < 6.0)
+	_checa("no choque ficam a uma lanca de distancia (%.1f px)" % dist_fim_mira, dist_fim_mira >= 0.0 and absf(dist_fim_mira - c.vao_encontro) < 6.0)
+	_checa("as lancas apontam uma para a outra no choque", lancas_apontam)
 	_checa("icones da barra se encontram no fim da mira (%.3f)" % barra_fim_mira, barra_fim_mira < 0.01)
 	_checa("camera aberta na apresentacao e largada",
 		_planos["apresentacao"] == CameraArena.Plano.ABERTO and _planos["largada"] == CameraArena.Plano.ABERTO)
@@ -125,7 +130,7 @@ func _initialize() -> void:
 	_checa("a camera fecha aos poucos na mira (%.2f -> %.2f)" % [zoom_mira_inicio, zoom_mira_fim],
 		zoom_mira_inicio == c.zoom_mira_inicio and zoom_mira_fim > zoom_mira_inicio + 0.3)
 	_checa("os dois golpeiam antes do choque", golpe_antes_do_choque)
-	_checa("choque: corte inclinado no contato", inclinou_no_choque and close_no_contato)
+	_checa("choque: corte inclinado com os dois no quadro", inclinou_no_choque and close_no_contato)
 	_checa("sem inclinacao fora do impacto", absf(arena.camera._inclinacao_destino) < 0.001)
 	# Gesto: estocada inclina o tronco em torno da sela e a lança vai junto (a guarda fica na mão).
 	var cav := arena.jogador
