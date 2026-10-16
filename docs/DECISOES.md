@@ -191,3 +191,9 @@ Formato: data · decisão · motivo.
 - **Câmera da Mira:** sem `focar_alvo` no peito do rival. O plano `duelo` segue o jogador e, com o rival chegando, enquadra os dois (zoom de 1,3 até o de seguir). Assim o rival e a mira ficam na tela, e o único corte é o do acerto (close inclinado e câmera lenta). Saíram `zoom_mira_inicio` e `zoom_mira_fim`.
 - **Correção junto:** depois do choque, os cavaleiros deviam seguir em câmera lenta, mas a conta tratava a velocidade (milésimos por ms) como se o tempo fosse em segundos, e eles ficavam praticamente parados.
 - **Exibição:** fica na pista curta (780 px), que cabe inteira na vista da arquibancada.
+
+## APK de teste (2026-10-16)
+- **JDK e SDK portáteis em `D:\DEV\Android\`**, sem Android Studio nem instalador: o usuário pediu que eu instalasse; a versão zip não mexe no sistema, cabe no disco D (o C tem pouco espaço) e basta apontar as Configurações do Editor.
+- **Permissão de internet ligada:** sem ela o salvamento na nuvem (Supabase) não funciona no celular. Antes o preset pedia só vibração.
+- **`import_etc2_astc` ligado:** exigência do Godot para exportar para Android. A pixel art não muda, porque as texturas são importadas sem perda.
+- **Preset exclui `tools/`, `supabase/` e `Gemini_*`:** ferramentas, servidor e imagem de referência não são usados pelo jogo e só aumentavam o APK.

@@ -56,7 +56,7 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
 - **Pedido do usuário:** executar **todos** os prompts de `docs/PACOTE_DE_PROMPTS.md` em sequência, sem parar para revisão; ele analisa tudo depois.
 - **Parar e perguntar antes de:** gastar crédito ou mexer em serviço externo. Isso inclui PixelLab, ElevenLabs, criar projeto ou aplicar migração no Supabase, Firebase, AdMob e lojas. Tudo o que é local, faça direto.
 - **Feito:**
-  - Parte 1: código 1.0–1.10. O 1.9 (APK) depende de instalar JDK, SDK e templates Android.
+  - Parte 1: código 1.0–1.10. O 1.9 (APK) já exporta: `--headless --path . --export-debug "Android" build/android/torneio_medieval.apk`, com JDK 17 e SDK em `D:\DEV\Android\` (ver `docs/ANDROID.md`); falta testar num celular real.
   - Parte 2: 2.1–2.11; 2.12 ligado ao projeto Supabase `Torneio_Medieval` (2026-10-13, migrações `contas_e_save` e `metricas` aplicadas); falta só o CAPTCHA no painel.
   - Parte 3: 3.12–3.25, todos locais. PvP, ordens, chat, compras e anúncios estão simulados ou com provedor de teste até o servidor existir.
 - **Próximo, em ordem:**

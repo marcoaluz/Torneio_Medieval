@@ -1,8 +1,20 @@
 # Testar no celular Android
 
-Passo a passo para gerar o APK de teste do Torneio Medieval e instalar no celular. O preset já está pronto em `export_presets.cfg` (nome **Android**): só arm64-v8a, paisagem, tela cheia (imersivo), permissão só de **vibração**, pacote `com.torneiomedieval.prototipo` (provisório, até o nome do jogo sair) e o ícone provisório `icon.svg`.
+Passo a passo para gerar o APK de teste do Torneio Medieval e instalar no celular. O preset já está pronto em `export_presets.cfg` (nome **Android**): só arm64-v8a, paisagem, tela cheia (imersivo), permissões de **vibração** e **internet** (salvamento na nuvem), pacote `com.torneiomedieval.prototipo` (provisório, até o nome do jogo sair) e o ícone provisório `icon.svg`.
 
-## O que falta instalar nesta máquina (uma vez só)
+## Nesta máquina (já instalado em 2026-10-16)
+
+- Templates do Godot 4.7.2 com Android em `%APPDATA%\Godot\export_templates\4.7.2.stable\`.
+- JDK 17 (Temurin, versão zip, sem instalador) em `D:\DEV\Android\jdk-17`.
+- Android SDK (só linha de comando) em `D:\DEV\Android\Sdk`: cmdline-tools, platform-tools, build-tools 35.0.0, android-35.
+- Configurações do Editor apontando para os dois (cópia da versão anterior em `editor_settings-4.7.tres.bak_2026-10-16`).
+- Chave de depuração criada com o `keytool` em `%APPDATA%\Godot\keystores\debug.keystore` (senha `android`).
+- Projeto: `rendering/textures/vram_compression/import_etc2_astc=true`, que o Android exige. A pixel art continua sem perda; só texturas com compressão de vídeo usam ETC2/ASTC.
+- O preset exclui `tests/`, `docs/`, `.claude/`, `tools/`, `supabase/` e a imagem de referência `Gemini_*`.
+
+Se for preciso montar tudo de novo em outra máquina, siga as seções abaixo.
+
+## O que falta instalar numa máquina nova (uma vez só)
 
 Verificado em 2026-10-11: os templates de desktop do Godot 4.7.2 estão instalados, mas faltam os de Android, o JDK e o Android SDK. Quando se tenta exportar, o Godot mostra exatamente estes erros:
 
