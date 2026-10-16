@@ -309,7 +309,7 @@ def escrever_pe(t, esp, v, imgs):
 
 def fazer_avulso(v):
     esp, desc = AVULSOS[v]
-    if existe_sprite("justa", "%s_%s_parado" % (esp, v)) and (esp in ("lanca", "caparacao") or existe_sprite("vila", "%s_%s_parado" % (esp, v))):
+    if existe_sprite("justa", "%s_%s_parado" % (esp, v)) and (esp in ("lanca", "caparacao") or all(existe_sprite(t, "%s_%s_parado" % (esp, v)) for t in ("vila", "equipamentos"))):
         return
     if esp in ("elmo", "peitoral"):
         justa_corpo(v, esp, desc)
@@ -327,7 +327,7 @@ def fazer_avulso(v):
 
 
 def fazer_conjunto(nome):
-    if existe_sprite("justa", "elmo_%s_parado" % nome) and existe_sprite("vila", "elmo_%s_parado" % nome):
+    if all(existe_sprite(t, "elmo_%s_parado" % nome) for t in ("justa", "vila", "equipamentos")):
         return
     g.CONJUNTOS[nome] = CONJUNTOS_NOVOS[nome]
     g.etapa_conjunto(nome)
