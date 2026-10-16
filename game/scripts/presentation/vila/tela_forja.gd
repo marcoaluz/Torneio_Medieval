@@ -49,7 +49,9 @@ func _ready() -> void:
 	visible = false
 	_fechar.text = tr("PAINEL_FECHAR")
 	_pegar.text = tr("FORJA_PEGAR")
-	_fechar.pressed.connect(func(): visible = false; _parar_martelo())
+	_fechar.pressed.connect(func(): visible = false)
+	# Fechada por qualquer caminho, o martelo para (e com ele o som, skill som).
+	visibility_changed.connect(func(): if not visible: _parar_martelo())
 	_pegar.pressed.connect(_pegar_pronto)
 	# Terminar com gemas (3.18).
 	_agora = Button.new()
@@ -416,6 +418,13 @@ func _bater_martelo() -> void:
 	_martelo.tween_property(m, "rotation_degrees", 50.0, 0.35).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_martelo.tween_property(m, "rotation_degrees", -10.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_martelo.tween_callback(_faiscas)
+	_martelo.tween_callback(_som_do_martelo)
+
+## Cada golpe soa na bigorna, como efeito desta tela (o Audio corta ao sair).
+func _som_do_martelo() -> void:
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio and is_visible_in_tree():
+		audio.tocar("martelo_bigorna", 0.0, predio)
 
 func _parar_martelo() -> void:
 	if _martelo:

@@ -40,6 +40,7 @@ var tela_equipamentos: TelaEquipamentos:
 			_tela_equipamentos = CENA_EQUIPAMENTOS.instantiate()
 			_tela_equipamentos.visible = false
 			$Interface.add_child(_tela_equipamentos)
+			_som_da_tela(_tela_equipamentos)
 			$Interface.move_child(_tela_equipamentos, $Interface/TelaTreino.get_index() + 1)
 		return _tela_equipamentos
 @onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
@@ -56,6 +57,13 @@ var tela_equipamentos: TelaEquipamentos:
 @onready var _botao_social: Button = $Interface/Topo/Linha/Social
 @onready var janela_oferta: JanelaOferta = $Interface/JanelaOferta
 @onready var _botao_baus: Button = $Interface/Topo/Linha/Baus
+
+## A vila é a cena principal do som: o que a cena anterior tocava para antes
+## de os filhos (ambiente, chuva) pedirem o seu.
+func _enter_tree() -> void:
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio:
+		audio.trocar_cena("vila")
 
 func _ready() -> void:
 	_jog = get_node("/root/Jogador")
@@ -85,6 +93,8 @@ func _ready() -> void:
 	janela_oferta.ver.connect(func(_id): fechar_painel(); tela_loja.abrir("ofertas"))
 	_icones_do_topo()
 	_chao_com_arte()
+	for t in $Interface.get_children():
+		_som_da_tela(t)
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	cena_historia.terminou.connect(_ao_terminar_cena)
@@ -100,6 +110,32 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
 		_fechar.text = tr("PAINEL_FECHAR")
 		atualizar()
+
+## Som das telas (GDD A vila > Som dos prédios): toda tela aberta por cima da
+## vila avisa o Audio pela visibilidade, então qualquer caminho de abrir ou
+## fechar (botão, outra tela, troca de prédio) para o ambiente e os efeitos da
+## tela que saiu e devolve o da vila. O nome é o do prédio nas telas de prédio.
+func _som_da_tela(t: Node) -> void:
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	if audio == null or not (t is Control) or not (str(t.name).begins_with("Tela") or t.name == "CenaHistoria"):
+		return
+	var aberta := {"nome": ""}
+	(t as Control).visibility_changed.connect(func():
+		if (t as Control).visible:
+			aberta["nome"] = nome_da_tela_som(t)
+			audio.entrar_tela(aberta["nome"])
+		elif aberta["nome"] != "":
+			audio.sair_tela(aberta["nome"])
+			aberta["nome"] = "")
+	if (t as Control).visible:
+		aberta["nome"] = nome_da_tela_som(t)
+		audio.entrar_tela(aberta["nome"])
+
+## Nome da tela para o som: o prédio (treino, forja) ou o nó em snake_case.
+static func nome_da_tela_som(t: Node) -> String:
+	if t is TelaTreino or t is TelaForja:
+		return str(t.get("predio"))
+	return str(t.name).to_snake_case()
 
 ## Chão da vila com arte (ChaoVila); trilhas até a frente de cada prédio.
 func _chao_com_arte() -> void:

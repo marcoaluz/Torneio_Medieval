@@ -160,3 +160,16 @@ Formato: data · decisão · motivo.
 - **Nada aplicado em `economia.json`:** o pedido era listar sugestões. Elas foram testadas trocando o arquivo só durante a execução e estão em `docs/ECONOMIA.md`. A recomendada (S1, `poder_raridade` +20%) deixa 4 metas fora.
 - `TM_CATALOGO=original` fica no script para medir o efeito de catálogo à parte (grava em `docs/economia/original/`).
 - **S1 aplicada (2026-10-15, pedido do usuário):** `poder_raridade` 3/5/8/12/17 → 4/6/10/14/20 (+20%, o que 5 peças precisam para valer o que 6 valiam). Metas fora: 11 → 4; o grátis volta a chegar ao Grande Torneio (dia 82) e o teste do GDD passa (habilidoso no dia 61, pagante ruim no 71). Descartado: abaixar as faixas de poder das regiões e da liga em ~13% (mesmo efeito, mais números mexidos). A tabela também pesa o pareamento da liga no jogo (`liga.gd`/`liga.ts`), igual para todos; os casos de `tests/shared/liga.json` trazem a própria tabela e não mudam. Seed regenerado (não aplicado no Supabase).
+
+## Som dos prédios e gerenciador único de áudio (2026-10-15)
+- **Bug:** o "galope" é laço no catálogo, e `_ligar_loop` ligava o laço no próprio recurso importado (compartilhado). Cada `tocar("galope")` do campo de treino virava um laço sem fim num tocador do conjunto. O laço do estábulo/campo só parava se a tela fosse fechada pelo botão.
+- **Pilha de telas no autoload `Audio`** (escolhido) em vez de cada tela ligar e desligar o próprio som (descartado: é o que falhava quando a tela fechava por outro caminho):
+  - a cena principal chama `trocar_cena`;
+  - a vila conecta `visibility_changed` de toda `Tela*` (e da CenaHistoria) a `entrar_tela`/`sair_tela`;
+  - o ambiente pertence à tela e só soa com ela por cima;
+  - o efeito pertence à tela de cima (ou à que ele nomeia) e é cortado com fade quando ela sai;
+  - interface (barramento UI) não tem dono.
+- **Efeito e laço usam cópias diferentes do arquivo** (`_com_laco`): o original em cache do Godot fica intacto.
+- **Campo de treino sem laço próprio:** o "campo_treino" é uma batida de 2 s e virou o efeito do acerto de força; o som do campo vem das passadas.
+- **Forja:** ambiente "forja" nas telas do armeiro e do ferreiro; "martelo_bigorna" a cada golpe do martelo desenhado.
+- Fade de saída `sons.json > fade_tela_s` = 0,3 s (dado, não código).

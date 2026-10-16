@@ -8,6 +8,15 @@
 		"interface": "short, soft and warm, pleasant to hear many times, no reverb tail, no music",
 		"musica": "D dorian, warm analog mix, not harsh, instrumental, no vocals unless stated"
 	},
+	"_nota_telas": "Som dos predios (GDD A vila): o laco de ambiente de cada tela so toca com ela aberta e por cima; ao sair, ele e os efeitos dela param com fade de fade_tela_s. Telas sem entrada nao tem ambiente proprio (a de baixo para enquanto ela esta aberta). Chaves: o predio (tela_treino e tela_forja) ou o nome da tela em snake_case (tela_perfil...).",
+	"fade_tela_s": 0.3,
+	"telas": {
+		"vila": [],
+		"estabulo": ["estabulo"],
+		"campo_treino": [],
+		"armeiro": ["forja"],
+		"ferreiro": ["forja"]
+	},
 	"formatos": {
 		"_nota": "Efeitos em wav tratado (fim sem silencio, pico em -3 dBFS; o Godot comprime na importacao), musicas em mp3 (sem ffmpeg nesta maquina para tratar mp3). ogg tambem e aceito.",
 		"extensoes": ["ogg", "mp3", "wav"]

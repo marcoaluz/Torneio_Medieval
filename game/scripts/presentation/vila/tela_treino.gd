@@ -71,26 +71,11 @@ func abrir(nome: String) -> void:
 		for c in _lista.get_children():
 			c.queue_free()
 		_campo.reiniciar()
-	_som_do_estabulo(nome == "estabulo")
-	_som_do_campo(nome == "campo_treino")
 	montar()
 
 func fechar() -> void:
 	visible = false
 	predio = ""
-	_som_do_estabulo(false)
-	_som_do_campo(false)
-
-func _som_do_campo(ligado: bool) -> void:
-	var audio := get_node_or_null("/root/Audio") as ServicoAudio
-	if audio:
-		audio.laco("campo_treino", ligado)
-
-## Ambiente do estábulo em laço só com a cena aberta (skill som).
-func _som_do_estabulo(ligado: bool) -> void:
-	var audio := get_node_or_null("/root/Audio") as ServicoAudio
-	if audio:
-		audio.laco("estabulo", ligado)
 
 func _process(delta: float) -> void:
 	_acumulado += delta

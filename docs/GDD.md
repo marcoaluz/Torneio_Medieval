@@ -158,6 +158,14 @@ A tela principal é a vila vista de cima, sem andar livre: o jogador toca num pr
 
 A vila também tem ciclo de dia e noite (tochas acesas à noite) e clima (chuva, neblina), no tom sombrio da direção de arte. Prédio ocioso mostra o personagem parado esperando, o que convida o jogador a dar uma tarefa.
 
+### Som dos prédios
+
+- O som de um prédio (campo de treino, estábulo, armeiro, ferreiro) toca **só enquanto a tela daquele prédio está aberta**.
+- Ao sair, ele para com um fade curto (cerca de 0,3 s).
+- Na vila, toca só a trilha e o ambiente da própria vila (por exemplo, a chuva).
+- Vale também para efeitos repetidos, como o martelo na bigorna, o galope do treino e a escovação.
+- Toda troca de tela para o ambiente da tela anterior. Uma tela aberta por cima (Equipamentos a partir da forja) para o som da de baixo, que volta quando ela fecha.
+
 ## Equipamentos e direção de arte
 
 A tela de Equipamentos mostra o cavaleiro e o cavalo grandes, lado a lado, e cada peça trocada aparece na hora no personagem. A arte é pixel art de alta resolução, bem detalhada, com tom sombrio e adulto.

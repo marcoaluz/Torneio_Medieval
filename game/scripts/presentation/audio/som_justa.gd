@@ -13,6 +13,12 @@ const ARAUTO := {"escudo": "no_escudo", "capacete": "acerto_elmo", "peito": "ace
 
 @export var controlador: ControladorJusta
 
+## A arena é a cena principal: o que a cena anterior tocava para.
+func _enter_tree() -> void:
+	var a := _audio()
+	if a:
+		a.trocar_cena("arena")
+
 func _ready() -> void:
 	if controlador == null:
 		return

@@ -67,7 +67,7 @@ func escolher_espaco(nome: String) -> void:
 func reagir() -> void:
 	var audio := get_node_or_null("/root/Audio") as ServicoAudio
 	if audio:
-		audio.tocar("cavalo_bufando")
+		audio.tocar("cavalo_bufando", 0.0, "estabulo")
 	if _reacao and _reacao.is_valid():
 		_reacao.kill()
 	_cavalo.position = _base_cavalo

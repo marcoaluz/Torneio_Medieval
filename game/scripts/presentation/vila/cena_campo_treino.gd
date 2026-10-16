@@ -14,6 +14,7 @@ extends VBoxContainer
 signal resultado(r: Dictionary)
 
 const PASTA := "res://game/art/sprites/campo_treino/"
+const TELA := "campo_treino"  ## dono dos efeitos no Audio (param ao sair da tela)
 const CAVALEIRO := preload("res://game/scenes/arena/cavaleiro.tscn")
 const FAISCAS := preload("res://game/scenes/arena/efeitos/faiscas.tscn")
 const ALVO_ARTE := {"forca": "estafermo_braco", "precisao": "argola", "equilibrio": "tronco"}
@@ -90,7 +91,7 @@ func passar_agora() -> void:
 		_lanca_baixa(atributo == "precisao")
 	var audio := get_node_or_null("/root/Audio") as ServicoAudio
 	if audio:
-		audio.tocar("galope")
+		audio.tocar("galope", 0.0, TELA)
 
 func passando() -> bool:
 	return _t >= 0.0
@@ -138,14 +139,14 @@ func _acerto(ponto: Vector2) -> void:
 		"forca":
 			_giro_vel = 16.0
 			if audio:
-				audio.tocar("impacto_escudo")
+				audio.tocar("campo_treino", 0.0, TELA)
 		"precisao":
 			_carregando_argola = true
 			if audio:
-				audio.tocar("toque_no_tempo")
+				audio.tocar("toque_no_tempo", 0.0, TELA)
 		"equilibrio":
 			if audio:
-				audio.tocar("cavalo_bufando")
+				audio.tocar("cavalo_bufando", 0.0, TELA)
 	var f := FAISCAS.instantiate() as CPUParticles2D
 	f.amount = 10 if atributo == "forca" else 6
 	_cena.add_child(f)

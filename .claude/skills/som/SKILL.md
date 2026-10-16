@@ -32,5 +32,13 @@ Os prompts e durações de cada som estão em `docs/PACOTE_DE_PROMPTS.md` (tabel
 - Variações: um serviço único de áudio recebe o nome do som (`impacto_escudo`) e sorteia entre os arquivos numerados, com leve variação de tom. Não repita a mesma variação duas vezes seguidas.
 - Ligue som por **sinal**, não por chamada direta: a máquina de fases da justa emite um sinal por fase e a apresentação escuta (Largada → trompete e bandeira; Corrida → galope em loop; Impacto → impacto por zona, torcida; derrubada → queda). Assim a regra da justa continua pura (ver `regra-da-justa`).
 - Estado do som da vila acompanha o estado visual: forja ligada só com forja em andamento, estábulo em loop só dentro do estábulo, chuva conforme o clima.
+- **Som dos prédios (GDD A vila):** o som de um prédio toca só com a tela dele aberta; ao sair, para com fade curto (`sons.json > fade_tela_s`, 0,3 s); na vila, só a trilha e o ambiente da vila. Vale para efeitos repetidos (martelo, galope do treino, escovação).
+- **Gerenciador único** (autoload `Audio`, `servico_audio.gd`), com quatro canais:
+  - música: `musica()`;
+  - ambiente: `laco()`, laço que pertence a uma tela;
+  - efeitos: `tocar()`, pertence à tela de cima e é cortado quando ela fecha; efeito nunca toca em laço;
+  - interface: barramento UI, nunca cortado.
+- **Telas:** a cena principal chama `trocar_cena()`; a vila avisa `entrar_tela()`/`sair_tela()` pela visibilidade de cada tela, então qualquer caminho de fechar vale. O ambiente de cada prédio fica em `sons.json > telas`.
+- **Nunca** crie `AudioStreamPlayer` em cena nem toque som por nó próprio: peça ao `Audio`. Efeito de uma tela passa o nome dela (`tocar(id, 0.0, "estabulo")`), para não soar se a tela já fechou. Teste novo de prédio entra em `tests/audio/som_telas_check.gd`.
 - Efeitos de interface e de feedback ao toque entram na mesma hora do gesto (o galope depende do ritmo do toque); teste a latência num celular real.
 - Nomes de som e textos de legenda não ficam no código solto: ids em um arquivo de dados (`game/data/`).
