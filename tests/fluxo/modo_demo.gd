@@ -2,7 +2,7 @@ extends Node
 ## Demonstração para o `driver.sh shot`: a arena no modo TM_MODO (exibicao ou
 ## tutorial), a primeira disputa do torneio TM_TORNEIO (PvE, com desafios) ou
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
-## TM_PREDIO/TM_ABA, habilidades, missoes com TM_ABA, torneios com TM_REGIAO);
+## TM_PREDIO/TM_ABA, habilidades [TM_CONJUNTO], missoes com TM_ABA, torneios com TM_REGIAO);
 ## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
 ## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada); estabulo (TM_PELAGEM, TM_TROCAR=1); campo (TM_ATRIBUTO, TM_TREINANDO=1). Save em
 ## user://teste_modo_demo/.
@@ -78,13 +78,14 @@ func _ready() -> void:
 			(func(): tf.aba = "melhorar"; tf.montar()).call_deferred()
 		return
 	if tela == "habilidades":
-		# Nível 15 (dois espaços) com o conjunto da vigia completo.
+		# Nível 15 (dois espaços) com o conjunto da vigia completo (ou TM_CONJUNTO).
 		jog.estado["cavaleiro"]["nivel"] = 15
 		var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
-		for m: String in jog.pecas_do_projeto("vigia"):
+		var conj := OS.get_environment("TM_CONJUNTO") if OS.get_environment("TM_CONJUNTO") != "" else "vigia"
+		for m: String in jog.pecas_do_projeto(conj):
 			jog.estado["inventario"]["itens"].append({"id": "v_" + m, "modelo": m, "nivel": 0, "durabilidade": int(modelos[m]["durabilidade_max"])})
 			jog.estado["equipamento"][modelos[m]["espaco"]] = "v_" + m
-		jog.equipar_habilidades(["investida", "olhar_da_vigia"])
+		jog.equipar_habilidades(["investida", str(Balanceamento.ler("itens")["conjuntos"][conj]["habilidade"])])
 		var th: TelaHabilidades = load("res://game/scenes/ui/tela_habilidades.tscn").instantiate()
 		var camada_h := CanvasLayer.new()
 		add_child(camada_h)
