@@ -69,9 +69,19 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var iniciar_sozinho := true
 ## Perfil da IA do rival (game/data/balance/ia_rival.json); vazio = rival sem IA.
 @export var perfil_rival := "equilibrado"
-## Velocidade dos cavaleiros na Mira e no Impacto em relação à Corrida
-## (câmera lenta). Ajuste visual: o tempo de jogo da Mira não muda.
+## Velocidade dos cavaleiros depois do choque, em relação à Corrida (câmera
+## lenta do Impacto; na exibição, também na Mira). Ajuste visual.
 @export_range(0.05, 1.0, 0.05) var camera_lenta := 0.3
+## Pista desenhada (só apresentação; a regra mede em milésimos e os tempos não
+## mudam): px por unidade de pista na Corrida. 1,7 dá uns 160 px/s de galope,
+## uma passada do desenho (~110 px) por ciclo da animação (8 quadros a 12 fps).
+## Antes era 0,59 (75 px/s): as pernas corriam e o cavalo quase não saía do lugar.
+@export var px_por_unidade_corrida := 1.7
+## Na Mira o galope continua, só um pouco mais devagar que na Corrida (a regra
+## cobre os últimos 150 de pista em 2 s): a câmera lenta fica para o acerto.
+@export_range(0.2, 1.0, 0.05) var fator_mira := 0.55
+## A exibição (vista da arquibancada, arena inteira) usa a pista curta, que cabe na tela.
+@export var pista_exibicao_px := 780.0
 ## Close do Impacto: o quadro vai do elmo do rival (pista de trás) ao pé do
 ## jogador (pista da frente), com folga; zoom entre estes limites e inclinação.
 @export var zoom_impacto := 1.7
@@ -87,9 +97,6 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var folga_topo_impacto := 0.12
 ## A barra de distância cobre o pé da tela: folga embaixo, em fração da altura.
 @export var folga_baixo_impacto := 0.12
-## Zoom da Mira no começo e no fim da fase (a câmera fecha devagar no alvo).
-@export var zoom_mira_inicio := 2.8
-@export var zoom_mira_fim := 3.2
 ## Plano aberto (Apresentação, Largada, Fim): quanto o centro fica à frente de
 ## quem está sendo mostrado e acima do pé dele. Na exibição, a arena inteira.
 @export var aberto_a_frente := 120.0
@@ -142,7 +149,9 @@ var _desistencia_registrada := false
 var _mira_pendente: Array = []
 var _t_ultima_mira := -100000
 var _t_ultimo_toque := -100000
-var _px_por_mil := 0.0
+var _px_por_mil := 0.0  ## px desenhados por milésimo na Corrida
+var _mira_px := 0.0  ## px que cada um desenha na Mira (o resto até o encontro)
+var _total_desenho := 0.0  ## soma do que os dois desenham até o encontro
 var _fim_corrida_j := 0.0  ## distâncias em px no fim da Corrida (para a Mira)
 var _fim_corrida_r := 0.0
 var _encontro_j := 0.0
@@ -263,8 +272,7 @@ func iniciar(semente_fixa := -1) -> void:
 	_t_ultimo_toque = -100000
 	semente = semente_fixa if semente_fixa >= 0 else randi()
 	justa = Justa.new(_cfg, lado_jogador, lado_rival, semente, perfil, perfil_jogador)
-	var vao := absf(arena.inicio_rival.global_position.x - arena.inicio_jogador.global_position.x)
-	_px_por_mil = vao / float(justa.distancia_total_mil())
+	_preparar_pista()
 	_resto_ms = 0.0
 	_tempo_desde_fim = 0.0
 	set_process(true)
@@ -515,9 +523,10 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 		JustaFases.Fase.FIM:
 			cam.plano_aberto(false, (arena.jogador.global_position + arena.rival.global_position) * 0.5 - Vector2(0, aberto_acima))
 		JustaFases.Fase.CORRIDA:
-			cam.seguir(arena.jogador)
+			# Sem corte até o acerto: segue o jogador e, com o rival chegando,
+			# vai enquadrando os dois (a Mira acontece nesse mesmo plano).
+			cam.duelo(arena.jogador, arena.rival)
 		JustaFases.Fase.MIRA:
-			cam.focar_alvo(arena.rival.get_node("Visual/Cavaleiro/Peito"), zoom_mira_inicio)
 			_base_mira = Vector2(Mira.ponta_inicial(_cfg["mira"]))
 			_tempo_mira = 0.0
 		JustaFases.Fase.IMPACTO:
@@ -559,8 +568,8 @@ func _registrar_no_jogador(e: Dictionary) -> void:
 			"equipamento_final": justa.equipamento_final(true), "perfil_rival": perfil_rival, "semente": semente,
 			"gasta_folego": _gasta_folego})
 
-## Galope na Corrida (no ritmo da velocidade) e em câmera lenta na Mira e no
-## Impacto; parado nas pontas e no fim.
+## Galope na Corrida (no ritmo da velocidade), um pouco mais lento na Mira
+## (câmera lenta na exibição) e em câmera lenta no Impacto; parado nas pontas e no fim.
 func _animar_cavaleiros(f: JustaFases.Fase) -> void:
 	for lado: Array in [[arena.jogador, justa.jogador], [arena.rival, justa.rival]]:
 		var cav: Cavaleiro = lado[0]
@@ -569,17 +578,37 @@ func _animar_cavaleiros(f: JustaFases.Fase) -> void:
 		match f:
 			JustaFases.Fase.CORRIDA:
 				cav.animar("galope", ritmo)
-			JustaFases.Fase.MIRA, JustaFases.Fase.IMPACTO:
+			JustaFases.Fase.MIRA:
+				cav.animar("galope", ritmo * (camera_lenta if modo == "exibicao" else fator_mira))
+			JustaFases.Fase.IMPACTO:
 				cav.animar("galope", ritmo * camera_lenta)
 			_:
 				cav.animar("parado")
 
+## Pista desenhada desta justa: px por milésimo na Corrida, quanto cada um
+## anda na Mira e a distância entre as pontas (a arena estende o cenário).
+## Os dois se encontram no meio, a uma lança de distância (vao_encontro).
+func _preparar_pista() -> void:
+	var total_mil := float(justa.distancia_total_mil())
+	var corrida_mil := float(justa.distancia_corrida_mil())
+	if modo == "exibicao":
+		_px_por_mil = (pista_exibicao_px - vao_encontro) / total_mil
+		_mira_px = (total_mil - corrida_mil) * _px_por_mil * 0.5
+	else:
+		_px_por_mil = px_por_unidade_corrida / 1000.0
+		var nominal := (justa.jogador.velocidade_nominal + justa.rival.velocidade_nominal) * 0.5  # unidades/s
+		var mira_s := justa.fases.duracao_ms(JustaFases.Fase.MIRA) / 1000.0
+		_mira_px = nominal * px_por_unidade_corrida * fator_mira * mira_s
+	_total_desenho = corrida_mil * _px_por_mil + 2.0 * _mira_px
+	arena.ajustar_pista(_total_desenho + vao_encontro)
+	arena.posicionar_nas_pontas()
+
 ## No fim da Corrida, divide o que falta até o encontro na proporção das
-## velocidades: a Mira (câmera lenta) leva cada um até o ponto de encontro.
+## velocidades: a Mira leva cada um até o ponto de encontro.
 func _ao_fim_da_corrida(e: Dictionary) -> void:
 	_fim_corrida_j = e["distancia_jogador_mil"] * _px_por_mil
 	_fim_corrida_r = e["distancia_rival_mil"] * _px_por_mil
-	var falta := justa.distancia_total_mil() * _px_por_mil - _fim_corrida_j - _fim_corrida_r
+	var falta := _total_desenho - _fim_corrida_j - _fim_corrida_r
 	var vj := float(e["velocidade_jogador"])
 	var vr := float(e["velocidade_rival"])
 	var parte_j := 0.5 if vj + vr <= 0.0 else vj / (vj + vr)
@@ -596,10 +625,11 @@ func distancias_px() -> Vector2:
 			var k := float(f.tempo_na_fase_ms) / f.duracao_ms(JustaFases.Fase.MIRA)
 			return Vector2(lerpf(_fim_corrida_j, _encontro_j, k), lerpf(_fim_corrida_r, _encontro_r, k))
 		JustaFases.Fase.IMPACTO:
-			# Seguem devagar depois do choque, na velocidade da câmera lenta.
-			var t := f.tempo_na_fase_ms / 1000.0
-			return Vector2(_encontro_j + justa.jogador.velocidade * _px_por_mil * camera_lenta * t,
-				_encontro_r + justa.rival.velocidade * _px_por_mil * camera_lenta * t)
+			# Seguem devagar depois do choque, na velocidade da câmera lenta
+			# (velocidade em milésimos por ms = tempo em ms).
+			var t_ms := float(f.tempo_na_fase_ms)
+			return Vector2(_encontro_j + justa.jogador.velocidade * _px_por_mil * camera_lenta * t_ms,
+				_encontro_r + justa.rival.velocidade * _px_por_mil * camera_lenta * t_ms)
 	return Vector2.ZERO
 
 func _atualizar_visual() -> void:
@@ -611,18 +641,15 @@ func _atualizar_visual() -> void:
 		_apresentou = true
 		arena.camera.plano_aberto(false, centro_aberto_em(arena.jogador))
 	var d := distancias_px()
-	# Pista encurtada no desenho: no encontro da regra, sobra o vão entre os dois.
-	var total_px := justa.distancia_total_mil() * _px_por_mil
-	var k := (total_px - vao_encontro) / total_px if total_px > vao_encontro else 1.0
-	arena.jogador.global_position = arena.inicio_jogador.global_position + Vector2(d.x * k, 0)
-	arena.rival.global_position = arena.inicio_rival.global_position - Vector2(d.y * k, 0)
+	# As pontas ficam a _total_desenho + vão: no encontro da regra, sobra o vão entre os dois.
+	arena.jogador.global_position = arena.inicio_jogador.global_position + Vector2(d.x, 0)
+	arena.rival.global_position = arena.inicio_rival.global_position - Vector2(d.y, 0)
 	_apontar_lancas()
 	_atualizar_mira()
 	if barra == null:
 		return
-	var total := justa.distancia_total_mil() * _px_por_mil
-	barra.posicao_jogador = d.x / total
-	barra.posicao_rival = 1.0 - d.y / total
+	barra.posicao_jogador = d.x / _total_desenho
+	barra.posicao_rival = 1.0 - d.y / _total_desenho
 	barra.brilho = _brilho_do_compasso()
 
 ## Ponta da lança, mira visível e brilho leve na zona sob ela, só na Mira.
@@ -646,8 +673,6 @@ func _atualizar_mira() -> void:
 	m.travado = justa.solto
 	var f := justa.fases
 	var dur := f.duracao_ms(JustaFases.Fase.MIRA)
-	if modo != "exibicao":
-		arena.camera.ajustar_zoom(lerpf(zoom_mira_inicio, zoom_mira_fim, clampf(float(f.tempo_na_fase_ms) / maxf(dur, 1.0), 0.0, 1.0)))
 	var falta := dur - f.tempo_na_fase_ms
 	if not _preparou and falta <= preparar_antes_ms:
 		_preparou = true

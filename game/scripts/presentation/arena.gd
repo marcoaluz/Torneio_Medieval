@@ -25,12 +25,22 @@ extends Node2D
 @onready var cerca: Node2D = $Cerca
 
 ## Arte do cenário (tools/gerar_arena.py): encaixe -> (arquivo, topo em y).
-## O cenário vai de x = -160 a 1120. Sem o arquivo, fica o provisório.
+## A arte vai de x = -160 a 1120 e se repete na horizontal quando a pista
+## desenhada é mais longa (ajustar_pista). Sem o arquivo, fica o provisório.
 const ARTE_CENARIO := {
 	"Fundo/Arquibancada": ["res://game/art/sprites/arena/fundo.png", 0],
 	"Fundo/Chao": ["res://game/art/sprites/arena/chao.png", 194],
 	"Cerca": ["res://game/art/sprites/arena/cerca.png", 236],
 }
+
+## Centro da pista (onde os dois se encontram) e quanto cenário sobra além
+## das pontas, para os planos abertos da Apresentação e da Largada.
+@export var centro_pista := 480.0
+@export var margem_cenario := 480.0
+## Arauto (bandeira da largada) à frente da ponta do jogador.
+@export var arauto_a_frente := 110.0
+
+var _artes: Array[Sprite2D] = []
 
 func _ready() -> void:
 	encaixar_arte()
@@ -68,6 +78,27 @@ func encaixar_arte() -> void:
 		s.position = Vector2(-160, float(ARTE_CENARIO[caminho][1])) - no.position
 		no.add_child(s)
 		no.move_child(s, 0)
+		_artes.append(s)
+
+## Pontas a `vao` px uma da outra, centradas no encontro; o arauto acompanha a
+## ponta do jogador e o cenário (arte repetida) e os limites da câmera cobrem a
+## pista com folga. Só desenho: a regra não sabe da pista em px.
+func ajustar_pista(vao: float) -> void:
+	var meia := vao * 0.5
+	inicio_jogador.global_position.x = centro_pista - meia
+	fim_jogador.global_position.x = centro_pista + meia
+	inicio_rival.global_position.x = centro_pista + meia
+	fim_rival.global_position.x = centro_pista - meia
+	arauto.global_position.x = inicio_jogador.global_position.x + arauto_a_frente
+	var esq := minf(-160.0, centro_pista - meia - margem_cenario)
+	var dir := maxf(1120.0, centro_pista + meia + margem_cenario)
+	for s in _artes:
+		s.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		s.region_enabled = true
+		s.region_rect = Rect2(esq + 160.0, 0.0, dir - esq, float(s.texture.get_height()))
+		s.global_position.x = esq
+	camera.limit_left = int(esq)
+	camera.limit_right = int(dir)
 
 ## Aparência do cavaleiro do jogador a partir dos dados do jogador (se houver).
 func vestir_jogador() -> void:

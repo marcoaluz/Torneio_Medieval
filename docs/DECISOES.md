@@ -182,3 +182,12 @@ Formato: data · decisão · motivo.
 - **Volta para a criação, não para o título:** como pediu o usuário. A política já aceita fica guardada.
 - **"Novo jogo" na depuração:** no autoload `Depuracao`, ao lado do FPS, só com `OS.is_debug_build()`, e pede um segundo toque em 3 s.
 - **Save antigo do aparelho** renomeado para `*.teste_claude_2026-10-15` em vez de apagado (dá para desfazer). A sessão anônima também foi renomeada, então a próxima abertura cria uma conta anônima nova. A antiga fica órfã no Supabase, junto com os usuários de teste a limpar (NUVEM.md).
+
+## Cavalo mais rápido e corte só no acerto (2026-10-16)
+- **Pedido do usuário:** "cavalo mais rápido na batalha, parece muito lento". Na pergunta, ele escolheu o corte de câmera só no acerto, em vez de fechar no rival no começo da Mira.
+- **Causa da lentidão:** a pista desenhada tinha 780 px para os ~4,5 s da Corrida, uns 75 px/s. O galope (8 quadros a 12 fps) cobria só 49 px por passada, e o cavalo parecia correr no lugar.
+- **Escolhido, só na apresentação:** pista desenhada mais longa (1,7 px por unidade de pista, ~160–190 px/s, uma passada de ~110 px por ciclo), com o cenário repetido na horizontal. Descartado: acelerar a regra (`galope.json`), porque mudaria o número de toques no compasso, o fôlego, a IA, as gravações e o porte em TypeScript.
+- **Mira:** a regra cobre os últimos 150 de pista em 2 s, um terço da velocidade da Corrida. No desenho, cada um anda na Mira `fator_mira` (0,55) da velocidade da Corrida, então as pontas ficam mais afastadas para os dois chegarem juntos ao vão da lança.
+- **Câmera da Mira:** sem `focar_alvo` no peito do rival. O plano `duelo` segue o jogador e, com o rival chegando, enquadra os dois (zoom de 1,3 até o de seguir). Assim o rival e a mira ficam na tela, e o único corte é o do acerto (close inclinado e câmera lenta). Saíram `zoom_mira_inicio` e `zoom_mira_fim`.
+- **Correção junto:** depois do choque, os cavaleiros deviam seguir em câmera lenta, mas a conta tratava a velocidade (milésimos por ms) como se o tempo fosse em segundos, e eles ficavam praticamente parados.
+- **Exibição:** fica na pista curta (780 px), que cabe inteira na vista da arquibancada.

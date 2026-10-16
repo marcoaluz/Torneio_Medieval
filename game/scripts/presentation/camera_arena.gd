@@ -5,7 +5,10 @@ extends Camera2D
 ##                    (centro_aberto/zoom_aberto). A justa usa um plano aberto
 ##                    já próximo, num lado da pista (Apresentação, Largada,
 ##                    Fim); a exibição usa a arena inteira (zoom 1)
-##   seguir(alvo)   - acompanha um cavaleiro (Corrida)
+##   seguir(alvo)   - acompanha um cavaleiro
+##   duelo(alvo, rival) - acompanha o jogador e, com o rival chegando,
+##                    enquadra os dois sem corte, fechando conforme se
+##                    aproximam (Corrida e Mira; o corte é só no acerto)
 ##   focar(ponto)   - zoom num ponto fixo do mundo (Impacto)
 ##   focar_alvo(no) - zoom num nó que se move (Mira: o peito do rival)
 ##   impacto(ponto) - corte seco para um close inclinado (ângulo holandês) no
@@ -33,6 +36,11 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 ## Deslocamento a partir da origem (pés) do alvo seguido; x é multiplicado
 ## pela direção do cavaleiro, para a câmera olhar um pouco à frente.
 @export var deslocamento_seguir := Vector2(70, -80)
+## Duelo: zoom mínimo ao enquadrar os dois, folga (px) além de cada um, e por
+## quantos px antes de caberem os dois a câmera começa a abrir para o rival.
+@export var zoom_duelo_min := 1.3
+@export var folga_duelo := 90.0
+@export var entrada_duelo := 320.0
 ## Rapidez da transição (por segundo). Maior = mais seco.
 @export var rapidez := 5.0
 ## Impacto: inclinação da imagem (graus) e quanto o corte entra mais fechado
@@ -48,6 +56,7 @@ enum Plano { ABERTO, SEGUIR, FOCO }
 var plano := Plano.ABERTO
 var _centro := Vector2(480, 270)
 var _alvo: Node2D
+var _rival: Node2D  ## duelo: o outro cavaleiro (null fora do duelo)
 var _ponto := Vector2.ZERO
 var _zoom_destino := 1.0
 ## Inclinação de base (radianos); o tremor soma por cima.
@@ -70,18 +79,47 @@ func tremer(quanto: float) -> void:
 ## `centro` = Vector2.INF usa `centro_aberto`; `zoom_plano` <= 0 usa `zoom_aberto`.
 func plano_aberto(imediato := false, centro := Vector2.INF, zoom_plano := 0.0) -> void:
 	_alvo = null
+	_rival = null
 	_inclinacao_destino = 0.0
 	_centro = centro_aberto if centro == Vector2.INF else centro
 	_trocar(Plano.ABERTO, zoom_plano if zoom_plano > 0.0 else zoom_aberto, imediato)
 
 func seguir(alvo: Node2D, imediato := false) -> void:
 	_alvo = alvo
+	_rival = null
 	_inclinacao_destino = 0.0
 	_trocar(Plano.SEGUIR, zoom_seguir, imediato)
+
+func duelo(alvo: Node2D, rival: Node2D, imediato := false) -> void:
+	_alvo = alvo
+	_rival = rival
+	_inclinacao_destino = 0.0
+	_trocar(Plano.SEGUIR, zoom_do_duelo(), imediato)
+
+## Vão (px) entre os dois no duelo.
+func _vao_duelo() -> float:
+	return absf(_rival.global_position.x - _alvo.global_position.x)
+
+## 0 = só o jogador (rival longe), 1 = os dois enquadrados.
+func peso_duelo() -> float:
+	if not (is_instance_valid(_alvo) and is_instance_valid(_rival)):
+		return 0.0
+	var cabe := get_viewport_rect().size.x / zoom_duelo_min - 2.0 * folga_duelo
+	var t := clampf((cabe + entrada_duelo - _vao_duelo()) / entrada_duelo, 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
+## Zoom do duelo: o de seguir com o rival longe; o que cabe os dois (entre
+## zoom_duelo_min e zoom_seguir) quando ele chega.
+func zoom_do_duelo() -> float:
+	if not (is_instance_valid(_alvo) and is_instance_valid(_rival)):
+		return zoom_seguir
+	var cabe := get_viewport_rect().size.x / (_vao_duelo() + 2.0 * folga_duelo)
+	return lerpf(zoom_seguir, clampf(cabe, zoom_duelo_min, zoom_seguir), peso_duelo())
 
 ## `zoom` <= 0 usa `zoom_foco`.
 func focar(ponto: Vector2, zoom_ponto := 0.0, imediato := false) -> void:
 	_alvo = null
+	_rival = null
 	_ponto = ponto
 	_inclinacao_destino = 0.0
 	_trocar(Plano.FOCO, zoom_ponto if zoom_ponto > 0.0 else zoom_foco, imediato)
@@ -89,6 +127,7 @@ func focar(ponto: Vector2, zoom_ponto := 0.0, imediato := false) -> void:
 ## Zoom que acompanha um nó em movimento. `zoom` <= 0 usa `zoom_foco`.
 func focar_alvo(no: Node2D, zoom_ponto := 0.0, imediato := false) -> void:
 	_alvo = no
+	_rival = null
 	_ponto = no.global_position
 	_inclinacao_destino = 0.0
 	_trocar(Plano.FOCO, zoom_ponto if zoom_ponto > 0.0 else zoom_foco, imediato)
@@ -97,6 +136,7 @@ func focar_alvo(no: Node2D, zoom_ponto := 0.0, imediato := false) -> void:
 ## até `zoom_ponto`. `graus` = 0 usa `inclinacao_impacto`.
 func impacto(ponto: Vector2, zoom_ponto: float, graus := 0.0) -> void:
 	_alvo = null
+	_rival = null
 	_ponto = ponto
 	_inclinacao_destino = deg_to_rad(graus if graus != 0.0 else inclinacao_impacto)
 	_trocar(Plano.FOCO, zoom_ponto, true)
@@ -108,6 +148,7 @@ func impacto(ponto: Vector2, zoom_ponto: float, graus := 0.0) -> void:
 ## Sem corte: o foco vai deslizando até outro ponto, zoom e inclinação.
 func deslizar(ponto: Vector2, novo_zoom: float, graus: float) -> void:
 	_alvo = null
+	_rival = null
 	_ponto = ponto
 	_zoom_destino = novo_zoom
 	_inclinacao_destino = deg_to_rad(graus)
@@ -125,7 +166,11 @@ func destino() -> Vector2:
 				var dir: Variant = _alvo.get("direcao")
 				if dir != null:
 					d.x *= float(dir)
-				return _alvo.global_position + d
+				var p := _alvo.global_position + d
+				if is_instance_valid(_rival):
+					var meio := Vector2((_alvo.global_position.x + _rival.global_position.x) * 0.5, p.y)
+					return p.lerp(meio, peso_duelo())
+				return p
 			return _centro
 		Plano.FOCO:
 			if is_instance_valid(_alvo):
@@ -134,6 +179,8 @@ func destino() -> Vector2:
 	return _centro
 
 func _process(delta: float) -> void:
+	if plano == Plano.SEGUIR and is_instance_valid(_rival):
+		_zoom_destino = zoom_do_duelo()
 	var k := 1.0 - exp(-rapidez * delta)
 	zoom = zoom.lerp(Vector2.ONE * _zoom_destino, k)
 	inclinacao = lerpf(inclinacao, _inclinacao_destino, k)

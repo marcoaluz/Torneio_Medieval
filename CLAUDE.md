@@ -85,7 +85,10 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
   - **Gerenciador único:** todo som passa pelo autoload `Audio` (música, ambiente por tela, efeitos por tela, interface); nunca `AudioStreamPlayer` em cena.
   - **Prédio ou tela nova:** ambiente em `sons.json > telas` e um caso em `tests/audio/som_telas_check.gd` (skill `som`).
 - **Ferramentas de arte (PixelLab):** rodar com `python -E -P` (o Pillow está na pasta do usuário; `-I` a esconde). Cliente em `tools/pixellab_cliente.py` (cache em `game/art/fontes/cache/`, fora do git). Limites que já morderam: altura múltipla de 4; pixen até 768 de largura; edit/transfer de 160 px = 4/3 quadros por pedido; quadros em `{"image":…, "size":…}`; o servidor às vezes devolve 504 (o cliente reenvia).
-- **Arena:** pistas em y=270 (rival, atrás da cerca) e y=340 (jogador, na frente); a câmera de cada fase está em `controlador_justa.gd` (`_ao_entrar_na_fase`) e os zooms em `camera_arena.gd`/exports do controlador. Mexeu nas pistas? Confira as capturas de cada fase (16:9 e 20:9) e o `justa_check`.
+- **Arena:** pistas em y=270 (rival, atrás da cerca) e y=340 (jogador, na frente).
+  - A câmera de cada fase está em `controlador_justa.gd` (`_ao_entrar_na_fase`) e os zooms em `camera_arena.gd`/exports do controlador.
+  - Corrida e Mira usam um plano só (`duelo`); o corte é só no acerto.
+  - A pista desenhada sai de `px_por_unidade_corrida`/`fator_mira` (`_preparar_pista` → `Arena.ajustar_pista`), não das marcas da cena. Mexeu nas pistas? Confira as capturas de cada fase (16:9 e 20:9) e o `justa_check`.
 - **Mudou a geometria do cavaleiro?** Meça as zonas na arte, atualize `mira.json`, os pontos fixos dos testes e regrave as referências (`TM_GRAVAR=1`) e os cenários (`tools/gravar_cenarios.gd`).
 - **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
 - **Mudança na regra da justa:**

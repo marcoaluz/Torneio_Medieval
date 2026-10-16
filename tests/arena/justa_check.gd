@@ -59,6 +59,10 @@ func _initialize() -> void:
 	var mira_peito := false      ## mira visível com a cor do peito enquanto segura
 	var zoom_mira_inicio := -1.0
 	var zoom_mira_fim := -1.0
+	var vel_corrida_px := 0.0    ## maior velocidade do desenho do jogador na Corrida (px/s)
+	var quadros_mira := 0
+	var rival_na_tela := 0       ## quadros da Mira com o rival dentro do quadro
+	var salto_mira := 0.0        ## maior salto da câmera entre quadros na Mira (sem corte)
 	var golpe_antes_do_choque := false
 	var inclinou_no_choque := false
 	var close_no_contato := false
@@ -68,6 +72,8 @@ func _initialize() -> void:
 	while not c.justa.terminou() and quadros < 30 * 120:
 		var antes := c.fase()
 		var j := c.justa
+		var x_antes := arena.jogador.global_position.x
+		var cam_antes := arena.camera.global_position
 		# Robô: toca no primeiro quadro depois da bandeira e no quadro mais perto de cada batida.
 		if antes == JustaFases.Fase.LARGADA and j.bandeira_baixou and not j.tocou_largada:
 			c.tocar()
@@ -86,11 +92,19 @@ func _initialize() -> void:
 				var mv: MiraVisual = arena.ponta_lanca.get_node("Mira")
 				mira_peito = mira_peito or (mv.is_visible_in_tree() and mv.zona == "peito" and mv.cor() == MiraVisual.CORES["peito"] and mv.segurando)
 			if zoom_mira_inicio < 0.0:
-				zoom_mira_inicio = arena.camera._zoom_destino
-			zoom_mira_fim = arena.camera._zoom_destino
+				zoom_mira_inicio = arena.camera.zoom.x
+			zoom_mira_fim = arena.camera.zoom.x
+			quadros_mira += 1
+			var meia := arena.get_viewport_rect().size / arena.camera.zoom * 0.5
+			if absf(arena.rival.global_position.x - arena.camera.global_position.x) < meia.x - 30.0:
+				rival_na_tela += 1
 		c._process(passo)
 		arena.camera._process(passo)
 		quadros += 1
+		if antes == JustaFases.Fase.CORRIDA and c.fase() == JustaFases.Fase.CORRIDA:
+			vel_corrida_px = maxf(vel_corrida_px, (arena.jogador.global_position.x - x_antes) / passo)
+		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.MIRA:
+			salto_mira = maxf(salto_mira, arena.camera.global_position.distance_to(cam_antes))
 		if antes == JustaFases.Fase.MIRA and c.fase() == JustaFases.Fase.IMPACTO and not inclinou_no_choque:
 			golpe_antes_do_choque = c._golpeou and arena.jogador._tween_gesto != null and arena.rival._tween_gesto != null
 			# Jogador (pista da frente) aponta para cima, rival (atrás, espelhado) para baixo: no quadro de cada um, ângulo < 0 e > 0.
@@ -123,12 +137,15 @@ func _initialize() -> void:
 	_checa("camera aberta na apresentacao e largada",
 		_planos["apresentacao"] == CameraArena.Plano.ABERTO and _planos["largada"] == CameraArena.Plano.ABERTO)
 	_checa("camera segue na corrida", _planos["corrida"] == CameraArena.Plano.SEGUIR)
-	_checa("camera foca na mira e no impacto",
-		_planos["mira"] == CameraArena.Plano.FOCO and _planos["impacto"] == CameraArena.Plano.FOCO)
+	_checa("sem corte na mira: o mesmo plano da corrida (duelo)", _planos["mira"] == CameraArena.Plano.SEGUIR)
+	_checa("corte so no acerto (impacto)", _planos["impacto"] == CameraArena.Plano.FOCO)
+	_checa("camera sem saltos na mira (%.1f px por quadro)" % salto_mira, salto_mira < 25.0)
+	_checa("rival na tela na maior parte da mira (%d de %d quadros)" % [rival_na_tela, quadros_mira], quadros_mira > 0 and rival_na_tela >= quadros_mira * 0.6)
+	_checa("cavalo rapido na corrida (%.0f px/s)" % vel_corrida_px, vel_corrida_px >= 140.0)
 	_checa("camera volta ao aberto no fim", arena.camera.plano == CameraArena.Plano.ABERTO)
 	_checa("mira visivel sobre a zona, com a cor dela", mira_peito)
 	_checa("a camera fecha aos poucos na mira (%.2f -> %.2f)" % [zoom_mira_inicio, zoom_mira_fim],
-		zoom_mira_inicio == c.zoom_mira_inicio and zoom_mira_fim > zoom_mira_inicio + 0.3)
+		zoom_mira_fim > zoom_mira_inicio + 0.3)
 	_checa("os dois golpeiam antes do choque", golpe_antes_do_choque)
 	_checa("choque: corte inclinado com os dois no quadro", inclinou_no_choque and close_no_contato)
 	_checa("sem inclinacao fora do impacto", absf(arena.camera._inclinacao_destino) < 0.001)
