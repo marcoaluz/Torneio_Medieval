@@ -9,6 +9,9 @@ extends RefCounted
 ## (pontos, pareamento limitado por faixa de poder, defesas, temporada com
 ## reinício e baú), baús (4 espaços, um abrindo por vez, chave, garantia de
 ## raro, repetidas viram fragmentos), melhoria +1..+10, forja por projeto,
+## peças sorteadas do catálogo real de itens.json como o RegraBau (raridade
+## pelos pesos, depois um modelo entre os da raridade; conjunto completo =
+## todas as peças daquele conjunto no catálogo),
 ## treino (vagas, custo, duração pelo nível), prédios (teto pela casa
 ## senhorial), fôlego do cavalo, missões, passe, VIP e anúncios.
 ## Determinístico: mesma semente, mesmo resultado (gerador Aleatorio).
@@ -28,8 +31,17 @@ var xp := 0
 var nivel := 1
 var atrib: Array = []
 var equip := {}
-var colecao := {}
+var colecao := {}  ## modelo -> raridade
 var fragmentos := 0
+## Catálogo usado (modelos de itens.json). so_originais = só as peças dos
+## conjuntos de economia.json > conjuntos (os 35 modelos de antes da 4.4),
+## para separar o efeito do catálogo maior.
+var so_originais := false
+var catalogo := {}
+var espacos: Array = []
+var itens_bau := 0
+var repetidas := 0
+var raras_bau := 0
 var sucata := 0
 var lingotes := 0
 var projetos: Array = []
@@ -87,7 +99,8 @@ func rodar(nome_perfil: String, semente: int) -> Dictionary:
 			_avancar(intervalo - por_sessao * seg_justa)
 		_fim_dia()
 	return {"marcos": marcos, "diario": diario, "resumo": {"justas": justas, "vitorias": vitorias, "baus_perdidos": baus_perdidos,
-		"nivel": nivel, "poder": poder(), "ouro": ouro, "pontos": pontos}}
+		"nivel": nivel, "poder": poder(), "ouro": ouro, "pontos": pontos,
+		"itens_bau": itens_bau, "repetidas": repetidas, "raras_bau": raras_bau}}
 
 # --- Estado ---------------------------------------------------------------
 
@@ -106,9 +119,21 @@ func _estado_inicial() -> void:
 		atrib.append(int(ini["cavalo"]["atributos"][a]))
 	equip = {}
 	colecao = {}
-	for id in ini["itens"] + [ini["tutorial"]["item_bau"]]:
+	catalogo = {}
+	var originais: Array = eco["conjuntos"].map(func(c): return c["nome"])
+	for id: String in d["itens"]["modelos"]:
 		var it: Dictionary = d["itens"]["modelos"][id]
-		_receber_peca(it["conjunto"], it["espaco"], it["raridade"])
+		if not so_originais or originais.has(it["conjunto"]):
+			catalogo[id] = it
+	espacos = []
+	for id: String in catalogo:
+		if not espacos.has(catalogo[id]["espaco"]):
+			espacos.append(catalogo[id]["espaco"])
+	itens_bau = 0
+	repetidas = 0
+	raras_bau = 0
+	for id in ini["itens"] + [ini["tutorial"]["item_bau"]]:
+		_receber_peca(id)
 	fragmentos = 0
 	sucata = int(ini["materiais"]["sucata"])
 	lingotes = 0
@@ -142,7 +167,7 @@ func poder() -> float:
 		media += a
 	media /= atrib.size()
 	var soma := media / 2.0
-	for e in eco["espacos_conjunto"]:
+	for e in espacos:
 		if equip.has(e):
 			soma += _poder_peca(equip[e])
 	return soma
@@ -223,7 +248,8 @@ func _fim_dia() -> void:
 		liga_temporada = liga()
 		passe_xp = 0
 	diario.append({"dia": dia, "nivel": nivel, "poder": poder(), "poder_atrib": _poder_atrib(), "melhoria_media": _melhoria_media(), "ouro": ouro, "pontos": pontos, "liga": liga(),
-		"regiao": regiao, "torneio": torneio, "fragmentos": fragmentos, "pecas": colecao.size()})
+		"regiao": regiao, "torneio": torneio, "fragmentos": fragmentos, "pecas": colecao.size(),
+		"raras": colecao.values().filter(func(r): return ORDEM_RARIDADE.find(r) >= 2).size()})
 
 func _checar_liga() -> void:
 	var l := liga()
@@ -367,10 +393,12 @@ func _abrir_bau(tipo: String) -> void:
 		elif conta_garantia and i == 0 and desde_raro >= int(eco["baus"]["garantia_raro_a_cada"]):
 			rar = "raro"
 			desde_raro = 0
-		var conjs: Array = eco["conjuntos"].filter(func(c): return c["raridade"] == rar)
-		var c: Dictionary = conjs[rng.inteiro(0, conjs.size() - 1)]
-		var esps: Array = eco["espacos_conjunto"]
-		_receber_peca(c["nome"], esps[rng.inteiro(0, esps.size() - 1)], rar)
+		var pool := RegraBau.modelos_da_raridade(catalogo, rar)
+		itens_bau += 1
+		if ORDEM_RARIDADE.find(rar) >= 2:
+			raras_bau += 1
+		if not _receber_peca(pool[rng.inteiro(0, pool.size() - 1)]):
+			repetidas += 1
 
 func _sortear(pesos: Dictionary) -> String:
 	var total := 0
@@ -383,18 +411,21 @@ func _sortear(pesos: Dictionary) -> String:
 			return k
 	return pesos.keys()[0]
 
-func _receber_peca(conjunto: String, espaco: String, raridade: String) -> void:
-	var chave := conjunto + "/" + espaco
-	if colecao.has(chave):
+## Recebe a peça (modelo do catálogo). Repetida vira fragmentos (devolve false).
+func _receber_peca(modelo: String) -> bool:
+	if colecao.has(modelo):
 		fragmentos += int(eco["baus"]["fragmentos_por_repetida"])
-		return
-	colecao[chave] = raridade
+		return false
+	var it: Dictionary = d["itens"]["modelos"][modelo]
+	var conjunto: String = it["conjunto"]
+	var raridade: String = it["raridade"]
+	colecao[modelo] = raridade
 	var nova := {"conjunto": conjunto, "raridade": raridade, "nivel": 0}
-	if not equip.has(espaco) or _poder_peca(nova) > _poder_peca(equip[espaco]):
-		equip[espaco] = nova
-	var completo := true
-	for e in eco["espacos_conjunto"]:
-		if not colecao.has(conjunto + "/" + e):
+	if not equip.has(it["espaco"]) or _poder_peca(nova) > _poder_peca(equip[it["espaco"]]):
+		equip[it["espaco"]] = nova
+	var completo := conjunto != ""
+	for m in _pecas_do_conjunto(conjunto):
+		if not colecao.has(m):
 			completo = false
 	if completo and dia > 0:
 		var r := ORDEM_RARIDADE.find(raridade)
@@ -402,6 +433,15 @@ func _receber_peca(conjunto: String, espaco: String, raridade: String) -> void:
 			_marco("conjunto_incomum")
 		if r >= 2:
 			_marco("conjunto_raro")
+	return true
+
+## Modelos do conjunto no catálogo, em ordem alfabética ("" = avulsa, nenhum).
+func _pecas_do_conjunto(conjunto: String) -> Array:
+	if conjunto == "":
+		return []
+	var r: Array = catalogo.keys().filter(func(m): return catalogo[m]["conjunto"] == conjunto)
+	r.sort()
+	return r
 
 # --- Gestão (no começo da sessão e entre justas) ---------------------------
 
@@ -495,7 +535,7 @@ func _gerir_treino() -> void:
 func _gerir_forja() -> void:
 	var f: Dictionary = eco["forja"]
 	if not forja.is_empty() and forja["resta"] <= 0:
-		_receber_peca(forja["conjunto"], forja["espaco"], forja["raridade"])
+		_receber_peca(forja["modelo"])
 		forja = {}
 	if not forja.is_empty() or nivel < int(d["vila"]["predios"]["armeiro"]["libera_nivel"]):
 		return
@@ -503,11 +543,11 @@ func _gerir_forja() -> void:
 
 	var melhor := {}
 	for nome in projetos:
-		var c: Dictionary = eco["conjuntos"].filter(func(x): return x["nome"] == nome)[0]
-		for e in eco["espacos_conjunto"]:
-			if not colecao.has(nome + "/" + e):
-				if melhor.is_empty() or ORDEM_RARIDADE.find(c["raridade"]) > ORDEM_RARIDADE.find(melhor["raridade"]):
-					melhor = {"conjunto": nome, "espaco": e, "raridade": c["raridade"]}
+		for m in _pecas_do_conjunto(nome):
+			if not colecao.has(m):
+				var rar: String = catalogo[m]["raridade"]
+				if melhor.is_empty() or ORDEM_RARIDADE.find(rar) > ORDEM_RARIDADE.find(melhor["raridade"]):
+					melhor = {"modelo": m, "raridade": rar}
 				break
 	if melhor.is_empty():
 		return

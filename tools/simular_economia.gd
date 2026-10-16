@@ -8,6 +8,9 @@ extends SceneTree
 ## mas chega. Uso:
 ##   driver.sh script res://tools/simular_economia.gd
 ## TM_SEMENTES=n muda o número de sementes (padrão em economia.json).
+## TM_CATALOGO=original sorteia só as peças dos conjuntos de economia.json
+## (os 35 modelos de antes da 4.4), para medir o efeito do catálogo maior;
+## grava em docs/economia/original/.
 
 const SAIDA := "res://docs/economia/"
 const NUNCA := 9999
@@ -22,7 +25,9 @@ func _initialize() -> void:
 	var perfis: Array = eco["perfis"].keys()
 
 	var linhas_marcos := ["perfil;marco;mediana;quartil_25;quartil_75;chegam_pct"]
-	var linhas_diario := ["perfil;dia;nivel;poder;poder_atributos;melhoria_media;ouro;pontos;liga;regiao;pecas"]
+	var linhas_diario := ["perfil;dia;nivel;poder;poder_atributos;melhoria_media;ouro;pontos;liga;regiao;pecas;raras_ou_mais"]
+	var so_originais := OS.get_environment("TM_CATALOGO") == "original"
+	var saida := SAIDA + ("original/" if so_originais else "")
 	var medianas := {}
 	var resumo := {}
 	for perfil in perfis:
@@ -31,10 +36,12 @@ func _initialize() -> void:
 			dias_marco[m] = []
 		var soma_dia: Array = []
 		for i in dias:
-			soma_dia.append({"nivel": 0.0, "poder": 0.0, "poder_atrib": 0.0, "melhoria_media": 0.0, "ouro": 0.0, "pontos": 0.0, "liga": 0.0, "regiao": 0.0, "pecas": 0.0})
-		var tot := {"justas": 0.0, "vitorias": 0.0, "baus_perdidos": 0.0}
+			soma_dia.append({"nivel": 0.0, "poder": 0.0, "poder_atrib": 0.0, "melhoria_media": 0.0, "ouro": 0.0, "pontos": 0.0, "liga": 0.0, "regiao": 0.0, "pecas": 0.0, "raras": 0.0})
+		var tot := {"justas": 0.0, "vitorias": 0.0, "baus_perdidos": 0.0, "itens_bau": 0.0, "repetidas": 0.0, "raras_bau": 0.0}
 		for s in n_sementes:
-			var r := SimulacaoEconomia.new(dados).rodar(perfil, int(sim_cfg["semente_base"]) + s)
+			var sim := SimulacaoEconomia.new(dados)
+			sim.so_originais = so_originais
+			var r := sim.rodar(perfil, int(sim_cfg["semente_base"]) + s)
 			for m in nomes_marcos:
 				dias_marco[m].append(int(r["marcos"].get(m, NUNCA)))
 			for i in dias:
@@ -52,17 +59,24 @@ func _initialize() -> void:
 			linhas_marcos.append("%s;%s;%s;%s;%s;%d" % [perfil, m, _txt(med), _txt(_q(lista, 0.25)), _txt(_q(lista, 0.75)), 100 * chegam / n_sementes])
 		for i in dias:
 			var sd: Dictionary = soma_dia[i]
-			linhas_diario.append("%s;%d;%.1f;%.1f;%.1f;%.1f;%.0f;%.0f;%.2f;%.2f;%.1f" % [perfil, i + 1, sd["nivel"] / n_sementes, sd["poder"] / n_sementes,
+			linhas_diario.append("%s;%d;%.1f;%.1f;%.1f;%.1f;%.0f;%.0f;%.2f;%.2f;%.1f;%.1f" % [perfil, i + 1, sd["nivel"] / n_sementes, sd["poder"] / n_sementes,
 				sd["poder_atrib"] / n_sementes, sd["melhoria_media"] / n_sementes,
-				sd["ouro"] / n_sementes, sd["pontos"] / n_sementes, sd["liga"] / n_sementes, sd["regiao"] / n_sementes, sd["pecas"] / n_sementes])
+				sd["ouro"] / n_sementes, sd["pontos"] / n_sementes, sd["liga"] / n_sementes, sd["regiao"] / n_sementes, sd["pecas"] / n_sementes, sd["raras"] / n_sementes])
 		var fim: Dictionary = soma_dia[dias - 1]
 		resumo[perfil] = "nivel %.1f · poder %.1f · ouro %.0f · pontos %.0f · vitorias %.0f%% · baus perdidos/sem. %.1f" % [
 			fim["nivel"] / n_sementes, fim["poder"] / n_sementes, fim["ouro"] / n_sementes, fim["pontos"] / n_sementes,
 			100.0 * tot["vitorias"] / maxf(1.0, tot["justas"]), tot["baus_perdidos"] / n_sementes / (dias / 7.0)]
+		var s30: Dictionary = soma_dia[29]
+		var s60: Dictionary = soma_dia[59]
+		resumo[perfil] += " · pecas %.1f · raras+ (dia 30/60/90) %.1f/%.1f/%.1f · itens de bau %.0f (raros+ %.1f/sem.) · repetidas %.0f%% · frag. de repetidas %.0f" % [
+			fim["pecas"] / n_sementes, s30["raras"] / n_sementes, s60["raras"] / n_sementes, fim["raras"] / n_sementes,
+			tot["itens_bau"] / n_sementes, tot["raras_bau"] / n_sementes / (dias / 7.0),
+			100.0 * tot["repetidas"] / maxf(1.0, tot["itens_bau"]),
+			tot["repetidas"] / n_sementes * float(eco["baus"]["fragmentos_por_repetida"])]
 
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SAIDA))
-	_gravar(SAIDA + "marcos.csv", linhas_marcos)
-	_gravar(SAIDA + "diario.csv", linhas_diario)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(saida))
+	_gravar(saida + "marcos.csv", linhas_marcos)
+	_gravar(saida + "diario.csv", linhas_diario)
 
 	# Tabela no terminal (só os três perfis da meta e os de teste no fim).
 	var cab := "%-22s" % "marco"

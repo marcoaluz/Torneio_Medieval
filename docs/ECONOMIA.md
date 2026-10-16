@@ -6,10 +6,12 @@ Script: `tools/simular_economia.gd` (modelo em `tools/simulacao_economia.gd`). R
 bash .claude/skills/run-torneio-medieval/driver.sh script res://tools/simular_economia.gd
 ```
 
-Para rodar com menos sementes e mais rápido, use `TM_SEMENTES=10`. O script grava duas planilhas, abertas direto no Excel em português (separador `;`, decimal `,`):
+Para rodar com menos sementes e mais rápido, use `TM_SEMENTES=10`. Com `TM_CATALOGO=original`, os baús sorteiam só as 35 peças dos 7 conjuntos de antes da 4.4 e as planilhas vão para `docs/economia/original/` (serve para medir o efeito do catálogo maior). O script grava duas planilhas, abertas direto no Excel em português (separador `;`, decimal `,`):
 
 - `docs/economia/marcos.csv` — para cada perfil e marco: a mediana do dia em que chega, os quartis e quantos % das sementes chegam em 90 dias.
-- `docs/economia/diario.csv` — média, dia a dia, de nível, poder (total e só atributos), melhoria média das peças, ouro, pontos de liga, liga, região e peças na coleção.
+- `docs/economia/diario.csv` — média, dia a dia, de nível, poder (total e só atributos), melhoria média das peças, ouro, pontos de liga, liga, região, peças na coleção e peças raras ou melhores na coleção.
+
+No terminal, o fim de cada perfil mostra também: peças na coleção, peças raras+ distintas nos dias 30/60/90, itens tirados de baú, raros+ por semana nos baús, % de repetidas e fragmentos vindos de repetidas.
 
 No fim da execução, o script confere a meta do prompt (pagante primeiro, grátis depois, mas chega) e as metas de ritmo de `economia.json > simulacao > metas`.
 
@@ -19,14 +21,14 @@ Joga um cavaleiro dia a dia, em 2 sessões de 7,5 min (15 min/dia), cada uma com
 
 > chance = 0,55 + 0,02 × (poder do jogador − poder do rival) + habilidade, limitada entre 5% e 95%
 
-O **poder** é a média dos 6 atributos (cavaleiro e cavalo) dividida por 2, mais o poder das 6 peças (raridade + melhoria). O teto é 212.
+O **poder** é a média dos 6 atributos (cavaleiro e cavalo) dividida por 2, mais o poder das peças equipadas nos 5 espaços que têm item no catálogo (elmo, peitoral, escudo, lança, caparação), pela raridade + melhoria, a mesma conta de `liga.gd`. O teto é 185. Até a 4.4 o modelo contava 6 peças (um espaço "ombreiras" que nunca existiu no jogo) e o teto era 212.
 
 Entram no modelo:
 - **PvE:** 5 regiões; o poder do rival sobe ao longo da região; o campeão dá baú de ouro e um projeto.
 - **Liga:** pontos; o rival tem o poder típico daquela pontuação, limitado à faixa de pareamento. Entram também as defesas do fantasma e a temporada de 28 dias, com baú e reinício de 50%.
-- **Baús:** 4 espaços, um abrindo por vez; chave semanal; garantia de raro a cada 10 baús de ferro ou melhores; peça repetida vira fragmento.
+- **Baús:** 4 espaços, um abrindo por vez; chave semanal; garantia de raro a cada 10 baús de ferro ou melhores; a peça sai do catálogo real de `itens.json` como no `RegraBau` (raridade pelos pesos, depois um modelo entre todos os daquela raridade); peça repetida vira fragmento. Conjunto completo = todas as peças daquele conjunto no catálogo.
 - **Melhoria +1 a +10:** chance de falha depois do +5; o teto segue o nível do armeiro.
-- **Forja:** a partir de projetos, com lingotes vindos de sucata.
+- **Forja:** a partir de projetos (a primeira peça que falta do conjunto, em ordem alfabética), com lingotes vindos de sucata.
 - **Treino:** vagas, custo e duração pelo nível, de `treino.json`.
 - **Prédios:** custos e tempos de `vila.json`, com o teto dado pela casa senhorial.
 - **Fôlego do cavalo**, missões diárias, passe (trilha grátis e premium), VIP e anúncios.
@@ -53,7 +55,38 @@ Os números vêm de `game/data/balance/`. O novo `economia.json` reúne os parâ
 
 ## Resultado (40 sementes, mediana do dia; — = não chega em 90 dias)
 
-Atualizado depois da forja (3.15) e da correção do passe na simulação (3.17: os projetos do passe premium não eram entregues, por comparar número inteiro com número do JSON). A receita da peça rara ficou em 13 lingotes de ferro equivalentes e 300 de ouro, então o primeiro conjunto raro do grátis passou do dia 32 para o dia 57.
+Atualizado em 2026-10-15, com o catálogo de 110 peças (4.4) e o modelo corrigido para os 5 espaços reais (ver "Catálogo de 110 peças" abaixo). Nenhum número de `economia.json` mudou.
+
+| Marco | Grátis | Grátis + anúncios | Pagante | Habilidoso grátis | Pagante ruim | Só VIP | Só passe |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Condado | 7 | 7 | 4 | 5 | 7 | 5 | 7 |
+| Ducado | 42 | 30 | 20 | 32 | 25 | 24 | 30 |
+| Reino | 67 | 58 | 38 | 59 | 57 | 47 | 56 |
+| Grande Torneio | — | — | — | 87 | — | — | — |
+| Campeão do Grande Torneio | — | — | — | — | — | — | — |
+| Liga Prata | 10 | 9 | 8 | 8 | 11 | 8 | 10 |
+| Liga Ouro | 25 | 20 | 15 | 19 | 21 | 16 | 22 |
+| Liga Platina | 69 | 56 | 39 | 51 | 49 | 44 | 55 |
+| Liga Diamante | — | — | — | — | — | — | — |
+| Liga Campeão | — | — | — | — | — | — | — |
+| 1º conjunto incomum completo | 11 | 10 | 8 | 9 | 11 | 9 | 11 |
+| 1º conjunto raro completo | 67 | 49 | 28 | 63 | 33 | 40 | 53 |
+| Nível 10 | 34 | 31 | 26 | 32 | 30 | 29 | 32 |
+| Nível 15 | 81 | 76 | 69 | 73 | 77 | 73 | 73 |
+
+**Meta do prompt:**
+- A ordem continua certa: o pagante chega primeiro em todos os marcos e o grátis com anúncios fica entre os dois.
+- **O grátis já não chega a todas as regiões em 90 dias:** o Grande Torneio sai do alcance de todos os perfis, menos o habilidoso (dia 87). A causa é a correção do 6º espaço, não o catálogo (ver abaixo).
+- O teste do GDD passa no que dá para medir: o grátis habilidoso chega ao Grande Torneio (dia 87) e o pagante que joga mal não chega. Ninguém é campeão do Grande Torneio em 90 dias.
+- **11 metas de ritmo fora da tolerância** (eram 7 antes da correção).
+
+**No dia 90:**
+- Grátis: nível 15,7 e poder 132 (71% do teto de 185).
+- Pagante: nível 16,3 e poder 138.
+
+### Resultado anterior (3.17, modelo com 6 peças e 35 modelos)
+
+A receita da peça rara ficou em 13 lingotes de ferro equivalentes e 300 de ouro, então o primeiro conjunto raro do grátis passou do dia 32 para o dia 57. Tabela mantida para comparação.
 
 | Marco | Grátis | Grátis + anúncios | Pagante | Habilidoso grátis | Pagante ruim | Só VIP | Só passe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -81,6 +114,62 @@ Atualizado depois da forja (3.15) e da correção do passe na simulação (3.17:
 - Grátis: nível 17,6 e poder 152 (72% do teto).
 - Pagante: nível 18,7 e poder 169.
 
+## Catálogo de 110 peças (4.4, 2026-10-15)
+
+O catálogo foi de 35 para 110 modelos: 25 comuns, 30 incomuns, 25 raros, 15 épicos e 15 lendários (eram 5, 10, 10, 5 e 5). Os pesos de raridade dos baús, a garantia e os fragmentos por repetida não mudaram.
+
+**O que a simulação usava antes:** uma lista própria de 7 conjuntos × 6 espaços em `economia.json` (`conjuntos` e `espacos_conjunto`), e não o catálogo. Por isso ela deu o mesmo resultado antes e depois das 75 peças novas. Agora o modelo sorteia do catálogo real como o `RegraBau`. Ao fazer isso, apareceu um segundo erro: o 6º espaço ("ombreiras") não existe no jogo, que tem item só em 5 espaços. O poder do jogador no modelo antigo tinha uma peça a mais (de +8 no dia 10 a +19 no dia 90).
+
+Para separar os dois efeitos, rodei três versões (40 sementes, mediana do dia):
+
+| | Modelo antigo (6 espaços, lista própria) | Catálogo real, só as 35 peças antigas | Catálogo real, 110 peças |
+| --- | --- | --- | --- |
+| Ducado (grátis / anúncios / pagante) | 30 / 21 / 13 | 44 / 30 / 20 | 42 / 30 / 20 |
+| Reino | 59 / 37 / 25 | 76 / 59 / 40 | 67 / 58 / 38 |
+| Grande Torneio | 76 / 58 / 43 | — / — / — | — / — / — |
+| Liga Platina | 63 / 39 / 35 | 74 / 54 / 39 | 69 / 56 / 39 |
+| 1º conjunto incomum | 9 / 7 / 6 | 9 / 7 / 6 | 11 / 10 / 8 |
+| 1º conjunto raro | 59 / 35 / 20 | 47 / 34 / 21 | 67 / 49 / 28 |
+| Raros+ por semana nos baús | (não medido) | 2,4 / 2,7 / 3,7 | 2,4 / 2,7 / 3,7 |
+| Peças raras+ distintas no dia 30 / 60 / 90 (grátis) | (não medido) | 7,5 / 10,4 / 13,1 | 9,3 / 15,2 / 23,9 |
+| Peças raras+ distintas no dia 90 (anúncios / pagante) | (não medido) | 13,8 / 15,7 | 25,4 / 31,4 |
+| Itens de baú repetidos (grátis / anúncios / pagante) | (não medido) | 93% / 95% / 95% | 78% / 83% / 84% |
+| Fragmentos vindos de repetidas em 90 dias | (não medido) | 1089 / 1474 / 1650 | 923 / 1291 / 1469 |
+| Metas fora da tolerância | 7 | 12 | 11 |
+
+**Efeito do catálogo maior** (coluna do meio contra a da direita):
+- **Peça rara+ chega no mesmo ritmo:** os baús continuam dando 2,4 raros+ por semana ao grátis (3,7 ao pagante), e a garantia segue a cada 10 baús de ferro+. Isso depende só dos pesos, que não mudaram.
+- **A repetição caiu, não subiu.** Com 3× mais modelos por raridade, a chance de tirar um que já tem diminui: de 93% para 78% no grátis. Por isso as peças raras+ *novas* quase dobram (13 para 24 no dia 90 do grátis) e os fragmentos vindos de repetidas caem cerca de 15% (1089 para 923). A melhoria média das peças no dia 90 ficou igual (+6,3), então a queda ainda não segura a forja.
+- **O conjunto completo atrasa.** Uma peça rara agora é 1 entre 25 modelos (antes 1 entre 10), então o baú quase não ajuda a fechar um conjunto. Quem fecha é a forja, pelo projeto. 1º conjunto raro: grátis 47 → 67, anúncios 34 → 49, pagante 21 → 28. O 1º incomum atrasa 2 dias.
+- **O resto quase não muda** e até melhora um pouco (reino do grátis 76 → 67), porque as peças raras+ novas ocupam mais espaços cedo.
+
+**Efeito da correção dos espaços** (coluna da esquerda contra a do meio): é o que mais pesa. Sem a 6ª peça, o poder fica uns 13% menor e o grátis perde o Grande Torneio em 90 dias. As faixas de poder das regiões e das ligas (`economia.json > regioes`, `ligas`) foram calibradas na 3.12 com essa peça a mais.
+
+### Sugestões de ajuste do catálogo (para decidir, nada aplicado)
+
+Testei cada uma na simulação, trocando o `economia.json` só durante a execução (o arquivo voltou pelo git):
+
+| Grátis / anúncios / pagante | Hoje | S1 | S1 + S2 |
+| --- | --- | --- | --- |
+| Ducado | 42 / 30 / 20 | 30 / 22 / 14 | 30 / 22 / 14 |
+| Reino | 67 / 58 / 38 | 53 / 36 / 25 | 58 / 35 / 26 |
+| Grande Torneio | — / — / — | 82 / 62 / 48 | 79 / 58 / 47 |
+| Liga Platina | 69 / 56 / 39 | 48 / 41 / 33 | 50 / 40 / 33 |
+| Liga Diamante (pagante) | — | 79 | 81 |
+| 1º conjunto raro | 67 / 49 / 28 | 62 / 43 / 21 | 60 / 28 / 18 |
+| Nível 15 | 81 / 76 / 69 | 70 / 61 / 53 | 68 / 59 / 53 |
+| Metas fora da tolerância | 11 | **4** | 5 |
+
+1. **S1 — devolver o poder da peça que faltava (recomendada).** Em `economia.json > poder_raridade`: comum 3→4, incomum 5→6, raro 8→10, épico 12→14, lendário 17→20 (cerca de +20%, o que 5 peças precisam para valer o que 6 valiam). Volta o Grande Torneio para o grátis (dia 82; meta 80) e deixa 4 metas fora, menos que as 7 de antes. O teste do GDD continua passando: o habilidoso chega ao Grande Torneio no dia 61 e o pagante ruim no 71. Atenção: o `liga.gd` usa a mesma tabela no pareamento do jogo. Como todos sobem juntos, só a parte das peças pesa um pouco mais que a dos atributos.
+   - **Alternativa:** abaixar as faixas de poder de cada região e o `poder_rival_base` da liga em cerca de 13%. Dá o mesmo efeito na simulação, mas mexe em mais números.
+2. **S2 — receita rara mais barata** (`forja > receitas > raro`: lingote_ferro 10→6 e ouro 300→200; a sugestão da 3.15). Com S1, adianta o conjunto raro de anúncios e pagante (43→28 e 21→18), mas **não o do grátis** (62→60), e deixa o pagante cedo demais (meta 25). **Não recomendo agora.**
+3. **O conjunto raro do grátis fica no dia ~60 em todas as variantes, e o freio é o ouro.** O grátis termina o dia 90 com uns 300 de ouro, porque prédios e treino levam tudo, e a forja espera sobrar ouro além da reserva. Testei mais sucata por vitória (S3, `sucata_por_vitoria` 2→3, número só da simulação) e não mudou nada (59). Opções que não testei:
+   - aceitar a meta em ~60, já que o grátis agora ganha mais peças raras+ avulsas;
+   - fazer o campeão de região dar o projeto e uma peça pronta do conjunto;
+   - baixar só o ouro da receita rara (300→150), sem mexer nos lingotes.
+4. **Limpeza:** `economia.json > espacos_conjunto` não é mais usado pelo modelo e pode sair. A lista `conjuntos` continua servindo ao passe premium (qual projeto dar) e ao `TM_CATALOGO=original`.
+5. **Fragmentos:** com 15% menos fragmentos de repetidas, a melhoria das peças ainda não mudou (+6,3 no dia 90). Não precisa de ajuste agora. Se o catálogo crescer de novo, olhe `baus > fragmentos_por_repetida` e o `fragmentos` de cada baú.
+
 ## Ajustes feitos durante a simulação
 
 Todos em `economia.json`, que é novo. Nenhum outro arquivo de balanceamento mudou.
@@ -93,7 +182,7 @@ Todos em `economia.json`, que é novo. Nenhum outro arquivo de balanceamento mud
 6. **Vaga de treino do VIP:** é a mesma segunda vaga que o campo de treino libera no nível 3, então não soma com ela.
 7. **Passe premium e gemas do VIP mais leves.** Antes, o pagante chegava a cada marco em metade do tempo do grátis.
 
-## Sugestões de ajuste (para decidir)
+## Sugestões de ajuste (3.12, para decidir; números do modelo antigo)
 
 1. **Ouro sobrando a partir do dia ~45.** No dia 90 sobram 18 mil (pagante), 10 mil (com anúncios) e 2,7 mil (grátis). Os prédios param no nível 5 e os atributos batem no teto, então o ouro deixa de ter destino. Sugestões:
    - Prédios até o nível 10 em `vila.json`. A tabela de Timers do GDD já fala em melhorias de 6 a 12 h no nível 21 ou mais.

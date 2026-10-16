@@ -15,7 +15,10 @@ func _initialize() -> void:
 	_checa("90 dias no diario", a["diario"].size() == int(dados["economia"]["simulacao"]["dias"]))
 	_checa("poder cresce (%.0f -> %.0f)" % [a["diario"][0]["poder"], a["diario"].back()["poder"]], a["diario"].back()["poder"] > a["diario"][0]["poder"] + 50)
 	var teto := 0.0
-	for e in dados["economia"]["espacos_conjunto"]:
+	var espacos := {}
+	for m: Dictionary in dados["itens"]["modelos"].values():
+		espacos[m["espaco"]] = true
+	for e in espacos:
 		teto += float(dados["economia"]["poder_raridade"]["lendario"]) + int(dados["economia"]["melhoria"]["nivel_max"]) * float(dados["economia"]["poder_por_melhoria"])
 	teto += float(dados["treino"]["teto_atributo"]) / 2.0
 	_checa("poder nunca passa do teto (%.0f)" % teto, a["diario"].all(func(x): return x["poder"] <= teto + 0.01))
