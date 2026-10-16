@@ -21,7 +21,7 @@ Joga um cavaleiro dia a dia, em 2 sessões de 7,5 min (15 min/dia), cada uma com
 
 > chance = 0,55 + 0,02 × (poder do jogador − poder do rival) + habilidade, limitada entre 5% e 95%
 
-O **poder** é a média dos 6 atributos (cavaleiro e cavalo) dividida por 2, mais o poder das peças equipadas nos 5 espaços que têm item no catálogo (elmo, peitoral, escudo, lança, caparação), pela raridade + melhoria, a mesma conta de `liga.gd`. O teto é 185. Até a 4.4 o modelo contava 6 peças (um espaço "ombreiras" que nunca existiu no jogo) e o teto era 212.
+O **poder** é a média dos 6 atributos (cavaleiro e cavalo) dividida por 2, mais o poder das peças equipadas nos 5 espaços que têm item no catálogo (elmo, peitoral, escudo, lança, caparação), pela raridade + melhoria, a mesma conta de `liga.gd`. O teto é 200. Até a 4.4 o modelo contava 6 peças (um espaço "ombreiras" que nunca existiu no jogo), com a tabela de poder antiga, e o teto era 212.
 
 Entram no modelo:
 - **PvE:** 5 regiões; o poder do rival sobe ao longo da região; o campeão dá baú de ouro e um projeto.
@@ -55,34 +55,38 @@ Os números vêm de `game/data/balance/`. O novo `economia.json` reúne os parâ
 
 ## Resultado (40 sementes, mediana do dia; — = não chega em 90 dias)
 
-Atualizado em 2026-10-15, com o catálogo de 110 peças (4.4) e o modelo corrigido para os 5 espaços reais (ver "Catálogo de 110 peças" abaixo). Nenhum número de `economia.json` mudou.
+Atualizado em 2026-10-15: catálogo de 110 peças (4.4), modelo com os 5 espaços reais e a **S1 aplicada** (`poder_raridade` 4/6/10/14/20, era 3/5/8/12/17; ver "Catálogo de 110 peças" abaixo).
 
 | Marco | Grátis | Grátis + anúncios | Pagante | Habilidoso grátis | Pagante ruim | Só VIP | Só passe |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Condado | 7 | 7 | 4 | 5 | 7 | 5 | 7 |
-| Ducado | 42 | 30 | 20 | 32 | 25 | 24 | 30 |
-| Reino | 67 | 58 | 38 | 59 | 57 | 47 | 56 |
-| Grande Torneio | — | — | — | 87 | — | — | — |
+| Condado | 5 | 5 | 4 | 4 | 5 | 4 | 5 |
+| Ducado | 30 | 22 | 14 | 20 | 16 | 14 | 20 |
+| Reino | 53 | 36 | 25 | 33 | 33 | 30 | 35 |
+| Grande Torneio | 82 | 62 | 48 | 61 | 71 | 54 | 60 |
 | Campeão do Grande Torneio | — | — | — | — | — | — | — |
-| Liga Prata | 10 | 9 | 8 | 8 | 11 | 8 | 10 |
-| Liga Ouro | 25 | 20 | 15 | 19 | 21 | 16 | 22 |
-| Liga Platina | 69 | 56 | 39 | 51 | 49 | 44 | 55 |
-| Liga Diamante | — | — | — | — | — | — | — |
+| Liga Prata | 9 | 8 | 8 | 8 | 10 | 8 | 9 |
+| Liga Ouro | 18 | 16 | 13 | 14 | 16 | 13 | 17 |
+| Liga Platina | 48 | 41 | 33 | 38 | 39 | 35 | 38 |
+| Liga Diamante | — | — | 79 | 76 | — | 83 | — |
 | Liga Campeão | — | — | — | — | — | — | — |
-| 1º conjunto incomum completo | 11 | 10 | 8 | 9 | 11 | 9 | 11 |
-| 1º conjunto raro completo | 67 | 49 | 28 | 63 | 33 | 40 | 53 |
-| Nível 10 | 34 | 31 | 26 | 32 | 30 | 29 | 32 |
-| Nível 15 | 81 | 76 | 69 | 73 | 77 | 73 | 73 |
+| 1º conjunto incomum completo | 9 | 9 | 8 | 8 | 8 | 7 | 9 |
+| 1º conjunto raro completo | 62 | 43 | 21 | 60 | 26 | 31 | 50 |
+| Nível 10 | 31 | 27 | 21 | 26 | 24 | 22 | 25 |
+| Nível 15 | 70 | 61 | 53 | 60 | 61 | 57 | 59 |
 
 **Meta do prompt:**
-- A ordem continua certa: o pagante chega primeiro em todos os marcos e o grátis com anúncios fica entre os dois.
-- **O grátis já não chega a todas as regiões em 90 dias:** o Grande Torneio sai do alcance de todos os perfis, menos o habilidoso (dia 87). A causa é a correção do 6º espaço, não o catálogo (ver abaixo).
-- O teste do GDD passa no que dá para medir: o grátis habilidoso chega ao Grande Torneio (dia 87) e o pagante que joga mal não chega. Ninguém é campeão do Grande Torneio em 90 dias.
-- **11 metas de ritmo fora da tolerância** (eram 7 antes da correção).
+- O pagante chega primeiro em todos os marcos e o grátis com anúncios fica entre os dois.
+- O grátis chega a todas as regiões em 90 dias (Grande Torneio no dia 82). Ficam para depois o campeão do Grande Torneio (ninguém chega) e as ligas Diamante e Campeão.
+- O teste do GDD passa: o grátis habilidoso chega ao Grande Torneio no dia 61 e à Diamante no 76; o pagante que joga mal só chega ao Grande Torneio no 71 e não chega à Diamante.
+- **4 metas de ritmo fora da tolerância** (eram 7 antes da 4.4):
+  - conjunto incomum do grátis cedo (9; meta 15);
+  - conjunto raro do grátis tarde (62; meta 45; ver sugestão 3 abaixo);
+  - reino do pagante cedo (25; meta 38);
+  - Diamante do pagante tarde (79; meta 60).
 
 **No dia 90:**
-- Grátis: nível 15,7 e poder 132 (71% do teto de 185).
-- Pagante: nível 16,3 e poder 138.
+- Grátis: nível 16,8 e poder 144 (72% do teto de 200).
+- Pagante: nível 17,8 e poder 150.
 
 ### Resultado anterior (3.17, modelo com 6 peças e 35 modelos)
 
@@ -145,11 +149,11 @@ Para separar os dois efeitos, rodei três versões (40 sementes, mediana do dia)
 
 **Efeito da correção dos espaços** (coluna da esquerda contra a do meio): é o que mais pesa. Sem a 6ª peça, o poder fica uns 13% menor e o grátis perde o Grande Torneio em 90 dias. As faixas de poder das regiões e das ligas (`economia.json > regioes`, `ligas`) foram calibradas na 3.12 com essa peça a mais.
 
-### Sugestões de ajuste do catálogo (para decidir, nada aplicado)
+### Sugestões de ajuste do catálogo (S1 aplicada em 2026-10-15; as outras, para decidir)
 
 Testei cada uma na simulação, trocando o `economia.json` só durante a execução (o arquivo voltou pelo git):
 
-| Grátis / anúncios / pagante | Hoje | S1 | S1 + S2 |
+| Grátis / anúncios / pagante | Antes da S1 | S1 (aplicada) | S1 + S2 |
 | --- | --- | --- | --- |
 | Ducado | 42 / 30 / 20 | 30 / 22 / 14 | 30 / 22 / 14 |
 | Reino | 67 / 58 / 38 | 53 / 36 / 25 | 58 / 35 / 26 |
@@ -160,7 +164,7 @@ Testei cada uma na simulação, trocando o `economia.json` só durante a execuç
 | Nível 15 | 81 / 76 / 69 | 70 / 61 / 53 | 68 / 59 / 53 |
 | Metas fora da tolerância | 11 | **4** | 5 |
 
-1. **S1 — devolver o poder da peça que faltava (recomendada).** Em `economia.json > poder_raridade`: comum 3→4, incomum 5→6, raro 8→10, épico 12→14, lendário 17→20 (cerca de +20%, o que 5 peças precisam para valer o que 6 valiam). Volta o Grande Torneio para o grátis (dia 82; meta 80) e deixa 4 metas fora, menos que as 7 de antes. O teste do GDD continua passando: o habilidoso chega ao Grande Torneio no dia 61 e o pagante ruim no 71. Atenção: o `liga.gd` usa a mesma tabela no pareamento do jogo. Como todos sobem juntos, só a parte das peças pesa um pouco mais que a dos atributos.
+1. **S1 — devolver o poder da peça que faltava. APLICADA (2026-10-15)**; o resultado no topo do documento é com ela. Em `economia.json > poder_raridade`: comum 3→4, incomum 5→6, raro 8→10, épico 12→14, lendário 17→20 (cerca de +20%, o que 5 peças precisam para valer o que 6 valiam). Volta o Grande Torneio para o grátis (dia 82; meta 80) e deixa 4 metas fora, menos que as 7 de antes. O teste do GDD continua passando: o habilidoso chega ao Grande Torneio no dia 61 e o pagante ruim no 71. Atenção: o `liga.gd` usa a mesma tabela no pareamento do jogo. Como todos sobem juntos, só a parte das peças pesa um pouco mais que a dos atributos.
    - **Alternativa:** abaixar as faixas de poder de cada região e o `poder_rival_base` da liga em cerca de 13%. Dá o mesmo efeito na simulação, mas mexe em mais números.
 2. **S2 — receita rara mais barata** (`forja > receitas > raro`: lingote_ferro 10→6 e ouro 300→200; a sugestão da 3.15). Com S1, adianta o conjunto raro de anúncios e pagante (43→28 e 21→18), mas **não o do grátis** (62→60), e deixa o pagante cedo demais (meta 25). **Não recomendo agora.**
 3. **O conjunto raro do grátis fica no dia ~60 em todas as variantes, e o freio é o ouro.** O grátis termina o dia 90 com uns 300 de ouro, porque prédios e treino levam tudo, e a forja espera sobrar ouro além da reserva. Testei mais sucata por vitória (S3, `sucata_por_vitoria` 2→3, número só da simulação) e não mudou nada (59). Opções que não testei:
@@ -181,6 +185,7 @@ Todos em `economia.json`, que é novo. Nenhum outro arquivo de balanceamento mud
 5. **Fragmentos mais escassos e melhorias mais caras**, e o teto de melhoria seguindo o armeiro (2 níveis de melhoria por nível do prédio). Antes, o grátis chegava perto do teto de poder no dia 60.
 6. **Vaga de treino do VIP:** é a mesma segunda vaga que o campo de treino libera no nível 3, então não soma com ela.
 7. **Passe premium e gemas do VIP mais leves.** Antes, o pagante chegava a cada marco em metade do tempo do grátis.
+8. **Poder por raridade +20% (2026-10-15, S1):** `poder_raridade` 3/5/8/12/17 → 4/6/10/14/20, porque o jogo tem item em 5 espaços e as faixas de regiões e ligas foram calibradas com 6 peças.
 
 ## Sugestões de ajuste (3.12, para decidir; números do modelo antigo)
 

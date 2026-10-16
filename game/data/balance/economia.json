@@ -21,7 +21,8 @@
 		"penalidade_cansado": 0.08,
 		"ouro_conserto_por_justa": 6
 	},
-	"poder_raridade": { "comum": 3, "incomum": 5, "raro": 8, "epico": 12, "lendario": 17 },
+	"_nota_poder_raridade": "Poder de cada peca equipada (liga.gd e a simulacao). 2026-10-15: +20% (era 3/5/8/12/17) porque so 5 espacos tem item; as faixas de regioes e ligas foram calibradas com 6 pecas (docs/ECONOMIA.md > Catalogo de 110 pecas, S1).",
+	"poder_raridade": { "comum": 4, "incomum": 6, "raro": 10, "epico": 14, "lendario": 20 },
 	"poder_por_melhoria": 1,
 	"espacos_conjunto": ["elmo", "peitoral", "ombreiras", "escudo", "lanca", "caparacao"],
 	"conjuntos": [
