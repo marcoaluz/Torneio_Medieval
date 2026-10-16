@@ -173,3 +173,12 @@ Formato: data · decisão · motivo.
 - **Campo de treino sem laço próprio:** o "campo_treino" é uma batida de 2 s e virou o efeito do acerto de força; o som do campo vem das passadas.
 - **Forja:** ambiente "forja" nas telas do armeiro e do ferreiro; "martelo_bigorna" a cada golpe do martelo desenhado.
 - Fade de saída `sons.json > fade_tela_s` = 0,3 s (dado, não código).
+
+## Personagem de teste no save real, apagar progresso e novo jogo (2026-10-15)
+- **Causa:** nenhum código cria personagem sozinho. Os testes trocavam o caminho do save, mas a Nuvem real já tinha lido a sessão anônima de `user://sessao.json` e, a cada `mudou`, enviava o save do teste. O `inicio_check` cria um personagem com nome sorteado e chega ao nível 2 com o tutorial concluído, exatamente o estado da "Inês". Numa abertura com o save local vazio, a nuvem venceu e trouxe o personagem.
+- **Correção na raiz:** com o transporte real e o save fora de `ServicoJogador.SAVE_PADRAO`, `ServicoNuvem.isolado()` faz a nuvem responder como sem rede e não agenda envio. Vale para todo teste, demo e ferramenta, sem depender de cada um isolar a Nuvem. O transporte falso dos testes da nuvem continua funcionando. Descartado: exigir em cada teste a troca do caminho da sessão, que é a regra que falhou.
+- **Apagar progresso guarda as configurações** (volume, idioma, aceite da política). Excluir a conta continua apagando tudo.
+- **Nuvem sem delete:** a RLS da migração `contas_e_save` não deixa o cliente apagar. O save da conta é sobrescrito com o estado novo e, sem conexão, fica a marca `apagar_nuvem`. O `sincronizar()` envia o vazio antes de adotar qualquer save, senão o antigo voltaria (a nuvem vence quando o local não tem personagem).
+- **Volta para a criação, não para o título:** como pediu o usuário. A política já aceita fica guardada.
+- **"Novo jogo" na depuração:** no autoload `Depuracao`, ao lado do FPS, só com `OS.is_debug_build()`, e pede um segundo toque em 3 s.
+- **Save antigo do aparelho** renomeado para `*.teste_claude_2026-10-15` em vez de apagado (dá para desfazer). A sessão anônima também foi renomeada, então a próxima abertura cria uma conta anônima nova. A antiga fica órfã no Supabase, junto com os usuários de teste a limpar (NUVEM.md).

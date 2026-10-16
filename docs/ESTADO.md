@@ -7,7 +7,16 @@
 > - **Arte completa do jogo (2026-10-15):** cavaleiro, cavalo (3 pelagens) e os 7 conjuntos em camadas nos três tamanhos (justa, vila, Equipamentos), pele e cabelo da criação, arena (arquibancada, chão, cerca, arauto), chão da vila e interface desenhada (tema 9-slice, HUD da justa, ícones), baús (4 tipos, fechado e aberto) e ícones das 35 peças recortados da arte (`tools/gerar_icones_itens.py`). Tela de título com arte de abertura. Ver `docs/PERSONAGEM.md` > Geração automática.
 > - **Arte das 59 peças novas (2026-10-15):** `tools/gerar_pecas_novas.py` desenha só a peça de cada espaço (elmo e peitoral nos 3 tamanhos, escudo como objeto nos 3, lança e caparação só na justa) e os conjuntos pelo pipeline normal; cache em `game/art/fontes/cache/` (rodar de novo retoma sem pagar o que já foi feito; pode rodar em processos paralelos com listas separadas). Prontos: os 4 conjuntos e 48 dos 55 avulsos. **Faltam 7 caparações** (sol_nascente, estandartes, protecao_pernas, peitoral_correntes, chanfrao, sela_segura, placas_equinas): o crédito do PixelLab do mês acabou (0 de 10.000); seguem na arte provisória por item (`python -E -P tools/gerar_pecas_novas.py` quando houver crédito, ~55 gerações cada).
 > - **Som dos prédios (2026-10-15):** o autoload `Audio` virou o gerenciador único com canais (música, ambiente por tela, efeitos por tela, interface) e pilha de telas; a vila avisa entrar/sair pela visibilidade de cada tela; som de prédio só com a tela aberta e fade de 0,3 s (`sons.json > fade_tela_s`, ambiente por tela em `sons.json > telas`). Corrigido o galope que ficava em laço depois do treino (o laço era ligado no recurso compartilhado). Teste `tests/audio/som_telas_check.gd` entra e sai de cada prédio. Sem pendência conhecida.
-> - **Em seguida (pedido do usuário):** o jogo sem save segue o Início do jogo do GDD (criação, brasão, cavalo, exibição, primeira justa, vila); sem personagem de teste automático; "Apagar progresso" nas configurações e "Novo jogo" no painel de depuração.
+> - **Início do jogo, apagar progresso e novo jogo (2026-10-15):**
+>   - **Sem save:** o jogo abre no título e segue criação (com a pelagem do cavalo) → brasão → exibição → primeira justa → baú → vila.
+>   - **Origem da "Inês":** o personagem que abria direto na vila veio dos testes. A Nuvem real usava a sessão anônima do aparelho mesmo com o save de teste, subia o personagem e depois o devolvia ao save real.
+>   - **Proteção:** `ServicoNuvem.isolado()` deixa a nuvem real sem rede quando o save não é `ServicoJogador.SAVE_PADRAO`.
+>   - **Save antigo:** guardado em `user://*.teste_claude_2026-10-15`.
+>   - **Apagar progresso:** em Configurações (dois toques) e "Novo jogo" no painel de depuração (dois toques, só em build de desenvolvimento). As duas usam `Fluxo.novo_jogo()`, que guarda as configurações, sobrescreve o save da nuvem (ou marca `apagar_nuvem` para a próxima conexão) e vai para a criação.
+>   - **Testes:** `tests/fluxo/novo_jogo_check.gd` e casos novos em `nuvem_check`.
+>   - **Pendentes:**
+>     - a criação só tem 1 rosto, porque só existe essa arte (mais rostos gastam crédito do PixelLab);
+>     - com `usa_acao` ligado, apagar progresso vai precisar de um comando no servidor (hoje sobrescreve o save pela REST).
 > - **Próximo:** PvP e social pelo servidor; publicar na branch (com autorização) e a Parte 4 (4.1–4.3).
 > - **Validação:** `bash tests/rodar_testes.sh` passa: 49 arquivos do GDScript (1060 checagens) e 334 checagens em TypeScript (`cd supabase && node --test "tests/regra/*.test.ts"`).
 > - **Save:** versão 11.

@@ -9,6 +9,8 @@ extends PanelContainer
 var _jog: ServicoJogador
 ## Exclusão de conta em dois toques: o primeiro pede a confirmação.
 var _excluir_confirmando := false
+## Apagar progresso, também em dois toques.
+var _apagar_confirmando := false
 
 @onready var _titulo: Label = $Coluna/Titulo
 @onready var _lista: VBoxContainer = $Coluna/Rolagem/Lista
@@ -20,6 +22,7 @@ func _ready() -> void:
 	_titulo.text = tr("CONFIG_TITULO")
 	_fechar.text = tr("PAINEL_FECHAR")
 	_fechar.pressed.connect(func(): visible = false)
+	visibility_changed.connect(func(): if not visible: _apagar_confirmando = false; _excluir_confirmando = false)
 
 func abrir() -> void:
 	visible = true
@@ -40,6 +43,10 @@ func montar() -> void:
 	_secao(tr("CONFIG_SOM"))
 	for b: String in ServicoAudio.BARRAMENTOS:
 		_volume(tr("CONFIG_VOLUME_" + b.to_upper()), "volume_" + b.to_lower())
+	_secao(tr("CONFIG_PROGRESSO"))
+	_botao(tr("CONFIG_APAGAR_CONFIRMA") if _apagar_confirmando else tr("CONFIG_APAGAR_PROGRESSO"), apagar_progresso)
+	if _apagar_confirmando:
+		_botao(tr("CONFIG_EXCLUIR_CANCELAR"), func(): _apagar_confirmando = false; montar())
 	_secao(tr("CONFIG_PRIVACIDADE"))
 	_opcao(tr("CONFIG_ANUNCIOS_PERSONALIZADOS"), "anuncios_personalizados")
 	_botao(tr("CONFIG_VER_POLITICA"), _abrir_politica)
@@ -89,6 +96,19 @@ func _excluir() -> void:
 	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
 	if f:
 		f.iniciar_jogo()
+
+## Primeiro toque pede a confirmação; o segundo apaga o progresso (aqui e na
+## nuvem, guardando as configurações) e volta para a criação do personagem.
+func apagar_progresso() -> void:
+	if not _apagar_confirmando:
+		_apagar_confirmando = true
+		montar()
+		return
+	_apagar_confirmando = false
+	visible = false
+	var f := get_node_or_null("/root/Fluxo") as FluxoTelas
+	if f:
+		f.novo_jogo()
 
 func _opcao(texto: String, chave: String) -> void:
 	var b := CheckButton.new()

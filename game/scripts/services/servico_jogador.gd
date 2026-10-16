@@ -21,7 +21,10 @@ signal acao_feita(tipo: String, args: Array)
 const VERSAO := 11
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
-@export var caminho_save := "user://jogador.json"
+## Save do jogador de verdade. Teste, demo e ferramenta trocam o caminho
+## (user://teste_*), e a Nuvem real nunca fala com o servidor nesse caso.
+const SAVE_PADRAO := "user://jogador.json"
+@export var caminho_save := SAVE_PADRAO
 
 var estado: Dictionary = {}
 
@@ -1731,6 +1734,20 @@ func apagar_dados_locais() -> void:
 		if FileAccess.file_exists(caminho_save + sufixo):
 			DirAccess.remove_absolute(caminho_save + sufixo)
 	estado = novo_estado()
+	_concluir("tudo")
+
+## "Apagar progresso" (configurações e "Novo jogo" da depuração): volta ao
+## estado inicial, sem personagem e com o tutorial do começo, mas guarda as
+## configurações do aparelho (volume, idioma, aceite da política). O save da
+## nuvem é sobrescrito à parte (Nuvem.apagar_save_nuvem).
+func apagar_progresso() -> void:
+	var config: Variant = estado.get("config", null)
+	for sufixo in [".bak", ".tmp"]:
+		if FileAccess.file_exists(caminho_save + sufixo):
+			DirAccess.remove_absolute(caminho_save + sufixo)
+	estado = novo_estado()
+	if config is Dictionary:
+		estado["config"] = (config as Dictionary).duplicate(true)
 	_concluir("tudo")
 
 func _cmd_definir_notificacao(tipo: String, ligada: bool) -> Dictionary:

@@ -80,6 +80,32 @@ func _initialize() -> void:
 		nuvem._process(0.05)
 	_checa("mudanca no jogo agenda o envio", _chamadas.has("POST /rest/v1/save_jogador"))
 
+	# Apagar progresso com conexão: o save da conta vira o estado novo (sem personagem).
+	nuvem.caminho_fila = "user://teste_nuvem/fila.json"
+	jog.apagar_progresso()
+	var ap := await nuvem.apagar_save_nuvem()
+	_checa("apagar progresso sobrescreve o save da nuvem", ap["ok"] and not ap["pendente"]
+		and str(_saves[uid]["dados"]["cavaleiro"]["nome"]) == "" and not nuvem.sessao.has("apagar_nuvem"))
+	var s4 := await nuvem.sincronizar()
+	_checa("depois de apagar, a nuvem nao devolve personagem", s4["ok"] and not jog.tem_personagem())
+	# Sem conexão: fica marcado; na volta, o vazio sobe antes e o antigo não volta.
+	jog.criar_personagem({"nome": "Isolda", "nome_casa": "Casa Pardal", "corpo": "feminino", "rosto": "1", "cabelo": "1",
+		"pele": "clara", "cor_principal": "azul_real", "cor_secundaria": "ouro_velho", "pelagem": "preto"})
+	await nuvem.enviar_save()
+	var conta := nuvem.sessao.duplicate()
+	jog.apagar_progresso()
+	nuvem.sessao.erase("access_token")
+	var ap2 := await nuvem.apagar_save_nuvem()
+	_checa("sem conexao o apagar fica pendente", ap2["ok"] and ap2["pendente"] and nuvem.sessao.get("apagar_nuvem", false))
+	_checa("o save antigo ainda esta na nuvem", str(_saves[uid]["dados"]["cavaleiro"]["nome"]) == "Isolda")
+	nuvem.sessao = conta
+	nuvem.sessao["apagar_nuvem"] = true
+	nuvem.sessao["revisao"] = 0  # revisão velha: sem a marca, a nuvem venceria e a Isolda voltaria
+	var s5 := await nuvem.sincronizar()
+	_checa("na volta o vazio sobe e a Isolda nao volta", s5["ok"] and not jog.tem_personagem()
+		and str(_saves[uid]["dados"]["cavaleiro"]["nome"]) == "" and not nuvem.sessao.has("apagar_nuvem"))
+	DirAccess.remove_absolute("user://teste_nuvem/fila.json")
+
 	# RLS simulado: outro usuário não lê o save
 	var outro := ServicoNuvem.new()
 	root.add_child(outro)

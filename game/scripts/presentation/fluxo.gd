@@ -78,6 +78,25 @@ func pular_tutorial() -> void:
 	pulando_tutorial = true
 	concluiu("titulo")
 
+## "Apagar progresso" (configurações) e "Novo jogo" (painel de depuração):
+## apaga o save local (guardando as configurações), sobrescreve o da nuvem e
+## volta para a criação do personagem, seguindo o Início do jogo do GDD.
+func novo_jogo() -> void:
+	var j := _jog()
+	if j == null:
+		return
+	j.apagar_progresso()
+	pulando_tutorial = false
+	modo_justa = "livre"
+	disputa = {}
+	ultimo_resultado = {}
+	_metrica("progresso_apagado")
+	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+	if nuvem:
+		await nuvem.apagar_save_nuvem()
+	j.definir_passo_tutorial(1)
+	ir_para_passo(1)
+
 func ir_para_vila() -> void:
 	modo_justa = "livre"
 	disputa = {}

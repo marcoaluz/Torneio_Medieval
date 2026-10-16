@@ -243,6 +243,26 @@ func excluir_conta() -> Dictionary:
 		m.limpar()
 	return {"ok": true, "erro": ""}
 
+## "Apagar progresso": o save da conta é sobrescrito pelo estado novo do
+## Jogador (sem personagem; o cliente não apaga linhas, RLS da migração
+## contas_e_save). Sem conexão agora, fica marcado e sincronizar() envia o
+## estado vazio antes de qualquer coisa, para o save antigo nunca voltar ao
+## aparelho. Quem chama já apagou o local (Jogador.apagar_progresso). {ok, erro}.
+func apagar_save_nuvem() -> Dictionary:
+	if not configurado() or sessao.is_empty() or isolado():
+		return {"ok": true, "erro": ""}
+	fila.clear()
+	_salvar_fila()
+	sessao["apagar_nuvem"] = true
+	_salvar_sessao()
+	if not conectado():
+		return {"ok": true, "erro": "", "pendente": true}
+	var r := await enviar_save()
+	if r["ok"]:
+		sessao.erase("apagar_nuvem")
+		_salvar_sessao()
+	return {"ok": true, "erro": "", "pendente": not r["ok"]}
+
 ## Baixa o balanceamento ativo (3.3) e guarda em cache para a próxima abertura
 ## (Balanceamento.aplicar_cache_remoto). {ok, erro, tabelas}.
 func baixar_balanceamento() -> Dictionary:
@@ -308,6 +328,15 @@ func enviar_save() -> Dictionary:
 ## da nuvem é maior que a última que este celular conhece (jogou em outro).
 ## Senão o local é enviado.
 func sincronizar() -> Dictionary:
+	if sessao.get("apagar_nuvem", false):
+		# O jogador apagou o progresso sem conexão: o save antigo da conta não
+		# pode voltar; primeiro o estado vazio sobe.
+		var ap := await enviar_save()
+		if not ap["ok"]:
+			return ap
+		sessao.erase("apagar_nuvem")
+		_salvar_sessao()
+		return {"ok": true, "erro": "", "origem": "local"}
 	if usa_acao():
 		# O servidor é o dono: manda o que ficou na fila e fica com o estado dele.
 		await processar_fila()
@@ -349,8 +378,15 @@ func registrar_push(token: String, plataforma: String) -> Dictionary:
 			"preferencias": _jog.estado.get("config", {}).get("notificacoes", {})}), ["Prefer: resolution=merge-duplicates,return=minimal"])
 	return {"ok": int(resp["codigo"]) < 300, "erro": "" if int(resp["codigo"]) < 300 else "nuvem_%d" % int(resp["codigo"])}
 
+## Teste, demo ou ferramenta (save fora do caminho padrão) com o transporte
+## real: nada vai nem vem do servidor.
+func isolado() -> bool:
+	return _jog != null and _jog.caminho_save != ServicoJogador.SAVE_PADRAO and transporte == Callable(self, "_http")
+
 ## Junta mudanças: envia alguns segundos depois da última.
 func agendar_envio() -> void:
+	if isolado():
+		return
 	if usa_acao():
 		return  # o save não sobe inteiro: vão as ações (fila)
 	if not configurado() or not conectado():
@@ -428,6 +464,11 @@ func _mudar(novo: String) -> void:
 
 ## Transporte padrão: HTTPRequest do Godot.
 func _http(metodo: int, url: String, cabecalhos: PackedStringArray, corpo: String) -> Dictionary:
+	# Save fora do caminho padrão = teste, demo ou ferramenta: a conta real não
+	# recebe nem devolve nada (um personagem de teste já subiu assim para a
+	# sessão anônima do aparelho e voltou como se fosse do jogador).
+	if isolado():
+		return {"codigo": 0, "corpo": ""}
 	var req := HTTPRequest.new()
 	req.timeout = 15.0
 	add_child(req)

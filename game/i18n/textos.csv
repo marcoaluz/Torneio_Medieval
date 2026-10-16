@@ -989,6 +989,11 @@ CONFIG_VER_POLITICA,Ver política de privacidade e termos,View privacy policy an
 CONFIG_EXCLUIR_CONTA,Excluir minha conta e meus dados,Delete my account and data
 CONFIG_EXCLUIR_CONFIRMA,Toque de novo para APAGAR a conta (não dá para desfazer),Tap again to DELETE the account (cannot be undone)
 CONFIG_EXCLUIR_CANCELAR,Cancelar,Cancel
+CONFIG_PROGRESSO,Progresso,Progress
+CONFIG_APAGAR_PROGRESSO,Apagar progresso e começar de novo,Erase progress and start over
+CONFIG_APAGAR_CONFIRMA,Toque de novo para APAGAR o progresso (não dá para desfazer),Tap again to ERASE your progress (cannot be undone)
+DEPURACAO_NOVO_JOGO,Novo jogo,New game
+DEPURACAO_NOVO_JOGO_CONFIRMA,Apagar tudo?,Erase all?
 CONFIG_EXCLUIR_FALHOU,Não consegui excluir agora. Tente de novo com internet.,Could not delete right now. Try again with internet.
 ERRO_SEM_CONEXAO,Sem conexão com o servidor. Tente de novo em instantes.,No connection to the server. Try again in a moment.
 ERRO_AGUARDE,Aguarde um pouco antes de começar outra disputa.,Wait a little before starting another bout.
