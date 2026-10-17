@@ -116,7 +116,7 @@ export function rival_de(s: Servico, r: Dados, rival_id: string, regiao = ""): D
     equip[modelos[m]["espaco"]] = st;
   }
   const lado = { cavaleiro: cav, cavalo: copiar(r["cavalo"]), equipamento: equip, habilidade: r["habilidade"] ?? "" };
-  const perfil = Pve.ajustar_perfil(s.bal("ia_rival")["perfis"][r["perfil"]], r["perfil_ajuste"] ?? {});
+  const perfil = Pve.perfil_do_rival(s.bal("ia_rival"), r);
   return {
     id: rival_id, lado, perfil_nome: r["perfil"], perfil, provocacao: r["provocacao"] ?? "",
     casa: { principal: r["casa"][0], secundaria: r["casa"][1] },

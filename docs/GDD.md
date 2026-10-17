@@ -48,15 +48,24 @@ Uma justa tem 3 passadas de cerca de 15 segundos cada, com tudo numa única vist
 | Fase | Duração | Câmera | O que o jogador faz |
 | --- | --- | --- | --- |
 | Apresentação | 2 s (pula) | Aberta, os dois parados nas pontas | Nada; o arauto anuncia os nomes |
-| Largada | 1 s | Aberta | Toca quando a bandeira baixa; largada perfeita dá velocidade e precisão extras |
-| Corrida | 4 a 5 s | Acompanha o cavaleiro | Toca no compasso do galope; pode ativar a habilidade especial |
-| Mira | 2 s | Zoom e câmera lenta no rival | Arrasta para mirar e solta para golpear |
-| Impacto | 2 s | Close lateral | Nada; lança estilhaça, peça voa, rival cai ou cambaleia |
+| Largada | 1 s | Aberta | Toca quando a bandeira baixa; a largada perfeita dá velocidade, precisão e golpe mais forte (ver Pontuação). Logo depois aparece "Largada perfeita!", "Boa largada" ou "Largada ruim", com o motivo e o efeito |
+| Corrida | 4 a 5 s | Acompanha o cavaleiro e enquadra os dois quando o rival chega | Toca no compasso do galope; sem tirar o dedo, arrasta para subir ou baixar a lança (o arrasto não conta como toque); pode ativar a habilidade especial |
+| Mira | 2 s | O mesmo plano da Corrida, fechando nos dois | Começa da altura escolhida na Corrida; arrasta para mirar e solta para golpear. A ponta segue o dedo com uma inércia leve |
+| Impacto | 2 s | Corte para um close inclinado, em câmera lenta | Nada; lança estilhaça, peça voa, rival cai ou cambaleia |
 
 **Pontuação**
 
 - Capacete: 3 pontos. Peito: 2 pontos. Escudo: 1 ponto. Errar: 0.
 - Derrubar o rival vence a justa na hora.
+- **A largada decide a força do golpe.** A qualidade da largada da passada de quem bate define a base da chance de derrubar em cada zona e o teto dela (milésimos, em `impacto.json > derrubada > por_largada`):
+
+  | Largada | Capacete | Peito | Escudo | Teto |
+  | --- | --- | --- | --- | --- |
+  | Perfeita | 450 | 380 | 180 | 750 |
+  | Boa | 250 | 200 | 90 | 450 |
+  | Ruim (lenta, queimada ou sem toque) | 40 | 30 | 10 | 80 |
+
+  Por cima somam, sem mudar: Força de quem bate contra Equilíbrio de quem leva, velocidade, ritmo do galope, poder da lança, defesa da peça atingida e habilidades. Perto do teto da largada, cada ponto rende menos. Vale para o jogador e para o rival; a IA larga melhor ou pior conforme o perfil (o novato erra muito, o campeão acerta mais). Com status médios, um acerto no capacete derruba perto de 54% com largada perfeita, 32% com boa e 5% com ruim (`tools/simular_derrubada.gd`).
 - Acertar o cavalo é falta: perde pontos e, na reincidência, é desclassificado.
 - Empate após 3 passadas: passada extra decisiva.
 

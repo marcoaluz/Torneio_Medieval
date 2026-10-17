@@ -31,7 +31,7 @@ describe("IA do rival", () => {
       const ia = new IaRival(cfg_ia["perfis"][caso["perfil"]], Math.trunc(caso["semente_ia"]));
       const obtido = [];
       for (let i = 0; i < caso["passadas"].length; i++) {
-        const r = ia.reacao_largada_ms();
+        const r = ia.reacao_largada_ms(dados["config_largada"]);
         const g = ia.plano_galope(500, 6000);
         const m = ia.ponto_mira(cfg_mira);
         obtido.push({ reacao_ms: r, galope: g, mira: [m.x, m.y] });

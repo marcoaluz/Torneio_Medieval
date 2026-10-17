@@ -1,10 +1,11 @@
 {
-	"versao": 1,
-	"_nota": "Perfis da IA do rival. Tempos em ms, erros de mira em px do quadro do alvo, chances em milesimos. 'acelera': 'cedo' = toca todas as batidas ate metade_batidas e depois uma sim, uma nao; 'tarde' = o contrario. habilidade_batida: batida da corrida em que aciona a habilidade ativa (0 = nunca). deslocamento_mira_px: [x, y] somado ao centro da zona (o centro do peito fica atras do escudo pequeno do ombro; a parte livre e a frente do tronco).",
+	"versao": 2,
+	"_nota": "Perfis da IA do rival. Tempos em ms, erros de mira em px do quadro do alvo, chances em milesimos. 'acelera': 'cedo' = toca todas as batidas ate metade_batidas e depois uma sim, uma nao; 'tarde' = o contrario. habilidade_batida: batida da corrida em que aciona a habilidade ativa (0 = nunca). deslocamento_mira_px: [x, y] somado ao centro da zona (o centro do peito fica atras do escudo pequeno do ombro; a parte livre e a frente do tronco). v2 (2026-10-17): a largada sai do perfil: largada_perfeita_milesimos e largada_boa_milesimos (o resto e ruim), com o instante sorteado dentro da faixa de galope.json > largada; a ruim atrasa ate largada_ruim_atraso_ms depois da faixa boa. Campeoes somam ajuste_campeao (antes do perfil_ajuste do proprio rival). Substitui reacao_media_ms/reacao_variacao_ms. A largada da a base e o teto da derrubada (impacto.json).",
 	"perfis": {
 		"novato": {
-			"reacao_media_ms": 320,
-			"reacao_variacao_ms": 220,
+			"largada_perfeita_milesimos": 100,
+			"largada_boa_milesimos": 350,
+			"largada_ruim_atraso_ms": 250,
 			"desvio_medio_ms": 40,
 			"desvio_variacao_ms": 170,
 			"perder_batida_milesimos": 300,
@@ -19,8 +20,9 @@
 			]
 		},
 		"equilibrado": {
-			"reacao_media_ms": 190,
-			"reacao_variacao_ms": 110,
+			"largada_perfeita_milesimos": 300,
+			"largada_boa_milesimos": 550,
+			"largada_ruim_atraso_ms": 200,
 			"desvio_medio_ms": 0,
 			"desvio_variacao_ms": 90,
 			"perder_batida_milesimos": 120,
@@ -29,11 +31,15 @@
 			"zona_preferida": "peito",
 			"erro_mira_px": 9,
 			"habilidade_batida": 4,
-			"deslocamento_mira_px": [9, 0]
+			"deslocamento_mira_px": [
+				9,
+				0
+			]
 		},
 		"agressivo": {
-			"reacao_media_ms": 120,
-			"reacao_variacao_ms": 90,
+			"largada_perfeita_milesimos": 450,
+			"largada_boa_milesimos": 400,
+			"largada_ruim_atraso_ms": 150,
 			"desvio_medio_ms": -10,
 			"desvio_variacao_ms": 70,
 			"perder_batida_milesimos": 60,
@@ -47,5 +53,10 @@
 				0
 			]
 		}
+	},
+	"ajuste_campeao": {
+		"_nota": "Somado ao perfil de todo rival com campeao: true (pve.json), antes do perfil_ajuste dele: campeao larga perfeito mais vezes.",
+		"largada_perfeita_milesimos": 200,
+		"largada_boa_milesimos": -100
 	}
 }

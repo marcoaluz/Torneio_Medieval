@@ -74,9 +74,17 @@ export function aplicar_desafios(cfg: Dados, lado_j: Dados, lado_r: Dados, perfi
 }
 
 /** Estilo de um campeão: o ajuste soma nos números do perfil da IA (sem passar de zero) e troca os textos. */
+/** Perfil da IA de um rival do PvE: o do perfil, mais ajuste_campeao se for campeão, mais o perfil_ajuste dele. */
+export function perfil_do_rival(ia: Dados, r: Dados): Dados {
+  let p: Dados = ia["perfis"][r["perfil"]];
+  if (r["campeao"] ?? false) p = ajustar_perfil(p, ia["ajuste_campeao"]);
+  return ajustar_perfil(p, r["perfil_ajuste"] ?? {});
+}
+
 export function ajustar_perfil(perfil: Dados, ajuste: Dados): Dados {
   const p = copiar(perfil);
   for (const k of Object.keys(ajuste)) {
+    if (k.startsWith("_")) continue; // nota
     if (typeof ajuste[k] === "number" && tem(p, k) && typeof p[k] === "number") {
       p[k] = Math.max(0, Math.trunc(p[k]) + Math.trunc(ajuste[k]));
     } else {

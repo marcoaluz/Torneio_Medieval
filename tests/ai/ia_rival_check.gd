@@ -22,7 +22,7 @@ func _initialize() -> void:
 		var ia := IaRival.new(cfg_ia["perfis"][caso["perfil"]], int(caso["semente_ia"]))
 		var obtido: Array = []
 		for i in caso["passadas"].size():
-			var r := ia.reacao_largada_ms()
+			var r := ia.reacao_largada_ms(dados["config_largada"])
 			var g := ia.plano_galope(500, 6000)
 			var m := ia.ponto_mira(cfg_mira)
 			obtido.append({"reacao_ms": r, "galope": g, "mira": [m.x, m.y]})

@@ -364,12 +364,12 @@ export class Justa {
           this._rival_largada_ms = -1;
           if (this.ia) {
             // Reação antes da bandeira = toque antes dela (queimada); nunca antes do 0.
-            const tr = Math.max(this.bandeira_ms + this.ia.reacao_largada_ms(), 0);
+            const tr = Math.max(this.bandeira_ms + this.ia.reacao_largada_ms(l), 0);
             if (tr < this.fases.duracao_ms(Fase.LARGADA)) this._rival_largada_ms = tr;
           }
           this._jog_largada_ms = -1;
           if (this.ia_jogador) {
-            const tj = Math.max(this.bandeira_ms + this.ia_jogador.reacao_largada_ms(), 0);
+            const tj = Math.max(this.bandeira_ms + this.ia_jogador.reacao_largada_ms(l), 0);
             if (tj < this.fases.duracao_ms(Fase.LARGADA)) this._jog_largada_ms = tj;
           }
           break;
@@ -437,8 +437,9 @@ export class Justa {
       zona_rival = Mira.zona_no_ponto(this._cfg["mira"], this.ponta_rival, this.precisao_rival, bonus_rival);
     }
     const entrada = {
-      jogador: this._golpeador(this.lado_jogador, golpe["zona"], this.jogador, this.habilidade_na_passada_jogador),
-      rival: this._golpeador(this.lado_rival, zona_rival, this.rival, this.habilidade_na_passada_rival),
+      jogador: this._golpeador(this.lado_jogador, golpe["zona"], this.jogador, this.habilidade_na_passada_jogador, this.qualidade_largada),
+      rival: this._golpeador(this.lado_rival, zona_rival, this.rival, this.habilidade_na_passada_rival,
+        this.qualidade_largada_rival !== "" ? this.qualidade_largada_rival : "boa"),
     };
     const res = Impacto.resolver(this._cfg["impacto"], entrada, this._rng);
     this.ultimo_impacto = res;
@@ -463,7 +464,7 @@ export class Justa {
   }
 
   /** Passivas valem em toda passada; a ativa, só na passada em que foi acionada. */
-  private _golpeador(lado: Dados, zona: string, g: Galope, ativa_na_passada: boolean): Dados {
+  private _golpeador(lado: Dados, zona: string, g: Galope, ativa_na_passada: boolean, largada: string): Dados {
     const habs: Dados[] = [];
     for (const nome of _habilidades_de(lado)) {
       let em_efeito = false;
@@ -474,7 +475,7 @@ export class Justa {
     }
     return {
       cavaleiro: lado["cavaleiro"], equipamento: lado["equipamento"] ?? {}, habilidades: habs, zona,
-      velocidade: g.velocidade, velocidade_nominal: g.velocidade_nominal, ritmo_milesimos: g.ritmo_milesimos(),
+      velocidade: g.velocidade, velocidade_nominal: g.velocidade_nominal, ritmo_milesimos: g.ritmo_milesimos(), largada,
     };
   }
 

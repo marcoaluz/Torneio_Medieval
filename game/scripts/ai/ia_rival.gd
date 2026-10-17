@@ -7,9 +7,14 @@ extends RefCounted
 ##
 ## Usa o próprio gerador (Aleatorio) com a semente que a Justa passa, para as
 ## decisões da IA não mudarem os sorteios da bandeira e do impacto.
-## Ordem dos sorteios por passada: largada (2), galope (por batida: perder? 1;
-## se toca, desvio 2), mira (4). Variação "triangular": média de dois
-## sorteios uniformes, com divisão só de número não negativo.
+## Ordem dos sorteios por passada: largada (2: a qualidade pelo perfil e o
+## instante dentro da faixa dela), galope (por batida: perder? 1; se toca,
+## desvio 2), mira (4). Variação "triangular": média de dois sorteios
+## uniformes, com divisão só de número não negativo.
+## Largada: o perfil diz quantos milésimos das largadas saem perfeitas
+## (largada_perfeita_milesimos) e boas (largada_boa_milesimos); o resto é
+## ruim (atrasada até largada_ruim_atraso_ms depois da faixa boa). Campeões
+## somam ia_rival.json > ajuste_campeao (RegraPve.perfil_do_rival).
 
 const MASCARA_SEMENTE := 0x5DEECE66
 
@@ -19,6 +24,8 @@ var _rng: Aleatorio
 static func validar(cfg: Dictionary) -> String:
 	if not cfg.get("perfis") is Dictionary or cfg["perfis"].is_empty():
 		return "falta \"perfis\""
+	if not cfg.get("ajuste_campeao") is Dictionary:
+		return "falta \"ajuste_campeao\""
 	for nome: String in cfg["perfis"]:
 		var erro := validar_perfil(cfg["perfis"][nome])
 		if erro != "":
@@ -26,7 +33,7 @@ static func validar(cfg: Dictionary) -> String:
 	return ""
 
 static func validar_perfil(p: Dictionary) -> String:
-	for k in ["reacao_media_ms", "reacao_variacao_ms", "desvio_medio_ms", "desvio_variacao_ms",
+	for k in ["largada_perfeita_milesimos", "largada_boa_milesimos", "largada_ruim_atraso_ms", "desvio_medio_ms", "desvio_variacao_ms",
 			"perder_batida_milesimos", "acelera", "metade_batidas", "zona_preferida", "erro_mira_px",
 			"deslocamento_mira_px", "habilidade_batida"]:
 		if not p.has(k):
@@ -50,9 +57,19 @@ func _variacao(v: int) -> int:
 	var soma := _rng.inteiro(0, 2 * v) + _rng.inteiro(0, 2 * v)
 	return soma / 2 - v
 
-## Reação à bandeira em ms (negativa = toca antes: queima a largada).
-func reacao_largada_ms() -> int:
-	return int(perfil["reacao_media_ms"]) + _variacao(int(perfil["reacao_variacao_ms"]))
+## Reação à bandeira em ms: sorteia a qualidade pelo perfil e o instante
+## dentro da faixa dela (galope.json > largada: perfeita até perfeita_ms, boa
+## até boa_ms). `cfg_largada` = galope.json > largada.
+func reacao_largada_ms(cfg_largada: Dictionary) -> int:
+	var perfeita_ms := int(cfg_largada["perfeita_ms"])
+	var boa_ms := int(cfg_largada["boa_ms"])
+	var q := _rng.inteiro(0, 999)
+	var p := int(perfil["largada_perfeita_milesimos"])
+	if q < p:
+		return _rng.inteiro(0, perfeita_ms)
+	if q < p + int(perfil["largada_boa_milesimos"]):
+		return _rng.inteiro(perfeita_ms + 1, boa_ms)
+	return _rng.inteiro(boa_ms + 1, boa_ms + maxi(int(perfil["largada_ruim_atraso_ms"]), 1))
 
 ## Instantes (ms desde o começo da Corrida, crescentes, >= 1) em que o rival
 ## toca, até `duracao_max_ms`.

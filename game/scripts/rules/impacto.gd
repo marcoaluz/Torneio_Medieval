@@ -13,6 +13,8 @@ extends RefCounted
 ##     zona: "capacete" | "peito" | "escudo" | "cavalo" | "erro" (da Mira),
 ##     velocidade, velocidade_nominal (do galope, no fim da corrida),
 ##     ritmo_milesimos (0 a 1000),
+##     largada: "perfeita" | "boa" | "ruim" (da passada de quem bate; sem
+##       largada, ou com uma desconhecida, vale "ruim", como quem não largou),
 ##   }
 ## Saída: {jogador: resultado, rival: resultado}, onde resultado descreve o
 ## golpe DAQUELE lado no outro:
@@ -24,8 +26,10 @@ extends RefCounted
 ##
 ## Regras (GDD): capacete 3, peito 2, escudo 1, erro 0. Cavalo é falta (perde
 ## pontos). Bloqueio desvia golpe no capacete/peito para o escudo. Derrubada:
-## Força de quem bate contra Equilíbrio de quem leva, mais velocidade, ritmo,
-## poder da lança e habilidade, menos a defesa da peça atingida. Peça com
+## a largada de quem bate dá a base por zona e o teto (derrubada.por_largada);
+## por cima, Força de quem bate contra Equilíbrio de quem leva, mais
+## velocidade, ritmo, poder da lança e habilidade, menos a defesa da peça
+## atingida; o teto suave usa o teto da largada. Peça com
 ## durabilidade 0 não dá bônus. Ciclo: cada habilidade tem uma família
 ## (investida, bloqueio ou golpe_pesado; a de um conjunto herda o ciclo da
 ## família) e anula as do outro lado da família que ela "vence". Bônus de
@@ -43,13 +47,21 @@ extends RefCounted
 ## divisão é feita com números não negativos.
 
 const ERRO := "erro"
+const QUALIDADES_LARGADA := ["perfeita", "boa", "ruim"]
+## Largada que vale quando o golpeador não traz uma (não largou).
+const LARGADA_SEM := "ruim"
+
+## Base e teto da derrubada para a largada de quem bate.
+static func derrubada_da_largada(cfg: Dictionary, largada: Variant) -> Dictionary:
+	var pl: Dictionary = cfg["derrubada"]["por_largada"]
+	return pl[largada] if largada is String and pl.has(largada) else pl[LARGADA_SEM]
 
 static func validar(cfg: Dictionary) -> String:
 	var grupos := {
 		"pontos": [], "falta": ["zona", "penalidade_pontos", "faltas_para_desclassificar"],
 		"bloqueio": ["zonas", "vira_zona", "base_milesimos", "teto_milesimos"],
-		"derrubada": ["base_por_zona_milesimos", "forca_menos_equilibrio_milesimos", "velocidade_por_pct_milesimos",
-			"ritmo_max_milesimos", "poder_lanca_milesimos", "defesa_peca_milesimos", "teto_milesimos"],
+		"derrubada": ["por_largada", "forca_menos_equilibrio_milesimos", "velocidade_por_pct_milesimos",
+			"ritmo_max_milesimos", "poder_lanca_milesimos", "defesa_peca_milesimos"],
 		"dano": ["base_por_zona", "peca_por_zona", "velocidade_por_pct_milesimos", "defesa_reduz_por_ponto_milesimos",
 			"minimo", "lanca_por_contato"],
 		"habilidades": [],
@@ -60,6 +72,10 @@ static func validar(cfg: Dictionary) -> String:
 		for k: String in grupos[g]:
 			if not cfg[g].has(k):
 				return "falta \"%s.%s\"" % [g, k]
+	for q in QUALIDADES_LARGADA:
+		var pl: Variant = cfg["derrubada"]["por_largada"].get(q)
+		if not pl is Dictionary or not pl.get("base_por_zona_milesimos") is Dictionary or not pl.has("teto_milesimos"):
+			return "falta \"derrubada.por_largada.%s\" (base_por_zona_milesimos e teto_milesimos)" % q
 	for k in ["teto_suave_joelho_pct", "habilidade_carga_ms"]:
 		if not cfg.has(k):
 			return "falta \"%s\"" % k
@@ -199,10 +215,11 @@ static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: Array[Stri
 
 	# Derrubada.
 	var dr: Dictionary = cfg["derrubada"]
-	if dr["base_por_zona_milesimos"].has(zf):
+	var dl := derrubada_da_largada(cfg, a.get("largada", LARGADA_SEM))
+	if dl["base_por_zona_milesimos"].has(zf):
 		var peca: String = cfg["dano"]["peca_por_zona"].get(zf, "")
 		var vel_pct := _velocidade_pct(a)
-		var chance := int(dr["base_por_zona_milesimos"][zf])
+		var chance := int(dl["base_por_zona_milesimos"][zf])
 		chance += (int(a["cavaleiro"]["forca"]) - int(d["cavaleiro"]["equilibrio"])) * int(dr["forca_menos_equilibrio_milesimos"])
 		chance += (vel_pct - 100) * int(dr["velocidade_por_pct_milesimos"])
 		chance += int(dr["ritmo_max_milesimos"]) * clampi(int(a.get("ritmo_milesimos", 0)), 0, 1000) / 1000
@@ -211,7 +228,7 @@ static func _golpe(cfg: Dictionary, a: Dictionary, d: Dictionary, ha: Array[Stri
 		chance += _soma(cfg, ha, "derrubada_bonus_milesimos")
 		chance += _soma(cfg, hd, "exposicao_milesimos")  # o defensor arriscou (golpe do campeão)
 		chance -= _soma(cfg, hd, "derrubada_reducao_milesimos")  # o defensor segura melhor (fantasma do corcel)
-		chance = suave(chance, int(dr["teto_milesimos"]), joelho)
+		chance = suave(chance, int(dl["teto_milesimos"]), joelho)
 		r["chance_derrubar_milesimos"] = chance
 		r["derrubou"] = rng.chance_milesimos(chance)
 

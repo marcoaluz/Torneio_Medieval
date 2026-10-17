@@ -18,7 +18,9 @@ extends RefCounted
 ## A Corrida termina quando a soma das distâncias chega ao ponto da Mira
 ## (pista.distancia_total - pista.distancia_mira) ou no teto fases_ms.corrida.
 ## O golpe é avaliado no choque (fim da Mira), não no instante em que solta.
-## No choque, a regra do impacto resolve os dois golpes; falta conta para a
+## No choque, a regra do impacto resolve os dois golpes, cada um com a
+## qualidade da largada de quem bate naquela passada (o rival sem IA larga
+## "boa", como no galope); falta conta para a
 ## desclassificação (impacto.falta.faltas_para_desclassificar) e o dano gasta
 ## a durabilidade das peças, que vale para as passadas seguintes.
 ## Rival: com `perfil_ia` (ia_rival.json), a IA (IaRival, semente derivada)
@@ -149,6 +151,10 @@ func _init(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictionary, semente: int
 	_rng = Aleatorio.new(semente)
 	precisao_jogador = Impacto.precisao_efetiva(lado_jogador)
 	precisao_rival = Impacto.precisao_efetiva(lado_rival)
+
+## Configuração em uso ({justa, galope, mira, impacto}; só leitura).
+func configuracao() -> Dictionary:
+	return _cfg
 
 func iniciar() -> Array[Dictionary]:
 	return _observar(fases.iniciar())
@@ -308,7 +314,9 @@ func tocar() -> Array[Dictionary]:
 	return eventos
 
 ## Segura e move a ponta da lança (décimos de px do quadro do rival). Só na
-## Mira e antes de soltar; o ponto é preso aos limites da mira.
+## Mira e antes de soltar; o ponto é preso aos limites da mira. (A altura da
+## lança na Corrida é da apresentação: ela só escolhe o ponto onde a Mira
+## começa, e o golpe sai do que chega aqui.)
 func mirar(ponto: Vector2i) -> void:
 	if fases.fase != JustaFases.Fase.MIRA or solto:
 		return
@@ -396,12 +404,12 @@ func _observar(eventos: Array[Dictionary]) -> Array[Dictionary]:
 				_rival_largada_ms = -1
 				if ia:
 					# Reação antes da bandeira = toque antes dela (queimada); nunca antes do 0.
-					var tr := maxi(bandeira_ms + ia.reacao_largada_ms(), 0)
+					var tr := maxi(bandeira_ms + ia.reacao_largada_ms(l), 0)
 					if tr < fases.duracao_ms(JustaFases.Fase.LARGADA):
 						_rival_largada_ms = tr
 				_jog_largada_ms = -1
 				if ia_jogador:
-					var tj := maxi(bandeira_ms + ia_jogador.reacao_largada_ms(), 0)
+					var tj := maxi(bandeira_ms + ia_jogador.reacao_largada_ms(l), 0)
 					if tj < fases.duracao_ms(JustaFases.Fase.LARGADA):
 						_jog_largada_ms = tj
 			JustaFases.Fase.CORRIDA:
@@ -458,8 +466,9 @@ func _resolver_impacto(golpe: Dictionary, t: int) -> Dictionary:
 			bonus_rival += int(_cfg["galope"]["largada"]["bonus_precisao_pct"][qualidade_largada_rival])
 		zona_rival = Mira.zona_no_ponto(_cfg["mira"], ponta_rival, precisao_rival, bonus_rival)
 	var entrada := {
-		"jogador": _golpeador(lado_jogador, golpe["zona"], jogador, habilidade_na_passada_jogador),
-		"rival": _golpeador(lado_rival, zona_rival, rival, habilidade_na_passada_rival),
+		"jogador": _golpeador(lado_jogador, golpe["zona"], jogador, habilidade_na_passada_jogador, qualidade_largada),
+		"rival": _golpeador(lado_rival, zona_rival, rival, habilidade_na_passada_rival,
+			qualidade_largada_rival if qualidade_largada_rival != "" else "boa"),
 	}
 	var res := Impacto.resolver(_cfg["impacto"], entrada, _rng)
 	ultimo_impacto = res
@@ -493,7 +502,7 @@ static func _lado_de(jogador_afetado: bool, rival_afetado: bool) -> JustaFases.L
 	return JustaFases.Lado.NENHUM
 
 ## Passivas valem em toda passada; a ativa, só na passada em que foi acionada.
-func _golpeador(lado: Dictionary, zona: String, g: Galope, ativa_na_passada: bool) -> Dictionary:
+func _golpeador(lado: Dictionary, zona: String, g: Galope, ativa_na_passada: bool, largada: String) -> Dictionary:
 	var habs: Array = []
 	for nome in _habilidades_de(lado):
 		var em_efeito := false
@@ -503,7 +512,7 @@ func _golpeador(lado: Dictionary, zona: String, g: Galope, ativa_na_passada: boo
 	return {"cavaleiro": lado["cavaleiro"], "equipamento": lado.get("equipamento", {}),
 		"habilidades": habs, "zona": zona,
 		"velocidade": g.velocidade, "velocidade_nominal": g.velocidade_nominal,
-		"ritmo_milesimos": g.ritmo_milesimos()}
+		"ritmo_milesimos": g.ritmo_milesimos(), "largada": largada}
 
 ## Tira o dano da durabilidade das peças (nunca abaixo de 0).
 static func _gastar(lado: Dictionary, dano: Dictionary) -> void:

@@ -3,8 +3,10 @@
 # especificação no topo de impacto.gd, para gerar o "esperado" dos casos
 # compartilhados em tests/shared/impacto.json sem copiar a saída das próprias
 # implementações. `python -I tools/oraculo_impacto.py conferir` refaz todos os
-# casos do arquivo e aponta divergências; `gerar` acrescenta os casos novos de
-# CASOS_NOVOS (e as habilidades novas na config embutida) a partir de impacto.json.
+# casos do arquivo e aponta divergências; `gerar` embute a config atual de
+# game/data/balance/impacto.json, dá a cada lado dos casos antigos a largada de
+# LARGADA_DOS_CASOS (padrão "boa"), acrescenta CASOS_NOVOS e refaz o esperado
+# de todos.
 import copy
 import json
 import os
@@ -48,6 +50,11 @@ def suave(v, teto, joelho_pct):
     if resto <= 0:
         return teto
     return joelho + div(exc * resto, exc + resto)
+
+
+def da_largada(cfg, largada):
+    pl = cfg["derrubada"]["por_largada"]
+    return pl[largada] if isinstance(largada, str) and largada in pl else pl["ruim"]
 
 
 def stat(eq, peca, k):
@@ -130,9 +137,10 @@ def golpe(cfg, a, d, ha, hd, rng):
     zf = r["zona_final"]
     r["pontos"] = int(cfg["pontos"][zf])
     dr = cfg["derrubada"]
-    if zf in dr["base_por_zona_milesimos"]:
+    dl = da_largada(cfg, a.get("largada", "ruim"))
+    if zf in dl["base_por_zona_milesimos"]:
         peca = cfg["dano"]["peca_por_zona"].get(zf, "")
-        c = int(dr["base_por_zona_milesimos"][zf])
+        c = int(dl["base_por_zona_milesimos"][zf])
         c += (int(a["cavaleiro"]["forca"]) - int(d["cavaleiro"]["equilibrio"])) * int(dr["forca_menos_equilibrio_milesimos"])
         c += (vel_pct(a) - 100) * int(dr["velocidade_por_pct_milesimos"])
         c += div(int(dr["ritmo_max_milesimos"]) * min(max(int(a.get("ritmo_milesimos", 0)), 0), 1000), 1000)
@@ -141,7 +149,7 @@ def golpe(cfg, a, d, ha, hd, rng):
         c += soma(cfg, ha, "derrubada_bonus_milesimos")
         c += soma(cfg, hd, "exposicao_milesimos")
         c -= soma(cfg, hd, "derrubada_reducao_milesimos")
-        c = suave(c, int(dr["teto_milesimos"]), joelho)
+        c = suave(c, int(dl["teto_milesimos"]), joelho)
         r["chance_derrubar_milesimos"] = c
         r["derrubou"] = rng.chance(c)
     dano(cfg, r, a, d, zf, ha)
@@ -161,15 +169,47 @@ def cav(f=50, p=50, e=50):
     return {"forca": f, "precisao": p, "equilibrio": e}
 
 
-def lado(zona, habs=(), f=50, e=50, vel=95):
+def lado(zona, habs=(), f=50, e=50, vel=95, largada="boa"):
     d = {"cavaleiro": cav(f, 50, e), "zona": zona, "velocidade": vel, "velocidade_nominal": 95, "ritmo_milesimos": 500}
+    if largada is not None:
+        d["largada"] = largada
     if habs:
         d["habilidades"] = [{"nome": n, "ativa": a} for n, a in habs]
     return d
 
 
-NOVAS = ["golpe_do_campeao", "fantasma_do_corcel", "manto_do_corvo", "mira_do_falcao"]
+# Largada de cada lado nos casos que já existiam antes dela (o resto: "boa").
+LARGADA_DOS_CASOS = {
+    "teto suave segura a chance de derrubar": ("perfeita", "perfeita"),
+    "forca alta contra equilibrio baixo derruba mais": ("perfeita", "ruim"),
+    "equilibrio alto quase nao cai": ("ruim", "perfeita"),
+    "lanca do sol: derrubada e dano": ("perfeita", "boa"),
+    "sorteio da derrubada semente 21": ("perfeita", "perfeita"),
+    "sorteio da derrubada semente 22": ("perfeita", "boa"),
+    "sorteio da derrubada semente 23": ("boa", "perfeita"),
+    "sorteio da derrubada semente 24": ("boa", "ruim"),
+    "sorteio da derrubada semente 25": ("ruim", "perfeita"),
+    "sorteio da derrubada semente 26": ("perfeita", "ruim"),
+}
+
 CASOS_NOVOS = [
+    ("largada perfeita: base e teto maiores", 31, lado("capacete", largada="perfeita"), lado("peito", largada="perfeita")),
+    ("largada boa: base e teto medios", 31, lado("capacete", largada="boa"), lado("peito", largada="boa")),
+    ("largada ruim: quase nao derruba", 31, lado("capacete", largada="ruim"), lado("peito", largada="ruim")),
+    ("sem largada vale ruim", 31, lado("capacete", largada=None), lado("escudo", largada=None)),
+    ("largada desconhecida vale ruim", 31, lado("capacete", largada="relampago"), lado("peito", largada="")),
+    ("largadas diferentes nos dois lados", 33, lado("peito", largada="perfeita"), lado("peito", largada="ruim")),
+    ("escudo com largada perfeita", 35, lado("escudo", largada="perfeita"), lado("escudo", largada="boa")),
+    ("teto da largada perfeita com tudo a favor", 37, lado("capacete", [("lanca_do_sol", True)], f=100, e=50, vel=114, largada="perfeita"),
+     lado("capacete", e=0, largada="perfeita")),
+    ("teto da largada ruim com tudo a favor", 37, lado("capacete", [("lanca_do_sol", True)], f=100, e=50, vel=114, largada="ruim"),
+     lado("capacete", e=0, largada="ruim")),
+    ("bloqueio vira escudo e usa a base do escudo da largada", 1, lado("capacete", largada="perfeita"), lado("peito", [("baluarte_real", True)], largada="boa")),
+    ("largada perfeita: sorteio semente 61", 61, lado("capacete", largada="perfeita"), lado("capacete", largada="perfeita")),
+    ("largada perfeita: sorteio semente 62", 62, lado("capacete", largada="perfeita"), lado("capacete", largada="perfeita")),
+    ("largada perfeita: sorteio semente 63", 63, lado("peito", largada="perfeita"), lado("peito", largada="perfeita")),
+    ("largada perfeita: sorteio semente 64", 64, lado("peito", largada="perfeita"), lado("capacete", largada="boa")),
+
     ("golpe do campeao: derrubada e dano maiores", 7, lado("peito", [("golpe_do_campeao", True)]), lado("erro")),
     ("golpe do campeao: quem usa fica exposto", 7, lado("erro", [("golpe_do_campeao", True)]), lado("peito")),
     ("golpe do campeao ainda nao acionado: sem bonus nem exposicao", 7, lado("peito", [("golpe_do_campeao", False)]), lado("peito")),
@@ -192,17 +232,19 @@ def main():
     dados = json.load(open(ARQ, encoding="utf-8"))
     jogo = json.load(open(os.path.join(RAIZ, "game", "data", "balance", "impacto.json"), encoding="utf-8"))
     if sys.argv[1:] == ["gerar"]:
-        cfg = dados["config"]
-        for n in NOVAS:
-            h = copy.deepcopy(jogo["habilidades"][n])
-            h.pop("_nota", None)
-            cfg["habilidades"][n] = h
+        cfg = copy.deepcopy(jogo)
+        dados["config"] = cfg
         nomes = {c["nome"] for c in dados["casos"]}
+        for c in dados["casos"]:
+            lj, lr = LARGADA_DOS_CASOS.get(c["nome"], ("boa", "boa"))
+            c["entrada"]["jogador"].setdefault("largada", lj)
+            c["entrada"]["rival"].setdefault("largada", lr)
         for nome, sem, j, r in CASOS_NOVOS:
             if nome in nomes:
                 continue
-            ent = {"jogador": j, "rival": r}
-            dados["casos"].append({"nome": nome, "semente": sem, "entrada": ent, "esperado": resolver(cfg, ent, sem)})
+            dados["casos"].append({"nome": nome, "semente": sem, "entrada": {"jogador": j, "rival": r}})
+        for c in dados["casos"]:
+            c["esperado"] = resolver(cfg, c["entrada"], int(c["semente"]))
         json.dump(dados, open(ARQ, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent="\t")  # mesmo formato, sem quebra no fim
     falhas = 0
     for c in dados["casos"]:

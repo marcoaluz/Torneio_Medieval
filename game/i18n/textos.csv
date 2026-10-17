@@ -8,8 +8,14 @@ RIVAL_EQUILIBRADO,Cavaleiro da Planície,Knight of the Plains
 RIVAL_AGRESSIVO,Cavaleiro Rubro,Crimson Knight
 LARGADA_PERFEITA,Largada perfeita!,Perfect start!
 LARGADA_BOA,Boa largada,Good start
-LARGADA_RUIM,Largada lenta,Slow start
-LARGADA_QUEIMADA,Queimou a largada!,False start!
+LARGADA_RUIM,Largada ruim,Bad start
+LARGADA_MOTIVO_QUEIMADA,Saiu antes da bandeira,Jumped the flag
+LARGADA_MOTIVO_TARDE,Demorou a sair: {ms} ms,Slow off the line: {ms} ms
+LARGADA_MOTIVO_SEM_TOQUE,Não tocou quando a bandeira baixou,No tap when the flag dropped
+LARGADA_MOTIVO_REACAO,Reação: {ms} ms,Reaction: {ms} ms
+LARGADA_EFEITO_PERFEITA,Velocidade +{vel}% · Mira +{prec}% · Derruba até {teto}%,Speed +{vel}% · Aim +{prec}% · Unhorse up to {teto}%
+LARGADA_EFEITO_BOA,Velocidade normal · Derruba até {teto}%,Normal speed · Unhorse up to {teto}%
+LARGADA_EFEITO_RUIM,Velocidade −{vel}% · Derruba até {teto}%,Speed −{vel}% · Unhorse up to {teto}%
 HABILIDADE_INVESTIDA,Investida,Charge
 HABILIDADE_GOLPE_PESADO,Golpe Pesado,Heavy Blow
 HABILIDADE_BLOQUEIO,Bloqueio,Block

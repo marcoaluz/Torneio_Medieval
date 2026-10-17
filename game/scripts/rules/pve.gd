@@ -71,9 +71,19 @@ static func aplicar_desafios(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictio
 
 ## Estilo de um campeão: o ajuste soma nos números do perfil da IA (sem
 ## passar de zero) e troca os textos (ex.: zona_preferida). Puro.
+## Perfil da IA de um rival do PvE: o do perfil dele, mais ajuste_campeao se
+## for campeão, mais o perfil_ajuste dele (ia = ia_rival.json; r = pve.json > rivais).
+static func perfil_do_rival(ia: Dictionary, r: Dictionary) -> Dictionary:
+	var p: Dictionary = ia["perfis"][r["perfil"]]
+	if r.get("campeao", false):
+		p = ajustar_perfil(p, ia["ajuste_campeao"])
+	return ajustar_perfil(p, r.get("perfil_ajuste", {}))
+
 static func ajustar_perfil(perfil: Dictionary, ajuste: Dictionary) -> Dictionary:
 	var p := perfil.duplicate(true)
 	for k in ajuste:
+		if str(k).begins_with("_"):
+			continue  # nota
 		if typeof(ajuste[k]) in [TYPE_INT, TYPE_FLOAT] and p.has(k) and typeof(p[k]) in [TYPE_INT, TYPE_FLOAT]:
 			p[k] = maxi(0, int(p[k]) + int(ajuste[k]))
 		else:

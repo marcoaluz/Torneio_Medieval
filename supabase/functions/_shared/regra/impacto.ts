@@ -5,6 +5,9 @@
 // rival; em cada um, (1) bloqueio da habilidade do defensor, se houver,
 // (2) bloqueio do escudo, se ainda não bloqueou, (3) derrubada. Só inteiros;
 // toda divisão é feita com números não negativos (trunca).
+// Derrubada: a largada de quem bate (golpeador.largada: perfeita, boa ou ruim;
+// sem ela, ruim) dá a base por zona e o teto (derrubada.por_largada); os
+// modificadores somam por cima e o teto suave usa o teto da largada.
 
 import type { Aleatorio } from "./aleatorio.ts";
 import { clampi, div, tem } from "./util.ts";
@@ -15,14 +18,23 @@ type Cfg = Record<string, any>;
 type Dados = Record<string, any>;
 
 export const ERRO = "erro";
+export const QUALIDADES_LARGADA = ["perfeita", "boa", "ruim"];
+/** Largada que vale quando o golpeador não traz uma (não largou). */
+export const LARGADA_SEM = "ruim";
+
+/** Base e teto da derrubada para a largada de quem bate. */
+export function derrubada_da_largada(cfg: Cfg, largada: unknown): Dados {
+  const pl = cfg["derrubada"]["por_largada"];
+  return typeof largada === "string" && tem(pl, largada) ? pl[largada] : pl[LARGADA_SEM];
+}
 
 export function validar(cfg: Cfg): string {
   const grupos: Record<string, string[]> = {
     pontos: [],
     falta: ["zona", "penalidade_pontos", "faltas_para_desclassificar"],
     bloqueio: ["zonas", "vira_zona", "base_milesimos", "teto_milesimos"],
-    derrubada: ["base_por_zona_milesimos", "forca_menos_equilibrio_milesimos", "velocidade_por_pct_milesimos",
-      "ritmo_max_milesimos", "poder_lanca_milesimos", "defesa_peca_milesimos", "teto_milesimos"],
+    derrubada: ["por_largada", "forca_menos_equilibrio_milesimos", "velocidade_por_pct_milesimos",
+      "ritmo_max_milesimos", "poder_lanca_milesimos", "defesa_peca_milesimos"],
     dano: ["base_por_zona", "peca_por_zona", "velocidade_por_pct_milesimos", "defesa_reduz_por_ponto_milesimos",
       "minimo", "lanca_por_contato"],
     habilidades: [],
@@ -32,6 +44,12 @@ export function validar(cfg: Cfg): string {
     if (typeof v !== "object" || v === null || Array.isArray(v)) return `falta o grupo "${g}"`;
     for (const k of grupos[g]) {
       if (!(k in v)) return `falta "${g}.${k}"`;
+    }
+  }
+  for (const q of QUALIDADES_LARGADA) {
+    const pl = cfg["derrubada"]["por_largada"][q];
+    if (typeof pl !== "object" || pl === null || typeof pl["base_por_zona_milesimos"] !== "object" || !("teto_milesimos" in pl)) {
+      return `falta "derrubada.por_largada.${q}" (base_por_zona_milesimos e teto_milesimos)`;
     }
   }
   for (const k of ["teto_suave_joelho_pct", "habilidade_carga_ms"]) {
@@ -184,10 +202,11 @@ function _golpe(cfg: Cfg, a: Dados, d: Dados, ha: string[], hd: string[], rng: A
 
   // Derrubada.
   const dr = cfg["derrubada"];
-  if (tem(dr["base_por_zona_milesimos"], zf)) {
+  const dl = derrubada_da_largada(cfg, a["largada"] ?? LARGADA_SEM);
+  if (tem(dl["base_por_zona_milesimos"], zf)) {
     const peca: string = cfg["dano"]["peca_por_zona"][zf] ?? "";
     const vel_pct = _velocidade_pct(a);
-    let chance = Math.trunc(dr["base_por_zona_milesimos"][zf]);
+    let chance = Math.trunc(dl["base_por_zona_milesimos"][zf]);
     chance += (Math.trunc(a["cavaleiro"]["forca"]) - Math.trunc(d["cavaleiro"]["equilibrio"])) * Math.trunc(dr["forca_menos_equilibrio_milesimos"]);
     chance += (vel_pct - 100) * Math.trunc(dr["velocidade_por_pct_milesimos"]);
     chance += div(Math.trunc(dr["ritmo_max_milesimos"]) * clampi(Math.trunc(a["ritmo_milesimos"] ?? 0), 0, 1000), 1000);
@@ -196,7 +215,7 @@ function _golpe(cfg: Cfg, a: Dados, d: Dados, ha: string[], hd: string[], rng: A
     chance += _soma(cfg, ha, "derrubada_bonus_milesimos");
     chance += _soma(cfg, hd, "exposicao_milesimos"); // o defensor arriscou (golpe do campeão)
     chance -= _soma(cfg, hd, "derrubada_reducao_milesimos"); // o defensor segura melhor (fantasma do corcel)
-    chance = suave(chance, Math.trunc(dr["teto_milesimos"]), joelho);
+    chance = suave(chance, Math.trunc(dl["teto_milesimos"]), joelho);
     r["chance_derrubar_milesimos"] = chance;
     r["derrubou"] = rng.chance_milesimos(chance);
   }

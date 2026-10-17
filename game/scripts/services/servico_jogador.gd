@@ -2045,7 +2045,7 @@ func _rival_de(r: Dictionary, rival_id: String, regiao := "") -> Dictionary:
 		equip[modelos[m]["espaco"]] = st
 	var lado := {"cavaleiro": cav, "cavalo": (r["cavalo"] as Dictionary).duplicate(), "equipamento": equip,
 		"habilidade": r.get("habilidade", "")}
-	var perfil := RegraPve.ajustar_perfil(Balanceamento.ler("ia_rival")["perfis"][r["perfil"]], r.get("perfil_ajuste", {}))
+	var perfil := RegraPve.perfil_do_rival(Balanceamento.ler("ia_rival"), r)
 	return {"id": rival_id, "lado": lado, "perfil_nome": r["perfil"], "perfil": perfil, "provocacao": r.get("provocacao", ""),
 		"casa": {"principal": r["casa"][0], "secundaria": r["casa"][1]},
 		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(r.get("brasao", ""), {}),

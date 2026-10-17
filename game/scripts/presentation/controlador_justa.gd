@@ -27,9 +27,16 @@ extends Node
 ## instante antes do contato, para o congelamento do impacto pegar o golpe
 ## esticado. Tudo pelo relógio das fases da regra; nada disso muda resultado.
 ## Toque na tela inteira, com uma mão: pula a Apresentação, larga na
-## Largada, galopa na Corrida. Na Mira: segura, arrasta a ponta da lança
-## sobre o rival (arrasto relativo, o dedo não cobre o alvo) e solta para
-## golpear. A zona sob a ponta brilha de leve no próprio rival.
+## Largada, galopa na Corrida. Na Corrida o dedo que tocou no compasso pode
+## ficar na tela e arrastar para cima ou para baixo: sobe ou baixa a lança.
+## O arrasto nunca vira toque (só encostar o dedo galopa), então não atrapalha
+## o compasso. Na Mira: segura, arrasta a ponta da lança sobre o rival
+## (arrasto relativo, o dedo não cobre o alvo) e solta para golpear; a Mira
+## começa da altura escolhida na Corrida, e o dedo que já estava arrastando a
+## lança quando a Mira chega passa a segurar sem precisar tocar de novo.
+## A ponta segue o dedo com uma inércia leve (mola), na Corrida e na Mira.
+## A zona sob a ponta brilha de leve no próprio rival. A altura da lança antes
+## da Mira não muda o resultado: o golpe sai do ponto que a Mira manda à regra.
 
 ## Qualquer troca de fase. `anterior` é JustaFases.Fase.FIM no começo.
 signal fase_mudou(fase: JustaFases.Fase, anterior: JustaFases.Fase, passada: int)
@@ -109,6 +116,16 @@ signal justa_terminou(vencedor: JustaFases.Lado, motivo: String, placar_jogador:
 @export var golpear_antes_ms := 110
 ## Quanto a ponta anda por px de arrasto aparente na tela (1 = acompanha o dedo).
 @export var sensibilidade_mira := 1.0
+## Na Corrida (rival longe, câmera aberta) o arrasto sobe ou baixa a lança:
+## px da ponta (no quadro do rival) por px de arrasto na tela.
+@export var sensibilidade_lanca_corrida := 0.6
+## Inércia da ponta (mola): rigidez e amortecimento. Amortecimento perto de
+## 2·√rigidez não passa do ponto; um pouco abaixo dá a sobra leve da mão.
+@export var rigidez_lanca := 140.0
+@export var amortecimento_lanca := 17.0
+## Na Corrida, inclinação da lança (graus) por px de altura escolhida, até o
+## rival chegar perto (aí ela aponta para o ponto de verdade).
+@export var lanca_corrida_graus_por_px := 0.22
 
 var justa: Justa
 ## Atributos de cada lado: {cavaleiro, cavalo, equipamento, habilidade}.
@@ -158,6 +175,10 @@ var _encontro_j := 0.0
 var _encontro_r := 0.0
 var _cfg: Dictionary
 var _base_mira := Vector2.ZERO  ## ponta sem a oscilação, décimos de px do quadro do rival
+var _alvo_mira := Vector2.ZERO  ## para onde o dedo levou a ponta (a ponta segue com inércia)
+var _vel_mira := Vector2.ZERO
+var _dedo_na_tela := false
+var _arrastou_lanca := false  ## o dedo atual arrastou a lança na Corrida
 var _tempo_mira := 0.0
 var _tempo_desde_fim := 0.0
 var _preparou := false  ## gesto do rival já recolhido nesta Mira
@@ -324,15 +345,41 @@ func segurar_mira() -> void:
 		_mirar(_ponto_mira())
 
 ## Mira: arrasto do dedo, em px da tela. Converte para o quadro do rival
-## (desfaz zoom, escala e espelho) e move a ponta.
+## (desfaz zoom, escala e espelho) e move o alvo da ponta (a ponta segue).
 func arrastar_mira(delta_tela: Vector2) -> void:
 	if fase() != JustaFases.Fase.MIRA or justa.solto or not justa.segurando:
 		return
 	var mundo := delta_tela / arena.camera.zoom * sensibilidade_mira
 	# affine_inverse: basis_xform_inv só serve para base sem escala (usa a transposta).
 	var quadro := arena.rival.visual().global_transform.affine_inverse().basis_xform(mundo)
-	_base_mira = Vector2(Mira.limitar(_cfg["mira"], Vector2i((_base_mira + quadro * 10.0).round())))
-	_mirar(_ponto_mira())
+	_alvo_mira = Vector2(Mira.limitar(_cfg["mira"], Vector2i((_alvo_mira + quadro * 10.0).round())))
+
+## Corrida: arrasto vertical do dedo sobe ou baixa a lança (a Mira começa
+## dali). Não é toque: o galope só conta o encostar do dedo.
+func arrastar_lanca(delta_tela: Vector2) -> void:
+	if fase() != JustaFases.Fase.CORRIDA or is_zero_approx(delta_tela.y):
+		return
+	_arrastou_lanca = true
+	var dy := delta_tela.y * sensibilidade_lanca_corrida / arena.rival.escala
+	_alvo_mira = Vector2(Mira.limitar(_cfg["mira"], Vector2i((_alvo_mira + Vector2(0.0, dy * 10.0)).round())))
+
+## Ponta segue o alvo com uma mola (inércia leve), presa aos limites da mira.
+func _seguir_alvo(delta: float) -> void:
+	var f := fase()
+	if not f in [JustaFases.Fase.CORRIDA, JustaFases.Fase.MIRA] or justa.solto:
+		_vel_mira = Vector2.ZERO
+		return
+	# Passos curtos: a mola fica estável mesmo num quadro longo.
+	var resta := minf(delta, 0.1)
+	while resta > 0.0:
+		var h := minf(resta, 1.0 / 120.0)
+		resta -= h
+		_vel_mira += ((_alvo_mira - _base_mira) * rigidez_lanca - _vel_mira * amortecimento_lanca) * h
+		_base_mira += _vel_mira * h
+	var limitada := Vector2(Mira.limitar(_cfg["mira"], Vector2i(_base_mira.round())))
+	if not limitada.is_equal_approx(_base_mira.round()):
+		_vel_mira = Vector2.ZERO
+		_base_mira = limitada
 
 ## Mira: solta o dedo (golpeia).
 func soltar_mira() -> void:
@@ -344,6 +391,16 @@ func soltar_mira() -> void:
 ## Ponta da lança em coordenadas do mundo (para desenhar).
 func ponta_no_mundo() -> Vector2:
 	return arena.rival.visual().to_global(Vector2(justa.ponta) / 10.0)
+
+## Ponta escolhida pelo dedo (com a inércia, sem a oscilação), no mundo.
+func lanca_no_mundo() -> Vector2:
+	return arena.rival.visual().to_global(_base_mira / 10.0)
+
+## 0 com os dois longe, 1 no vão do encontro (as lanças apontam a partir dele).
+func _peso_aproximacao() -> float:
+	var dx := absf(arena.rival.global_position.x - arena.jogador.global_position.x)
+	var peso := clampf(1.0 - (dx - vao_encontro) / apontar_desde_px, 0.0, 1.0)
+	return peso * peso * (3.0 - 2.0 * peso)  # suave
 
 ## Painel de ajuste: troca o conteúdo da configuração `arquivo` no lugar, para
 ## a justa em andamento já ler os números novos (o que é calculado no começo
@@ -393,6 +450,7 @@ func _process(delta: float) -> void:
 	_resto_ms += delta * 1000.0
 	var ms := int(_resto_ms)
 	_resto_ms -= ms
+	_seguir_alvo(delta)
 	if fase() == JustaFases.Fase.MIRA:
 		_tempo_mira += delta
 		if justa.segurando:
@@ -428,6 +486,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if modo == "exibicao":
 		return  # na exibição o jogador só assiste
+	if event is InputEventScreenTouch:
+		_dedo_na_tela = event.pressed
+		if event.pressed:
+			_arrastou_lanca = false
 	if fase() == JustaFases.Fase.MIRA:
 		if event is InputEventScreenTouch:
 			if event.pressed:
@@ -440,6 +502,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 	elif event is InputEventScreenTouch and event.pressed:
 		tocar()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenDrag and fase() == JustaFases.Fase.CORRIDA:
+		arrastar_lanca(event.relative)
 		get_viewport().set_input_as_handled()
 
 ## Ponta com a oscilação da mão (dados: mira.oscilacao), em décimos de px.
@@ -520,6 +585,9 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 		JustaFases.Fase.LARGADA:
 			arena.arauto.levantar()
 			cam.plano_aberto(false, centro_aberto_em(arena.jogador))
+			_base_mira = Vector2(Mira.ponta_inicial(_cfg["mira"]))
+			_alvo_mira = _base_mira
+			_vel_mira = Vector2.ZERO
 		JustaFases.Fase.FIM:
 			cam.plano_aberto(false, (arena.jogador.global_position + arena.rival.global_position) * 0.5 - Vector2(0, aberto_acima))
 		JustaFases.Fase.CORRIDA:
@@ -527,8 +595,10 @@ func _ao_entrar_na_fase(nova: JustaFases.Fase) -> void:
 			# vai enquadrando os dois (a Mira acontece nesse mesmo plano).
 			cam.duelo(arena.jogador, arena.rival)
 		JustaFases.Fase.MIRA:
-			_base_mira = Vector2(Mira.ponta_inicial(_cfg["mira"]))
+			# Começa da altura escolhida na Corrida (a ponta inicial, se não mexeu).
 			_tempo_mira = 0.0
+			if _dedo_na_tela and _arrastou_lanca:
+				segurar_mira()  # o dedo que arrastava a lança já segura
 		JustaFases.Fase.IMPACTO:
 			if not _golpeou:  # Mira curta demais para a antecedência
 				_golpear()
@@ -653,14 +723,25 @@ func _atualizar_visual() -> void:
 	barra.brilho = _brilho_do_compasso()
 
 ## Ponta da lança, mira visível e brilho leve na zona sob ela, só na Mira.
-## Também fecha a câmera aos poucos e dispara o gesto do golpe antes do choque.
+## Na Corrida, a marca aparece fraca quando o rival chega perto, na altura
+## escolhida. Também dispara o gesto do golpe antes do choque.
 func _atualizar_mira() -> void:
 	var na_mira := justa.fases.fase == JustaFases.Fase.MIRA
-	arena.ponta_lanca.visible = na_mira
+	var na_corrida := justa.fases.fase == JustaFases.Fase.CORRIDA
+	var perto_corrida := na_corrida and _peso_aproximacao() > 0.35 and modo != "exibicao"
+	arena.ponta_lanca.visible = na_mira or perto_corrida
+	if perto_corrida:
+		arena.ponta_lanca.global_position = lanca_no_mundo()
+		arena.ponta_lanca.modulate.a = 0.55
+		var mc := _mira_visual()
+		mc.zona = ""
+		mc.segurando = false
+		mc.travado = false
 	if not na_mira:
 		arena.rival.realcar("")
 		arena.jogador.modulate.a = 1.0
 		return
+	arena.ponta_lanca.modulate.a = 1.0
 	arena.ponta_lanca.global_position = ponta_no_mundo()
 	var zona := Mira.zona_no_ponto(_cfg["mira"], justa.ponta, justa.precisao_jogador, justa.bonus_precisao_pct())
 	arena.rival.realcar(zona)
@@ -710,11 +791,14 @@ func _apontar_lancas() -> void:
 		return
 	var j := arena.jogador
 	var r := arena.rival
-	var dx := absf(r.global_position.x - j.global_position.x)
-	var peso := clampf(1.0 - (dx - vao_encontro) / apontar_desde_px, 0.0, 1.0)
-	peso = peso * peso * (3.0 - 2.0 * peso)  # suave
-	var alvo_j := ponta_no_mundo() if f == JustaFases.Fase.MIRA else r.ponto_alvo("Peito")
-	j.mira_lanca = j.angulo_para(alvo_j) * peso
+	var peso := _peso_aproximacao()
+	if f == JustaFases.Fase.MIRA:
+		j.mira_lanca = j.angulo_para(ponta_no_mundo()) * peso
+	else:
+		# Corrida: longe, a lança só inclina pela altura escolhida; perto, aponta para ela.
+		var dy := (_base_mira.y - float(Mira.ponta_inicial(_cfg["mira"]).y)) / 10.0
+		var inclinada := deg_to_rad(dy * lanca_corrida_graus_por_px)
+		j.mira_lanca = lerpf(inclinada, j.angulo_para(lanca_no_mundo()), peso)
 	r.mira_lanca = r.angulo_para(j.ponto_alvo("Peito")) * peso
 
 func _golpear() -> void:

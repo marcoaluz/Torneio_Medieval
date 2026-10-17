@@ -1,6 +1,6 @@
 {
-	"versao": 2,
-	"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa).",
+	"versao": 3,
+	"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa). v3 (2026-10-17): a largada da passada de quem bate define a base por zona e o teto da chance de derrubar (derrubada.por_largada); os modificadores (forca menos equilibrio, velocidade, ritmo, poder da lanca, defesa da peca, habilidades, exposicao, reducao) somam por cima, sem mudar, e o teto suave usa o teto da largada. Sem largada vale ruim (nao largou).",
 	"pontos": {
 		"capacete": 3,
 		"peito": 2,
@@ -24,17 +24,38 @@
 		"teto_milesimos": 400
 	},
 	"derrubada": {
-		"base_por_zona_milesimos": {
-			"capacete": 120,
-			"peito": 90,
-			"escudo": 30
+		"_nota": "Base e teto por largada (GDD, A justa > Pontuacao). Alvo com status medios: capacete perto de 50-55% na perfeita, 30% na boa, 2% na ruim (tools/simular_derrubada.gd).",
+		"por_largada": {
+			"perfeita": {
+				"base_por_zona_milesimos": {
+					"capacete": 450,
+					"peito": 380,
+					"escudo": 180
+				},
+				"teto_milesimos": 750
+			},
+			"boa": {
+				"base_por_zona_milesimos": {
+					"capacete": 250,
+					"peito": 200,
+					"escudo": 90
+				},
+				"teto_milesimos": 450
+			},
+			"ruim": {
+				"base_por_zona_milesimos": {
+					"capacete": 40,
+					"peito": 30,
+					"escudo": 10
+				},
+				"teto_milesimos": 80
+			}
 		},
 		"forca_menos_equilibrio_milesimos": 3,
 		"velocidade_por_pct_milesimos": 4,
 		"ritmo_max_milesimos": 40,
 		"poder_lanca_milesimos": 2,
-		"defesa_peca_milesimos": 2,
-		"teto_milesimos": 450
+		"defesa_peca_milesimos": 2
 	},
 	"dano": {
 		"base_por_zona": {

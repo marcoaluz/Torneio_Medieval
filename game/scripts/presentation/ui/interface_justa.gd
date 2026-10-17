@@ -10,6 +10,10 @@ extends Control
 @export var controlador: ControladorJusta
 ## Tempo do letreiro na tela (s).
 @export var duracao_letreiro := 1.2
+## Tempo do aviso da largada na tela (s): "Largada perfeita!", "Boa largada"
+## ou "Largada ruim", com o motivo e o efeito (números dos dados).
+@export var duracao_largada := 2.2
+const COR_LARGADA := {"perfeita": Color(1.0, 0.84, 0.35), "boa": Color(0.92, 0.9, 0.84), "ruim": Color(0.95, 0.5, 0.42)}
 
 @onready var plaquinha_jogador: Plaquinha = $Topo/PlaquinhaJogador
 @onready var plaquinha_rival: Plaquinha = $Topo/PlaquinhaRival
@@ -26,6 +30,10 @@ extends Control
 var _armadura_inicial_jogador := 0
 var _armadura_inicial_rival := 0
 var _tempo_letreiro := 0.0
+var _tempo_largada := 0.0
+var _aviso_largada: PanelContainer
+var _largada_titulo: Label
+var _largada_detalhe: Label
 
 func _ready() -> void:
 	_vestir_arte()
@@ -34,6 +42,7 @@ func _ready() -> void:
 		if c != botao:
 			(c as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	letreiro.visible = false
+	_criar_aviso_largada()
 	resultado.visible = false
 	botao.visible = false
 	botao.pressed.connect(_ao_apertar_botao)
@@ -58,6 +67,12 @@ func _process(delta: float) -> void:
 		_tempo_letreiro -= delta
 		if _tempo_letreiro <= 0.0:
 			letreiro.visible = false
+	if _tempo_largada > 0.0:
+		_tempo_largada -= delta
+		if _tempo_largada <= 0.3:
+			_aviso_largada.modulate.a = clampf(_tempo_largada / 0.3, 0.0, 1.0)
+		if _tempo_largada <= 0.0:
+			_aviso_largada.visible = false
 	var j := controlador.justa if controlador else null
 	if j == null:
 		return
@@ -126,8 +141,77 @@ func _ao_mudar_fase(f: JustaFases.Fase, _anterior: JustaFases.Fase, _p: int) -> 
 		_:
 			dica.text = ""
 
-func _ao_avaliar_largada(_p: int, qualidade: String, _reacao: int, queimada: bool) -> void:
-	mostrar_letreiro(tr("LARGADA_QUEIMADA") if queimada else tr("LARGADA_" + qualidade.to_upper()))
+func _ao_avaliar_largada(_p: int, qualidade: String, reacao: int, queimada: bool) -> void:
+	mostrar_largada(qualidade, reacao, queimada)
+
+## Aviso da largada logo depois dela: título na cor da qualidade, o motivo
+## (reação em ms, queimada, sem toque) e o efeito na passada, com os números
+## de galope.json (velocidade e mira) e impacto.json (teto da derrubada).
+func mostrar_largada(qualidade: String, reacao: int, queimada: bool) -> void:
+	if not COR_LARGADA.has(qualidade):
+		return
+	var cfg := controlador.justa.configuracao() if controlador and controlador.justa else Justa.carregar_configuracao()
+	var l: Dictionary = cfg["galope"]["largada"]
+	var teto := int(Impacto.derrubada_da_largada(cfg["impacto"], qualidade)["teto_milesimos"]) / 10
+	var vel := absi(int(l["velocidade_inicial_pct"][qualidade]) - 100)
+	var efeito := tr("LARGADA_EFEITO_" + qualidade.to_upper()).format(
+		{"vel": vel, "prec": int(l["bonus_precisao_pct"][qualidade]), "teto": teto})
+	var motivo: String
+	if queimada:
+		motivo = tr("LARGADA_MOTIVO_QUEIMADA")
+	elif qualidade == "ruim" and reacao == 0:
+		motivo = tr("LARGADA_MOTIVO_SEM_TOQUE")
+	elif qualidade == "ruim":
+		motivo = tr("LARGADA_MOTIVO_TARDE").format({"ms": reacao})
+	else:
+		motivo = tr("LARGADA_MOTIVO_REACAO").format({"ms": reacao})
+	_largada_titulo.text = tr("LARGADA_" + qualidade.to_upper())
+	_largada_titulo.add_theme_color_override("font_color", COR_LARGADA[qualidade])
+	_largada_detalhe.text = motivo + "\n" + efeito
+	_aviso_largada.visible = true
+	_aviso_largada.modulate.a = 1.0
+	_tempo_largada = duracao_largada
+	# Entra com um pulo curto (escala), centrado.
+	_aviso_largada.reset_size()
+	_aviso_largada.pivot_offset = _aviso_largada.size * 0.5
+	_aviso_largada.scale = Vector2(1.25, 1.25)
+	create_tween().tween_property(_aviso_largada, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _criar_aviso_largada() -> void:
+	_aviso_largada = PanelContainer.new()
+	_aviso_largada.name = "AvisoLargada"
+	_aviso_largada.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_aviso_largada.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_aviso_largada.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_aviso_largada.offset_top = 104.0
+	var c := ArteUi.caixa("painel", Vector2(26, 16))
+	if c:
+		_aviso_largada.add_theme_stylebox_override("panel", c)
+	else:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.08, 0.06, 0.05, 0.78)
+		sb.set_content_margin_all(8)
+		_aviso_largada.add_theme_stylebox_override("panel", sb)
+	var coluna := VBoxContainer.new()
+	coluna.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	coluna.add_theme_constant_override("separation", 2)
+	_aviso_largada.add_child(coluna)
+	_largada_titulo = _rotulo(26, 6)
+	_largada_detalhe = _rotulo(13, 4)
+	_largada_detalhe.add_theme_color_override("font_color", Color(0.93, 0.9, 0.82))
+	coluna.add_child(_largada_titulo)
+	coluna.add_child(_largada_detalhe)
+	_aviso_largada.visible = false
+	add_child(_aviso_largada)
+
+func _rotulo(tamanho: int, contorno: int) -> Label:
+	var r := Label.new()
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	r.add_theme_font_size_override("font_size", tamanho)
+	r.add_theme_constant_override("outline_size", contorno)
+	r.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.05))
+	return r
 
 ## Letreiro sempre que uma habilidade dispara (GDD): a ativa ao acionar, a
 ## passiva quando desvia o golpe.

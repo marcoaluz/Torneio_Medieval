@@ -1,13 +1,14 @@
 {
 	"versao": 1,
-	"descricao": "IA do rival (game/scripts/ai/ia_rival.gd). Para cada caso: IaRival(perfil, semente_ia); por passada chame reacao_largada_ms(), plano_galope(500, 6000), ponto_mira(mira) nessa ordem. semente_ia = (semente_justa ^ 0x5DEECE66) & 0xFFFFFFFF.",
+	"descricao": "IA do rival (game/scripts/ai/ia_rival.gd). Para cada caso: IaRival(perfil, semente_ia); por passada chame reacao_largada_ms(config_largada), plano_galope(500, 6000), ponto_mira(mira) nessa ordem. semente_ia = (semente_justa ^ 0x5DEECE66) & 0xFFFFFFFF. Esperado gerado por tools/oraculo_ia_rival.py.",
 	"config_ia": {
-		"versao": 1,
-		"_nota": "Perfis da IA do rival. Tempos em ms, erros de mira em px do quadro do alvo, chances em milesimos. 'acelera': 'cedo' = toca todas as batidas ate metade_batidas e depois uma sim, uma nao; 'tarde' = o contrario. habilidade_batida: batida da corrida em que aciona a habilidade ativa (0 = nunca). deslocamento_mira_px: [x, y] somado ao centro da zona (o centro do peito fica meio atras do escudo).",
+		"versao": 2,
+		"_nota": "Perfis da IA do rival. Tempos em ms, erros de mira em px do quadro do alvo, chances em milesimos. 'acelera': 'cedo' = toca todas as batidas ate metade_batidas e depois uma sim, uma nao; 'tarde' = o contrario. habilidade_batida: batida da corrida em que aciona a habilidade ativa (0 = nunca). deslocamento_mira_px: [x, y] somado ao centro da zona (o centro do peito fica atras do escudo pequeno do ombro; a parte livre e a frente do tronco). v2 (2026-10-17): a largada sai do perfil: largada_perfeita_milesimos e largada_boa_milesimos (o resto e ruim), com o instante sorteado dentro da faixa de galope.json > largada; a ruim atrasa ate largada_ruim_atraso_ms depois da faixa boa. Campeoes somam ajuste_campeao (antes do perfil_ajuste do proprio rival). Substitui reacao_media_ms/reacao_variacao_ms. A largada da a base e o teto da derrubada (impacto.json).",
 		"perfis": {
 			"novato": {
-				"reacao_media_ms": 320,
-				"reacao_variacao_ms": 220,
+				"largada_perfeita_milesimos": 100,
+				"largada_boa_milesimos": 350,
+				"largada_ruim_atraso_ms": 250,
 				"desvio_medio_ms": 40,
 				"desvio_variacao_ms": 170,
 				"perder_batida_milesimos": 300,
@@ -22,8 +23,9 @@
 				]
 			},
 			"equilibrado": {
-				"reacao_media_ms": 190,
-				"reacao_variacao_ms": 110,
+				"largada_perfeita_milesimos": 300,
+				"largada_boa_milesimos": 550,
+				"largada_ruim_atraso_ms": 200,
 				"desvio_medio_ms": 0,
 				"desvio_variacao_ms": 90,
 				"perder_batida_milesimos": 120,
@@ -33,13 +35,14 @@
 				"erro_mira_px": 9,
 				"habilidade_batida": 4,
 				"deslocamento_mira_px": [
-					-5,
+					9,
 					0
 				]
 			},
 			"agressivo": {
-				"reacao_media_ms": 120,
-				"reacao_variacao_ms": 90,
+				"largada_perfeita_milesimos": 450,
+				"largada_boa_milesimos": 400,
+				"largada_ruim_atraso_ms": 150,
 				"desvio_medio_ms": -10,
 				"desvio_variacao_ms": 70,
 				"perder_batida_milesimos": 60,
@@ -53,6 +56,11 @@
 					0
 				]
 			}
+		},
+		"ajuste_campeao": {
+			"_nota": "Somado ao perfil de todo rival com campeao: true (pve.json), antes do perfil_ajuste dele: campeao larga perfeito mais vezes.",
+			"largada_perfeita_milesimos": 200,
+			"largada_boa_milesimos": -100
 		}
 	},
 	"config_mira": {
@@ -169,7 +177,7 @@
 			"semente_ia": 1575931495,
 			"passadas": [
 				{
-					"reacao_ms": 97,
+					"reacao_ms": 257,
 					"galope": [
 						474,
 						1036,
@@ -188,7 +196,7 @@
 					]
 				},
 				{
-					"reacao_ms": 68,
+					"reacao_ms": 50,
 					"galope": [
 						551,
 						969,
@@ -207,7 +215,7 @@
 					]
 				},
 				{
-					"reacao_ms": 163,
+					"reacao_ms": 71,
 					"galope": [
 						490,
 						967,
@@ -233,7 +241,7 @@
 			"semente_ia": 1575931397,
 			"passadas": [
 				{
-					"reacao_ms": 122,
+					"reacao_ms": 217,
 					"galope": [
 						514,
 						983,
@@ -252,7 +260,7 @@
 					]
 				},
 				{
-					"reacao_ms": 91,
+					"reacao_ms": 248,
 					"galope": [
 						1022,
 						1475,
@@ -270,7 +278,7 @@
 					]
 				},
 				{
-					"reacao_ms": 126,
+					"reacao_ms": 182,
 					"galope": [
 						476,
 						1015,
@@ -296,7 +304,7 @@
 			"semente_ia": 1575955494,
 			"passadas": [
 				{
-					"reacao_ms": 155,
+					"reacao_ms": 62,
 					"galope": [
 						484,
 						1509,
@@ -313,7 +321,7 @@
 					]
 				},
 				{
-					"reacao_ms": 202,
+					"reacao_ms": 125,
 					"galope": [
 						479,
 						1013,
@@ -331,7 +339,7 @@
 					]
 				},
 				{
-					"reacao_ms": 112,
+					"reacao_ms": 282,
 					"galope": [
 						447,
 						985,
@@ -357,7 +365,7 @@
 			"semente_ia": 1575931495,
 			"passadas": [
 				{
-					"reacao_ms": 202,
+					"reacao_ms": 257,
 					"galope": [
 						519,
 						976,
@@ -370,12 +378,12 @@
 						5977
 					],
 					"mira": [
-						-55,
+						85,
 						-1078
 					]
 				},
 				{
-					"reacao_ms": 129,
+					"reacao_ms": 143,
 					"galope": [
 						448,
 						1511,
@@ -386,12 +394,12 @@
 						4975
 					],
 					"mira": [
-						-41,
+						99,
 						-1027
 					]
 				},
 				{
-					"reacao_ms": 136,
+					"reacao_ms": 120,
 					"galope": [
 						454,
 						981,
@@ -404,7 +412,7 @@
 						5935
 					],
 					"mira": [
-						-49,
+						91,
 						-1102
 					]
 				}
@@ -416,7 +424,7 @@
 			"semente_ia": 1575931397,
 			"passadas": [
 				{
-					"reacao_ms": 175,
+					"reacao_ms": 217,
 					"galope": [
 						510,
 						1483,
@@ -428,12 +436,12 @@
 						5953
 					],
 					"mira": [
-						-42,
+						98,
 						-1053
 					]
 				},
 				{
-					"reacao_ms": 172,
+					"reacao_ms": 252,
 					"galope": [
 						461,
 						980,
@@ -446,12 +454,12 @@
 						6016
 					],
 					"mira": [
-						-75,
+						65,
 						-1062
 					]
 				},
 				{
-					"reacao_ms": 191,
+					"reacao_ms": 153,
 					"galope": [
 						465,
 						1006,
@@ -464,7 +472,7 @@
 						6035
 					],
 					"mira": [
-						9,
+						149,
 						-1034
 					]
 				}
@@ -476,7 +484,7 @@
 			"semente_ia": 1575955494,
 			"passadas": [
 				{
-					"reacao_ms": 115,
+					"reacao_ms": 169,
 					"galope": [
 						495,
 						1488,
@@ -486,12 +494,12 @@
 						6025
 					],
 					"mira": [
-						-26,
+						114,
 						-1042
 					]
 				},
 				{
-					"reacao_ms": 134,
+					"reacao_ms": 70,
 					"galope": [
 						472,
 						1038,
@@ -503,12 +511,12 @@
 						5996
 					],
 					"mira": [
-						-52,
+						88,
 						-1029
 					]
 				},
 				{
-					"reacao_ms": 238,
+					"reacao_ms": 32,
 					"galope": [
 						518,
 						976,
@@ -520,7 +528,7 @@
 						5980
 					],
 					"mira": [
-						-102,
+						38,
 						-1100
 					]
 				}
@@ -532,7 +540,7 @@
 			"semente_ia": 1575931495,
 			"passadas": [
 				{
-					"reacao_ms": 271,
+					"reacao_ms": 507,
 					"galope": [
 						1031,
 						2485,
@@ -549,7 +557,7 @@
 					]
 				},
 				{
-					"reacao_ms": 391,
+					"reacao_ms": 498,
 					"galope": [
 						1122,
 						2032,
@@ -567,7 +575,7 @@
 					]
 				},
 				{
-					"reacao_ms": 432,
+					"reacao_ms": 99,
 					"galope": [
 						1084,
 						2042,
@@ -589,7 +597,7 @@
 			"semente_ia": 1575931397,
 			"passadas": [
 				{
-					"reacao_ms": 339,
+					"reacao_ms": 467,
 					"galope": [
 						1110,
 						2627,
@@ -606,7 +614,7 @@
 					]
 				},
 				{
-					"reacao_ms": 233,
+					"reacao_ms": 532,
 					"galope": [
 						1097,
 						2050,
@@ -622,7 +630,7 @@
 					]
 				},
 				{
-					"reacao_ms": 224,
+					"reacao_ms": 122,
 					"galope": [
 						1066,
 						2550,
@@ -646,7 +654,7 @@
 			"semente_ia": 1575955494,
 			"passadas": [
 				{
-					"reacao_ms": 117,
+					"reacao_ms": 169,
 					"galope": [
 						1062,
 						2471,
@@ -659,7 +667,7 @@
 					]
 				},
 				{
-					"reacao_ms": 300,
+					"reacao_ms": 328,
 					"galope": [
 						2601,
 						2995,
@@ -675,7 +683,7 @@
 					]
 				},
 				{
-					"reacao_ms": 270,
+					"reacao_ms": 398,
 					"galope": [
 						1013,
 						2597,
@@ -693,5 +701,21 @@
 				}
 			]
 		}
-	]
+	],
+	"config_largada": {
+		"bandeira_ms": 250,
+		"bandeira_variacao_ms": 350,
+		"perfeita_ms": 150,
+		"boa_ms": 350,
+		"velocidade_inicial_pct": {
+			"perfeita": 115,
+			"boa": 100,
+			"ruim": 85
+		},
+		"bonus_precisao_pct": {
+			"perfeita": 10,
+			"boa": 0,
+			"ruim": 0
+		}
+	}
 }

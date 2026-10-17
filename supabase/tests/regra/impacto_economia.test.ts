@@ -156,6 +156,15 @@ describe("desafios do PvE", () => {
       for (const k of Object.keys(caso["esperado"])) assert.equal(String(p[k]), String(caso["esperado"][k]), k);
     });
   }
+  for (const caso of dados["perfil_rival"]) {
+    test(`perfil do rival: ${caso["nome"]}`, () => {
+      const p = Pve.perfil_do_rival(dados["ia_perfil_rival"], caso["rival"]);
+      for (const k of Object.keys(caso["esperado"])) {
+        if (caso["esperado"][k] === null) assert.equal(k in p, false, k);
+        else assert.equal(String(p[k]), String(caso["esperado"][k]), k);
+      }
+    });
+  }
 });
 
 describe("ordens", () => {

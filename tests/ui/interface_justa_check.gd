@@ -38,6 +38,7 @@ func _initialize() -> void:
 	var ligou_depois_da_carga := false
 	var toque_no_botao_nao_galopou := false
 	var letreiros: Array[String] = []
+	var avisos_largada: Array[String] = []
 	var quadros := 0
 	while not c.justa.terminou() and quadros < 30 * 120:
 		var j := c.justa
@@ -68,14 +69,30 @@ func _initialize() -> void:
 		ui._process(passo)
 		if ui.letreiro.visible and (letreiros.is_empty() or letreiros.back() != ui.letreiro.text):
 			letreiros.append(ui.letreiro.text)
+		if ui._aviso_largada.visible:
+			var aviso := ui._largada_titulo.text + " | " + ui._largada_detalhe.text.replace("
+", " | ")
+			if avisos_largada.is_empty() or avisos_largada.back() != aviso:
+				avisos_largada.append(aviso)
 		quadros += 1
 
 	_checa("anel de carga sobe durante a corrida", viu_carga_parcial)
 	_checa("botao so liga depois da carga", ligou_depois_da_carga)
 	_checa("toque no botao nao conta como galope", toque_no_botao_nao_galopou)
 	_checa("habilidade usada uma vez", c.justa.habilidade_usada_jogador and ui.botao.disabled)
-	_checa("letreiros mostram largada, habilidade e golpe %s" % [letreiros],
-		letreiros.has("Largada perfeita!") and letreiros.has("Investida") and letreiros.any(func(t): return t.begins_with("Peito +2") or t.begins_with("Escudo +1") or t.begins_with("Bloqueado")))
+	_checa("aviso da largada: titulo, reacao e efeito %s" % [avisos_largada],
+		not avisos_largada.is_empty() and avisos_largada.all(_aviso_perfeito))
+	ui.mostrar_largada("ruim", -40, true)
+	_checa("largada queimada: ruim e o motivo (%s)" % ui._largada_detalhe.text,
+		ui._largada_titulo.text == "Largada ruim" and ui._largada_detalhe.text.begins_with("Saiu antes da bandeira") and ui._largada_detalhe.text.ends_with("Velocidade −15% · Derruba até 8%"))
+	ui.mostrar_largada("ruim", 0, false)
+	_checa("sem toque: ruim e o motivo", ui._largada_detalhe.text.begins_with("Não tocou quando a bandeira baixou"))
+	ui.mostrar_largada("boa", 260, false)
+	_checa("boa largada: reacao e efeito (%s)" % ui._largada_detalhe.text,
+		ui._largada_titulo.text == "Boa largada" and ui._largada_detalhe.text == "Reação: 260 ms
+Velocidade normal · Derruba até 45%")
+	_checa("letreiros mostram habilidade e golpe %s" % [letreiros],
+		letreiros.has("Investida") and letreiros.any(func(t): return t.begins_with("Peito +2") or t.begins_with("Escudo +1") or t.begins_with("Bloqueado")))
 	_checa("resultado aparece no fim (%s / %s)" % [ui.resultado_titulo.text, ui.resultado_motivo.text],
 		ui.resultado.visible and ui.resultado_titulo.text != "" and ui.resultado_dica.text == "Toque para justar de novo")
 	var pj := c.justa.fases.placar_jogador
@@ -100,6 +117,9 @@ func _initialize() -> void:
 
 	print("UI %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)
+
+func _aviso_perfeito(a: String) -> bool:
+	return a.begins_with("Largada perfeita! | Reação: ") and a.ends_with("Velocidade +15% · Mira +10% · Derruba até 75%")
 
 func _checa(nome: String, ok: bool) -> void:
 	print("UI %s %s" % [nome, "OK" if ok else "FALHOU"])

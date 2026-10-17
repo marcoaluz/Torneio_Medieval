@@ -2,8 +2,9 @@
 // casos em tests/shared/ia_rival.json. Usa o próprio gerador (Aleatorio) com a
 // semente derivada da justa, para as decisões da IA não mudarem os sorteios
 // da bandeira e do impacto.
-// Ordem dos sorteios por passada: largada (2), galope (por batida: perder? 1;
-// se toca, desvio 2), mira (4). Variação "triangular": média de dois sorteios
+// Ordem dos sorteios por passada: largada (2: a qualidade pelo perfil e o
+// instante dentro da faixa dela), galope (por batida: perder? 1; se toca,
+// desvio 2), mira (4). Variação "triangular": média de dois sorteios
 // uniformes, com divisão só de número não negativo.
 
 import { Aleatorio, MASCARA } from "./aleatorio.ts";
@@ -15,7 +16,7 @@ type Dados = Record<string, any>;
 export const MASCARA_SEMENTE = 0x5DEECE66;
 
 export function validar_perfil(p: Dados): string {
-  for (const k of ["reacao_media_ms", "reacao_variacao_ms", "desvio_medio_ms", "desvio_variacao_ms",
+  for (const k of ["largada_perfeita_milesimos", "largada_boa_milesimos", "largada_ruim_atraso_ms", "desvio_medio_ms", "desvio_variacao_ms",
     "perder_batida_milesimos", "acelera", "metade_batidas", "zona_preferida", "erro_mira_px",
     "deslocamento_mira_px", "habilidade_batida"]) {
     if (!(k in p)) return `falta "${k}"`;
@@ -26,6 +27,7 @@ export function validar_perfil(p: Dados): string {
 
 export function validar(cfg: Dados): string {
   if (typeof cfg["perfis"] !== "object" || cfg["perfis"] === null || Object.keys(cfg["perfis"]).length === 0) return 'falta "perfis"';
+  if (typeof cfg["ajuste_campeao"] !== "object" || cfg["ajuste_campeao"] === null) return 'falta "ajuste_campeao"';
   for (const nome of Object.keys(cfg["perfis"])) {
     const erro = validar_perfil(cfg["perfis"][nome]);
     if (erro !== "") return `perfil ${nome}: ${erro}`;
@@ -65,9 +67,15 @@ export class IaRival {
     return Math.trunc(soma / 2) - v;
   }
 
-  /** Reação à bandeira em ms (negativa = toca antes: queima a largada). */
-  reacao_largada_ms(): number {
-    return Math.trunc(this.perfil["reacao_media_ms"]) + this._variacao(Math.trunc(this.perfil["reacao_variacao_ms"]));
+  /** Reação à bandeira em ms: qualidade sorteada pelo perfil e instante dentro da faixa dela (`cfg_largada` = galope.json > largada). */
+  reacao_largada_ms(cfg_largada: Dados): number {
+    const perfeita_ms = Math.trunc(cfg_largada["perfeita_ms"]);
+    const boa_ms = Math.trunc(cfg_largada["boa_ms"]);
+    const q = this._rng.inteiro(0, 999);
+    const p = Math.trunc(this.perfil["largada_perfeita_milesimos"]);
+    if (q < p) return this._rng.inteiro(0, perfeita_ms);
+    if (q < p + Math.trunc(this.perfil["largada_boa_milesimos"])) return this._rng.inteiro(perfeita_ms + 1, boa_ms);
+    return this._rng.inteiro(boa_ms + 1, boa_ms + Math.max(Math.trunc(this.perfil["largada_ruim_atraso_ms"]), 1));
   }
 
   /** Instantes (ms desde o começo da Corrida, crescentes, >= 1) em que o rival toca, até `duracao_max_ms`. */

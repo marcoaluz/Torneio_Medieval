@@ -95,7 +95,8 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
   - regere os casos compartilhados com o oráculo Python correspondente;
   - regrave as gravações com `TM_GRAVAR=1` em `tests/rules/justa_simulacao_check.gd` e `tests/ai/ia_justa_check.gd`.
 
-  Os oráculos ficavam no scratchpad da sessão e podem não existir mais. Nesse caso, reescreva o oráculo a partir da especificação no topo do arquivo da regra.
+  Impacto e IA têm oráculo no repositório: `tools/oraculo_impacto.py` e `tools/oraculo_ia_rival.py` (`gerar` embute os dados atuais e refaz o esperado; `conferir` só compara). Os demais ficavam no scratchpad da sessão e podem não existir mais; nesse caso, reescreva o oráculo a partir da especificação no topo do arquivo da regra.
+- **Derrubada:** a base e o teto vêm da largada de quem bate (`impacto.json > derrubada > por_largada`). Mexeu nisso, nos modificadores ou na largada da IA (`ia_rival.json`)? Rode `tools/simular_derrubada.gd` e confira os alvos com status médios (capacete perto de 50–55%, 30% e 2%).
 - **Demos e capturas:** `tests/fluxo/modo_demo.tscn` com as variáveis `TM_TELA`, `TM_ABA`, `TM_TORNEIO` e outras, listadas no topo de `modo_demo.gd`, mais `driver.sh shot` para gerar o PNG.
 - **Nuvem só com o save real:** com o save fora de `ServicoJogador.SAVE_PADRAO` (teste, demo, ferramenta), a Nuvem real fica sem rede (`ServicoNuvem.isolado()`). Um personagem de teste já subiu pela sessão anônima do aparelho e voltou como save do jogador. Não abra `principal.tscn` com o save real sem querer falar com o Supabase.
 - **Testes nunca tocam o `user://` real:** todo teste que usa um autoload (Nuvem, Metricas, Jogador) troca antes os caminhos (`caminho_save`, `caminho_sessao`, `caminho_cache_balanceamento`, `caminho_fila`) para uma pasta `user://teste_*`. Já aconteceu: `entrar()` baixou um balanceamento falso para o cache real e o jogo quebrou ao abrir (`folego_cavalo`).

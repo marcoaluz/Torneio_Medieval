@@ -1,6 +1,6 @@
 {
 	"versao": 1,
-	"descricao": "Desafios especiais do PvE (game/scripts/rules/pve.gd: aplicar_desafios e ajustar_perfil), calculados a mao. Porcentagens em inteiros (x * pct / 100, truncado). O servidor (TypeScript) roda os mesmos casos.",
+	"descricao": "Desafios especiais do PvE (game/scripts/rules/pve.gd: aplicar_desafios e ajustar_perfil), calculados a mao. Porcentagens em inteiros (x * pct / 100, truncado). O servidor (TypeScript) roda os mesmos casos. perfil_rival: RegraPve.perfil_do_rival(ia, rival) = perfil + ajuste_campeao (se campeao) + perfil_ajuste do rival; chaves com _ sao notas e nao entram (esperado null = ausente).",
 	"defs": {
 		"uma_chance": { "tentativas": 1 },
 		"cavalo_emprestado": { "cavalo": { "velocidade": 55, "folego": 50, "temperamento": 30 }, "gasta_folego": false },
@@ -33,5 +33,17 @@
 		{ "nome": "soma numeros e troca textos", "perfil": { "erro_mira_px": 9, "reacao_media_ms": 190, "zona_preferida": "peito" },
 			"ajuste": { "erro_mira_px": -3, "zona_preferida": "capacete" }, "esperado": { "erro_mira_px": 6, "reacao_media_ms": 190, "zona_preferida": "capacete" } },
 		{ "nome": "nao passa de zero", "perfil": { "erro_mira_px": 4 }, "ajuste": { "erro_mira_px": -10 }, "esperado": { "erro_mira_px": 0 } }
+	],
+	"ia_perfil_rival": {
+		"perfis": { "x": { "largada_perfeita_milesimos": 300, "largada_boa_milesimos": 550, "erro_mira_px": 9, "zona_preferida": "peito" } },
+		"ajuste_campeao": { "_nota": "nota", "largada_perfeita_milesimos": 200, "largada_boa_milesimos": -100 }
+	},
+	"perfil_rival": [
+		{ "nome": "rival comum: so o perfil_ajuste", "rival": { "perfil": "x", "perfil_ajuste": { "erro_mira_px": -3 } },
+			"esperado": { "largada_perfeita_milesimos": 300, "largada_boa_milesimos": 550, "erro_mira_px": 6, "zona_preferida": "peito" } },
+		{ "nome": "campeao soma ajuste_campeao e depois o dele", "rival": { "perfil": "x", "campeao": true, "perfil_ajuste": { "largada_perfeita_milesimos": 60, "zona_preferida": "capacete" } },
+			"esperado": { "largada_perfeita_milesimos": 560, "largada_boa_milesimos": 450, "erro_mira_px": 9, "zona_preferida": "capacete" } },
+		{ "nome": "campeao sem perfil_ajuste", "rival": { "perfil": "x", "campeao": true },
+			"esperado": { "largada_perfeita_milesimos": 500, "largada_boa_milesimos": 450, "erro_mira_px": 9, "zona_preferida": "peito", "_nota": null } }
 	]
 }

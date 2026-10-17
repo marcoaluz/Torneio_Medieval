@@ -44,7 +44,7 @@
 			"versao": 2.0
 		},
 		"impacto": {
-			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa).",
+			"_nota": "Chances em milesimos (1000 = 100%). Teto suave: ate joelho_pct do teto o valor passa inteiro; acima, cada ponto rende menos e nunca passa do teto (GDD: perto do teto cada ponto rende menos). habilidade_carga_ms: tempo de Corrida ate a habilidade ativa poder ser acionada (GDD: carrega durante a corrida). v2 (3.16): habilidade tem grupo (ofensiva = ativa, botao que carrega; defensiva = passiva, dispara no impacto), familia (investida, bloqueio ou golpe_pesado: o ciclo vale pela familia) e vence (a familia que ela anula). As de conjunto (olhar_da_vigia, carga_andante, ...) sao versoes melhores de uma familia. GDD: nenhuma chega a 100% (bloqueio no maximo 70%, ativas uma vez por justa). v3 (2026-10-17): a largada da passada de quem bate define a base por zona e o teto da chance de derrubar (derrubada.por_largada); os modificadores (forca menos equilibrio, velocidade, ritmo, poder da lanca, defesa da peca, habilidades, exposicao, reducao) somam por cima, sem mudar, e o teto suave usa o teto da largada. Sem largada vale ruim (nao largou).",
 			"bloqueio": {
 				"base_milesimos": 50.0,
 				"teto_milesimos": 400.0,
@@ -73,16 +73,37 @@
 				"velocidade_por_pct_milesimos": 10.0
 			},
 			"derrubada": {
-				"base_por_zona_milesimos": {
-					"capacete": 120.0,
-					"escudo": 30.0,
-					"peito": 90.0
-				},
+				"_nota": "Base e teto por largada (GDD, A justa > Pontuacao). Alvo com status medios: capacete perto de 50-55% na perfeita, 30% na boa, 2% na ruim (tools/simular_derrubada.gd).",
 				"defesa_peca_milesimos": 2.0,
 				"forca_menos_equilibrio_milesimos": 3.0,
 				"poder_lanca_milesimos": 2.0,
+				"por_largada": {
+					"boa": {
+						"base_por_zona_milesimos": {
+							"capacete": 250.0,
+							"escudo": 90.0,
+							"peito": 200.0
+						},
+						"teto_milesimos": 450.0
+					},
+					"perfeita": {
+						"base_por_zona_milesimos": {
+							"capacete": 450.0,
+							"escudo": 180.0,
+							"peito": 380.0
+						},
+						"teto_milesimos": 750.0
+					},
+					"ruim": {
+						"base_por_zona_milesimos": {
+							"capacete": 40.0,
+							"escudo": 10.0,
+							"peito": 30.0
+						},
+						"teto_milesimos": 80.0
+					}
+				},
 				"ritmo_max_milesimos": 40.0,
-				"teto_milesimos": 450.0,
 				"velocidade_por_pct_milesimos": 4.0
 			},
 			"falta": {
@@ -119,10 +140,32 @@
 					"tipo": "ativa",
 					"vence": "bloqueio"
 				},
+				"fantasma_do_corcel": {
+					"_nota": "Conjunto corcel_ancestral. O cavalo segura o tranco da propria carga: -8% na chance de quem a tem ser derrubado (os bonus ofensivos vao de 4% a 12%). Familia bloqueio (a investida a anula), mas nao anula ninguem.",
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 0.0,
+					"derrubada_reducao_milesimos": 80.0,
+					"familia": "bloqueio",
+					"grupo": "defensiva",
+					"tipo": "passiva",
+					"vence": ""
+				},
 				"furia_do_dragao": {
 					"bloqueio_milesimos": 0.0,
 					"dano_bonus_pct": 80.0,
 					"derrubada_bonus_milesimos": 60.0,
+					"familia": "golpe_pesado",
+					"grupo": "ofensiva",
+					"tipo": "ativa",
+					"vence": "investida"
+				},
+				"golpe_do_campeao": {
+					"_nota": "Conjunto campeao_invicto. Golpe pesado arriscado: derruba mais que o golpe pesado (90 contra 40, abaixo da lanca do sol) e fere bem (55%, abaixo da furia do dragao), mas quem usa fica 7% mais facil de derrubar na passada em que acionou.",
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 55.0,
+					"derrubada_bonus_milesimos": 90.0,
+					"exposicao_milesimos": 70.0,
 					"familia": "golpe_pesado",
 					"grupo": "ofensiva",
 					"tipo": "ativa",
@@ -155,6 +198,16 @@
 					"tipo": "ativa",
 					"vence": "bloqueio"
 				},
+				"manto_do_corvo": {
+					"_nota": "Conjunto corvo_sombrio. Bloqueio entre o olhar da vigia (650) e o baluarte real (700).",
+					"bloqueio_milesimos": 660.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 0.0,
+					"familia": "bloqueio",
+					"grupo": "defensiva",
+					"tipo": "passiva",
+					"vence": "golpe_pesado"
+				},
 				"martelo_negro": {
 					"bloqueio_milesimos": 0.0,
 					"dano_bonus_pct": 65.0,
@@ -163,6 +216,17 @@
 					"grupo": "ofensiva",
 					"tipo": "ativa",
 					"vence": "investida"
+				},
+				"mira_do_falcao": {
+					"_nota": "Conjunto falcao_justa. Amplia as zonas da Mira em 8% (a largada perfeita da 10%), como a precisao, em toda passada. Familia bloqueio (a investida a anula no impacto, onde ela nao tem efeito), mas nao anula ninguem.",
+					"bloqueio_milesimos": 0.0,
+					"dano_bonus_pct": 0.0,
+					"derrubada_bonus_milesimos": 0.0,
+					"familia": "bloqueio",
+					"grupo": "defensiva",
+					"precisao_bonus_pct": 8.0,
+					"tipo": "passiva",
+					"vence": ""
 				},
 				"olhar_da_vigia": {
 					"bloqueio_milesimos": 650.0,
@@ -182,7 +246,7 @@
 				"peito": 2.0
 			},
 			"teto_suave_joelho_pct": 70.0,
-			"versao": 2.0
+			"versao": 3.0
 		},
 		"justa": {
 			"_nota": "fases_ms.corrida e o teto da Corrida; ela termina antes quando os cavaleiros chegam ao ponto da Mira (galope.json, pista)",
@@ -540,7 +604,7 @@
 		"fase|anterior=2|fase=3|passada=1|t=7084",
 		"soltou|passada=1|t=8084|t_mira_ms=1000|x=80|y=-860",
 		"golpe|automatico=false|passada=1|sem_golpe=false|t=9084|t_mira_ms=1000|x=80|y=-860|zona=peito",
-		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 170, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"bloqueio\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=1|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 100, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=9084",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 320, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"bloqueio\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=1|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 230, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=9084",
 		"fase|anterior=3|fase=4|passada=1|t=9084",
 		"passada|derrubado=0|desclassificado=0|passada=1|pontos_jogador=1|pontos_rival=3|t=11084",
 		"fase|anterior=4|fase=0|passada=2|t=11084",
@@ -560,7 +624,7 @@
 		"fase|anterior=2|fase=3|passada=2|t=18168",
 		"soltou|passada=2|t=19168|t_mira_ms=1000|x=80|y=-860",
 		"golpe|automatico=false|passada=2|sem_golpe=false|t=20168|t_mira_ms=1000|x=80|y=-860|zona=peito",
-		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 230, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=2|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 100, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=20168",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"peito\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 2, \"chance_derrubar_milesimos\": 520, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"\", \"dano\": { \"peitoral\": 18 }, \"dano_lanca\": 4 }|passada=2|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 230, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 15 }, \"dano_lanca\": 4 }|t=20168",
 		"fase|anterior=3|fase=4|passada=2|t=20168",
 		"passada|derrubado=0|desclassificado=0|passada=2|pontos_jogador=2|pontos_rival=3|t=22168",
 		"fase|anterior=4|fase=0|passada=3|t=22168",
@@ -580,7 +644,7 @@
 		"fase|anterior=2|fase=3|passada=3|t=29252",
 		"soltou|passada=3|t=30252|t_mira_ms=1000|x=80|y=-860",
 		"golpe|automatico=false|passada=3|sem_golpe=false|t=31252|t_mira_ms=1000|x=80|y=-860|zona=peito",
-		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 170, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"bloqueio\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=3|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 120, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 20 }, \"dano_lanca\": 4 }|t=31252",
+		"impacto|derrubado=0|desclassificado=0|faltas_jogador=0|faltas_rival=0|jogador={ \"zona\": \"peito\", \"zona_final\": \"escudo\", \"bloqueado\": true, \"bloqueio_por\": \"habilidade\", \"falta\": false, \"pontos\": 1, \"chance_derrubar_milesimos\": 320, \"derrubou\": false, \"habilidade\": \"\", \"habilidades\": [], \"habilidade_bloqueio\": \"bloqueio\", \"dano\": { \"escudo\": 12 }, \"dano_lanca\": 4 }|passada=3|rival={ \"zona\": \"capacete\", \"zona_final\": \"capacete\", \"bloqueado\": false, \"bloqueio_por\": \"\", \"falta\": false, \"pontos\": 3, \"chance_derrubar_milesimos\": 250, \"derrubou\": false, \"habilidade\": \"bloqueio\", \"habilidades\": [\"bloqueio\"], \"habilidade_bloqueio\": \"\", \"dano\": { \"elmo\": 20 }, \"dano_lanca\": 4 }|t=31252",
 		"fase|anterior=3|fase=4|passada=3|t=31252",
 		"passada|derrubado=0|desclassificado=0|passada=3|pontos_jogador=1|pontos_rival=3|t=33252",
 		"fase|anterior=4|fase=5|passada=3|t=33252",

@@ -29,6 +29,16 @@ func _initialize() -> void:
 			if str(p.get(k)) != str(caso["esperado"][k]) and not (typeof(caso["esperado"][k]) == TYPE_FLOAT and int(p.get(k, -1)) == int(caso["esperado"][k])):
 				ok = false
 		_checa("perfil: " + caso["nome"], ok)
+	for caso: Dictionary in dados["perfil_rival"]:
+		var p := RegraPve.perfil_do_rival(dados["ia_perfil_rival"], caso["rival"])
+		var ok := true
+		for k: String in caso["esperado"]:
+			var e: Variant = caso["esperado"][k]
+			if e == null:
+				ok = ok and not p.has(k)
+			elif str(p.get(k)) != str(e) and not (typeof(e) == TYPE_FLOAT and int(p.get(k, -1)) == int(e)):
+				ok = false
+		_checa("perfil do rival: " + caso["nome"], ok)
 	# Os desafios do jogo de verdade batem com os casos (mesmos ids e efeitos).
 	var defs_jogo: Dictionary = Balanceamento.carregar("pve")["desafios"]
 	_checa("pve.json tem os 5 desafios do GDD", defs_jogo.keys().size() == 5 and dados["defs"].keys().all(func(k): return defs_jogo.has(k)))

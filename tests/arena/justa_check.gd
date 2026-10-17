@@ -156,8 +156,11 @@ func _initialize() -> void:
 	cav.gesto = 1.0
 	var corpo := cav.get_node("Visual/Cavaleiro") as Node2D
 	var lanca := cav.get_node("Visual/Lanca") as Node2D
-	var mao := Cavaleiro.PIVO_SELA + (lanca0 - Cavaleiro.PIVO_SELA).rotated(corpo.rotation)
+	# A mão vai com o tronco: giro em torno da sela e o erguer nos estribos.
+	var ergue := corpo.position - (Cavaleiro.PIVO_SELA - Cavaleiro.PIVO_SELA.rotated(corpo.rotation))
+	var mao := Cavaleiro.PIVO_SELA + (lanca0 - Cavaleiro.PIVO_SELA).rotated(corpo.rotation) + ergue
 	_checa("estocada inclina o tronco para a frente", corpo.rotation > deg_to_rad(5.0))
+	_checa("estocada ergue o cavaleiro nos estribos (%.1f px)" % -ergue.y, ergue.y < -1.0)
 	_checa("a lanca acompanha a mao (%.1f px)" % lanca.position.distance_to(mao), lanca.position.distance_to(mao) <= Cavaleiro.GESTO_ESTOCADA_PX + 0.01)
 	cav.gesto = -0.7
 	_checa("preparar recolhe o tronco", corpo.rotation < 0.0)

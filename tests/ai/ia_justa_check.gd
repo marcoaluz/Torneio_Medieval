@@ -31,6 +31,7 @@ func _initialize() -> void:
 	_checa("a IA nao muda a bandeira (sorteio separado)", n > 0 and a["bandeiras"].slice(0, n) == outra.slice(0, n))
 
 	# Estatística por perfil, com o jogador parado (não mira): só a IA pontua.
+	# Por golpe, não por justa: quem derruba encerra a justa antes (menos passadas).
 	var media := {}
 	for nome: String in ["novato", "equilibrado", "agressivo"]:
 		var pontos := 0
@@ -38,6 +39,9 @@ func _initialize() -> void:
 		var golpes := 0
 		var no_tempo := 0
 		var toques := 0
+		var derrubadas := 0
+		var perfeitas := 0
+		var largadas := 0
 		for s in SEMENTES:
 			var r := _jogar(1000 + s, nome, false)
 			pontos += r["pontos_rival"]
@@ -45,11 +49,19 @@ func _initialize() -> void:
 			golpes += r["zonas_rival"].size()
 			no_tempo += r["no_tempo_rival"]
 			toques += r["toques_rival"]
-		media[nome] = {"pontos": float(pontos) / SEMENTES, "capacete": float(capacetes) / maxi(golpes, 1),
-			"ritmo": float(no_tempo) / maxi(toques, 1)}
-		print("IA_JUSTA perfil %s: %.2f pontos por justa, %.0f%% no capacete, %.0f%% dos toques no tempo" %
-			[nome, media[nome]["pontos"], media[nome]["capacete"] * 100.0, media[nome]["ritmo"] * 100.0])
-	_checa("novato pontua menos que equilibrado", media["novato"]["pontos"] < media["equilibrado"]["pontos"])
+			derrubadas += r["derrubadas_rival"]
+			perfeitas += r["largadas_rival_perfeitas"]
+			largadas += r["largadas_rival"]
+		media[nome] = {"pontos": float(pontos) / maxi(golpes, 1), "capacete": float(capacetes) / maxi(golpes, 1),
+			"ritmo": float(no_tempo) / maxi(toques, 1), "derrubada": float(derrubadas) / maxi(golpes, 1),
+			"perfeita": float(perfeitas) / maxi(largadas, 1)}
+		print("IA_JUSTA perfil %s: %.2f pontos por golpe, %.0f%% no capacete, %.0f%% dos toques no tempo, %.0f%% de largadas perfeitas, %.0f%% dos golpes derrubam" %
+			[nome, media[nome]["pontos"], media[nome]["capacete"] * 100.0, media[nome]["ritmo"] * 100.0,
+			media[nome]["perfeita"] * 100.0, media[nome]["derrubada"] * 100.0])
+	_checa("novato pontua menos por golpe que equilibrado", media["novato"]["pontos"] < media["equilibrado"]["pontos"])
+	_checa("novato larga perfeito menos que equilibrado, e este menos que agressivo",
+		media["novato"]["perfeita"] < media["equilibrado"]["perfeita"] and media["equilibrado"]["perfeita"] < media["agressivo"]["perfeita"])
+	_checa("novato derruba menos por golpe que equilibrado", media["novato"]["derrubada"] < media["equilibrado"]["derrubada"])
 	_checa("novato acerta menos o compasso", media["novato"]["ritmo"] < media["equilibrado"]["ritmo"])
 	_checa("agressivo mira no capacete", media["agressivo"]["capacete"] > 0.5 and media["equilibrado"]["capacete"] < 0.2)
 
@@ -78,7 +90,7 @@ func _initialize() -> void:
 func _jogar(semente: int, perfil: String, mira: bool, lado_rival := {}) -> Dictionary:
 	var j := Justa.new(_cfg, _lado, lado_rival if not lado_rival.is_empty() else _lado, semente, _perfis[perfil])
 	var r := {"eventos": [], "entradas": [], "toques_rival": 0, "no_tempo_rival": 0, "largadas_rival": 0,
-		"bandeiras": [], "zonas_rival": [], "pontos_rival": 0}
+		"bandeiras": [], "zonas_rival": [], "pontos_rival": 0, "largadas_rival_perfeitas": 0, "derrubadas_rival": 0}
 	_anotar(r, j.iniciar())
 	while not j.terminou():
 		var t := j.fases.tempo_total_ms
@@ -104,7 +116,7 @@ func _jogar(semente: int, perfil: String, mira: bool, lado_rival := {}) -> Dicti
 
 func _repetir(j: Justa, entradas: Array) -> Array:
 	var r := {"eventos": [], "entradas": [], "toques_rival": 0, "no_tempo_rival": 0, "largadas_rival": 0,
-		"bandeiras": [], "zonas_rival": [], "pontos_rival": 0}
+		"bandeiras": [], "zonas_rival": [], "pontos_rival": 0, "largadas_rival_perfeitas": 0, "derrubadas_rival": 0}
 	_anotar(r, j.iniciar())
 	for e: Array in entradas + [[1 << 40, "fim", 0, 0]]:
 		while j.fases.tempo_total_ms < int(e[0]) and not j.terminou():
@@ -134,6 +146,8 @@ func _anotar(r: Dictionary, eventos: Array[Dictionary]) -> void:
 					r["no_tempo_rival"] += 1
 			"largada_rival":
 				r["largadas_rival"] += 1
+				if e["qualidade"] == "perfeita":
+					r["largadas_rival_perfeitas"] += 1
 			"fase":
 				if e.get("fase") == JustaFases.Fase.LARGADA:
 					r["largada_t"] = e["t"]
@@ -142,6 +156,8 @@ func _anotar(r: Dictionary, eventos: Array[Dictionary]) -> void:
 				r["bandeiras"].append(e["t"] - int(r.get("largada_t", 0)))
 			"impacto":
 				r["zonas_rival"].append(e["rival"]["zona"])
+				if e["rival"]["derrubou"]:
+					r["derrubadas_rival"] += 1
 
 func _checa(nome: String, ok: bool) -> void:
 	print("IA_JUSTA %s %s" % [nome, "OK" if ok else "FALHOU"])
