@@ -31,7 +31,8 @@ Os prompts e durações de cada som estão em `docs/PACOTE_DE_PROMPTS.md` (tabel
 - Barramentos (*): `Master` > `Musica`, `SFX`, `Voz`, `Ambiente`, `UI`. Volume do jogador por barramento nas configurações; nunca ajuste ganho dentro do código de cena.
 - Variações: um serviço único de áudio recebe o nome do som (`impacto_escudo`) e sorteia entre os arquivos numerados, com leve variação de tom. Não repita a mesma variação duas vezes seguidas.
 - Ligue som por **sinal**, não por chamada direta: a máquina de fases da justa emite um sinal por fase e a apresentação escuta (Largada → trompete e bandeira; Corrida → galope em loop; Impacto → impacto por zona, torcida; derrubada → queda). Assim a regra da justa continua pura (ver `regra-da-justa`).
-- Estado do som da vila acompanha o estado visual: forja ligada só com forja em andamento, estábulo em loop só dentro do estábulo, chuva conforme o clima.
+- Estado do som da vila acompanha o estado visual: chuva conforme o clima. **Estábulo, armeiro e ferreiro não têm som contínuo** (nada de laço de forja, fole, baia, galope ou passos): o estábulo só bufa ao toque no cavalo (uma variação sorteada, `intervalo_min_s` 2 s no catálogo) e o ferreiro só dá uma martelada ao toque ou quando uma peça fica pronta.
+- Som de uma vez só que não pode repetir a cada toque leva `intervalo_min_s` no catálogo; o `Audio` ignora o pedido dentro do intervalo.
 - **Som dos prédios (GDD A vila):** o som de um prédio toca só com a tela dele aberta; ao sair, para com fade curto (`sons.json > fade_tela_s`, 0,3 s); na vila, só a trilha e o ambiente da vila. Vale para efeitos repetidos (martelo, galope do treino, escovação).
 - **Gerenciador único** (autoload `Audio`, `servico_audio.gd`), com quatro canais:
   - música: `musica()`;

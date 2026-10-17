@@ -13,7 +13,7 @@ var _tween: Tween
 
 @onready var _titulo: Label = $Coluna/Titulo
 @onready var _info: Label = $Coluna/Info
-@onready var _espacos: HBoxContainer = $Coluna/Espacos
+@onready var _espacos: HBoxContainer = $Coluna/Rolagem/Espacos
 @onready var _chances: Label = $Coluna/Probabilidades
 @onready var _mensagem: Label = $Coluna/Mensagem
 @onready var _ver_chances: Button = $Coluna/Botoes/VerChances
@@ -226,7 +226,6 @@ func _cartao(it: Dictionary) -> Control:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	l.add_theme_font_size_override("font_size", 12)
 	var extra := tr("BAUS_REPETIDA").format({"n": int(_jog.cfg_baus()["fragmentos_por_repetida"])}) if it["repetida"] else tr("BAUS_NOVA")
 	l.text = "%s\n%s\n%s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), tr("RARIDADE_" + str(it["raridade"]).to_upper()), extra]
 	l.add_theme_color_override("font_color", cor_raridade(it["raridade"]))

@@ -109,7 +109,7 @@ func _initialize() -> void:
 	await process_frame
 	tela.abrir()
 	await process_frame
-	_checa("tela: 4 espacos", tela.get_node("Coluna/Espacos").get_child_count() == 4)
+	_checa("tela: 4 espacos", tela.get_node("Coluna/Rolagem/Espacos").get_child_count() == 4)
 	_checa("chances: todas as raridades do bau real", tela.texto_probabilidades().contains("Lendária") and tela.texto_probabilidades().contains("Baú real"))
 	tela.abrir_bau(jog.baus()[0]["id"], true)
 	await create_timer(1.6).timeout

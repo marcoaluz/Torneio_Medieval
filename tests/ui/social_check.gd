@@ -154,7 +154,7 @@ func _initialize() -> void:
 	root.add_child(vila)
 	await process_frame
 	await process_frame
-	_checa("vila tem o botao da ordem", (vila.get_node("Interface/Topo/Linha/Social") as Button).text.begins_with("Ordem"))
+	_checa("vila tem o botao da ordem", (vila.get_node("Interface/Topo/Linha/Social") as Button).tooltip_text.begins_with("Ordem"))
 	_checa("bandeira da ordem visivel", vila.vida.bandeira_ordem.visible and vila.vida.bandeira_ordem.texture != null)
 	var n := int(jog.cfg_ordem()["praca_max"])
 	_checa("cavaleiros da ordem na praca (%d)" % n, vila.vida.cavaleiros_ordem.size() == n)

@@ -673,6 +673,9 @@ CONFIG_NOTIF_AJUDA_ORDEM,Pedidos de ajuda da ordem,Order help requests
 CONFIG_NOTIF_TEMPORADA,Fim da temporada,Season ending
 CONFIG_PELO_SERVIDOR,(pelo servidor),(from the server)
 VILA_CONFIG,⚙,⚙
+VILA_CONFIG_DICA,Configurações,Settings
+VILA_BAUS_DICA,Baús,Chests
+VILA_RETRATO_DICA,Perfil e equipamentos,Profile and equipment
 CONFIG_ACESSIBILIDADE,Acessibilidade,Accessibility
 CONFIG_IDIOMA,Idioma,Language
 CONFIG_TEXTO,Tamanho do texto,Text size

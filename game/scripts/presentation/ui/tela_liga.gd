@@ -167,7 +167,6 @@ func _rotulo(texto: String, destaque := false) -> Label:
 	var l := Label.new()
 	l.text = texto
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", 12)
 	if destaque:
 		l.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
 	_lista.add_child(l)

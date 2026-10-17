@@ -1,6 +1,14 @@
 {
 	"versao": 1,
 	"_nota": "Predios da vila (GDD, A vila). A guilda e a sede da Ordem (abre a tela social; libera no nivel minimo da ordem, ordem.json); o brasao da ordem e aplicado em cima da fachada pelo jogo. libera_nivel = nivel do cavaleiro que abre o predio. A casa senhorial define o teto de nivel dos outros. melhoria[i] = custo e tempo para ir do nivel i+1 ao i+2 (tempos da tabela Timers e ritmo do GDD: niveis 1 a 5 = 2 a 10 min). estagios = quantos visuais o predio tem (o estagio cresce com o nivel). posicao em px no mapa da vila (960x540, area segura).",
+	"camera": {
+		"_nota": "Camera da vila (GDD A vila > Interface legivel no celular): zoom aproxima a vila e aumenta os predios; o jogador arrasta para ver o resto. centro = onde a camera comeca (px do mapa); limites = [esquerda, topo, direita, baixo] do que ela pode mostrar; arrasto_min_px = quanto o dedo anda antes de contar como arrasto (menos que isso e toque no predio); fonte_rotulo_px = tamanho do nome do predio NA TELA (o jogo divide pelo zoom).",
+		"zoom": 1.2,
+		"centro": [480, 274],
+		"limites": [0, 15, 960, 535],
+		"arrasto_min_px": 14,
+		"fonte_rotulo_px": 22
+	},
 	"predios": {
 		"casa_senhorial": { "libera_nivel": 1, "nivel_max": 5, "estagios": 5, "posicao": [480, 150], "tamanho": [150, 96], "cor_telhado": "5c2a22",
 			"melhoria": [ { "ouro": 80, "segundos": 120 }, { "ouro": 160, "segundos": 240 }, { "ouro": 320, "segundos": 360 }, { "ouro": 640, "segundos": 480 } ] },

@@ -122,7 +122,6 @@ func _linha(texto: String, botao: String, acao: Callable) -> Button:
 	var l := Label.new()
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", 12)
 	l.text = texto
 	linha.add_child(l)
 	var b := Button.new()
@@ -137,7 +136,6 @@ func _rotulo(texto: String, destaque := false) -> void:
 	var l := Label.new()
 	l.text = texto
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", 12)
 	if destaque:
 		l.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
 	_lista.add_child(l)

@@ -9,10 +9,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -330.0
-offset_top = -225.0
-offset_right = 330.0
-offset_bottom = 235.0
+offset_left = -450.0
+offset_top = -264.0
+offset_right = 450.0
+offset_bottom = 264.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
@@ -24,11 +24,10 @@ layout_mode = 2
 [node name="Titulo" type="Label" parent="Coluna"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 28
 
 [node name="Renome" type="Label" parent="Coluna"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
 
 [node name="Abas" type="HBoxContainer" parent="Coluna"]
 layout_mode = 2
@@ -45,7 +44,6 @@ size_flags_horizontal = 3
 [node name="Mensagem" type="Label" parent="Coluna"]
 layout_mode = 2
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 12
 
 [node name="Fechar" type="Button" parent="Coluna"]
 layout_mode = 2

@@ -7,6 +7,10 @@ extends Node2D
 ## o nível que libera. Tudo que muda dados passa pelo serviço Jogador.
 
 signal abrir_justa
+## O retrato do topo abre o perfil; de lá, os Equipamentos.
+signal retrato_tocado
+
+const ARRASTO_MIN_PADRAO := 14.0
 
 const CENA_PREDIO := preload("res://game/scenes/village/predio_vila.tscn")
 
@@ -17,9 +21,19 @@ var _jog: ServicoJogador
 @onready var vida: VidaVila = $Vida
 @onready var ambiente: AmbienteVila = $Ambiente
 var _acumulado := 0.0
+var _retrato: RetratoCabeca
+var _chave_topo := ""
+var _toque_inicio := Vector2.INF  ## onde o dedo apertou (INF = sem dedo)
+var _arrastou := false
+var _arrasto_min := ARRASTO_MIN_PADRAO
 
-@onready var _topo_nome: Label = $Interface/Topo/Linha/Nome
-@onready var _topo_ouro: Label = $Interface/Topo/Linha/Ouro
+@onready var _topo: PanelContainer = $Interface/Topo
+@onready var _topo_nome: Label = $Interface/Topo/Linha/Identidade/Nome
+@onready var _topo_nivel: Label = $Interface/Topo/Linha/Identidade/Nivel
+@onready var _topo_xp: ProgressBar = $Interface/Topo/Linha/Identidade/Xp
+@onready var _topo_retrato: Button = $Interface/Topo/Linha/Retrato
+@onready var _topo_brasao: TextureRect = $Interface/Topo/Linha/Brasao
+@onready var _camera: Camera2D = $Camera
 @onready var _painel: PanelContainer = $Interface/Painel
 @onready var _titulo: Label = $Interface/Painel/Coluna/Titulo
 @onready var _nivel: Label = $Interface/Painel/Coluna/Nivel
@@ -71,20 +85,24 @@ func _ready() -> void:
 	if audio:
 		audio.musica("tema_vila")
 	var vila := Balanceamento.carregar("vila")
+	_ajustar_camera(vila["camera"])
 	for nome: String in vila["ordem"]:
 		var p: PredioVila = CENA_PREDIO.instantiate()
 		$Predios.add_child(p)
 		p.configurar(nome, vila["predios"][nome])
+		p.ajustar_rotulos(ceili(float(vila["camera"]["fonte_rotulo_px"]) / _camera.zoom.x))
 		predios[nome] = p
 	_painel.visible = false
 	_letreiro.text = ""
 	_melhorar.pressed.connect(func(): melhorar(aberto))
 	_fechar.pressed.connect(fechar_painel)
 	tela_perfil.melhorar_pedido.connect(func(r): if r["ok"]: _registrar_melhoria("casa_senhorial", r))
+	tela_perfil.abrir_equipamentos.connect(func(): tela_perfil.fechar(); tela_equipamentos.abrir())
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
-	($Interface/Topo/Linha/Config as Button).text = tr("VILA_CONFIG")
+	_topo_retrato.pressed.connect(func(): fechar_painel(); tela_perfil.abrir(); retrato_tocado.emit())
+	_topo_nome.add_theme_font_size_override("font_size", 24)
 	_botao_social.pressed.connect(func(): fechar_painel(); tela_social.abrir())
 	($Interface/Topo/Linha/Config as Button).pressed.connect(func(): fechar_painel(); tela_configuracoes.abrir())
 	_botao_missoes.pressed.connect(func(): fechar_painel(); tela_missoes.abrir("login" if _jog.login_hoje()["pode"] else "diarias"))
@@ -92,7 +110,13 @@ func _ready() -> void:
 	tela_treino.abrir_habilidades.connect(func(): tela_treino.fechar(); tela_habilidades.abrir())
 	janela_oferta.ver.connect(func(_id): fechar_painel(); tela_loja.abrir("ofertas"))
 	_icones_do_topo()
+	_montar_topo()
 	_chao_com_arte()
+	_cores_vivas()
+	var bandeirolas := Bandeirolas.new()
+	bandeirolas.name = "Bandeirolas"
+	add_child(bandeirolas)
+	bandeirolas.configurar(ambiente.configuracao()["bandeirolas"])
 	for t in $Interface.get_children():
 		_som_da_tela(t)
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
@@ -153,54 +177,104 @@ func _chao_com_arte() -> void:
 	else:
 		chao.queue_free()
 
-var _recursos := {}  ## ouro/gemas/renome -> Label do número (com ícone ao lado)
+## Chão e prédios com a paleta da arena (clara, saturada): o shader vivificar,
+## com a grama mais amarelada que a do resto (ambiente.json > paleta).
+func _cores_vivas() -> void:
+	var grama := ambiente.material_vivo("tom_grama")
+	var predios_mat := ambiente.material_vivo("tom_predios")
+	for n in $Chao.find_children("*", "CanvasItem", true, false):
+		if n is Sprite2D or n is Line2D:
+			n.material = grama if (n.get_parent().name == "Arte" and n is Sprite2D and (n as Sprite2D).region_enabled) else predios_mat
+	for p: PredioVila in $Predios.get_children():
+		p.get_node("Sprite").material = predios_mat
 
-## Ícones da interface (tools/gerar_ui.py) no topo: ouro, gemas e renome com o
-## número ao lado, e nos botões. Sem a arte, fica o texto de antes.
+var _recursos := {}  ## ouro/gemas -> Label do número (com ícone ao lado)
+var _avisos := {}  ## botão do topo -> Label do aviso ("!") no canto
+
+## Topo da vila (GDD A vila > Interface legível no celular): retrato, brasão,
+## nome, nível com a barra de XP, ouro e gemas, e os quatro botões de ícone
+## (72×72, com o aviso "!" no canto). Moldura da interface desenhada.
 func _icones_do_topo() -> void:
-	var tex_ouro := ArteUi.textura("icone_ouro")
-	if tex_ouro == null:
-		return
-	var linha := _topo_ouro.get_parent()
+	var moldura := ArteUi.caixa("painel", Vector2(20, 4))
+	if moldura:
+		_topo.add_theme_stylebox_override("panel", moldura)
+	var linha := $Interface/Topo/Linha
 	var caixa := HBoxContainer.new()
 	caixa.name = "Recursos"
-	caixa.add_theme_constant_override("separation", 4)
+	caixa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	caixa.add_theme_constant_override("separation", 14)
 	linha.add_child(caixa)
-	linha.move_child(caixa, _topo_ouro.get_index())
-	_topo_ouro.visible = false
-	for par in [["ouro", "icone_ouro", "VILA_OURO_DICA"], ["gemas", "icone_gema", "VILA_GEMAS_DICA"], ["renome", "icone_renome", "VILA_RENOME_DICA"]]:
+	linha.move_child(caixa, _botao_missoes.get_index())
+	for par in [["ouro", "icone_ouro", "VILA_OURO_DICA"], ["gemas", "icone_gema", "VILA_GEMAS_DICA"]]:
+		var unidade := HBoxContainer.new()
+		unidade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		unidade.add_theme_constant_override("separation", 4)
+		unidade.tooltip_text = tr(par[2])
+		caixa.add_child(unidade)
 		var ic := TextureRect.new()
 		ic.texture = ArteUi.textura(par[1])
-		ic.custom_minimum_size = Vector2(28, 28)
+		ic.custom_minimum_size = Vector2(36, 36)
+		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		ic.tooltip_text = tr(par[2])
-		caixa.add_child(ic)
+		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		unidade.add_child(ic)
 		var l := Label.new()
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		l.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
-		l.custom_minimum_size.x = 44
-		caixa.add_child(l)
+		l.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.04))
+		l.add_theme_constant_override("outline_size", 4)
+		unidade.add_child(l)
 		_recursos[par[0]] = l
-	for b in [[_botao_missoes, "icone_missoes"], [_botao_social, "icone_ordem"], [_botao_baus, "icone_bau"],
-			[$Interface/Topo/Linha/Config as Button, "icone_config"]]:
+	for b in [[_botao_missoes, "icone_missoes", "VILA_MISSOES"], [_botao_social, "icone_ordem", "VILA_SOCIAL"],
+			[_botao_baus, "icone_bau", "VILA_BAUS"], [$Interface/Topo/Linha/Config as Button, "icone_config", "VILA_CONFIG_DICA"]]:
 		var bt: Button = b[0]
 		bt.icon = ArteUi.textura(b[1])
-		bt.expand_icon = false
-	($Interface/Topo/Linha/Config as Button).text = ""
+		bt.expand_icon = true
+		bt.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bt.add_theme_constant_override("icon_max_width", 40)
+		bt.add_theme_stylebox_override("normal", _botao_compacto(bt, "normal"))
+		bt.add_theme_stylebox_override("hover", _botao_compacto(bt, "hover"))
+		bt.add_theme_stylebox_override("pressed", _botao_compacto(bt, "pressed"))
+		bt.text = ""
+		bt.tooltip_text = tr(b[2]).format({"n": 0, "max": 0}) if b[2] != "VILA_BAUS" else tr("VILA_BAUS_DICA")
+		var aviso := Label.new()
+		aviso.name = "Aviso"
+		aviso.text = "!"
+		aviso.visible = false
+		aviso.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		aviso.add_theme_color_override("font_color", Color(1, 0.85, 0.3))
+		aviso.add_theme_color_override("font_outline_color", Color(0.45, 0.08, 0.06))
+		aviso.add_theme_constant_override("outline_size", 6)
+		aviso.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		aviso.position = Vector2(-22, 0)
+		bt.add_child(aviso)
+		_avisos[bt] = aviso
+
+## Botão do topo sem a margem larga do tema: o ícone de 40 px cabe nos 72 px.
+func _botao_compacto(bt: Button, estado: String) -> StyleBox:
+	var sb := bt.get_theme_stylebox(estado, "Button").duplicate()
+	for m in ["content_margin_left", "content_margin_right", "content_margin_top", "content_margin_bottom"]:
+		sb.set(m, 8.0)
+	return sb
+
+## Camera da vila: aproxima (zoom), começa no centro dos prédios e só deixa
+## ver o que está dentro dos limites do mapa (vila.json > camera).
+func _ajustar_camera(cfg: Dictionary) -> void:
+	_camera.zoom = Vector2.ONE * float(cfg["zoom"])
+	_camera.position = Vector2(float(cfg["centro"][0]), float(cfg["centro"][1]))
+	var l: Array = cfg["limites"]
+	_camera.limit_left = int(l[0])
+	_camera.limit_top = int(l[1])
+	_camera.limit_right = int(l[2])
+	_camera.limit_bottom = int(l[3])
+	_camera.reset_smoothing()
+	_arrasto_min = float(cfg.get("arrasto_min_px", ARRASTO_MIN_PADRAO))
 
 ## Atualiza prédios e topo a partir dos dados (e o painel aberto).
 func atualizar() -> void:
-	var cav := _jog.cavaleiro()
-	_topo_nome.text = tr("VILA_TOPO").format({"nome": cav["nome"] if cav["nome"] != "" else "—",
-		"nivel": cav["nivel"], "casa": _jog.casa()["nome"]})
-	if _recursos.is_empty():
-		_topo_ouro.text = tr("VILA_OURO").format({"ouro": _jog.ouro()}) + "  ·  " + tr("VILA_GEMAS").format({"gemas": _jog.gemas()}) \
-			+ "  ·  " + tr("VILA_RENOME").format({"renome": _jog.renome()}) + ("  ·  VIP" if _jog.vip_ativo() else "")
-	else:
-		_recursos["ouro"].text = str(_jog.ouro())
-		_recursos["gemas"].text = str(_jog.gemas())
-		_recursos["renome"].text = str(_jog.renome()) + ("   VIP" if _jog.vip_ativo() else "")
+	_atualizar_topo()
 	# Oferta nova (GDD: janela que fecha com um toque, sem bloquear).
 	if not janela_oferta.visible and not cena_historia.visible:
 		var of := _jog.oferta_nova()
@@ -208,13 +282,14 @@ func atualizar() -> void:
 			janela_oferta.mostrar(of, tela_loja.texto_conteudo(of["conteudo"]))
 	var m := _jog.missoes()
 	var prontas: int = (m["diarias"] + m["semanais"]).filter(func(x): return x["pronta"]).size() + (1 if _jog.login_hoje()["pode"] else 0)
-	_botao_missoes.text = tr("VILA_MISSOES") + (" !" if prontas > 0 else "")
+	_avisos[_botao_missoes].visible = prontas > 0
 	for c: String in _jog.conquistas_novas():
 		mostrar_letreiro(tr("VILA_CONQUISTA").format({"conquista": tr("CONQUISTA_" + c.to_upper())}))
-	_botao_social.text = tr("VILA_SOCIAL") + (" !" if _jog.social_alerta() else "")
+	_avisos[_botao_social].visible = _jog.social_alerta()
 	_jog.atualizar_ajudas()
 	var prontos := _jog.baus().filter(func(b): return _jog.bau_pronto(b["id"])).size()
-	_botao_baus.text = tr("VILA_BAUS").format({"n": _jog.baus().size(), "max": int(_jog.cfg_baus()["espacos"])}) + (" !" if prontos > 0 else "")
+	_botao_baus.tooltip_text = tr("VILA_BAUS").format({"n": _jog.baus().size(), "max": int(_jog.cfg_baus()["espacos"])})
+	_avisos[_botao_baus].visible = prontos > 0
 	for nome: String in predios:
 		var p: PredioVila = predios[nome]
 		p.bloqueado = not _jog.predio_liberado(nome)
@@ -235,13 +310,69 @@ func _process(delta: float) -> void:
 		_acumulado = 0.0
 		atualizar()
 
+## Topo da vila a partir dos dados: nome, nível com a barra de XP, ouro, gemas,
+## retrato (cabeça com o elmo que usa) e brasão da casa.
+func _atualizar_topo() -> void:
+	var cav := _jog.cavaleiro()
+	_topo_nome.text = cav["nome"] if cav["nome"] != "" else "—"
+	_topo_nivel.text = tr("PERFIL_NIVEL").format({"nivel": cav["nivel"]}) + ("  VIP" if _jog.vip_ativo() else "")
+	var tabela: Array = Balanceamento.ler("progressao")["xp_por_nivel"]
+	var nivel := int(cav["nivel"])
+	if nivel >= tabela.size():
+		_topo_xp.max_value = 1
+		_topo_xp.value = 1
+	else:
+		var base := int(tabela[nivel - 1]) if nivel > 1 else 0
+		_topo_xp.max_value = maxi(int(tabela[nivel]) - base, 1)
+		_topo_xp.value = clampi(int(cav["xp"]) - base, 0, int(_topo_xp.max_value))
+	_recursos["ouro"].text = str(_jog.ouro())
+	_recursos["gemas"].text = str(_jog.gemas())
+	var chave := JSON.stringify([_jog.visual_das_pecas(), _jog.casa(), cav.get("rosto", ""), cav.get("cabelo", ""), cav.get("corpo", "")], "", true)
+	if chave != _chave_topo:
+		_chave_topo = chave
+		_retrato.vestir(_jog)
+		_topo_brasao.texture = GeradorBrasao.textura(AparenciaJogador.brasao(_jog), Vector2i(34, 44))
+
+## Retrato e barra de XP (estilo igual ao do perfil).
+func _montar_topo() -> void:
+	_retrato = RetratoCabeca.new()
+	_retrato.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_topo_retrato.add_child(_retrato)
+	_topo_retrato.tooltip_text = tr("VILA_RETRATO_DICA")
+	var fundo := StyleBoxFlat.new()
+	fundo.bg_color = Color(0.2, 0.15, 0.11)
+	fundo.set_border_width_all(2)
+	fundo.border_color = Color(0.7, 0.55, 0.3)
+	var cheio := StyleBoxFlat.new()
+	cheio.bg_color = Color(1, 0.88, 0.55).darkened(0.15)
+	_topo_xp.add_theme_stylebox_override("background", fundo)
+	_topo_xp.add_theme_stylebox_override("fill", cheio)
+	for estado in ["normal", "hover", "pressed", "focus"]:
+		_topo_retrato.add_theme_stylebox_override(estado, StyleBoxEmpty.new())
+
 func _unhandled_input(event: InputEvent) -> void:
 	if (_tela_equipamentos and _tela_equipamentos.visible) or tela_treino.visible or tela_torneios.visible:
+		_toque_inicio = Vector2.INF
 		return
-	if event is InputEventScreenTouch and event.pressed:
-		var nome := predio_em(get_canvas_transform().affine_inverse() * event.position)
-		if nome != "":
-			tocar_predio(nome)
+	# Arrastar com o dedo move a câmera; só vira toque no prédio se o dedo
+	# soltar perto de onde apertou (arrasto_min_px).
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_toque_inicio = event.position
+			_arrastou = false
+		else:
+			var tocou := _toque_inicio != Vector2.INF and not _arrastou
+			_toque_inicio = Vector2.INF
+			if tocou:
+				var nome := predio_em(get_canvas_transform().affine_inverse() * event.position)
+				if nome != "":
+					tocar_predio(nome)
+					get_viewport().set_input_as_handled()
+	elif event is InputEventScreenDrag and _toque_inicio != Vector2.INF:
+		if not _arrastou and (event.position as Vector2).distance_to(_toque_inicio) >= _arrasto_min:
+			_arrastou = true
+		if _arrastou:
+			_camera.position -= (event.relative as Vector2) / _camera.zoom.x
 			get_viewport().set_input_as_handled()
 
 ## Prédio sob um ponto do mundo ("" se nenhum). O de baixo na tela ganha.

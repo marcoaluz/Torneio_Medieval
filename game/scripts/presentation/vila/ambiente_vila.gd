@@ -4,6 +4,9 @@ extends Node2D
 ## entardecer, noite), tochas acesas à noite e clima sorteado uma vez por dia
 ## (limpo, nublado, chuva, neblina). Só apresentação; números em
 ## game/data/vila/ambiente.json. A interface (CanvasLayer) não escurece.
+## A vila segue a arena da justa (clara e saturada): a cor do mundo nunca
+## fica abaixo de `brilho_minimo` (85%) em nenhum canal, nem à noite nem com
+## clima. A arte passa pelo shader vivificar (paleta) e ganha bandeirolas.
 
 const DADOS := "res://game/data/vila/ambiente.json"
 
@@ -64,7 +67,27 @@ func cor_da_hora(h: float) -> Color:
 			cor = Color(a[1]).lerp(Color(b[1]), k)
 			break
 	var esc := float(_cfg["clima"]["escurecer"].get(clima, 1.0))
-	return Color(cor.r * esc, cor.g * esc, cor.b * esc, 1.0)
+	return limitar_brilho(Color(cor.r * esc, cor.g * esc, cor.b * esc, 1.0), float(_cfg["brilho_minimo"]))
+
+## Nenhum canal abaixo de `minimo`: a cor escurece no máximo (1 − minimo).
+static func limitar_brilho(cor: Color, minimo: float) -> Color:
+	return Color(maxf(cor.r, minimo), maxf(cor.g, minimo), maxf(cor.b, minimo), 1.0)
+
+## Material do shader vivificar com a paleta dos dados (`tom` = "tom_grama"
+## ou "tom_predios").
+func material_vivo(tom: String) -> ShaderMaterial:
+	var p: Dictionary = _cfg["paleta"]
+	var m := ShaderMaterial.new()
+	m.shader = load("res://game/art/shaders/vivificar.gdshader")
+	m.set_shader_parameter("gama", float(p["gama"]))
+	m.set_shader_parameter("brilho", float(p["brilho"]))
+	m.set_shader_parameter("saturacao", float(p["saturacao"]))
+	var t: Array = p[tom]
+	m.set_shader_parameter("tom", Color(float(t[0]), float(t[1]), float(t[2])))
+	return m
+
+func configuracao() -> Dictionary:
+	return _cfg
 
 ## Clima do dia: sorteio com pesos e semente = o dia (fica o mesmo o dia todo).
 static func sortear_clima(cfg: Dictionary, dia: int) -> String:

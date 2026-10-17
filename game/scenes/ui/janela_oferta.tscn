@@ -33,7 +33,6 @@ layout_mode = 2
 [node name="Texto" type="Label" parent="Quadro/Coluna"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 13
 autowrap_mode = 3
 
 [node name="Botoes" type="HBoxContainer" parent="Quadro/Coluna"]

@@ -74,7 +74,6 @@ func _montar_conquistas() -> void:
 			extra = "  ·  " + tr("METAS_TITULO_DA").format({"titulo": tr("TITULO_" + str(c["titulo"]).to_upper())})
 		var l := Label.new()
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		l.add_theme_font_size_override("font_size", 12)
 		l.text = "%s %s  (%d/%d)%s\n%s" % ["✓" if c["feita"] else "·", tr("CONQUISTA_" + str(c["id"]).to_upper()), int(c["progresso"]),
 			int(c["meta"]), extra, texto_recompensa(c.get("recompensa", {}))]
 		if c["feita"]:
@@ -110,7 +109,6 @@ func _linha(texto: String, botao: String, desabilitado: bool) -> Button:
 	var l := Label.new()
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", 12)
 	l.text = texto
 	linha.add_child(l)
 	var b := Button.new()

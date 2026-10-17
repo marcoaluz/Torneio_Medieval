@@ -43,6 +43,7 @@ var _lacos := {}  ## id -> AudioStreamPlayer tocando (só os da tela de cima)
 var _musica: AudioStreamPlayer
 var _musica_id := ""
 var _tween_musica: Tween
+var _ultima_vez := {}  ## id -> instante (ms) da última vez que tocou (intervalo_min_s)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -107,7 +108,8 @@ func telas_abertas() -> Array[String]:
 
 ## Toca um efeito (uma variação sorteada, nunca em laço). Pertence à `tela`
 ## ("" = a de cima), menos os de interface. Devolve false se não há arquivo
-## ou se a tela pedida não é a de cima (tela fechada não faz som).
+## se a tela pedida não é a de cima (tela fechada não faz som) ou se o som
+## ainda está no intervalo mínimo dele (`intervalo_min_s` no catálogo).
 func tocar(id: String, volume_db := 0.0, tela := "") -> bool:
 	var e := _entrada(id)
 	var s := _stream(id)
@@ -117,6 +119,11 @@ func tocar(id: String, volume_db := 0.0, tela := "") -> bool:
 	var dono := "" if bus in SEM_DONO else (tela if tela != "" else tela_atual())
 	if dono != "" and dono != tela_atual():
 		return false
+	# Intervalo mínimo do próprio som (o relincho do estábulo não repete a cada toque).
+	var agora := Time.get_ticks_msec()
+	if agora - int(_ultima_vez.get(id, -1000000)) < int(float(e.get("intervalo_min_s", 0.0)) * 1000.0):
+		return false
+	_ultima_vez[id] = agora
 	var p := _pool[_proximo]
 	_proximo = (_proximo + 1) % _pool.size()
 	_soltar(p)
@@ -148,6 +155,10 @@ func laco(id: String, ligado: bool, tela := "") -> void:
 
 func tocando_laco(id: String) -> bool:
 	return _lacos.has(id)
+
+## Ids dos laços tocando agora (para testes e depuração).
+func lacos_tocando() -> Array:
+	return _lacos.keys()
 
 ## Deixa tocando exatamente o ambiente da tela de cima.
 func _ligar_ambiente() -> void:

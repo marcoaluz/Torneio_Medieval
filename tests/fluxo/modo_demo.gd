@@ -4,7 +4,7 @@ extends Node
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades [TM_CONJUNTO], missoes com TM_ABA, torneios com TM_REGIAO);
 ## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
-## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada); estabulo (TM_PELAGEM, TM_TROCAR=1); campo (TM_ATRIBUTO, TM_TREINANDO=1). Save em
+## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada, TM_HORA, TM_CLIMA); estabulo (TM_PELAGEM, TM_TROCAR=1); campo (TM_ATRIBUTO, TM_TREINANDO=1). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -172,7 +172,13 @@ func _ready() -> void:
 		jog.estado["inventario"]["ouro"] = 3000
 		if OS.get_environment("TM_ORDEM") == "1":
 			jog.criar_ordem("Ordem da Rosa")
-		add_child(load("res://game/scenes/village/vila.tscn").instantiate())
+		var vila_demo: Node = load("res://game/scenes/village/vila.tscn").instantiate()
+		# Hora (0 a 24) e clima fixos para conferir o brilho: TM_HORA=23 TM_CLIMA=chuva.
+		if OS.get_environment("TM_HORA") != "":
+			vila_demo.get_node("Ambiente").hora_forcada = float(OS.get_environment("TM_HORA"))
+		if OS.get_environment("TM_CLIMA") != "":
+			vila_demo.get_node("Ambiente").clima_forcado = OS.get_environment("TM_CLIMA")
+		add_child(vila_demo)
 		return
 	if tela == "historia":
 		# Vila com a cena TM_CENA pendente (padrão: a do começo); TM_FALA avança falas.

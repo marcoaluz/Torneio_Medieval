@@ -2,19 +2,35 @@
 	"versao": 1,
 	"_nota": "Ambiente da vila (apresentacao): cor do mundo por hora do dia (interpolada entre as marcas), horas com tochas acesas, clima sorteado uma vez por dia (pesos) e intensidades. Horario = relogio do celular.",
 	"cores_por_hora": [
-		[0, "3a4466"],
-		[5, "3e4568"],
-		[6, "b08878"],
+		[0, "dbe3ff"],
+		[5, "dde5ff"],
+		[6, "ffe4d4"],
 		[8, "ffffff"],
-		[17, "fff4e6"],
-		[19, "c08a6a"],
-		[20, "4a4f72"],
-		[24, "3a4466"]
-	],
+		[17, "fff6e8"],
+		[19, "ffdcc8"],
+		[20, "dde0ff"],
+		[24, "dbe3ff"]
+	],	"brilho_minimo": 0.85,
+	"paleta": {
+		"_nota": "Cores da vila alinhadas com a arena da justa (clara e saturada: grama #93b657, areia #bf965f, madeira #5e3a2d, bandeiras vivas). Passa por game/art/shaders/vivificar.gdshader no chao e nos predios. brilho_minimo: a cor do mundo (hora e clima) nunca fica abaixo disso em nenhum canal, ou seja, a vila nunca escurece mais que 15% do brilho do dia.",
+		"gama": 0.6,
+		"brilho": 1.18,
+		"saturacao": 1.35,
+		"tom_grama": [1.05, 1.0, 0.72],
+		"tom_predios": [1.0, 1.0, 1.0]
+	},
+	"bandeirolas": {
+		"_nota": "Fios de bandeirolas entre os predios, nas cores da arena. cores em hex; fios = pares de pontos do mapa [x1,y1,x2,y2]; flecha = quanto o fio cai no meio (px); espaco = px entre bandeirolas.",
+		"cores": ["d8362f", "2f6bc4", "f0bf30", "3f9a4a", "8a45b0", "f1e7d0"],
+		"fios": [[195, 200, 405, 140], [555, 140, 765, 200], [260, 372, 395, 342], [565, 342, 700, 372]],
+		"flecha": 16,
+		"espaco": 20,
+		"lado": 11
+	},
 	"tochas": { "acende": 18.5, "apaga": 6.5 },
 	"clima": {
 		"pesos": { "limpo": 45, "nublado": 30, "chuva": 15, "neblina": 10 },
-		"escurecer": { "limpo": 1.0, "nublado": 0.82, "chuva": 0.7, "neblina": 0.85 },
+		"escurecer": { "limpo": 1.0, "nublado": 0.94, "chuva": 0.9, "neblina": 0.93 },
 		"chuva_gotas": 140,
 		"neblina_manchas": 9
 	},

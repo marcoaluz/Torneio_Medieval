@@ -10,10 +10,13 @@ extends PanelContainer
 ## pelos mesmos comandos de antes.
 
 signal melhorar_pedido(resultado: Dictionary)
+## O retrato do topo da vila abre este perfil; daqui, o botão abre os Equipamentos.
+signal abrir_equipamentos
 
 const PREDIO := "casa_senhorial"
 const COR_DESTAQUE := Color(1, 0.88, 0.55)
 const COR_FRACA := Color(0.75, 0.7, 0.62)
+const TEXTO_MIN := 22
 
 var _jog: ServicoJogador
 var _retrato: CamadasPersonagem
@@ -29,6 +32,7 @@ var _chave := ""
 @onready var _casa_nivel: Label = $Coluna/Rodape/CasaNivel
 @onready var _melhorar: Button = $Coluna/Rodape/Melhorar
 @onready var _fechar: Button = $Coluna/Rodape/Fechar
+@onready var _equipamentos: Button = $Coluna/Rodape/Equipamentos
 @onready var _aviso: Label = $Coluna/Aviso
 
 func _ready() -> void:
@@ -36,6 +40,8 @@ func _ready() -> void:
 	visible = false
 	_fechar.text = tr("PAINEL_FECHAR")
 	_fechar.pressed.connect(fechar)
+	_equipamentos.text = tr("EQUIP_TITULO")
+	_equipamentos.pressed.connect(func(): abrir_equipamentos.emit())
 	_melhorar.pressed.connect(_ao_melhorar)
 	_retrato = CamadasPersonagem.new()
 	_retrato.name = "Retrato"
@@ -49,6 +55,7 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and _fechar != null:
 		_fechar.text = tr("PAINEL_FECHAR")
+		_equipamentos.text = tr("EQUIP_TITULO")
 		if visible:
 			_chave = ""
 			atualizar()
@@ -56,6 +63,7 @@ func _notification(what: int) -> void:
 func abrir() -> void:
 	visible = true
 	_aviso.text = ""
+	_aviso.visible = false
 	_chave = ""
 	atualizar()
 
@@ -96,7 +104,7 @@ func _montar_direita(cav: Dictionary, est: Dictionary) -> void:
 	# Nível e experiência.
 	var tabela: Array = Balanceamento.ler("progressao")["xp_por_nivel"]
 	var nivel := int(cav["nivel"])
-	_direita.add_child(_rotulo(tr("PERFIL_NIVEL").format({"nivel": nivel}), 18, COR_DESTAQUE))
+	_direita.add_child(_rotulo(tr("PERFIL_NIVEL").format({"nivel": nivel}), 28, COR_DESTAQUE))
 	var barra := ProgressBar.new()
 	barra.show_percentage = false
 	barra.custom_minimum_size = Vector2(0, 12)
@@ -124,7 +132,7 @@ func _montar_direita(cav: Dictionary, est: Dictionary) -> void:
 	var linhas := GridContainer.new()
 	linhas.columns = 2
 	linhas.add_theme_constant_override("h_separation", 12)
-	linhas.add_theme_constant_override("v_separation", 2)
+	linhas.add_theme_constant_override("v_separation", 0)
 	_direita.add_child(linhas)
 	_par(linhas, tr("PERFIL_LIGA_ROTULO"), tr("PERFIL_LIGA_VALOR").format({"liga": tr("LIGA_" + str(lg["nome"]).to_upper()),
 		"divisao": lg["divisao"], "pontos": lg["pontos"]}))
@@ -148,7 +156,7 @@ func _montar_direita(cav: Dictionary, est: Dictionary) -> void:
 func _cartao(id: String, valor: String) -> PanelContainer:
 	var c := PanelContainer.new()
 	c.name = id
-	c.custom_minimum_size = Vector2(104, 56)
+	c.custom_minimum_size = Vector2(150, 66)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var col := VBoxContainer.new()
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -170,7 +178,7 @@ func _par(grade: GridContainer, rotulo: String, valor: String) -> void:
 func _rotulo(texto: String, tamanho: int, cor: Color) -> Label:
 	var l := Label.new()
 	l.text = texto
-	l.add_theme_font_size_override("font_size", tamanho)
+	l.add_theme_font_size_override("font_size", maxi(tamanho, TEXTO_MIN))  # nunca abaixo do mínimo legível no celular
 	l.add_theme_color_override("font_color", cor)
 	return l
 
@@ -191,5 +199,6 @@ func _atualizar_obra() -> void:
 func _ao_melhorar() -> void:
 	var r := _jog.melhorar_predio(PREDIO)
 	_aviso.text = "" if r["ok"] else tr("ERRO_" + str(r["erro"]).to_upper())
+	_aviso.visible = _aviso.text != ""
 	melhorar_pedido.emit(r)
 	atualizar()

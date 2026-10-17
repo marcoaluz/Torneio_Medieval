@@ -80,7 +80,6 @@ theme_override_constants/separation = 4
 [node name="Erro" type="Label" parent="Formulario/Coluna"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.45, 0.35, 1)
-theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
 [node name="Botoes" type="HBoxContainer" parent="Formulario/Coluna"]

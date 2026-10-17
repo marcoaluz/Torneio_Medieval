@@ -8,14 +8,14 @@
 		"interface": "short, soft and warm, pleasant to hear many times, no reverb tail, no music",
 		"musica": "D dorian, warm analog mix, not harsh, instrumental, no vocals unless stated"
 	},
-	"_nota_telas": "Som dos predios (GDD A vila): o laco de ambiente de cada tela so toca com ela aberta e por cima; ao sair, ele e os efeitos dela param com fade de fade_tela_s. Telas sem entrada nao tem ambiente proprio (a de baixo para enquanto ela esta aberta). Chaves: o predio (tela_treino e tela_forja) ou o nome da tela em snake_case (tela_perfil...).",
+	"_nota_telas": "Som dos predios (GDD A vila): o laco de ambiente de cada tela so toca com ela aberta e por cima; ao sair, ele e os efeitos dela param com fade de fade_tela_s. Telas sem entrada nao tem ambiente proprio (a de baixo para enquanto ela esta aberta). Estabulo, armeiro e ferreiro nao tem laco nenhum (2026-10-17): o estabulo so bufa quando se toca no cavalo (intervalo_min_s do som) e o ferreiro so da uma martelada ao toque ou quando a peca fica pronta. Chaves: o predio (tela_treino e tela_forja) ou o nome da tela em snake_case (tela_perfil...). intervalo_min_s (por som): tempo minimo entre duas vezes que o mesmo som toca.",
 	"fade_tela_s": 0.3,
 	"telas": {
 		"vila": [],
-		"estabulo": ["estabulo"],
+		"estabulo": [],
 		"campo_treino": [],
-		"armeiro": ["forja"],
-		"ferreiro": ["forja"]
+		"armeiro": [],
+		"ferreiro": []
 	},
 	"formatos": {
 		"_nota": "Efeitos em wav tratado (fim sem silencio, pico em -3 dBFS; o Godot comprime na importacao), musicas em mp3 (sem ffmpeg nesta maquina para tratar mp3). ogg tambem e aceito.",
@@ -33,7 +33,7 @@
 		"impacto_cavalo": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.04, "duracao_s": 1.5, "variacoes": 3, "prompt": "Lance glancing off horse barding with a dull thump, then a short alarmed horse neigh"},
 		"lanca_estilhaca": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.07, "duracao_s": 1.5, "variacoes": 4, "prompt": "Wooden lance shattering into splinters, explosive wood crack"},
 		"derrubada": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.04, "duracao_s": 2, "variacoes": 3, "prompt": "Armored knight falling off a horse onto mud, heavy metal clatter, thud"},
-		"cavalo_bufando": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.06, "volume_db": -3, "duracao_s": 2, "variacoes": 3, "prompt": "Warhorse snorting and blowing, tired"},
+		"cavalo_bufando": {"pasta": "sfx/justa", "bus": "SFX", "intervalo_min_s": 2.0, "tom": 0.06, "volume_db": -3, "duracao_s": 2, "variacoes": 3, "prompt": "Warhorse snorting and blowing, tired"},
 		"habilidade_investida": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.03, "duracao_s": 1.5, "variacoes": 3, "prompt": "Rushing wind and pounding hooves accelerating"},
 		"habilidade_bloqueio": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.03, "duracao_s": 1, "variacoes": 3, "prompt": "Bright metallic ring of a parry, clean and resonant"},
 		"habilidade_golpe_pesado": {"pasta": "sfx/justa", "bus": "SFX", "tom": 0.03, "duracao_s": 1.5, "variacoes": 3, "prompt": "Deep boom with crunching metal"},
@@ -42,8 +42,6 @@
 		"torcida_decepcionada": {"pasta": "sfx/torcida", "bus": "Ambiente", "tom": 0.04, "duracao_s": 2, "variacoes": 3, "prompt": "Medieval crowd groaning in disappointment"},
 		"porta_predio": {"pasta": "sfx/vila", "bus": "UI", "tom": 0.06, "duracao_s": 1, "variacoes": 3, "prompt": "Heavy wooden door creak opening, short"},
 		"martelo_bigorna": {"pasta": "sfx/vila", "bus": "SFX", "tom": 0.05, "duracao_s": 1, "variacoes": 4, "prompt": "Blacksmith hammer striking hot iron on an anvil, ringing"},
-		"forja": {"pasta": "sfx/vila", "bus": "Ambiente", "loop": true, "tom": 0.0, "volume_db": -6, "duracao_s": 8, "variacoes": 2, "prompt": "Bellows pumping and fire roaring in a forge"},
-		"estabulo": {"pasta": "sfx/vila", "bus": "Ambiente", "loop": true, "tom": 0.0, "volume_db": -6, "duracao_s": 8, "variacoes": 2, "prompt": "Horses shifting in straw, soft snorts"},
 		"campo_treino": {"pasta": "sfx/vila", "bus": "SFX", "tom": 0.05, "duracao_s": 2, "variacoes": 3, "prompt": "Lance striking a quintain shield, sandbag swinging and thudding"},
 		"treino_pronto": {"pasta": "sfx/vila", "bus": "UI", "tom": 0.0, "duracao_s": 2, "variacoes": 2, "prompt": "Short horn call in the distance, in D"},
 		"obra_predio": {"pasta": "sfx/vila", "bus": "SFX", "tom": 0.04, "duracao_s": 3, "variacoes": 3, "prompt": "Hammering, sawing and stones being placed"},

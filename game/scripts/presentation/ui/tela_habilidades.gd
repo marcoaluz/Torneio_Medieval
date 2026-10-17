@@ -41,7 +41,6 @@ func montar() -> void:
 		var l := Label.new()
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		l.add_theme_font_size_override("font_size", 12)
 		l.text = "%s · %s\n%s" % [tr("HABILIDADE_" + h.to_upper()), tr("HABS_GRUPO_" + str(defs[h]["grupo"]).to_upper()), descricao(h)]
 		if em_uso.has(h):
 			l.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
@@ -67,7 +66,6 @@ func montar() -> void:
 		var hab := str(conjs[c].get("habilidade", ""))
 		var lc := Label.new()
 		lc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		lc.add_theme_font_size_override("font_size", 12)
 		lc.text = tr("HABS_CONJUNTO_LINHA").format({"conjunto": tr("CONJUNTO_" + c.to_upper()), "n": int(ef["contagem"].get(c, 0)),
 			"total": int(ef["total"].get(c, 0)), "bonus": ", ".join(bonus), "habilidade": tr("HABILIDADE_" + hab.to_upper()) if hab != "" else "—"})
 		_lista.add_child(lc)

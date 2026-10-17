@@ -274,7 +274,7 @@ func _montar_cartoes() -> void:
 		b.focus_mode = Control.FOCUS_NONE
 		b.toggle_mode = true
 		b.button_pressed = a == atributo
-		b.custom_minimum_size = Vector2(0, 86)
+		b.custom_minimum_size = Vector2(0, 166)
 		b.self_modulate = Color.WHITE if a == atributo else Color(0.7, 0.7, 0.7)  # o escolhido salta à vista
 		b.pressed.connect(func(): escolher(a))
 		var linha := HBoxContainer.new()
@@ -298,7 +298,7 @@ func _montar_cartoes() -> void:
 		linha.add_child(col)
 		var topo := Label.new()
 		topo.text = "%s   %d / %d" % [tr("ATRIBUTO_" + a.to_upper()), int(atr[a]), teto]
-		topo.add_theme_font_size_override("font_size", 15)
+		topo.add_theme_font_size_override("font_size", 28)
 		topo.add_theme_color_override("font_color", Color(1, 0.88, 0.55) if a == atributo else Color(0.95, 0.9, 0.8))
 		topo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		col.add_child(topo)
@@ -306,7 +306,7 @@ func _montar_cartoes() -> void:
 		barra.max_value = teto
 		barra.value = int(atr[a])
 		barra.show_percentage = false
-		barra.custom_minimum_size = Vector2(0, 7)
+		barra.custom_minimum_size = Vector2(0, 12)
 		barra.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		col.add_child(barra)
 		var desc := Label.new()
@@ -319,7 +319,6 @@ func _montar_cartoes() -> void:
 		else:
 			desc.text = tr("TREINO_EM_ANDAMENTO").format({"tempo": Vila.formatar_tempo(ServicoTempo.restante(int(t["termina_em"])))})
 			desc.add_theme_color_override("font_color", Color(1, 0.8, 0.45))
-		desc.add_theme_font_size_override("font_size", 11)
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		col.add_child(desc)
@@ -371,12 +370,12 @@ func _ao_treinar() -> void:
 func _flutuar(texto: String, cor: Color) -> void:
 	var l := Label.new()
 	l.text = texto
-	l.add_theme_font_size_override("font_size", 18)
+	l.add_theme_font_size_override("font_size", 28)
 	l.add_theme_color_override("font_color", cor)
 	l.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.04))
 	l.add_theme_constant_override("outline_size", 6)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.size = Vector2(384, 30)
+	l.size = Vector2(480, 40)
 	l.position = Vector2(0, 40)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_palco.add_child(l)

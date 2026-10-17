@@ -54,6 +54,17 @@ func configurar(n: String, dados: Dictionary) -> void:
 	_nome.position = Vector2(-80, tamanho.y * 0.5 + 2)
 	_balao.position = Vector2(-60, -tamanho.y * 0.5 - 30)
 
+## Tamanho dos textos do prédio (nome e balão do timer) em px do mapa: a vila
+## é vista com zoom, então o tamanho lido na tela é `px` vezes o zoom.
+func ajustar_rotulos(px: int) -> void:
+	for l: Label in [$Nome, $Balao]:
+		l.add_theme_font_size_override("font_size", px)
+	$Nome.offset_left = -100.0
+	$Nome.offset_right = 100.0
+	$Nome.custom_minimum_size.y = px + 6
+	_nome.position = Vector2(-100, tamanho.y * 0.5 + 2)
+	_balao.position = Vector2(-60, -tamanho.y * 0.5 - 30 - (px - 13))
+
 func _texto_nome() -> void:
 	if _nome:
 		_nome.text = tr("PREDIO_" + nome.to_upper())

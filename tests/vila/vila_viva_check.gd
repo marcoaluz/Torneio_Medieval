@@ -22,7 +22,18 @@ func _initialize() -> void:
 	var vida: VidaVila = vila.vida
 
 	_checa("meio-dia e claro", amb.cor_da_hora(13.0).is_equal_approx(Color("ffffff")) or amb.cor_da_hora(13.0).r > 0.95)
-	_checa("meia-noite e escura e azulada", amb.cor_da_hora(0.0).r < 0.3 and amb.cor_da_hora(0.0).b > amb.cor_da_hora(0.0).r)
+	_checa("meia-noite azulada, mas clara", amb.cor_da_hora(0.0).b > amb.cor_da_hora(0.0).r)
+	# A vila segue a arena (clara): nenhuma hora nem clima escurece o mundo abaixo de 85% do brilho do dia.
+	var minimo := 1.0
+	for clima in ["limpo", "nublado", "chuva", "neblina"]:
+		amb.clima = clima
+		for q in 97:
+			var c := amb.cor_da_hora(q * 0.25)
+			minimo = minf(minimo, minf(c.r, minf(c.g, c.b)))
+	amb.clima = "limpo"
+	_checa("nunca abaixo de 85%% do brilho do dia, em nenhuma hora nem clima (minimo %.3f)" % minimo, minimo >= 0.85 - 0.0001)
+	_checa("o limite vem dos dados (brilho_minimo 0,85)", is_equal_approx(float(amb.configuracao()["brilho_minimo"]), 0.85))
+	_checa("limitar_brilho sobe so o que esta abaixo", AmbienteVila.limitar_brilho(Color(0.2, 0.9, 1.0), 0.85).is_equal_approx(Color(0.85, 0.9, 1.0)))
 	_checa("entardecer puxa para o laranja", amb.cor_da_hora(19.0).r > amb.cor_da_hora(19.0).b)
 	_checa("tochas apagadas de dia", not amb.tochas_acesas())
 	amb.hora_forcada = 22.0

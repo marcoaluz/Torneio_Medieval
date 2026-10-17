@@ -7,6 +7,10 @@ extends VBoxContainer
 ## peças do inventário do espaço escolhido, o mesmo inventário da aba Cavalo de
 ## Equipamentos. Tocar numa peça equipa pelo serviço Jogador; quando o visual
 ## do cavalo muda, ele reage (bufa, sapateia e dá um pulinho).
+## Som (GDD A vila > Som dos prédios): o estábulo não tem som contínuo nem
+## ambiente. O cavalo só bufa quando o jogador toca nele (ou troca uma peça),
+## uma vez por toque, com uma variação sorteada e no mínimo `intervalo_min_s`
+## (2 s, catálogo) entre uma bufada e outra.
 
 signal resultado(r: Dictionary)
 
@@ -21,6 +25,7 @@ var _chave_pecas := ""
 var _base_cavalo := Vector2.ZERO
 var _reacao: Tween
 
+@onready var _palco: Control = $Palco
 @onready var _fundo: TextureRect = $Palco/Fundo
 @onready var _cavalo: CamadasPersonagem = $Palco/Cavalo
 @onready var _botoes_espaco: HBoxContainer = $Espacos
@@ -31,6 +36,8 @@ func _ready() -> void:
 	_base_cavalo = _cavalo.position
 	if ResourceLoader.exists(FUNDO):
 		_fundo.texture = load(FUNDO)
+	_palco.mouse_filter = Control.MOUSE_FILTER_STOP
+	_palco.gui_input.connect(_ao_tocar_palco)
 
 func configurar(jog: ServicoJogador) -> void:
 	_jog = jog
@@ -63,11 +70,38 @@ func escolher_espaco(nome: String) -> void:
 	espaco = nome
 	atualizar()
 
+## Região do palco que conta como "o cavalo" (o corpo inteiro, de pé).
+func area_do_cavalo() -> Rect2:
+	return Rect2(_base_cavalo + Vector2(-95, -150) * _cavalo.scale, Vector2(200, 160) * _cavalo.scale)
+
+func _ao_tocar_palco(ev: InputEvent) -> void:
+	var pos := Vector2.INF
+	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+		pos = ev.position
+	elif ev is InputEventScreenTouch and ev.pressed:
+		pos = ev.position
+	if pos != Vector2.INF and area_do_cavalo().has_point(pos):
+		tocar_no_cavalo()
+
+## Toque no cavalo: bufa uma vez (respeitando o intervalo mínimo do som) e se mexe.
+## Devolve se a bufada tocou.
+func tocar_no_cavalo() -> bool:
+	var tocou := _bufar()
+	_mexer()
+	return tocou
+
+func _bufar() -> bool:
+	var audio := get_node_or_null("/root/Audio") as ServicoAudio
+	return audio != null and audio.tocar("cavalo_bufando", 0.0, "estabulo")
+
 ## O cavalo reage à troca: bufa, sapateia (alguns quadros do galope) e dá um pulinho.
 func reagir() -> void:
-	var audio := get_node_or_null("/root/Audio") as ServicoAudio
-	if audio:
-		audio.tocar("cavalo_bufando", 0.0, "estabulo")
+	_bufar()
+	_mexer()
+
+func _mexer() -> void:
+	if reagindo():
+		return
 	if _reacao and _reacao.is_valid():
 		_reacao.kill()
 	_cavalo.position = _base_cavalo
@@ -92,17 +126,18 @@ func _montar_espacos() -> void:
 		b.focus_mode = Control.FOCUS_NONE
 		b.toggle_mode = true
 		b.button_pressed = nome == espaco
-		b.custom_minimum_size = Vector2(53, 42)
+		b.custom_minimum_size = Vector2(64, 66)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.tooltip_text = tr("ESPACO_" + nome.to_upper())
 		var it := _jog.equipado(nome)
 		if not it.is_empty():
 			b.icon = ArteUi.icone_item(it["modelo"])
 			b.expand_icon = true
+			b.add_theme_constant_override("icon_max_width", 44)
 		else:
-			b.text = tr("ESPACO_" + nome.to_upper())
-			b.add_theme_font_size_override("font_size", 8)
-			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			# Espaço vazio: o contorno do espaço (o nome fica na dica, 22 px não cabe em 64).
+			b.text = "+"
+			b.add_theme_font_size_override("font_size", 28)
 		b.pressed.connect(func(): escolher_espaco(nome))
 		_botoes_espaco.add_child(b)
 		_margens_curtas(b)  # depois de entrar na árvore, para pegar a moldura do tema
@@ -113,10 +148,10 @@ func _margens_curtas(b: Button) -> void:
 		var sb := b.get_theme_stylebox(estado, "Button")
 		if sb:
 			sb = sb.duplicate()
-			sb.content_margin_left = 3
-			sb.content_margin_right = 3
-			sb.content_margin_top = 3
-			sb.content_margin_bottom = 3
+			sb.content_margin_left = 6
+			sb.content_margin_right = 6
+			sb.content_margin_top = 6
+			sb.content_margin_bottom = 6
 			b.add_theme_stylebox_override(estado, sb)
 
 func _montar_pecas() -> void:
@@ -127,13 +162,12 @@ func _montar_pecas() -> void:
 	var equipado_id: String = _jog.estado["equipamento"].get(espaco, "")
 	var titulo := Label.new()
 	titulo.text = tr("ESPACO_" + espaco.to_upper()) + ":"
-	titulo.add_theme_font_size_override("font_size", 11)
+	titulo.add_theme_color_override("font_color", Color(1, 0.88, 0.55))
 	_pecas.add_child(titulo)
 	var lista := _jog.itens().filter(func(it): return modelos.get(it["modelo"], {}).get("espaco", "") == espaco)
 	if lista.is_empty():
 		var vazio := Label.new()
 		vazio.text = tr("EQUIP_SEM_PECAS")
-		vazio.add_theme_font_size_override("font_size", 11)
 		_pecas.add_child(vazio)
 	for it: Dictionary in lista:
 		var m: Dictionary = modelos[it["modelo"]]
@@ -141,8 +175,7 @@ func _montar_pecas() -> void:
 		b.name = str(it["id"])
 		b.focus_mode = Control.FOCUS_NONE
 		b.icon = ArteUi.icone_item(it["modelo"])
-		b.add_theme_constant_override("icon_max_width", 28)
-		b.add_theme_font_size_override("font_size", 10)
+		b.add_theme_constant_override("icon_max_width", 40)
 		var nivel := int(it.get("nivel", 0))
 		b.text = "%s%s%s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), " +%d" % nivel if nivel > 0 else "", " ✓" if it["id"] == equipado_id else ""]
 		b.add_theme_color_override("font_color", TelaBaus.cor_raridade(m["raridade"]))

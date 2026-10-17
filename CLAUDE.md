@@ -81,7 +81,7 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
 - **Servidor em TypeScript:** mudou regra ou economia do GDScript? Mude o porte em `supabase/functions/_shared/`, regrave os cenários (`tools/gravar_cenarios.gd`) e rode os testes dos dois lados; sem enum/namespace/parâmetro-propriedade nos `.ts` (Node só apaga tipos). O relógio do GDScript pode ser parado com `ServicoTempo.fixo` (só para gravações).
 - **Comando público novo no `ServicoJogador`:** escreva como `_cmd_<nome>` e acrescente o invólucro na seção "comandos públicos" (é ele que avisa `acao_feita` para a fila do servidor); o nome tem que existir em `PUBLICOS` no TypeScript.
 - **Som:** todo som entra primeiro em `game/data/audio/sons.json`; o jogo acha `<pasta>/<id>_NN.(ogg|mp3|wav)`. Sem arquivo, não toca.
-  - **Som dos prédios:** som de prédio só com a tela dele aberta e fade de 0,3 s ao sair; na vila, só a trilha e o ambiente da vila.
+  - **Som dos prédios:** som de prédio só com a tela dele aberta e fade de 0,3 s ao sair; na vila, só a trilha e o ambiente da vila. Estábulo, armeiro e ferreiro não têm som contínuo: o cavalo bufa ao toque (`intervalo_min_s` 2 s) e o ferreiro martela ao toque ou com peça pronta.
   - **Gerenciador único:** todo som passa pelo autoload `Audio` (música, ambiente por tela, efeitos por tela, interface); nunca `AudioStreamPlayer` em cena.
   - **Prédio ou tela nova:** ambiente em `sons.json > telas` e um caso em `tests/audio/som_telas_check.gd` (skill `som`).
 - **Ferramentas de arte (PixelLab):** rodar com `python -E -P` (o Pillow está na pasta do usuário; `-I` a esconde). Cliente em `tools/pixellab_cliente.py` (cache em `game/art/fontes/cache/`, fora do git). Limites que já morderam: altura múltipla de 4; pixen até 768 de largura; edit/transfer de 160 px = 4/3 quadros por pedido; quadros em `{"image":…, "size":…}`; o servidor às vezes devolve 504 (o cliente reenvia).
@@ -89,6 +89,8 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
   - A câmera de cada fase está em `controlador_justa.gd` (`_ao_entrar_na_fase`) e os zooms em `camera_arena.gd`/exports do controlador.
   - Corrida e Mira usam um plano só (`duelo`); o corte é só no acerto.
   - A pista desenhada sai de `px_por_unidade_corrida`/`fator_mira` (`_preparar_pista` → `Arena.ajustar_pista`), não das marcas da cena. Mexeu nas pistas? Confira as capturas de cada fase (16:9 e 20:9) e o `justa_check`.
+- **Interface legível no celular:** texto de 22 px, título de 28 px (`theme_type_variation = &"Titulo"`) e botão ou ícone tocável com no mínimo 64×64 px, vindos de `game/scenes/ui/tema_jogo.tres`. Nunca `font_size` menor que 22 em cena ou script. Tela nova ou mudança de layout: abra em 16:9 e 20:9 e rode `tests/ui/legibilidade_check.gd` (acrescente a tela à lista dele). A vila é vista com zoom (`vila.json > camera`) e arrasta com o dedo.
+- **Cores da vila:** seguem a arena da justa (clara e saturada): shader `vivificar` e `ambiente.json > paleta`. `ambiente.json > brilho_minimo` (0,85) vale para toda hora e clima. Hora e clima fixos para capturas: `TM_HORA` e `TM_CLIMA` na demo da vila.
 - **Mudou a geometria do cavaleiro?** Meça as zonas na arte, atualize `mira.json`, os pontos fixos dos testes e regrave as referências (`TM_GRAVAR=1`) e os cenários (`tools/gravar_cenarios.gd`).
 - **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
 - **Mudança na regra da justa:**

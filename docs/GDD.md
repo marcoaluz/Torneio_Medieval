@@ -165,14 +165,29 @@ A tela principal é a vila vista de cima, sem andar livre: o jogador toca num pr
 | Praça | Cavaleiros de outros jogadores da mesma ordem passando a cavalo |
 | Casa senhorial | A bandeira da casa e a da ordem no alto da torre |
 
-A vila também tem ciclo de dia e noite (tochas acesas à noite) e clima (chuva, neblina), no tom sombrio da direção de arte. Prédio ocioso mostra o personagem parado esperando, o que convida o jogador a dar uma tarefa.
+A vila também tem ciclo de dia e noite (tochas acesas à noite) e clima (chuva, neblina), sem nunca escurecer demais (ver Brilho mínimo e cores). Prédio ocioso mostra o personagem parado esperando, o que convida o jogador a dar uma tarefa.
+
+### Interface legível no celular
+
+- **Tamanhos mínimos (`tema_jogo.tres`):** texto de 22 px, títulos de 28 px (variação `Titulo` do tema) e todo botão ou ícone tocável com pelo menos 64×64 px. Números de atributos e de recursos podem ser maiores (28 px). Nenhuma tela usa texto menor por conta própria.
+- **Vila aproximada:** a câmera da vila fica com zoom (`vila.json > camera`), então os prédios enchem a tela; o jogador arrasta o dedo para ver o resto, e só um toque curto abre o prédio. O nome de cada prédio lê 22 px na tela (o jogo divide pelo zoom).
+- **Telas dos prédios:** ocupam a vista inteira (900×528 px na base de 960×540), com o campo de treino e o estábulo maiores. No estábulo, os atributos do cavalo aparecem grandes (nome e valor com barra até o teto), não escondidos em botão desabilitado.
+- **Topo da vila:** retrato do cavaleiro (cabeça e elmo que usa), brasão da casa, nome, nível com a barra de experiência, ouro e gemas, e os botões de Missões, Ordem, Configurações e Baús em ícones de 72×72 px com "!" no canto quando há algo pendente. O retrato abre o perfil, e o perfil abre os Equipamentos. Moldura desenhada da interface.
+- **Teste:** `tests/ui/legibilidade_check.gd` confere tamanhos de texto e de botão e se cada tela cabe na vista, em 16:9 (960×540) e 20:9 (1200×540).
+
+### Brilho mínimo e cores
+
+- **A arena da justa é a referência visual:** clara, saturada e chamativa, com tudo legível (grama amarelo-esverdeada, areia, madeira, bandeirolas vivas). A vila segue a mesma harmonia: grama, trilhas e prédios passam pelo shader `vivificar` (`ambiente.json > paleta`), e fios de bandeirolas nas cores da arena enfeitam os prédios.
+- **Brilho mínimo:** a cor do mundo (hora do dia mais clima) nunca fica abaixo de 85% do brilho do dia em nenhum canal (`ambiente.json > brilho_minimo`), nem à noite nem com chuva ou neblina. A noite é azulada e as tochas acendem, mas a vila continua legível.
 
 ### Som dos prédios
 
 - O som de um prédio (campo de treino, estábulo, armeiro, ferreiro) toca **só enquanto a tela daquele prédio está aberta**.
 - Ao sair, ele para com um fade curto (cerca de 0,3 s).
 - Na vila, toca só a trilha e o ambiente da própria vila (por exemplo, a chuva).
-- Vale também para efeitos repetidos, como o martelo na bigorna, o galope do treino e a escovação.
+- Vale também para efeitos repetidos, como o martelo na bigorna e o galope do treino.
+- **Estábulo:** sem som contínuo e sem ambiente (nada de loop de baia, galope ou passos). Ao tocar no cavalo, ele bufa ou relincha uma vez, com uma variação sorteada e no mínimo 2 s entre uma bufada e outra (`intervalo_min_s` do som no catálogo).
+- **Ferreiro (e armeiro):** sem som contínuo (nada de fole nem martelo em laço). O martelo da oficina bate só no desenho; a bigorna soa uma martelada quando o jogador toca no ferreiro e quando uma peça ou lingote fica pronto com a tela aberta.
 - Toda troca de tela para o ambiente da tela anterior. Uma tela aberta por cima (Equipamentos a partir da forja) para o som da de baixo, que volta quando ela fecha.
 
 ## Equipamentos e direção de arte

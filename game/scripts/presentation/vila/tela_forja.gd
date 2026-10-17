@@ -9,6 +9,10 @@ extends PanelContainer
 ## e de Equipamentos) e Fundir (sucata em ferro e ferro em aço). Embaixo, a
 ## oficina: o martelo bate enquanto há peça na forja (ou lingote no forno) e
 ## "Pegar" recolhe o que ficou pronto. Tudo pelo serviço Jogador.
+## Som (GDD A vila > Som dos prédios): sem som contínuo (nada de fole nem de
+## martelo em laço; o martelo da oficina bate só no desenho). Uma martelada na
+## bigorna soa quando o jogador toca no ferreiro (a bancada ou a bigorna) e
+## quando uma peça ou lingote fica pronto com a tela aberta.
 
 signal abrir_equipamentos
 
@@ -19,6 +23,7 @@ var _martelo: Tween
 var _agora: Button
 var _anuncio_b: Button
 var _agora_id := ""
+var _pronto_visto := {}  ## id do timer -> já estava pronto na última conferência
 var _acumulado := 0.0
 var selecionada := ""  ## peça na bancada do ferreiro (id do item)
 
@@ -33,7 +38,7 @@ const FUNDO_FERREIRO := "res://game/art/sprites/ferreiro/fundo.png"
 @onready var _depois: VistaPeca = $Coluna/Corpo/Cena/Palco/Depois
 @onready var _rotulo_antes: Label = $Coluna/Corpo/Cena/Palco/RotuloAntes
 @onready var _rotulo_depois: Label = $Coluna/Corpo/Cena/Palco/RotuloDepois
-@onready var _peca: Label = $Coluna/Corpo/Cena/Peca
+@onready var _peca: Label = $Coluna/Corpo/Cena/Palco/Peca
 @onready var _consertar: Button = $Coluna/Corpo/Cena/Consertar
 @onready var _bigorna: Control = $Coluna/Oficina/Bigorna
 @onready var _status: Label = $Coluna/Oficina/Status
@@ -73,6 +78,11 @@ func _ready() -> void:
 	if ResourceLoader.exists(FUNDO_FERREIRO):
 		($Coluna/Corpo/Cena/Palco/Fundo as TextureRect).texture = load(FUNDO_FERREIRO)
 	_jog.mudou.connect(func(_s): if visible: montar())
+	# Tocar no ferreiro (a bancada) ou na bigorna: uma martelada.
+	($Coluna/Corpo/Cena/Palco as Control).mouse_filter = Control.MOUSE_FILTER_STOP
+	($Coluna/Corpo/Cena/Palco as Control).gui_input.connect(_ao_tocar_ferreiro)
+	_bigorna.mouse_filter = Control.MOUSE_FILTER_STOP
+	_bigorna.gui_input.connect(_ao_tocar_ferreiro)
 
 ## Abre no prédio ("armeiro" ou "ferreiro").
 func abrir(nome: String) -> void:
@@ -80,19 +90,21 @@ func abrir(nome: String) -> void:
 	aba = "criar" if nome == "armeiro" else "consertar"
 	_cena.visible = nome == "ferreiro"
 	# Ferreiro: mais largo para a bancada (384) e a lista ao lado.
-	var meia := Vector2(440, 250) if nome == "ferreiro" else Vector2(330, 230)
+	var meia := Vector2(450, 264)
 	offset_left = -meia.x
 	offset_right = meia.x
 	offset_top = -meia.y
 	offset_bottom = meia.y
 	selecionada = ""
 	_mensagem.text = ""
+	_pronto_visto.clear()
 	visible = true
 	montar()
 
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	_mensagem.visible = _mensagem.text != ""  # só ocupa lugar quando há o que dizer
 	_acumulado += delta
 	if _acumulado >= 1.0:
 		_acumulado = 0.0
@@ -157,7 +169,6 @@ func _montar_criar() -> void:
 			var l := Label.new()
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.add_theme_font_size_override("font_size", 12)
 			l.text = "%s\n%s" % [tr("ITEM_" + m.to_upper()), tr("FORJA_RECEITA").format({"custo": _custo(rec["materiais"]),
 				"ouro": int(rec["ouro"]), "tempo": Vila.formatar_tempo(_jog.duracao_timer(int(rec["segundos"])))})]
 			l.add_theme_color_override("font_color", TelaBaus.cor_raridade(Balanceamento.carregar("itens")["modelos"][m]["raridade"]))
@@ -186,7 +197,6 @@ func _montar_melhorar() -> void:
 		var l := Label.new()
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		l.add_theme_font_size_override("font_size", 12)
 		if c["maximo"]:
 			l.text = tr("FORJA_MELHORAR_MAX").format({"item": nome, "nivel": c["nivel"]})
 		elif int(c["nivel"]) >= int(c["teto"]):
@@ -263,7 +273,6 @@ func _montar_consertar() -> void:
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.icon = ArteUi.icone_item(it["modelo"])
 		b.add_theme_constant_override("icon_max_width", 28)
-		b.add_theme_font_size_override("font_size", 12)
 		b.add_theme_color_override("font_color", TelaBaus.cor_raridade(modelos[it["modelo"]]["raridade"]))
 		b.text = "%s%s · %s" % [tr("ITEM_" + str(it["modelo"]).to_upper()), "  ✓" if equip.has(it["id"]) else "", _nome_estagio(it["id"])]
 		var id: String = it["id"]
@@ -278,7 +287,6 @@ func _montar_consertar() -> void:
 		var linha := HBoxContainer.new()
 		var l := Label.new()
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		l.add_theme_font_size_override("font_size", 12)
 		l.text = tr("ITEM_" + str(_jog.item(t["item"]).get("modelo", "")).to_upper())
 		linha.add_child(l)
 		var b := Button.new()
@@ -375,6 +383,11 @@ func _montar_oficina() -> void:
 		return
 	var t: Dictionary = ts[0]
 	var pronto := ServicoTempo.pronto(int(t["termina_em"]))
+	# Ficou pronto agora, com a tela aberta: uma martelada (a primeira conferência só anota).
+	if _pronto_visto.has(t["id"]) and pronto and not _pronto_visto[t["id"]]:
+		_golpe()
+		_som_do_martelo()
+	_pronto_visto[t["id"]] = pronto
 	if tipo == "forja":
 		var item := tr("ITEM_" + str(t["modelo"]).to_upper())
 		_status.text = tr("FORJA_PRONTA").format({"item": item}) if pronto else tr("FORJA_EM_ANDAMENTO").format({"item": item,
@@ -409,7 +422,8 @@ func _pegar_pronto() -> void:
 			montar()
 			return
 
-## Martelo em loop (Tween): sobe e bate, com faíscas a cada golpe.
+## Martelo em loop (Tween): sobe e bate, com faíscas a cada golpe. Só desenho,
+## sem som.
 func _bater_martelo() -> void:
 	if _martelo and _martelo.is_valid():
 		return
@@ -418,9 +432,17 @@ func _bater_martelo() -> void:
 	_martelo.tween_property(m, "rotation_degrees", 50.0, 0.35).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_martelo.tween_property(m, "rotation_degrees", -10.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_martelo.tween_callback(_faiscas)
-	_martelo.tween_callback(_som_do_martelo)
 
-## Cada golpe soa na bigorna, como efeito desta tela (o Audio corta ao sair).
+## Toque no ferreiro: o martelo desce e a bigorna soa uma vez.
+func _ao_tocar_ferreiro(ev: InputEvent) -> void:
+	if (ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT) 			or (ev is InputEventScreenTouch and ev.pressed):
+		tocar_no_ferreiro()
+
+func tocar_no_ferreiro() -> void:
+	_golpe()
+	_som_do_martelo()
+
+## Uma martelada na bigorna, como efeito desta tela (o Audio corta ao sair).
 func _som_do_martelo() -> void:
 	var audio := get_node_or_null("/root/Audio") as ServicoAudio
 	if audio and is_visible_in_tree():

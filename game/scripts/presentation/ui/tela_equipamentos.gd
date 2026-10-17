@@ -82,7 +82,6 @@ func montar() -> void:
 		var b := Button.new()
 		b.focus_mode = Control.FOCUS_NONE
 		b.custom_minimum_size = Vector2(150, 34)
-		b.add_theme_font_size_override("font_size", 11)
 		var it := _jog.equipado(nome)
 		var linha2 := tr("EQUIP_VAZIO") if it.is_empty() else tr("ITEM_" + str(it["modelo"]).to_upper())
 		b.text = "%s\n%s" % [tr("ESPACO_" + nome.to_upper()), linha2]

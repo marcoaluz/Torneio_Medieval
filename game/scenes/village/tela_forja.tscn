@@ -10,10 +10,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -330.0
-offset_top = -225.0
-offset_right = 330.0
-offset_bottom = 235.0
+offset_left = -450.0
+offset_top = -264.0
+offset_right = 450.0
+offset_bottom = 264.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
@@ -28,16 +28,14 @@ layout_mode = 2
 [node name="Titulo" type="Label" parent="Coluna/Cabecalho"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"Titulo"
 
 [node name="Abas" type="HBoxContainer" parent="Coluna/Cabecalho"]
 layout_mode = 2
 
 [node name="Materiais" type="Label" parent="Coluna"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-autowrap_mode = 3
+text_overrun_behavior = 3
 
 [node name="Corpo" type="HBoxContainer" parent="Coluna"]
 layout_mode = 2
@@ -51,41 +49,43 @@ theme_override_constants/separation = 4
 
 [node name="Palco" type="Control" parent="Coluna/Corpo/Cena"]
 clip_contents = true
-custom_minimum_size = Vector2(384, 216)
+custom_minimum_size = Vector2(340, 190)
 layout_mode = 2
 mouse_filter = 2
 
 [node name="Fundo" type="TextureRect" parent="Coluna/Corpo/Cena/Palco"]
 texture_filter = 1
 layout_mode = 0
-offset_right = 384.0
-offset_bottom = 216.0
+offset_right = 340.0
+offset_bottom = 190.0
 mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
 [node name="Antes" type="Control" parent="Coluna/Corpo/Cena/Palco"]
 layout_mode = 0
-offset_left = 22.0
-offset_top = 14.0
-offset_right = 172.0
-offset_bottom = 156.0
+offset_left = 14.0
+offset_top = 30.0
+offset_right = 144.0
+offset_bottom = 124.0
 mouse_filter = 2
 script = ExtResource("3")
 
 [node name="Depois" type="Control" parent="Coluna/Corpo/Cena/Palco"]
 layout_mode = 0
-offset_left = 212.0
-offset_top = 14.0
-offset_right = 362.0
-offset_bottom = 156.0
+offset_left = 196.0
+offset_top = 30.0
+offset_right = 326.0
+offset_bottom = 124.0
 mouse_filter = 2
 script = ExtResource("3")
 
 [node name="Seta" type="Label" parent="Coluna/Corpo/Cena/Palco"]
 layout_mode = 0
-offset_left = 172.0
-offset_top = 64.0
-offset_right = 212.0
-offset_bottom = 100.0
+offset_left = 144.0
+offset_top = 56.0
+offset_right = 196.0
+offset_bottom = 92.0
 theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
 theme_override_colors/font_outline_color = Color(0.08, 0.05, 0.04, 1)
 theme_override_constants/outline_size = 6
@@ -95,35 +95,35 @@ horizontal_alignment = 1
 
 [node name="RotuloAntes" type="Label" parent="Coluna/Corpo/Cena/Palco"]
 layout_mode = 0
-offset_left = 12.0
-offset_top = 160.0
-offset_right = 182.0
-offset_bottom = 208.0
+offset_left = 2.0
+offset_top = 128.0
+offset_right = 160.0
+offset_bottom = 188.0
 theme_override_colors/font_outline_color = Color(0.08, 0.05, 0.04, 1)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="RotuloDepois" type="Label" parent="Coluna/Corpo/Cena/Palco"]
 layout_mode = 0
-offset_left = 202.0
-offset_top = 160.0
-offset_right = 372.0
-offset_bottom = 208.0
+offset_left = 180.0
+offset_top = 128.0
+offset_right = 338.0
+offset_bottom = 188.0
 theme_override_colors/font_color = Color(0.7, 0.95, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0.08, 0.05, 0.04, 1)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Peca" type="Label" parent="Coluna/Corpo/Cena"]
-custom_minimum_size = Vector2(384, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
+[node name="Peca" type="Label" parent="Coluna/Corpo/Cena/Palco"]
+layout_mode = 0
+offset_right = 340.0
+offset_bottom = 30.0
+theme_override_colors/font_outline_color = Color(0.08, 0.05, 0.04, 1)
+theme_override_constants/outline_size = 5
 horizontal_alignment = 1
-autowrap_mode = 3
+text_overrun_behavior = 3
 
 [node name="Consertar" type="Button" parent="Coluna/Corpo/Cena"]
 layout_mode = 2
@@ -201,9 +201,9 @@ layout_mode = 2
 focus_mode = 0
 
 [node name="Mensagem" type="Label" parent="Coluna"]
+visible = false
 layout_mode = 2
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
 [node name="Botoes" type="HBoxContainer" parent="Coluna"]

@@ -10,10 +10,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -420.0
-offset_top = -250.0
-offset_right = 420.0
-offset_bottom = 250.0
+offset_left = -450.0
+offset_top = -262.0
+offset_right = 450.0
+offset_bottom = 262.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
@@ -33,13 +33,13 @@ theme_override_constants/separation = 6
 
 [node name="Palco" type="Control" parent="Coluna/Corpo/Esquerda"]
 clip_contents = true
-custom_minimum_size = Vector2(260, 300)
+custom_minimum_size = Vector2(230, 220)
 layout_mode = 2
 
 [node name="Fundo" type="ColorRect" parent="Coluna/Corpo/Esquerda/Palco"]
 layout_mode = 0
-offset_right = 260.0
-offset_bottom = 300.0
+offset_right = 230.0
+offset_bottom = 220.0
 mouse_filter = 2
 color = Color(0.2, 0.14, 0.12, 1)
 
@@ -60,28 +60,26 @@ theme_override_constants/separation = 0
 
 [node name="Nome" type="Label" parent="Coluna/Corpo/Esquerda/Identidade/Textos"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
-theme_override_font_sizes/font_size = 22
+theme_type_variation = &"Titulo"
 
 [node name="Casa" type="Label" parent="Coluna/Corpo/Esquerda/Identidade/Textos"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+text_overrun_behavior = 3
 
 [node name="Titulo" type="Label" parent="Coluna/Corpo/Esquerda"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
+text_overrun_behavior = 3
 
 [node name="Direita" type="VBoxContainer" parent="Coluna/Corpo"]
-custom_minimum_size = Vector2(500, 0)
+custom_minimum_size = Vector2(540, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 2
 
 [node name="Aviso" type="Label" parent="Coluna"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.45, 0.35, 1)
-theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 
 [node name="Rodape" type="HBoxContainer" parent="Coluna"]
@@ -89,11 +87,18 @@ layout_mode = 2
 
 [node name="CasaNivel" type="Label" parent="Coluna/Rodape"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+size_flags_horizontal = 3
+autowrap_mode = 3
+custom_minimum_size = Vector2(150, 0)
+
+[node name="Equipamentos" type="Button" parent="Coluna/Rodape"]
+layout_mode = 2
+focus_mode = 0
 
 [node name="Melhorar" type="Button" parent="Coluna/Rodape"]
 layout_mode = 2
 size_flags_horizontal = 3
+autowrap_mode = 3
 focus_mode = 0
 
 [node name="Fechar" type="Button" parent="Coluna/Rodape"]

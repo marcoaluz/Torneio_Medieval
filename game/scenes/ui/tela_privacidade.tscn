@@ -42,7 +42,7 @@ layout_mode = 2
 [node name="Titulo" type="Label" parent="Painel/Coluna"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.55, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 28
 
 [node name="Rolagem" type="ScrollContainer" parent="Painel/Coluna"]
 layout_mode = 2
@@ -52,7 +52,6 @@ horizontal_scroll_mode = 0
 [node name="Texto" type="Label" parent="Painel/Coluna/Rolagem"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
 [node name="Personalizados" type="CheckButton" parent="Painel/Coluna"]

@@ -424,7 +424,6 @@ func _montar_chat() -> void:
 			var r := _jog.chat_enviar(canal, "", id)
 			if not r["ok"]:
 				_erro(r))
-		b.add_theme_font_size_override("font_size", 11)
 	var msgs := _jog.chat_mensagens(canal)
 	if msgs.is_empty():
 		_rotulo(tr("CHAT_VAZIO"))
@@ -616,7 +615,6 @@ func _texto(texto: String) -> Label:
 	var l := Label.new()
 	l.text = texto
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", 12)
 	return l
 
 func _rotulo(texto: String, destaque := false) -> Label:
@@ -638,7 +636,6 @@ func _botao_em(pai: Control, texto: String, acao: Callable) -> Button:
 	var b := Button.new()
 	b.focus_mode = Control.FOCUS_NONE
 	b.text = texto
-	b.add_theme_font_size_override("font_size", 11)
 	b.pressed.connect(acao)
 	pai.add_child(b)
 	return b
