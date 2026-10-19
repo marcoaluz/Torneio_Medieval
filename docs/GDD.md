@@ -175,6 +175,18 @@ A vila também tem ciclo de dia e noite (tochas acesas à noite) e clima (chuva,
 - **Topo da vila:** retrato do cavaleiro (cabeça e elmo que usa), brasão da casa, nome, nível com a barra de experiência, ouro e gemas, e os botões de Missões, Ordem, Configurações e Baús em ícones de 72×72 px com "!" no canto quando há algo pendente. O retrato abre o perfil, e o perfil abre os Equipamentos. Moldura desenhada da interface.
 - **Teste:** `tests/ui/legibilidade_check.gd` confere tamanhos de texto e de botão e se cada tela cabe na vista, em 16:9 (960×540) e 20:9 (1200×540).
 
+### Direção de arte da vila
+
+- **Referência:** a arena da justa. A vila é clara e saturada, em terra batida, madeira clara e cores heráldicas vivas, sem ilhas de terra flutuando sobre a grama.
+- **Chão contínuo:** cada prédio tem um terreiro de terra batida maior que a base desenhada (cobre a borda dela), com um anel suave que some na grama. Caminhos de terra ligam o terreiro de cada prédio à praça e aos vizinhos, formando um anel, e a praça central tem uma roda de terra por fora. Árvores espalhadas só onde não há prédio nem caminho. Tudo por código (`ChaoVila`, `ambiente.json > chao`) até a arte nova.
+- **Telhados nas cores da arena:** cada prédio tem uma cor de telhado tirada das bandeirolas (vermelho, azul, verde, amarelo, roxo, cinza-azulado); o shader `vivificar` puxa só as telhas (pixels quentes na parte de cima do quadro) para essa cor, mantendo a luz e a sombra da arte.
+- **Bandeirolas:** fios ligando os prédios nas cores da arena, também em volta da casa senhorial e da arena.
+- **Arte nova (pendente):** os 9 prédios redesenhados sem base, com telhado colorido e 4 a 5 estágios; prompts em `docs/ARTE_PENDENTE.md`.
+
+### Menus sobre a vila
+
+- **Um painel por vez.** Abrir uma tela, painel de prédio, ficha ou duelo esconde a que estava aberta (ela volta quando a nova fecha) e escurece tudo atrás, o topo inclusive. Nada do topo ou da vila aparece por cima de um painel. A janela de oferta só aparece com tudo fechado. Implementado em `GerenciadorPaineis`; teste `tests/ui/paineis_check.gd`; capturas com `bash tools/capturar_menus.sh <pasta>` em 16:9 e 20:9.
+
 ### Brilho mínimo e cores
 
 - **A arena da justa é a referência visual:** clara, saturada e chamativa, com tudo legível (grama amarelo-esverdeada, areia, madeira, bandeirolas vivas). A vila segue a mesma harmonia: grama, trilhas e prédios passam pelo shader `vivificar` (`ambiente.json > paleta`), e fios de bandeirolas nas cores da arena enfeitam os prédios.

@@ -2,35 +2,156 @@
 	"versao": 1,
 	"_nota": "Ambiente da vila (apresentacao): cor do mundo por hora do dia (interpolada entre as marcas), horas com tochas acesas, clima sorteado uma vez por dia (pesos) e intensidades. Horario = relogio do celular.",
 	"cores_por_hora": [
-		[0, "dbe3ff"],
-		[5, "dde5ff"],
-		[6, "ffe4d4"],
-		[8, "ffffff"],
-		[17, "fff6e8"],
-		[19, "ffdcc8"],
-		[20, "dde0ff"],
-		[24, "dbe3ff"]
-	],	"brilho_minimo": 0.85,
+		[
+			0,
+			"dbe3ff"
+		],
+		[
+			5,
+			"dde5ff"
+		],
+		[
+			6,
+			"ffe4d4"
+		],
+		[
+			8,
+			"ffffff"
+		],
+		[
+			17,
+			"fff6e8"
+		],
+		[
+			19,
+			"ffdcc8"
+		],
+		[
+			20,
+			"dde0ff"
+		],
+		[
+			24,
+			"dbe3ff"
+		]
+	],
+	"brilho_minimo": 0.85,
 	"paleta": {
 		"_nota": "Cores da vila alinhadas com a arena da justa (clara e saturada: grama #93b657, areia #bf965f, madeira #5e3a2d, bandeiras vivas). Passa por game/art/shaders/vivificar.gdshader no chao e nos predios. brilho_minimo: a cor do mundo (hora e clima) nunca fica abaixo disso em nenhum canal, ou seja, a vila nunca escurece mais que 15% do brilho do dia.",
 		"gama": 0.6,
 		"brilho": 1.18,
 		"saturacao": 1.35,
-		"tom_grama": [1.05, 1.0, 0.72],
-		"tom_predios": [1.0, 1.0, 1.0]
+		"tom_grama": [
+			1.05,
+			1.0,
+			0.72
+		],
+		"tom_predios": [
+			1.0,
+			1.0,
+			1.0
+		],
+		"telhados": {
+			"casa_senhorial": "d8362f",
+			"estabulo": "2f6bc4",
+			"campo_treino": "3f9a4a",
+			"ferreiro": "6a7a96",
+			"arena": "8a45b0",
+			"loja": "f0bf30",
+			"salao_liga": "d8362f",
+			"guilda": "2f6bc4",
+			"armeiro": "3f9a4a"
+		},
+		"forca_telhado": 0.7,
+		"_nota_telhados": "Cor do telhado de cada predio, tiradas das bandeirolas da arena; forca_telhado = quanto das telas quentes (marrom-alaranjadas, parte de cima do predio) vai para essa cor (0 desliga). Shader vivificar."
 	},
 	"bandeirolas": {
 		"_nota": "Fios de bandeirolas entre os predios, nas cores da arena. cores em hex; fios = pares de pontos do mapa [x1,y1,x2,y2]; flecha = quanto o fio cai no meio (px); espaco = px entre bandeirolas.",
-		"cores": ["d8362f", "2f6bc4", "f0bf30", "3f9a4a", "8a45b0", "f1e7d0"],
-		"fios": [[195, 200, 405, 140], [555, 140, 765, 200], [260, 372, 395, 342], [565, 342, 700, 372]],
+		"cores": [
+			"d8362f",
+			"2f6bc4",
+			"f0bf30",
+			"3f9a4a",
+			"8a45b0",
+			"f1e7d0"
+		],
+		"fios": [
+			[
+				195,
+				200,
+				405,
+				140
+			],
+			[
+				555,
+				140,
+				765,
+				200
+			],
+			[
+				260,
+				372,
+				395,
+				342
+			],
+			[
+				565,
+				342,
+				700,
+				372
+			],
+			[
+				300,
+				118,
+				410,
+				98
+			],
+			[
+				550,
+				98,
+				660,
+				118
+			],
+			[
+				320,
+				470,
+				420,
+				492
+			],
+			[
+				540,
+				492,
+				640,
+				470
+			],
+			[
+				160,
+				330,
+				195,
+				380
+			]
+		],
 		"flecha": 16,
 		"espaco": 20,
 		"lado": 11
 	},
-	"tochas": { "acende": 18.5, "apaga": 6.5 },
+	"tochas": {
+		"acende": 18.5,
+		"apaga": 6.5
+	},
 	"clima": {
-		"pesos": { "limpo": 45, "nublado": 30, "chuva": 15, "neblina": 10 },
-		"escurecer": { "limpo": 1.0, "nublado": 0.94, "chuva": 0.9, "neblina": 0.93 },
+		"pesos": {
+			"limpo": 45,
+			"nublado": 30,
+			"chuva": 15,
+			"neblina": 10
+		},
+		"escurecer": {
+			"limpo": 1.0,
+			"nublado": 0.94,
+			"chuva": 0.9,
+			"neblina": 0.93
+		},
 		"chuva_gotas": 140,
 		"neblina_manchas": 9
 	},
@@ -41,5 +162,62 @@
 		"praca_volta_s": 16,
 		"praca_y": 336,
 		"praca_escala": 0.3
+	},
+	"chao": {
+		"_nota": "Chao continuo da vila feito por codigo (ChaoVila): terreiro de terra sob cada predio (escala_terreiro x o tamanho do predio, desloca_y px para baixo) que cobre a borda da base desenhada, anel suave por fora, caminhos de terra entre predios vizinhos (pares de nomes), roda de terra na praca e arvores extras por sorteio fixo (area = [x, y, largura, altura] do mapa; folga do predio e do caminho em px).",
+		"cor_terra": "93856a",
+		"cor_borda": "8e8f62",
+		"escala_terreiro": 1.0,
+		"desloca_y": 8,
+		"largura_trilha": 24,
+		"curva_px": 14,
+		"caminhos": [
+			[
+				"estabulo",
+				"ferreiro"
+			],
+			[
+				"ferreiro",
+				"arena"
+			],
+			[
+				"arena",
+				"armeiro"
+			],
+			[
+				"armeiro",
+				"guilda"
+			],
+			[
+				"guilda",
+				"campo_treino"
+			],
+			[
+				"campo_treino",
+				"salao_liga"
+			],
+			[
+				"salao_liga",
+				"casa_senhorial"
+			],
+			[
+				"casa_senhorial",
+				"loja"
+			],
+			[
+				"loja",
+				"estabulo"
+			]
+		],
+		"semente_arvores": 77,
+		"arvores_extras": 16,
+		"arvore_distancia": 62,
+		"arvore_folga": 36,
+		"area": [
+			10,
+			40,
+			940,
+			495
+		]
 	}
 }

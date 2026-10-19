@@ -106,3 +106,52 @@ Peças só de aparência dadas na primeira vitória sobre cada campeão (`itens.
 
 - **Troféus da estante:** hoje cada lugar mostra o brasão do campeão num botão. Um troféu desenhado por campeão (taça, elmo ou lança quebrada sobre um pedestal, 64×64) deixaria a estante com cara de casa senhorial.
 - **Voz do arauto (ElevenLabs, gasta crédito):** a tela de duelo usa a fala `senhoras_e_senhores`. Falas novas sugeridas: "Contra o campeão!" e "A revanche!" (entrariam em `game/data/audio/sons.json > voz > falas`).
+
+## Prédios da vila redesenhados no estilo da arena (9 prédios, 4 a 5 estágios)
+
+**Por quê:** os prédios atuais (`game/art/sprites/vila/*.png`) vêm de uma geração anterior: cada um tem uma base de terra recortada que parece uma ilha flutuante sobre a grama, e os telhados são todos marrons. A arena da justa (clara, saturada, madeira, bandeirolas vivas) é a referência. Até haver crédito, a vila já se aproxima disso por código: terreiro contínuo de terra sob cada prédio que cobre a borda da base, caminhos entre os prédios e telhados tingidos pelo shader `vivificar` com as cores abaixo (`game/data/vila/ambiente.json > paleta > telhados`). Quando a arte nova chegar, a base some e o tingimento por código pode ser desligado (`forca_telhado` 0), porque a telha já virá colorida.
+
+**Como gerar** (gasta crédito do PixelLab: só com o aval do usuário; os estágios 2 a 5 usam o 1 como `init_image`, como em `tools/gerar_arte.py`): apagar `game/art/fontes/vila/<prédio>_*.png` do que for refazer, `python -I tools/gerar_arte.py --grupo vila --so <prédio>` depois de trocar os textos de `PREDIOS` e `ESTAGIOS` pelos prompts abaixo, e `bash .claude/skills/run-torneio-medieval/driver.sh script res://tools/montar_folhas_vila.gd` para montar as folhas. Conferir as capturas com `bash tools/capturar_menus.sh`.
+
+**Prefixo de estilo** (antes de todo prompt; é o da skill `estilo-arte`, com a luz da arena):
+
+> High-detail pixel art, dark medieval tone, gritty and mature, muted earthy palette (iron grey, worn leather brown, mud, overcast sky), heraldic colors as the only saturated accents, rim light from an overcast sky, visible wear, scratches and dirt, crisp pixel clusters, no anti-aliasing blur, no outlines thicker than 1 pixel, bright saturated daylight like a festive jousting arena (yellow-green grass, warm sand, light timber), vivid heraldic roof colors
+
+**Sufixo obrigatório** (acaba com a base flutuante):
+
+> single building only, top-down three-quarter view, sitting directly on flat ground with NO base, NO floating island, NO diorama block, NO dirt platform, NO terrain tile, NO cast shadow plate, transparent background, no trees, no people
+
+**Negativo:**
+
+> cartoon, chibi, cute, bright saturated colors everywhere, 3D render, blurry, smooth gradients, text, watermark, modern elements, fantasy glowing armor, anime, floating island, diorama base, terrain block, dirt platform, ground tile, cliff, trees, bushes, dull brown roof
+
+Parâmetros de cada pedido: `/generate-image-pixflux`, `view: high top-down`, `no_background: true`, `detail: highly detailed`, `shading: detailed shading`, `outline: selective outline`, `color_image` com a paleta do jogo mais a cor do telhado. Tamanho de cada quadro: o de `vila.json > tamanho` × 1,3 / × 1,7 arredondado a 8 (ver `tamanho_predio`).
+
+| Prédio | Estágios | Quadro | Cor do telhado | Prompt (depois do prefixo, antes do sufixo) |
+| --- | --- | --- | --- | --- |
+| Casa senhorial (`casa_senhorial`) | 5 | 192x160 | `#d8362f` (bright vermilion red) | a lord's manor house with a small tower and a banner pole, red roof tiles with a white trim |
+| Estábulo (`estabulo`) | 4 | 168x136 | `#2f6bc4` (bright cobalt blue) | a horse stable with open stalls, hay bales and a fenced paddock, blue shingle roof |
+| Campo de treino (`campo_treino`) | 4 | 184x136 | `#3f9a4a` (leaf green) | a jousting practice shed with a wooden quintain, weapon rack and a fence, green shingle roof |
+| Ferreiro (`ferreiro`) | 4 | 144x128 | `#6a7a96` (slate blue-grey) | a blacksmith workshop with a stone forge chimney, anvil and bellows under a slate blue-grey roof |
+| Arena de torneios (`arena`) | 5 | 224x168 | `#8a45b0` (violet purple) | a small jousting arena with a tilt barrier, wooden stands and pennants, violet and white striped canvas roof |
+| Loja (`loja`) | 4 | 144x128 | `#f0bf30` (golden yellow) | a merchant stall shop with a golden yellow and white striped awning, crates and barrels |
+| Salão da liga (`salao_liga`) | 4 | 160x136 | `#d8362f` (bright vermilion red) | a guild hall of champions with heraldic banners and a stone entrance, bright red roof |
+| Sede da ordem (`guilda`) | 4 | 160x136 | `#2f6bc4` (bright cobalt blue) | a knights' order hall, a stately timber and stone lodge with a wide double door, a plain bare wooden signboard and an empty flagpole, no heraldry, blue roof |
+| Armeiro (`armeiro`) | 4 | 160x136 | `#3f9a4a` (leaf green) | an armorer's workshop with armor stands, shields on the walls and a workbench, green shingle roof |
+
+**Estágios** (o prompt do prédio + uma destas linhas; estágio 1 é o mais humilde, e os de 4 estágios pulam o primeiro da lista de 5):
+
+- Prédios de 5 estágios:
+  1. tiny humble one-room version, rough timber walls and a sagging roof, patched and poor
+  2. small modest version, timber frame with plaster walls and a wooden shingle roof
+  3. medium sturdy version, stone ground floor with timber upper floor
+  4. large prosperous version, dressed stone walls, two floors, small heraldic banners
+  5. grand imposing version, fine stonework, three floors with a tower, tall roof, large banners and iron details
+- Prédios de 4 estágios:
+  1. small modest version, timber frame with plaster walls and a wooden shingle roof
+  2. medium sturdy version, stone ground floor with timber upper floor
+  3. large prosperous version, dressed stone walls, two floors, small heraldic banners
+  4. grand imposing version, fine stonework, tall roof, large banners and iron details
+
+**Regras do resultado:** o prédio termina na linha do chão (nada de borda de terra: a vila põe o terreiro por baixo); telhado nas cores da tabela, nunca marrom; nada de brasão desenhado na sede da ordem (o jogo põe o estandarte); mesma luz vinda do alto à esquerda nos 9; o mesmo prédio mantém a silhueta de um estágio ao outro.
+

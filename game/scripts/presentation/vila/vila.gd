@@ -55,10 +55,13 @@ var tela_equipamentos: TelaEquipamentos:
 			_tela_equipamentos.visible = false
 			$Interface.add_child(_tela_equipamentos)
 			_som_da_tela(_tela_equipamentos)
+			if paineis:
+				paineis.registrar(_tela_equipamentos)
 			$Interface.move_child(_tela_equipamentos, $Interface/TelaTreino.get_index() + 1)
 		return _tela_equipamentos
 ## Ficha do adversário (antes de toda justa do PvE e do PvP) e tela de duelo
 ## (antes de um campeão), por cima de tudo; criadas na primeira vez.
+var paineis: GerenciadorPaineis
 var _ficha: FichaAdversario
 var _duelo: DueloCampeao
 ## O que Lutar faz na ficha aberta agora.
@@ -133,6 +136,11 @@ func _ready() -> void:
 	bandeirolas.configurar(ambiente.configuracao()["bandeirolas"])
 	for t in $Interface.get_children():
 		_som_da_tela(t)
+	paineis = GerenciadorPaineis.new()
+	paineis.name = "Paineis"
+	add_child(paineis)
+	paineis.configurar($Interface)
+	paineis.todos_fechados.connect(atualizar)
 	_jog.mudou.connect(func(_s): atualizar(); vida.atualizar())
 	vida.configurar(self, _jog)
 	cena_historia.terminou.connect(_ao_terminar_cena)
@@ -182,9 +190,11 @@ func _chao_com_arte() -> void:
 	$Chao.add_child(chao)
 	$Chao.move_child(chao, 0)
 	var destinos := []
+	var predios := []
 	for p: PredioVila in $Predios.get_children():
 		destinos.append(p.position + Vector2(0, p.tamanho.y * 0.45))
-	if chao.montar(destinos):
+		predios.append({"nome": p.nome, "pos": p.position, "tam": p.tamanho})
+	if chao.montar(destinos, predios, ambiente.configuracao().get("chao", {})):
 		for f in $Chao.get_children():
 			if f.is_in_group("provisorio"):
 				f.visible = false
@@ -197,10 +207,16 @@ func _cores_vivas() -> void:
 	var grama := ambiente.material_vivo("tom_grama")
 	var predios_mat := ambiente.material_vivo("tom_predios")
 	for n in $Chao.find_children("*", "CanvasItem", true, false):
-		if n is Sprite2D or n is Line2D:
+		if n is Sprite2D or n is Line2D or n is Polygon2D:
 			n.material = grama if (n.get_parent().name == "Arte" and n is Sprite2D and (n as Sprite2D).region_enabled) else predios_mat
+	# Telhado de cada prédio tingido com uma cor da arena (shader, só nos pixels de telha).
+	var telhados: Dictionary = ambiente.configuracao()["paleta"].get("telhados", {})
 	for p: PredioVila in $Predios.get_children():
-		p.get_node("Sprite").material = predios_mat
+		var m := ambiente.material_vivo("tom_predios")
+		if telhados.has(p.nome):
+			m.set_shader_parameter("cor_telhado", Color(str(telhados[p.nome])))
+			m.set_shader_parameter("forca_telhado", float(ambiente.configuracao()["paleta"].get("forca_telhado", 0.0)))
+		p.get_node("Sprite").material = m
 
 var _recursos := {}  ## ouro/gemas -> Label do número (com ícone ao lado)
 var _avisos := {}  ## botão do topo -> Label do aviso ("!") no canto
@@ -290,7 +306,7 @@ func _ajustar_camera(cfg: Dictionary) -> void:
 func atualizar() -> void:
 	_atualizar_topo()
 	# Oferta nova (GDD: janela que fecha com um toque, sem bloquear).
-	if not janela_oferta.visible and not cena_historia.visible:
+	if not janela_oferta.visible and (paineis == null or paineis.nenhum_aberto()):
 		var of := _jog.oferta_nova()
 		if not of.is_empty():
 			janela_oferta.mostrar(of, tela_loja.texto_conteudo(of["conteudo"]))
@@ -376,6 +392,7 @@ func ficha() -> FichaAdversario:
 		_ficha.grow_horizontal = Control.GROW_DIRECTION_BOTH
 		_ficha.grow_vertical = Control.GROW_DIRECTION_BOTH
 		$Interface.add_child(_ficha)
+		paineis.registrar(_ficha)
 		_ficha.lutar.connect(_ao_lutar_na_ficha)
 		_ficha.abrir_equipamentos.connect(func():
 			_ficha.fechar()
@@ -393,6 +410,7 @@ func duelo() -> DueloCampeao:
 		_duelo = DueloCampeao.new()
 		_duelo.name = "DueloCampeao"
 		$Interface.add_child(_duelo)
+		paineis.registrar(_duelo)
 		_duelo.entrar.connect(func(): if _ao_lutar.is_valid(): _ao_lutar.call())
 	return _duelo
 

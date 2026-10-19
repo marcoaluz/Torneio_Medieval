@@ -1,6 +1,10 @@
 # Estado atual
 
 > **Retomada rápida (2026-10-14; última sessão 2026-10-18):**
+> - **Menus e vila (2026-10-18), feito e testado:**
+>   - **Um painel por vez** (`GerenciadorPaineis`, `game/scripts/presentation/vila/gerenciador_paineis.gd`): abrir esconde o aberto (volta ao fechar), fundo escuro acima do topo e abaixo dos painéis, oferta só com tudo fechado. Teste `tests/ui/paineis_check.gd`; capturas de 19 telas com `bash tools/capturar_menus.sh <pasta>` (precisa de janela).
+>   - **Chão por código** (`ChaoVila`, `ambiente.json > chao`): terreiros, caminhos entre prédios, roda da praça, 16 árvores, mais fios de bandeirolas; **telhados tingidos** pelo shader `vivificar` (`paleta.telhados`, `forca_telhado`).
+>   - **Pendente:** os 9 prédios redesenhados sem base (prompts em `docs/ARTE_PENDENTE.md`, gasta crédito); painéis a ~8 px da borda de cima e de baixo (mantido pelo tamanho mínimo do tema).
 > - **Campeões (2026-10-18), feito e testado:**
 >   - **Traços:** os 17 campeões e o nêmesis têm traço, alcunha, frase de entrada e de derrota (`pve.json` v3: `traco`, `alcunha`, `frase_entrada`, `frase_derrota`, `retrato`, `peca_trofeu`; textos `TRACO_*`, `ALCUNHA_*`, `ENTRADA_*`, `DERROTA_*`). Catálogo `pve.json > tracos` (8 traços + "rancor" do nêmesis) com a assinatura que `tests/rules/tracos_check.gd` mede por simulação. Habilidades de alguns campeões trocadas para o traço ficar distinguível (só os "muralha" defendem). IA ganhou `habilidade_passada` (opcional, padrão 1) para o traço "paciente", nos dois lados.
 >   - **Ficha do adversário** (`FichaAdversario`, `game/scripts/presentation/ui/ficha_adversario.gd`): antes de toda justa do PvE (torneios e revanche) e do PvP (liga e campeonato), hospedada pela vila; Equipamentos troca e volta; faixa de poder por `RegraPve.faixa_poder` (`pve.json > ficha`).
@@ -48,8 +52,8 @@
 >   - **Pendentes:**
 >     - a criação só tem 1 rosto, porque só existe essa arte (mais rostos gastam crédito do PixelLab);
 >     - com `usa_acao` ligado, apagar progresso vai precisar de um comando no servidor (hoje sobrescreve o save pela REST).
-> - **Próximo:** (1) rodar a suíte inteira (a confirmação de 2026-10-18 foi cortada por falta de memória); (2) usuário decidir os achados da revisão dos campeões (`docs/DECISOES.md` > Campeões) e, se quiser, gerar os retratos (`docs/ARTE_PENDENTE.md`, gasta crédito); (3) PvP e social pelo servidor; publicar na branch (com autorização) e a Parte 4 (4.1–4.3).
-> - **Validação (2026-10-18):** a última rodada inteira de `bash tests/rodar_testes.sh` passou 57 arquivos e acusou 2 testes antigos que fixavam o que mudou de propósito (`circuito_pve_check`, `equipamentos_check`); os dois foram atualizados e passam sozinhos. A rodada de confirmação depois disso foi encerrada pelo sistema por falta de memória: **rodar a suíte inteira de novo no começo da próxima sessão.** TypeScript: 383 checagens passando (`cd supabase && node --test "tests/regra/*.test.ts"`).
+> - **Próximo:** (1) usuário decidir os achados da revisão dos campeões (`docs/DECISOES.md` > Campeões) e, se quiser, gerar os retratos (`docs/ARTE_PENDENTE.md`, gasta crédito); (3) PvP e social pelo servidor; publicar na branch (com autorização) e a Parte 4 (4.1–4.3).
+> - **Validação (2026-10-18):** `bash tests/rodar_testes.sh` passa inteira: 60 arquivos do GDScript e a regra em TypeScript (383 checagens; `cd supabase && node --test "tests/regra/*.test.ts"`).
 > - **Save:** versão 12 (troféus e peça de troféu em uso).
 > - **Armadilhas e convenções:** veja "Onde paramos" no `CLAUDE.md`.
 
