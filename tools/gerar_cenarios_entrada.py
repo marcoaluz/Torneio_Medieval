@@ -249,6 +249,29 @@ p.append(cmd(20, "adicionar_cavalo", "alazao", {"velocidade": 40, "folego": 40, 
 p.append(cmd(21, "ganhar_bau", "ferro"))
 cenarios.append({"nome": "pve, tutorial e disputa automatica", "passos": p})
 
+# 7. Campeões: troféu, peça de troféu e revanche heroica ---------------------
+p = []
+FEIRAS = {"proxima": 9, "concluido": True, "estrelas": {"0": 3}}
+p.append(set_(0, cavaleiro__nivel=20, pve__torneios__feira_moinho=FEIRAS, pve__torneios__feira_ponte=FEIRAS,
+              pve__torneios__feira_mercado=FEIRAS, pve__torneios__feira_colheita=FEIRAS,
+              pve__torneios__feira_grande={"proxima": 4, "concluido": False, "estrelas": {}}))
+p.append(cmd(1, "concluir_revanche", "campeao_valdemar", EV_VITORIA_3))        # ainda sem troféu
+p.append(cmd(2, "concluir_disputa", "feira_grande", 4, EV_DERROTA))             # perder não dá troféu
+p.append(cmd(3, "concluir_disputa", "feira_grande", 4, EV_VITORIA_3))           # troféu + peça
+p.append(cmd(4, "concluir_disputa", "feira_grande", 4, EV_VITORIA_3))           # repetir não dá outro
+p.append(cmd(5, "usar_peca_trofeu", "estandarte", "trofeu_campeao_valdemar"))
+p.append(cmd(5, "usar_peca_trofeu", "cimeira", "trofeu_campeao_valdemar"))      # espaço errado
+p.append(cmd(5, "usar_peca_trofeu", "cimeira", "trofeu_martim_martelo"))        # não conquistada
+p.append(cmd(5, "usar_peca_trofeu", "cimeira", "nao_existe"))
+p.append(cmd(6, "concluir_revanche", "campeao_valdemar", EV_VITORIA_3))
+p.append(cmd(7, "concluir_revanche", "campeao_valdemar", EV_VITORIA_3))        # uma por dia
+p.append(cmd(DIA + 7, "concluir_revanche", "campeao_valdemar", EV_DERROTA))    # perder gasta a do dia
+p.append(cmd(2 * DIA + 7, "concluir_revanche", "campeao_valdemar", EV_VITORIA_3))
+p.append(cmd(2 * DIA + 8, "concluir_revanche", "martim_martelo", EV_VITORIA_3))  # sem troféu
+p.append(cmd(2 * DIA + 8, "concluir_revanche", "cavaleiro_negro", EV_VITORIA_3))  # não é campeão
+p.append(cmd(2 * DIA + 9, "usar_peca_trofeu", "estandarte", ""))
+cenarios.append({"nome": "campeoes: trofeu, peca e revanche", "passos": p})
+
 io.open("D:/DEV/Torneio_Medieval/tests/shared/cenarios_servico_entrada.json", "w", encoding="utf-8", newline="\n").write(
     json.dumps({"versao": 1, "cenarios": cenarios}, ensure_ascii=False, indent=1) + "\n")
 print(sum(len(c["passos"]) for c in cenarios), "passos")

@@ -3,7 +3,8 @@
 // Porte da seção "PvE" de game/scripts/services/servico_jogador.gd.
 
 import * as Pve from "../regra/pve.ts";
-import { concluir, copiar, div, erro, inteiro, tem } from "./base.ts";
+import * as Liga from "../regra/liga.ts";
+import { concluir, copiar, dia_atual, div, erro, inteiro, tem } from "./base.ts";
 import type { Dados, Resultado, Servico } from "./base.ts";
 import {
   _evento, _evento_maximo, bonus_companheiros, cfg_baus, derrota_por_pouco, disparar_oferta, ganhar, guardar_bau, guardar_vitoria,
@@ -117,10 +118,18 @@ export function rival_de(s: Servico, r: Dados, rival_id: string, regiao = ""): D
   }
   const lado = { cavaleiro: cav, cavalo: copiar(r["cavalo"]), equipamento: equip, habilidade: r["habilidade"] ?? "" };
   const perfil = Pve.perfil_do_rival(s.bal("ia_rival"), r);
+  const atr: number[] = [];
+  for (const k of ["forca", "precisao", "equilibrio"]) atr.push(inteiro(cav[k] ?? 0));
+  for (const k of ["velocidade", "folego", "temperamento"]) atr.push(inteiro(r["cavalo"][k] ?? 0));
+  const pecas = (r["equipamento"] as string[]).map((m) => ({ raridade: modelos[m]["raridade"], nivel: 0 }));
   return {
     id: rival_id, lado, perfil_nome: r["perfil"], perfil, provocacao: r["provocacao"] ?? "",
     casa: { principal: r["casa"][0], secundaria: r["casa"][1] },
     nome_chave: "RIVAL_" + rival_id.toUpperCase(), nemesis: r["nemesis"] ?? false, campeao: r["campeao"] ?? false,
+    retrato: String(r["retrato"] ?? rival_id),
+    traco: r["traco"] ?? "", alcunha: r["alcunha"] ?? "", frase_entrada: r["frase_entrada"] ?? "",
+    frase_derrota: r["frase_derrota"] ?? "", poder: Liga.poder(atr, pecas, s.bal("economia")),
+    encontros: inteiro((s.estado["pve"]["encontros"] ?? {})[rival_id] ?? 0), bonus_encontro: bonus,
   };
 }
 
@@ -263,10 +272,130 @@ export function concluir_disputa(s: Servico, torneio: string, indice: number, ev
   renome_g = div(renome_g * (100 + bonus_companheiros(s, "renome_pct")), 100);
   metas["renome"] = inteiro(metas["renome"]) + renome_g;
   if (est > 0 && ouro_g > 0) guardar_vitoria(s, ouro_g);
+  // Primeira vitória sobre um campeão: troféu na casa senhorial e a peça dele.
+  let trofeu = "";
+  if (est > 0 && (dados["rivais"][rival]["campeao"] ?? false) && !tem(trofeus_de(s), rival)) {
+    trofeus_de(s)[rival] = { em: s.agora(), torneio, revanches: 0 };
+    trofeu = rival;
+  }
   const niveis = ganhar(s, ouro_g, xp_g);
   return {
     ...concluir(), estrelas: est, ouro: ouro_g, xp: xp_g, niveis, torneio_concluido: fechou, venceu: est > 0,
     projeto, regiao_nova, baus: baus_ganhos, materiais: mats_g, renome: renome_g,
+    trofeu, peca_trofeu: trofeu !== "" ? String(dados["rivais"][rival]["peca_trofeu"] ?? "") : "",
+  };
+}
+
+// ------------------------------------------- troféus, peças e revanche heroica
+// Porte da seção de mesmo nome do ServicoJogador (GDScript).
+
+export function trofeus_de(s: Servico): Dados {
+  if (!tem(s.estado["pve"], "trofeus")) s.estado["pve"]["trofeus"] = {};
+  return s.estado["pve"]["trofeus"];
+}
+
+/** Peças de troféu conquistadas (itens.json > pecas_trofeu). */
+export function pecas_trofeu(s: Servico): string[] {
+  const rivais = pve(s)["rivais"];
+  const saida: string[] = [];
+  for (const c of Object.keys(trofeus_de(s))) {
+    const p = String((rivais[c] ?? {})["peca_trofeu"] ?? "");
+    if (p !== "") saida.push(p);
+  }
+  return saida;
+}
+
+export function usar_peca_trofeu(s: Servico, espaco: string, id: string): Resultado {
+  const defs = s.bal("itens")["pecas_trofeu"] ?? {};
+  if (!tem(s.estado, "visual_trofeu")) s.estado["visual_trofeu"] = {};
+  if (id === "") {
+    delete s.estado["visual_trofeu"][espaco];
+    return concluir();
+  }
+  if (typeof id !== "string" || !tem(defs, id) || id.startsWith("_")) return erro("item_inexistente");
+  if (!pecas_trofeu(s).includes(id)) return erro("peca_bloqueada");
+  if (String(defs[id]["espaco"]) !== espaco) return erro("espaco_errado");
+  s.estado["visual_trofeu"][espaco] = id;
+  return concluir();
+}
+
+/** Região do campeão (a primeira em que ele aparece). */
+export function regiao_do_rival(s: Servico, rival_id: string): string {
+  const dados = pve(s);
+  for (const reg of dados["ordem_regioes"] as string[]) {
+    for (const t of dados["regioes"][reg]["torneios"] as string[]) {
+      if ((dados["torneios"][t]["rivais"] as string[]).includes(rival_id)) return reg;
+    }
+  }
+  return "";
+}
+
+export function pode_revanche(s: Servico, campeao: string): Resultado {
+  const r = typeof campeao === "string" ? (pve(s)["rivais"][campeao] ?? {}) : {};
+  if (!(r["campeao"] ?? false)) return erro("nao_e_campeao");
+  if (!tem(trofeus_de(s), campeao)) return erro("sem_trofeu");
+  if (inteiro(trofeus_de(s)[campeao]["revanche_dia"] ?? -1) === dia_atual(s)) return erro("revanche_feita_hoje");
+  return concluir();
+}
+
+export function bonus_revanche(s: Servico, campeao: string): number {
+  const cfg = pve(s)["revanche"];
+  const v = inteiro((trofeus_de(s)[campeao] ?? {})["revanches"] ?? 0);
+  return Math.min(inteiro(cfg["bonus_atributos"]) + inteiro(cfg["bonus_por_vitoria"]) * v, inteiro(cfg["bonus_max"]));
+}
+
+/** Tudo para jogar a revanche (sem desafios): o campeão mais forte pela regra. */
+export function preparar_revanche(s: Servico, campeao: string): Dados {
+  const cfg = pve(s)["revanche"];
+  const vitorias = inteiro((trofeus_de(s)[campeao] ?? {})["revanches"] ?? 0);
+  const r = Pve.rival_revanche(pve(s)["rivais"][campeao], cfg, vitorias);
+  const rv = rival_de(s, r, campeao);
+  rv["revanche"] = true;
+  rv["bonus_revanche"] = bonus_revanche(s, campeao);
+  return { cfg: configuracao_justa(s), lado_jogador: lado_para_justa(s), rival: rv, desafios: [], visuais: [], gasta_folego: true, revanche: campeao };
+}
+
+/** Fim da revanche pelos eventos (do servidor): gasta a do dia; na vitória, recompensa de 3 estrelas × recompensa_pct, baú e materiais. */
+export function concluir_revanche(s: Servico, campeao: string, eventos: Dados[]): Resultado {
+  const p = pode_revanche(s, campeao);
+  if (!p.ok) return p;
+  const dados = pve(s);
+  const cfg = dados["revanche"];
+  const t = trofeus_de(s)[campeao];
+  t["revanche_dia"] = dia_atual(s);
+  const est = Pve.estrelas(eventos);
+  let ouro_g = 0;
+  let xp_g = 0;
+  const baus_ganhos: Dados[] = [];
+  const mats_g: Dados = {};
+  let renome_g = 0;
+  const metas = s.estado["metas"];
+  if (est > 0) {
+    t["revanches"] = inteiro(t["revanches"] ?? 0) + 1;
+    const rd = dados["recompensa_disputa"];
+    const pct = inteiro(dados["regioes"][regiao_do_rival(s, campeao)]["recompensa_pct"] ?? 100);
+    ouro_g = div(div((inteiro(rd["ouro_base"]) + 3 * inteiro(rd["ouro_por_estrela"])) * pct, 100) * inteiro(cfg["recompensa_pct"]), 100);
+    xp_g = div(div((inteiro(rd["xp_base"]) + 3 * inteiro(rd["xp_por_estrela"])) * pct, 100) * inteiro(cfg["recompensa_pct"]), 100);
+    if (String(cfg["bau"] ?? "") !== "") baus_ganhos.push(guardar_bau(s, String(cfg["bau"])));
+    const inv_mats = s.estado["inventario"]["materiais"];
+    for (const m of Object.keys(cfg["materiais"] ?? {})) {
+      mats_g[m] = inteiro(cfg["materiais"][m]);
+      inv_mats[m] = inteiro(inv_mats[m] ?? 0) + mats_g[m];
+    }
+    _evento(s, "vitoria");
+    renome_g = div(inteiro(s.bal("metas")["renome"]["ganho"]["vitoria"]) * (100 + bonus_companheiros(s, "renome_pct")), 100);
+    metas["renome"] = inteiro(metas["renome"]) + renome_g;
+    metas["sequencia"] = inteiro(metas["sequencia"]) + 1;
+    _evento_maximo(s, "sequencia", inteiro(metas["sequencia"]));
+    guardar_vitoria(s, ouro_g);
+  } else {
+    metas["sequencia"] = 0;
+  }
+  const niveis = ganhar(s, ouro_g, xp_g);
+  return {
+    ...concluir(), estrelas: est, ouro: ouro_g, xp: xp_g, niveis, venceu: est > 0, baus: baus_ganhos,
+    materiais: mats_g, renome: renome_g, revanche: campeao, revanches: inteiro(t["revanches"] ?? 0),
+    torneio_concluido: false, projeto: "", regiao_nova: "", trofeu: "", peca_trofeu: "",
   };
 }
 

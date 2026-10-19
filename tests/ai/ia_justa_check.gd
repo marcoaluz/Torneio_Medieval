@@ -6,6 +6,8 @@ extends SceneTree
 ##   TM_GRAVAR=1 timeout 120 bash .claude/skills/run-torneio-medieval/driver.sh script res://tests/ai/ia_justa_check.gd
 
 const REFERENCIA := "res://tests/shared/justa_referencia_ia.json"
+## Rival "paciente" (traço dos campeões): habilidade_passada 3 no perfil.
+const REFERENCIA_PACIENTE := "res://tests/shared/justa_referencia_ia_paciente.json"
 const PEITO := Vector2i(-50, -1060)
 const SEMENTES := 40
 
@@ -81,6 +83,45 @@ func _initialize() -> void:
 	var g: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(REFERENCIA))
 	var j := Justa.new(g["config"], g["lado_jogador"], g["lado_rival"], int(g["semente"]), g["perfil"])
 	_checa("referencia com IA reproduz", _repetir(j, g["entradas"]) == g["eventos"])
+
+	# Paciente: a ativa do rival só sai da 3ª passada em diante (nunca antes).
+	var paciente: Dictionary = _perfis["agressivo"].duplicate(true)
+	paciente["habilidade_passada"] = 3
+	_perfis["paciente"] = paciente
+	var passadas_hab: Array = []
+	var chegaram := 0
+	for s in SEMENTES:
+		var rp := _jogar(2000 + s, "paciente", true, com_hab)
+		var maior := 0
+		for ev: String in rp["eventos"]:
+			if ev.begins_with("impacto|"):
+				maior = maxi(maior, int(ev.split("passada=")[1].split("|")[0]))
+			if ev.begins_with("habilidade|") and ev.contains("lado=rival"):
+				passadas_hab.append(int(ev.split("passada=")[1].split("|")[0]))
+		if maior >= 3:
+			chegaram += 1
+	_checa("paciente: a ativa do rival nunca sai antes da 3a passada", passadas_hab.all(func(p): return p >= 3))
+	_checa("paciente: e sai em toda justa que chega a 3a passada (%d de %d)" % [passadas_hab.size(), chegaram], passadas_hab.size() == chegaram and chegaram > 0)
+	var seed_p := 2000
+	for s in SEMENTES:
+		var rp := _jogar(2000 + s, "paciente", true, com_hab)
+		if rp["eventos"].any(func(ev: String): return ev.begins_with("habilidade|") and ev.contains("lado=rival")):
+			seed_p = 2000 + s
+			break
+	var r_pac := _jogar(seed_p, "paciente", true, com_hab)
+	var ref_p := {"versao": 1,
+		"descricao": "Como justa_referencia_ia.json, com o perfil do rival com habilidade_passada 3 (traco paciente dos campeoes): a ativa so sai da 3a passada.",
+		"config": _cfg, "lado_jogador": _lado, "lado_rival": com_hab, "perfil": paciente, "semente": seed_p,
+		"entradas": r_pac["entradas"], "eventos": r_pac["eventos"]}
+	if OS.get_environment("TM_GRAVAR") == "1" or not FileAccess.file_exists(REFERENCIA_PACIENTE):
+		var fp := FileAccess.open(REFERENCIA_PACIENTE, FileAccess.WRITE)
+		fp.store_string(JSON.stringify(ref_p, "	") + "
+")
+		fp.close()
+		print("IA_JUSTA referencia do paciente gravada em %s" % REFERENCIA_PACIENTE)
+	var gp: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(REFERENCIA_PACIENTE))
+	var jp := Justa.new(gp["config"], gp["lado_jogador"], gp["lado_rival"], int(gp["semente"]), gp["perfil"])
+	_checa("referencia do paciente reproduz", _repetir(jp, gp["entradas"]) == gp["eventos"])
 
 	print("IA_JUSTA %s" % ("TUDO OK" if _falhas == 0 else "%d FALHA(S)" % _falhas))
 	quit(0 if _falhas == 0 else 1)

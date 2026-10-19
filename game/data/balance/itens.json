@@ -129,5 +129,25 @@
 		"caparacao_corvo_sombrio": {"espaco": "caparacao", "raridade": "epico", "conjunto": "corvo_sombrio", "visual": "corvo_sombrio", "visual_provisorio": "ferro_negro", "durabilidade_max": 0, "status": {}, "_nota": "Gualdrapa Sombria com Símbolo do Grifo"},
 		"caparacao_campeao_invicto": {"espaco": "caparacao", "raridade": "lendario", "conjunto": "campeao_invicto", "visual": "campeao_invicto", "visual_provisorio": "rei_sol", "durabilidade_max": 0, "status": {}, "_nota": "Arreios Dourados Ornamentados"},
 		"caparacao_corcel_ancestral": {"espaco": "caparacao", "raridade": "lendario", "conjunto": "corcel_ancestral", "visual": "corcel_ancestral", "visual_provisorio": "dragao", "durabilidade_max": 0, "status": {}, "_nota": "Conjunto Mítico do Corcel de Guerra Fantasma"}
+	},
+	"pecas_trofeu": {
+		"_nota": "Pecas cosmeticas dos campeoes do PvE (so aparencia, nao contam na justa nem saem de bau): a primeira vitoria sobre o campeao (pve.json > rivais > peca_trofeu) da a peca junto com o trofeu da casa senhorial. espaco: cimeira (penacho), caparacao (manta do cavalo) ou estandarte (na lanca). visual = arte em game/art/sprites/personagem (pendente: docs/ARTE_PENDENTE.md); visual_provisorio = arte ja desenhada usada ate la. cores = cores da casa do campeao.",
+		"trofeu_campeao_valdemar": {"campeao": "campeao_valdemar", "espaco": "estandarte", "visual": "trofeu_campeao_valdemar", "cores": ["ouro_velho", "azul_real"]},
+		"trofeu_martim_martelo": {"campeao": "martim_martelo", "espaco": "cimeira", "visual": "trofeu_martim_martelo", "cores": ["azul_real", "branco_osso"]},
+		"trofeu_dama_isolda_gaviao": {"campeao": "dama_isolda_gaviao", "espaco": "cimeira", "visual": "trofeu_dama_isolda_gaviao", "cores": ["verde_floresta", "ouro_velho"]},
+		"trofeu_sir_egas_muro": {"campeao": "sir_egas_muro", "espaco": "caparacao", "visual": "trofeu_sir_egas_muro", "cores": ["purpura", "ouro_velho"], "visual_provisorio": "xadrez_real"},
+		"trofeu_conde_rodrigo_alvar": {"campeao": "conde_rodrigo_alvar", "espaco": "estandarte", "visual": "trofeu_conde_rodrigo_alvar", "cores": ["prata", "azul_real"]},
+		"trofeu_sir_henrique_lamina": {"campeao": "sir_henrique_lamina", "espaco": "cimeira", "visual": "trofeu_sir_henrique_lamina", "cores": ["azul_real", "branco_osso"]},
+		"trofeu_dama_mafalda_tormenta": {"campeao": "dama_mafalda_tormenta", "espaco": "caparacao", "visual": "trofeu_dama_mafalda_tormenta", "cores": ["verde_floresta", "ouro_velho"], "visual_provisorio": "cla_rival"},
+		"trofeu_sir_bermudo_touro": {"campeao": "sir_bermudo_touro", "espaco": "caparacao", "visual": "trofeu_sir_bermudo_touro", "cores": ["purpura", "ouro_velho"], "visual_provisorio": "dragao"},
+		"trofeu_duque_afonso_montargil": {"campeao": "duque_afonso_montargil", "espaco": "estandarte", "visual": "trofeu_duque_afonso_montargil", "cores": ["prata", "azul_real"]},
+		"trofeu_sir_gil_implacavel": {"campeao": "sir_gil_implacavel", "espaco": "cimeira", "visual": "trofeu_sir_gil_implacavel", "cores": ["azul_real", "branco_osso"]},
+		"trofeu_dama_brites_escarpa": {"campeao": "dama_brites_escarpa", "espaco": "estandarte", "visual": "trofeu_dama_brites_escarpa", "cores": ["verde_floresta", "ouro_velho"]},
+		"trofeu_sir_tristao_ferro_velho": {"campeao": "sir_tristao_ferro_velho", "espaco": "caparacao", "visual": "trofeu_sir_tristao_ferro_velho", "cores": ["purpura", "ouro_velho"], "visual_provisorio": "malha_equina"},
+		"trofeu_principe_fernando_aurora": {"campeao": "principe_fernando_aurora", "espaco": "cimeira", "visual": "trofeu_principe_fernando_aurora", "cores": ["prata", "azul_real"]},
+		"trofeu_sir_aurelio_invicto": {"campeao": "sir_aurelio_invicto", "espaco": "estandarte", "visual": "trofeu_sir_aurelio_invicto", "cores": ["azul_real", "branco_osso"]},
+		"trofeu_dama_elvira_sangue_real": {"campeao": "dama_elvira_sangue_real", "espaco": "caparacao", "visual": "trofeu_dama_elvira_sangue_real", "cores": ["verde_floresta", "ouro_velho"], "visual_provisorio": "rei_sol"},
+		"trofeu_sir_baltasar_escudo_ouro": {"campeao": "sir_baltasar_escudo_ouro", "espaco": "estandarte", "visual": "trofeu_sir_baltasar_escudo_ouro", "cores": ["purpura", "ouro_velho"]},
+		"trofeu_rei_sancho_justador": {"campeao": "rei_sancho_justador", "espaco": "cimeira", "visual": "trofeu_rei_sancho_justador", "cores": ["prata", "azul_real"]}
 	}
 }

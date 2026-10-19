@@ -2042,6 +2042,323 @@
      ]
     }
    ]
+  },
+  {
+   "nome": "campeoes: trofeu, peca e revanche",
+   "passos": [
+    {
+     "t": 0,
+     "set": {
+      "cavaleiro.nivel": 20,
+      "pve.torneios.feira_moinho": {
+       "proxima": 9,
+       "concluido": true,
+       "estrelas": {
+        "0": 3
+       }
+      },
+      "pve.torneios.feira_ponte": {
+       "proxima": 9,
+       "concluido": true,
+       "estrelas": {
+        "0": 3
+       }
+      },
+      "pve.torneios.feira_mercado": {
+       "proxima": 9,
+       "concluido": true,
+       "estrelas": {
+        "0": 3
+       }
+      },
+      "pve.torneios.feira_colheita": {
+       "proxima": 9,
+       "concluido": true,
+       "estrelas": {
+        "0": 3
+       }
+      },
+      "pve.torneios.feira_grande": {
+       "proxima": 4,
+       "concluido": false,
+       "estrelas": {}
+      }
+     }
+    },
+    {
+     "t": 1,
+     "cmd": "concluir_revanche",
+     "args": [
+      "campeao_valdemar",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 2,
+     "cmd": "concluir_disputa",
+     "args": [
+      "feira_grande",
+      4,
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 2,
+        "motivo": "pontos",
+        "placar_jogador": 1,
+        "placar_rival": 2
+       }
+      ]
+     ]
+    },
+    {
+     "t": 3,
+     "cmd": "concluir_disputa",
+     "args": [
+      "feira_grande",
+      4,
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 4,
+     "cmd": "concluir_disputa",
+     "args": [
+      "feira_grande",
+      4,
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 5,
+     "cmd": "usar_peca_trofeu",
+     "args": [
+      "estandarte",
+      "trofeu_campeao_valdemar"
+     ]
+    },
+    {
+     "t": 5,
+     "cmd": "usar_peca_trofeu",
+     "args": [
+      "cimeira",
+      "trofeu_campeao_valdemar"
+     ]
+    },
+    {
+     "t": 5,
+     "cmd": "usar_peca_trofeu",
+     "args": [
+      "cimeira",
+      "trofeu_martim_martelo"
+     ]
+    },
+    {
+     "t": 5,
+     "cmd": "usar_peca_trofeu",
+     "args": [
+      "cimeira",
+      "nao_existe"
+     ]
+    },
+    {
+     "t": 6,
+     "cmd": "concluir_revanche",
+     "args": [
+      "campeao_valdemar",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 7,
+     "cmd": "concluir_revanche",
+     "args": [
+      "campeao_valdemar",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 86407,
+     "cmd": "concluir_revanche",
+     "args": [
+      "campeao_valdemar",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 2,
+        "motivo": "pontos",
+        "placar_jogador": 1,
+        "placar_rival": 2
+       }
+      ]
+     ]
+    },
+    {
+     "t": 172807,
+     "cmd": "concluir_revanche",
+     "args": [
+      "campeao_valdemar",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 172808,
+     "cmd": "concluir_revanche",
+     "args": [
+      "martim_martelo",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 172808,
+     "cmd": "concluir_revanche",
+     "args": [
+      "cavaleiro_negro",
+      [
+       {
+        "tipo": "impacto",
+        "jogador": {
+         "zona": "peito",
+         "falta": false
+        }
+       },
+       {
+        "tipo": "fim",
+        "vencedor": 1,
+        "motivo": "derrubada",
+        "placar_jogador": 2,
+        "placar_rival": 0
+       }
+      ]
+     ]
+    },
+    {
+     "t": 172809,
+     "cmd": "usar_peca_trofeu",
+     "args": [
+      "estandarte",
+      ""
+     ]
+    }
+   ]
   }
  ]
 }

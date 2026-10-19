@@ -31,6 +31,7 @@ export const PUBLICOS: Record<string, Comando> = {
   definir_brasao: J.definir_brasao,
   equipar: J.equipar,
   definir_visual: J.definir_visual,
+  usar_peca_trofeu: P.usar_peca_trofeu,
   equipar_habilidades: J.equipar_habilidades,
   melhorar_predio: J.melhorar_predio,
   concluir_timer: J.concluir_timer,
@@ -59,6 +60,7 @@ export const PUBLICOS: Record<string, Comando> = {
   definir_notificacao: J.definir_notificacao,
   disputa_automatica,
   iniciar_disputa: D.iniciar_disputa,
+  iniciar_revanche: D.iniciar_revanche,
   concluir_disputa_conferida: D.concluir_disputa_conferida,
   abandonar_disputa: D.abandonar_disputa,
   salvar_defesa: L.salvar_defesa,
@@ -135,6 +137,7 @@ export const INTERNOS: Record<string, Comando> = {
   ganhar_bau: J.ganhar_bau,
   entregar_compra: J.entregar_compra,
   concluir_disputa: P.concluir_disputa,
+  concluir_revanche: P.concluir_revanche,
   disputa_automatica_com_semente: P.disputa_automatica,
 };
 

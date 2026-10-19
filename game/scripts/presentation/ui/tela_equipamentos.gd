@@ -6,7 +6,9 @@ extends Control
 ## do inventário daquele espaço; tocar numa peça já mostra no personagem
 ## (pré-visualização) antes de equipar. Cada peça mostra status, raridade,
 ## durabilidade e conjunto. Guarda-roupa: usar só a aparência de uma peça
-## sobre os status de outra. Tudo pelo serviço Jogador.
+## sobre os status de outra. Peças de troféu dos campeões (penacho, manta,
+## estandarte; só aparência) aparecem nos espaços delas e vão por cima do que
+## estiver no espaço. Tudo pelo serviço Jogador.
 
 signal fechada
 
@@ -15,6 +17,7 @@ const ESPACOS := "res://game/data/personagem/espacos.json"
 var aba := "cavaleiro"
 var espaco := ""          ## espaço com a lista aberta
 var selecionado := ""     ## id da peça em pré-visualização
+var trofeu_sel := ""      ## peça de troféu em pré-visualização (itens.json > pecas_trofeu)
 var _jog: ServicoJogador
 var _espacos: Dictionary
 var _botoes_espaco := {}
@@ -45,9 +48,13 @@ func _ready() -> void:
 	_equipar.text = tr("EQUIP_EQUIPAR")
 	_aparencia.text = tr("EQUIP_SO_APARENCIA")
 	_restaurar.text = tr("EQUIP_RESTAURAR_APARENCIA")
-	_equipar.pressed.connect(func(): _aplicar(_jog.equipar(selecionado)))
+	_equipar.pressed.connect(func(): _aplicar(_jog.usar_peca_trofeu(espaco, trofeu_sel) if trofeu_sel != "" else _jog.equipar(selecionado)))
 	_aparencia.pressed.connect(func(): _aplicar(_jog.definir_visual(espaco, selecionado)))
-	_restaurar.pressed.connect(func(): _aplicar(_jog.definir_visual(espaco, "")))
+	_restaurar.pressed.connect(func():
+		if _jog.peca_trofeu_em_uso(espaco) != "":
+			_aplicar(_jog.usar_peca_trofeu(espaco, ""))
+		else:
+			_aplicar(_jog.definir_visual(espaco, "")))
 	_consertar.pressed.connect(_ao_consertar)
 	_retrato.tocar("respirar")
 	_jog.mudou.connect(func(_s): if visible: montar())
@@ -84,6 +91,9 @@ func montar() -> void:
 		b.custom_minimum_size = Vector2(150, 34)
 		var it := _jog.equipado(nome)
 		var linha2 := tr("EQUIP_VAZIO") if it.is_empty() else tr("ITEM_" + str(it["modelo"]).to_upper())
+		var tf := _jog.peca_trofeu_em_uso(nome)
+		if tf != "":
+			linha2 = "%s (%s)" % [tr("ITEM_" + tf.to_upper()), tr("EQUIP_PECA_TROFEU")]
 		b.text = "%s\n%s" % [tr("ESPACO_" + nome.to_upper()), linha2]
 		if not it.is_empty():
 			b.add_theme_color_override("font_color", TelaBaus.cor_raridade(modelos[it["modelo"]]["raridade"]))
@@ -98,6 +108,7 @@ func montar() -> void:
 func abrir_espaco(nome: String) -> void:
 	espaco = nome
 	selecionado = ""
+	trofeu_sel = ""
 	_painel.visible = true
 	_montar_lista()
 
@@ -108,7 +119,8 @@ func _montar_lista() -> void:
 	var modelos: Dictionary = Balanceamento.carregar("itens")["modelos"]
 	var equipado_id: String = _jog.estado["equipamento"].get(espaco, "")
 	var pecas := _jog.itens().filter(func(it): return modelos.get(it["modelo"], {}).get("espaco", "") == espaco)
-	if pecas.is_empty():
+	var trofeus := pecas_trofeu_do_espaco(espaco)
+	if pecas.is_empty() and trofeus.is_empty():
 		var vazio := Label.new()
 		vazio.text = tr("EQUIP_SEM_PECAS")
 		_lista.add_child(vazio)
@@ -124,11 +136,35 @@ func _montar_lista() -> void:
 		b.add_theme_constant_override("icon_max_width", 32)
 		b.pressed.connect(func(): selecionar(it["id"]))
 		_lista.add_child(b)
+	var em_uso := _jog.peca_trofeu_em_uso(espaco)
+	for id: String in trofeus:
+		var b := Button.new()
+		b.name = id
+		b.focus_mode = Control.FOCUS_NONE
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.text = "%s (%s)%s" % [tr("ITEM_" + id.to_upper()), tr("EQUIP_PECA_TROFEU"), "  ✓" if id == em_uso else ""]
+		b.add_theme_color_override("font_color", TelaBaus.cor_raridade("lendario"))
+		b.pressed.connect(func(): selecionar_trofeu(id))
+		_lista.add_child(b)
+	_atualizar_detalhes()
+
+## Peças de troféu já conquistadas que vão no espaço.
+func pecas_trofeu_do_espaco(nome: String) -> Array:
+	var defs: Dictionary = Balanceamento.ler("itens").get("pecas_trofeu", {})
+	return _jog.pecas_trofeu().filter(func(id): return str(defs.get(id, {}).get("espaco", "")) == nome)
+
+## Pré-visualiza a peça de troféu (só aparência).
+func selecionar_trofeu(id: String) -> void:
+	selecionado = ""
+	trofeu_sel = id
+	var def: Dictionary = Balanceamento.ler("itens")["pecas_trofeu"][id]
+	_vestir_previa({espaco: str(def["visual"])})
 	_atualizar_detalhes()
 
 ## Pré-visualiza a peça no personagem e mostra os detalhes.
 func selecionar(id: String) -> void:
 	selecionado = id
+	trofeu_sel = ""
 	var it := _jog.item(id)
 	var visual: String = Balanceamento.carregar("itens")["modelos"][it["modelo"]]["visual"]
 	_vestir_previa({espaco: visual})
@@ -137,7 +173,15 @@ func selecionar(id: String) -> void:
 func _atualizar_detalhes() -> void:
 	_equipar.disabled = selecionado == "" or _jog.estado["equipamento"].get(espaco, "") == selecionado
 	_aparencia.disabled = selecionado == ""
-	_restaurar.disabled = not _jog.estado["visual"].has(espaco)
+	_restaurar.disabled = not _jog.estado["visual"].has(espaco) and _jog.peca_trofeu_em_uso(espaco) == ""
+	if trofeu_sel != "":
+		_equipar.disabled = _jog.peca_trofeu_em_uso(espaco) == trofeu_sel
+		_aparencia.disabled = true
+		_consertar.visible = false
+		var def: Dictionary = Balanceamento.ler("itens")["pecas_trofeu"][trofeu_sel]
+		_detalhes.text = "\n".join([tr("ITEM_" + trofeu_sel.to_upper()), tr("RIVAL_" + str(def["campeao"]).to_upper()),
+			tr("EQUIP_SO_VISUAL")])
+		return
 	_atualizar_conserto()
 	if selecionado == "":
 		_detalhes.text = tr("EQUIP_TOQUE_UMA_PECA")
@@ -210,4 +254,5 @@ func _aplicar(r: Dictionary) -> void:
 		_detalhes.text = tr("ERRO_" + str(r["erro"]).to_upper())
 		return
 	selecionado = ""
+	trofeu_sel = ""
 	montar()

@@ -157,6 +157,9 @@ var resultado_disputa := {}
 ## torneio e se o cavalo do jogador cansa (cavalo emprestado não).
 var provocacao := ""
 var desafios: Array = []
+## Rival desta justa como o serviço o devolve (alcunha, frase de derrota...;
+## {} na justa livre, no tutorial e na exibição).
+var rival_info := {}
 ## Anúncio do arauto com o título do jogador ("" sem título; 3.21).
 var anuncio_titulo := ""
 var _gasta_folego := true
@@ -225,6 +228,7 @@ func iniciar(semente_fixa := -1) -> void:
 		var frase := tr("ARAUTO_FRASE_" + str(jog_d.estado["loja"]["frase"]).to_upper()).format({"nome": jog_d.cavaleiro().get("nome", "")})
 		anuncio_titulo = (anuncio_titulo + "  " if anuncio_titulo != "" else "") + frase
 	provocacao = ""
+	rival_info = {}
 	desafios = []
 	_gasta_folego = true
 	match modo:
@@ -232,7 +236,8 @@ func iniciar(semente_fixa := -1) -> void:
 			if not disputa.is_empty() and jog_d:
 				# Com o servidor: exatamente a configuração, os lados e a semente dele.
 				var prep: Dictionary = disputa["servidor"] if disputa.has("servidor") \
-					else jog_d.preparar_disputa(disputa["torneio"], int(disputa["indice"]))
+					else (jog_d.preparar_revanche(disputa["revanche"]) if disputa.has("revanche")
+						else jog_d.preparar_disputa(disputa["torneio"], int(disputa["indice"])))
 				if disputa.has("servidor"):
 					semente_fixa = int(prep["semente"])
 				_cfg = prep["cfg"]
@@ -270,6 +275,7 @@ func iniciar(semente_fixa := -1) -> void:
 			arena.jogador.camadas().vestir({"pelagem": "branco", "corpo": "masculino", "elmo": "vigia", "peitoral": "vigia", "escudo": "vigia", "lanca": "vigia"})
 			arena.jogador.definir_brasao({"cor1": "azul_real", "cor2": "prata", "simbolo": "cruz", "cor_simbolo": "prata"})
 	if not rv.is_empty():
+		rival_info = rv
 		lado_rival = rv["lado"]
 		perfil_rival = rv["perfil_nome"]
 		nome_rival = rv["nome_chave"]
@@ -621,7 +627,8 @@ func _registrar_no_jogador(e: Dictionary) -> void:
 		if fluxo_p:
 			fluxo_p.ultimo_resultado = resultado_disputa
 	if jog and not disputa.is_empty():
-		resultado_disputa = jog.concluir_disputa(disputa["torneio"], int(disputa["indice"]), eventos_justa)
+		resultado_disputa = jog.concluir_revanche(disputa["revanche"], eventos_justa) if disputa.has("revanche") \
+			else jog.concluir_disputa(disputa["torneio"], int(disputa["indice"]), eventos_justa)
 		# O resultado acima aparece já; o servidor refaz a justa com as entradas e paga
 		# (mesma regra e semente: dá o mesmo). O estado dele vence quando a fila esvazia.
 		if disputa.has("servidor"):

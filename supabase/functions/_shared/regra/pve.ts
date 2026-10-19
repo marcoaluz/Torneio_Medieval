@@ -73,6 +73,40 @@ export function aplicar_desafios(cfg: Dados, lado_j: Dados, lado_r: Dados, perfi
   return { cfg: c, lado_jogador: j, lado_rival: r, perfil_rival: p };
 }
 
+/**
+ * Revanche heroica: cópia do campeão com atributos + bonus (bonus_atributos + bonus_por_vitoria × vitórias,
+ * até bonus_max; nenhum passa de teto_atributo) e o perfil_ajuste da revanche somado ao dele.
+ */
+export function rival_revanche(r: Dados, cfg: Dados, vitorias: number): Dados {
+  const saida = copiar(r);
+  const bonus = Math.min(
+    Math.trunc(cfg["bonus_atributos"]) + Math.trunc(cfg["bonus_por_vitoria"]) * Math.max(Math.trunc(vitorias), 0),
+    Math.trunc(cfg["bonus_max"]),
+  );
+  const teto = Math.trunc(cfg["teto_atributo"]);
+  for (const parte of ["cavaleiro", "cavalo"]) {
+    const atr = saida[parte];
+    for (const k of Object.keys(atr).sort()) atr[k] = Math.min(Math.trunc(atr[k]) + bonus, teto);
+  }
+  const ajuste: Dados = saida["perfil_ajuste"] ?? {};
+  const extra: Dados = cfg["perfil_ajuste"] ?? {};
+  for (const k of Object.keys(extra).sort()) {
+    if (k.startsWith("_")) continue;
+    if (typeof extra[k] === "number" && typeof ajuste[k] === "number") ajuste[k] = Math.trunc(ajuste[k]) + Math.trunc(extra[k]);
+    else ajuste[k] = extra[k];
+  }
+  saida["perfil_ajuste"] = ajuste;
+  return saida;
+}
+
+/** Faixa da ficha do adversário: quanto o rival é mais forte, em % do poder do jogador (trunca). */
+export function faixa_poder(poder_jogador: number, poder_rival: number, cfg: Dados): string {
+  const dif = Math.trunc((Math.trunc(poder_rival) - Math.trunc(poder_jogador)) * 100 / Math.max(Math.trunc(poder_jogador), 1));
+  if (dif <= Math.trunc(cfg["verde_max_pct"])) return "verde";
+  if (dif <= Math.trunc(cfg["amarelo_max_pct"])) return "amarelo";
+  return "vermelho";
+}
+
 /** Estilo de um campeão: o ajuste soma nos números do perfil da IA (sem passar de zero) e troca os textos. */
 /** Perfil da IA de um rival do PvE: o do perfil, mais ajuste_campeao se for campeão, mais o perfil_ajuste dele. */
 export function perfil_do_rival(ia: Dados, r: Dados): Dados {

@@ -301,7 +301,7 @@ export class Justa {
         this._plano_ix += 1;
       }
       const hb = this.ia.batida_habilidade();
-      if (hb > 0 && this.rival.t_ms === hb * this.rival.compasso_ms()) eventos.push(...this.rival_ativar_habilidade());
+      if (hb > 0 && this.rival.t_ms === hb * this.rival.compasso_ms() && this.fases.passada >= this.ia.passada_habilidade()) eventos.push(...this.rival_ativar_habilidade());
     }
     if (this.ia_jogador) {
       while (this._plano_jog_ix < this._plano_jogador.length && this._plano_jogador[this._plano_jog_ix] <= this.jogador.t_ms) {
@@ -309,7 +309,7 @@ export class Justa {
         this._plano_jog_ix += 1;
       }
       const hbj = this.ia_jogador.batida_habilidade();
-      if (hbj > 0 && this.jogador.t_ms === hbj * this.jogador.compasso_ms()) eventos.push(...this.ativar_habilidade());
+      if (hbj > 0 && this.jogador.t_ms === hbj * this.jogador.compasso_ms() && this.fases.passada >= this.ia_jogador.passada_habilidade()) eventos.push(...this.ativar_habilidade());
     }
     const perdido = this.jogador.avancar_1ms();
     const perdido_rival = this.rival.avancar_1ms();

@@ -18,7 +18,7 @@ signal mudou(secao: String)
 ## Um comando público deu certo aqui (a Nuvem manda ao servidor; ver _comando).
 signal acao_feita(tipo: String, args: Array)
 
-const VERSAO := 11
+const VERSAO := 12
 const ESPACOS_REGRA := ["elmo", "peitoral", "escudo", "lanca"]
 
 ## Save do jogador de verdade. Teste, demo e ferramenta trocam o caminho
@@ -123,6 +123,12 @@ func visual_das_pecas() -> Dictionary:
 		if not it.is_empty():
 			var e := estagio_dano(estado["equipamento"][espaco])
 			saida[espaco] = str(modelos[it["modelo"]]["visual"]) + ("_d%d" % e if e > 0 else "")
+	# Peças de troféu (só aparência) por cima do que estiver no espaço.
+	var trofeus: Dictionary = Balanceamento.ler("itens").get("pecas_trofeu", {})
+	for espaco: String in estado.get("visual_trofeu", {}):
+		var id: String = estado["visual_trofeu"][espaco]
+		if trofeus.has(id):
+			saida[espaco] = str(trofeus[id]["visual"])
 	return saida
 
 ## Estágio de dano da peça (0 inteira, 1 riscada, 2 amassada, 3 rachada),
@@ -1126,7 +1132,8 @@ func preparar_pvp() -> Dictionary:
 	var perfil_nome: String = cfg_ligas()["fantasmas"]["perfil"]
 	var rv := {"id": a["id"], "lado": (a["lado"] as Dictionary).duplicate(true), "perfil_nome": perfil_nome,
 		"perfil": Balanceamento.ler("ia_rival")["perfis"][perfil_nome].duplicate(true), "casa": a["casa"].duplicate(),
-		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(a["brasao_perfil"], {}), "nome_chave": a["nome"], "provocacao": ""}
+		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(a["brasao_perfil"], {}), "nome_chave": a["nome"], "provocacao": "",
+		"poder": int(a.get("poder", 0)), "pvp": true}
 	return {"cfg": Justa.carregar_configuracao(), "lado_jogador": lado_para_justa(), "rival": rv}
 
 ## Fim da justa de PvP: pontos (RegraLiga), ouro e XP na vitória, chance de
@@ -2046,10 +2053,22 @@ func _rival_de(r: Dictionary, rival_id: String, regiao := "") -> Dictionary:
 	var lado := {"cavaleiro": cav, "cavalo": (r["cavalo"] as Dictionary).duplicate(), "equipamento": equip,
 		"habilidade": r.get("habilidade", "")}
 	var perfil := RegraPve.perfil_do_rival(Balanceamento.ler("ia_rival"), r)
+	var atr: Array = []
+	for k in ["forca", "precisao", "equilibrio"]:
+		atr.append(int(cav.get(k, 0)))
+	for k in ["velocidade", "folego", "temperamento"]:
+		atr.append(int(r["cavalo"].get(k, 0)))
+	var pecas: Array = []
+	for m: String in r["equipamento"]:
+		pecas.append({"raridade": modelos[m]["raridade"], "nivel": 0})
 	return {"id": rival_id, "lado": lado, "perfil_nome": r["perfil"], "perfil": perfil, "provocacao": r.get("provocacao", ""),
 		"casa": {"principal": r["casa"][0], "secundaria": r["casa"][1]},
 		"brasao": GeradorBrasao.opcoes().get("rivais", {}).get(r.get("brasao", ""), {}),
-		"nome_chave": "RIVAL_" + rival_id.to_upper(), "nemesis": r.get("nemesis", false), "campeao": r.get("campeao", false)}
+		"nome_chave": "RIVAL_" + rival_id.to_upper(), "nemesis": r.get("nemesis", false), "campeao": r.get("campeao", false),
+		"retrato": str(r.get("retrato", rival_id)),
+		"traco": r.get("traco", ""), "alcunha": r.get("alcunha", ""), "frase_entrada": r.get("frase_entrada", ""),
+		"frase_derrota": r.get("frase_derrota", ""), "poder": RegraLiga.poder(atr, pecas, Balanceamento.ler("economia")),
+		"encontros": int(estado["pve"].get("encontros", {}).get(rival_id, 0)), "bonus_encontro": bonus}
 
 ## Tudo para jogar uma disputa (manual ou automática), com os desafios do
 ## torneio já aplicados pela regra: {cfg, lado_jogador, rival (como
@@ -2185,10 +2204,160 @@ func concluir_disputa(torneio: String, indice: int, eventos: Array, automatico :
 	metas["renome"] = int(metas["renome"]) + renome_g
 	if est > 0 and ouro_g > 0:
 		_guardar_vitoria(ouro_g)
+	# Primeira vitória sobre um campeão: troféu na casa senhorial e a peça dele.
+	var trofeu := ""
+	if est > 0 and dados["rivais"][rival].get("campeao", false) and not _trofeus().has(rival):
+		_trofeus()[rival] = {"em": ServicoTempo.agora(), "torneio": torneio, "revanches": 0}
+		trofeu = rival
 	var niveis := _ganhar(ouro_g, xp_g)
 	var res := _concluir("pve")
 	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "torneio_concluido": fechou, "venceu": est > 0,
-		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos, "materiais": mats_g, "renome": renome_g}, true)
+		"projeto": projeto, "regiao_nova": regiao_nova, "baus": baus_ganhos, "materiais": mats_g, "renome": renome_g,
+		"trofeu": trofeu, "peca_trofeu": str(dados["rivais"][rival].get("peca_trofeu", "")) if trofeu != "" else ""}, true)
+	return res
+
+# ------------------------------------------- troféus, peças e revanche heroica
+# Primeira vitória sobre um campeão: troféu exposto na casa senhorial e a peça
+# cosmética dele (itens.json > pecas_trofeu; só aparência). Campeão já vencido
+# pode ser enfrentado de novo uma vez por dia (virada de metas.json), mais
+# forte (RegraPve.rival_revanche) e com recompensa melhor (pve.json > revanche).
+
+func _trofeus() -> Dictionary:
+	if not estado["pve"].has("trofeus"):
+		estado["pve"]["trofeus"] = {}
+	return estado["pve"]["trofeus"]
+
+## Troféus em ordem de conquista: [{campeao, em, torneio, revanches, peca, hoje (revanche feita hoje)}].
+func trofeus() -> Array:
+	var saida: Array = []
+	var dados := pve()
+	for c: String in _trofeus():
+		var t: Dictionary = _trofeus()[c]
+		saida.append({"campeao": c, "em": int(t["em"]), "torneio": str(t["torneio"]), "revanches": int(t.get("revanches", 0)),
+			"peca": str(dados["rivais"].get(c, {}).get("peca_trofeu", "")), "hoje": int(t.get("revanche_dia", -1)) == dia_atual()})
+	saida.sort_custom(func(a, b): return a["em"] < b["em"] or (a["em"] == b["em"] and a["campeao"] < b["campeao"]))
+	return saida
+
+## Peças de troféu conquistadas (ids de itens.json > pecas_trofeu).
+func pecas_trofeu() -> Array:
+	var saida: Array = []
+	for t: Dictionary in trofeus():
+		if t["peca"] != "":
+			saida.append(t["peca"])
+	return saida
+
+## Peça de troféu em uso no espaço ("" = nenhuma).
+func peca_trofeu_em_uso(espaco: String) -> String:
+	return str(estado.get("visual_trofeu", {}).get(espaco, ""))
+
+func _cmd_usar_peca_trofeu(espaco: String, id: String) -> Dictionary:
+	var defs: Dictionary = Balanceamento.ler("itens").get("pecas_trofeu", {})
+	if not estado.has("visual_trofeu"):
+		estado["visual_trofeu"] = {}
+	if id == "":
+		estado["visual_trofeu"].erase(espaco)
+		return _concluir("equipamento")
+	if not defs.has(id):
+		return _erro("item_inexistente")
+	if not pecas_trofeu().has(id):
+		return _erro("peca_bloqueada")
+	if str(defs[id]["espaco"]) != espaco:
+		return _erro("espaco_errado")
+	estado["visual_trofeu"][espaco] = id
+	return _concluir("equipamento")
+
+## Campeões do circuito, na ordem em que aparecem (região, torneio, chave).
+func campeoes() -> Array:
+	var saida: Array = []
+	var dados := pve()
+	for reg: String in dados["ordem_regioes"]:
+		for t: String in dados["regioes"][reg]["torneios"]:
+			for rid: String in dados["torneios"][t]["rivais"]:
+				if dados["rivais"][rid].get("campeao", false) and not saida.has(rid):
+					saida.append(rid)
+	return saida
+
+## Região do campeão (a primeira em que ele aparece): vale a recompensa dela.
+func regiao_do_rival(rival_id: String) -> String:
+	var dados := pve()
+	for reg: String in dados["ordem_regioes"]:
+		for t: String in dados["regioes"][reg]["torneios"]:
+			if (dados["torneios"][t]["rivais"] as Array).has(rival_id):
+				return reg
+	return ""
+
+func pode_revanche(campeao: String) -> Dictionary:
+	var r: Dictionary = pve()["rivais"].get(campeao, {})
+	if not r.get("campeao", false):
+		return _erro("nao_e_campeao")
+	if not _trofeus().has(campeao):
+		return _erro("sem_trofeu")
+	if int(_trofeus()[campeao].get("revanche_dia", -1)) == dia_atual():
+		return _erro("revanche_feita_hoje")
+	return {"ok": true, "erro": ""}
+
+## Bônus de atributos da próxima revanche contra o campeão.
+func bonus_revanche(campeao: String) -> int:
+	var cfg: Dictionary = pve()["revanche"]
+	var v := int(_trofeus().get(campeao, {}).get("revanches", 0))
+	return mini(int(cfg["bonus_atributos"]) + int(cfg["bonus_por_vitoria"]) * v, int(cfg["bonus_max"]))
+
+## Tudo para jogar a revanche (como preparar_disputa, sem desafios): o campeão
+## mais forte pela regra. {cfg, lado_jogador, rival, desafios, visuais, gasta_folego, revanche}.
+func preparar_revanche(campeao: String) -> Dictionary:
+	var cfg: Dictionary = pve()["revanche"]
+	var vitorias := int(_trofeus().get(campeao, {}).get("revanches", 0))
+	var r := RegraPve.rival_revanche(pve()["rivais"][campeao], cfg, vitorias)
+	var rv := _rival_de(r, campeao)
+	rv["revanche"] = true
+	rv["bonus_revanche"] = bonus_revanche(campeao)
+	return {"cfg": Justa.carregar_configuracao(), "lado_jogador": lado_para_justa(), "rival": rv, "desafios": [], "visuais": [],
+		"gasta_folego": true, "revanche": campeao}
+
+## Fim da revanche a partir dos eventos da justa: gasta a revanche do dia
+## (vencendo ou não); na vitória, a recompensa de uma disputa de 3 estrelas da
+## região do campeão × recompensa_pct, o baú e os materiais da revanche.
+## {ok, venceu, estrelas, ouro, xp, niveis, baus, materiais, revanches}.
+func concluir_revanche(campeao: String, eventos: Array) -> Dictionary:
+	var p := pode_revanche(campeao)
+	if not p["ok"]:
+		return p
+	var dados := pve()
+	var cfg: Dictionary = dados["revanche"]
+	var t: Dictionary = _trofeus()[campeao]
+	t["revanche_dia"] = dia_atual()
+	var est := RegraPve.estrelas(eventos)
+	var ouro_g := 0
+	var xp_g := 0
+	var baus_ganhos: Array = []
+	var mats_g := {}
+	var renome_g := 0
+	var metas: Dictionary = estado["metas"]
+	if est > 0:
+		t["revanches"] = int(t.get("revanches", 0)) + 1
+		var rd: Dictionary = dados["recompensa_disputa"]
+		var pct := int(dados["regioes"][regiao_do_rival(campeao)].get("recompensa_pct", 100))
+		ouro_g = (int(rd["ouro_base"]) + 3 * int(rd["ouro_por_estrela"])) * pct / 100 * int(cfg["recompensa_pct"]) / 100
+		xp_g = (int(rd["xp_base"]) + 3 * int(rd["xp_por_estrela"])) * pct / 100 * int(cfg["recompensa_pct"]) / 100
+		if str(cfg.get("bau", "")) != "":
+			baus_ganhos.append(_guardar_bau(str(cfg["bau"])))
+		var inv_mats: Dictionary = estado["inventario"]["materiais"]
+		for m: String in cfg.get("materiais", {}):
+			mats_g[m] = int(cfg["materiais"][m])
+			inv_mats[m] = int(inv_mats.get(m, 0)) + mats_g[m]
+		_evento("vitoria")
+		renome_g = int(Balanceamento.ler("metas")["renome"]["ganho"]["vitoria"]) * (100 + bonus_companheiros("renome_pct")) / 100
+		metas["renome"] = int(metas["renome"]) + renome_g
+		metas["sequencia"] = int(metas["sequencia"]) + 1
+		_evento_maximo("sequencia", int(metas["sequencia"]))
+		_guardar_vitoria(ouro_g)
+	else:
+		metas["sequencia"] = 0
+	var niveis := _ganhar(ouro_g, xp_g)
+	var res := _concluir("pve")
+	res.merge({"estrelas": est, "ouro": ouro_g, "xp": xp_g, "niveis": niveis, "venceu": est > 0, "baus": baus_ganhos,
+		"materiais": mats_g, "renome": renome_g, "revanche": campeao, "revanches": int(t["revanches"]),
+		"torneio_concluido": false, "projeto": "", "regiao_nova": "", "trofeu": "", "peca_trofeu": ""}, true)
 	return res
 
 ## Disputa no automático: a mesma regra, com uma IA de precisão média no
@@ -3107,9 +3276,10 @@ func novo_estado() -> Dictionary:
 		"inventario": {"ouro": int(ini["ouro"]), "gemas": int(ini["gemas"]), "materiais": ini["materiais"].duplicate(), "itens": [], "projetos": []},
 		"equipamento": {},
 		"visual": {},
+		"visual_trofeu": {},
 		"vila": {"predios": {}},
 		"timers": [],
-		"pve": {"regiao": "feiras", "torneios": {}},
+		"pve": {"regiao": "feiras", "torneios": {}, "trofeus": {}},
 		"tutorial": {"passo": 0, "concluido": false},
 	}
 	e["inventario"]["materiais"]["fragmentos"] = int(e["inventario"]["materiais"].get("fragmentos", 0))
@@ -3226,6 +3396,15 @@ static func migrar(d: Dictionary) -> Dictionary:
 		if not d.has("social"):
 			d["social"] = _social_novo()
 		v = 11
+	if v < 12:
+		# Campeões (2026-10-18): troféus da casa senhorial (com as revanches) e
+		# as peças de troféu em uso.
+		var pve12: Dictionary = d.get("pve", {})
+		if not pve12.has("trofeus"):
+			pve12["trofeus"] = {}
+		if not d.has("visual_trofeu"):
+			d["visual_trofeu"] = {}
+		v = 12
 	d["versao"] = maxi(v, VERSAO)
 	return d
 
@@ -3246,6 +3425,9 @@ func equipar(id: String) -> Dictionary:
 
 func definir_visual(espaco: String, id_visual: String) -> Dictionary:
 	return _comando("definir_visual", [espaco, id_visual], _cmd_definir_visual)
+
+func usar_peca_trofeu(espaco: String, id: String) -> Dictionary:
+	return _comando("usar_peca_trofeu", [espaco, id], _cmd_usar_peca_trofeu)
 
 func equipar_habilidades(lista: Array) -> Dictionary:
 	return _comando("equipar_habilidades", [lista], _cmd_equipar_habilidades)

@@ -8,7 +8,11 @@ extends PanelContainer
 ##   Ranking: jogadores e ordens. Temporada: tempo e recompensas por liga.
 ##   Campeonato: chave de fim de semana.
 ## Até o servidor, adversários, defesas, ranking e campeonato são simulados
-## (a tela avisa). Tudo pelo serviço Jogador.
+## (a tela avisa). Tudo pelo serviço Jogador. Justar pede a ficha do
+## adversário a quem hospeda a tela (a vila); sem ninguém ouvindo, vai direto.
+
+## A vila mostra a ficha do adversário e, ao lutar, chama Fluxo.justar_pvp.
+signal pedir_justa
 
 var aba := "liga"
 var ranking := "jogadores"
@@ -79,7 +83,7 @@ func _montar_liga() -> void:
 		var j := Button.new()
 		j.focus_mode = Control.FOCUS_NONE
 		j.text = tr("LIGA_JUSTAR")
-		j.pressed.connect(func(): (get_node("/root/Fluxo") as FluxoTelas).justar_pvp())
+		j.pressed.connect(_justar)
 		linha.add_child(j)
 		var o := Button.new()
 		o.focus_mode = Control.FOCUS_NONE
@@ -150,10 +154,17 @@ func _montar_campeonato() -> void:
 		var b := _botao(tr("LIGA_JOGAR_RODADA").format({"n": int(c["rodada"]) + 1}), func():
 			var r := _jog.jogar_campeonato()
 			if r["ok"]:
-				(get_node("/root/Fluxo") as FluxoTelas).justar_pvp()
+				_justar()
 			else:
 				_mensagem.text = tr("ERRO_" + str(r["erro"]).to_upper()))
 		b.disabled = not c["aberto"]
+
+## Justar no PvP: a ficha do adversário antes (pela vila); sem vila, direto.
+func _justar() -> void:
+	if pedir_justa.get_connections().is_empty():
+		(get_node("/root/Fluxo") as FluxoTelas).justar_pvp()
+	else:
+		pedir_justa.emit()
 
 func _texto_premio(p: Dictionary) -> String:
 	var partes: Array[String] = []

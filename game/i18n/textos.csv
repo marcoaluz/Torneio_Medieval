@@ -365,7 +365,7 @@ RIVAL_SIR_ESTEVAO_ROCHA,Sir Estêvão da Rocha,Sir Estêvão of the Rock
 RIVAL_DAMA_ALDONCA_VAZ,Dama Aldonça Vaz,Dame Aldonça Vaz
 RIVAL_SIR_LOPO_FAGUNDES,Sir Lopo Fagundes,Sir Lopo Fagundes
 RIVAL_SIR_GIL_IMPLACAVEL,"Sir Gil, o Implacável",Sir Gil the Relentless
-PROVOCACAO_SIR_GIL_IMPLACAVEL,Gil não diz nada. Só aponta a lança para o seu elmo.,Gil says nothing. He just points his lance at your helm.
+PROVOCACAO_SIR_GIL_IMPLACAVEL,Gil não diz nada. Só ajeita a lança e espera.,Gil says nothing. He just settles his lance and waits.
 RIVAL_DAMA_BRITES_ESCARPA,Dama Brites da Escarpa,Dame Brites of the Cliff
 PROVOCACAO_DAMA_BRITES_ESCARPA,"Brites ajeita as luvas: ""Da escarpa se vê quem cai primeiro.""","Brites adjusts her gauntlets: ""From the cliff you can see who falls first."""
 RIVAL_SIR_TRISTAO_FERRO_VELHO,Sir Tristão Ferro-Velho,Sir Tristão Old-Iron
@@ -1092,3 +1092,145 @@ ITEM_CAPARACAO_PLACAS_EQUINAS,"Armadura de Placas Equina Completa (Full Steel Ba
 ITEM_CAPARACAO_CORVO_SOMBRIO,"Gualdrapa Sombria com Símbolo do Grifo","Shadow Griffin Caparison"
 ITEM_CAPARACAO_CAMPEAO_INVICTO,"Arreios Dourados Ornamentados","Ornate Golden Harness"
 ITEM_CAPARACAO_CORCEL_ANCESTRAL,"Conjunto Mítico do Corcel de Guerra Fantasma","Mythic Phantom Warhorse Set"
+TRACO_LARGADA_PERFEITA,Larga perfeito,Perfect starter
+TRACO_LARGADA_PERFEITA_DESC,Quase sempre parte na hora exata da bandeira: chega veloz e derruba fácil.,Almost always leaves right on the flag: arrives fast and unhorses easily.
+TRACO_LARGADA_PERFEITA_FRAQUEZA,Mira solta: muitos golpes vão no escudo ou no vazio. Largue perfeito também.,Loose aim: many blows hit the shield or miss. Start perfectly too.
+TRACO_CACADOR_DE_ELMOS,Só mira o capacete,Helm hunter
+TRACO_CACADOR_DE_ELMOS_DESC,Todo golpe vai na sua cabeça: 3 pontos quando acerta e muita chance de derrubar.,Every blow goes for your head: 3 points when it lands and a big chance to unhorse.
+TRACO_CACADOR_DE_ELMOS_FRAQUEZA,Previsível: o Bloqueio desvia o capacete para o escudo.,Predictable: Block turns helm blows into shield blows.
+TRACO_CERTEIRO,Nunca erra o peito,Never misses the chest
+TRACO_CERTEIRO_DESC,Acerta o seu peito em toda passada: soma 2 pontos sempre.,Hits your chest every pass: always scores 2.
+TRACO_CERTEIRO_FRAQUEZA,Larga devagar e quase não derruba: vença pelo capacete ou pela derrubada.,Slow off the line and rarely unhorses: win by the helm or by unhorsing.
+TRACO_MURALHA,Bloqueia muito,The wall
+TRACO_MURALHA_DESC,A habilidade dele vira seus golpes no capacete e no peito em golpes no escudo.,His skill turns your helm and chest blows into shield blows.
+TRACO_MURALHA_FRAQUEZA,A Investida atravessa o bloqueio na passada em que você a usa.,Charge breaks through the block in the pass you use it.
+TRACO_PACIENTE,Guarda a habilidade,Patient
+TRACO_PACIENTE_DESC,Não usa a habilidade até a última passada; aí vem com tudo.,"Holds his skill until the last pass, then comes with everything."
+TRACO_PACIENTE_FRAQUEZA,Nas duas primeiras passadas está sem ela: abra vantagem cedo e guarde para a última a sua que anula a dele.,In the first two passes he has no skill: build a lead early and save your counter for the last.
+TRACO_COMPASSO_DE_FERRO,Nunca perde o compasso,Iron rhythm
+TRACO_COMPASSO_DE_FERRO_DESC,Não erra uma batida do galope: chega na velocidade máxima e bate forte.,Never misses a beat of the gallop: arrives at full speed and hits hard.
+TRACO_COMPASSO_DE_FERRO_FRAQUEZA,Larga mal muitas vezes: com uma boa largada você chega junto.,Often starts badly: with a good start you arrive level with him.
+TRACO_ESCUDO_FIRME,Joga no escudo,Shield player
+TRACO_ESCUDO_FIRME_DESC,"Mira sempre o seu escudo: quase nunca erra, mas faz 1 ponto por golpe.","Always aims at your shield: hardly ever misses, but scores 1 per blow."
+TRACO_ESCUDO_FIRME_FRAQUEZA,Pontua pouco: acerte capacete e peito e vença nos pontos.,Scores little: land helm and chest blows and win on points.
+TRACO_TUDO_OU_NADA,Tudo ou nada,All or nothing
+TRACO_TUDO_OU_NADA_DESC,"Vai no capacete com o Golpe Pesado, mas erra um golpe em cada quatro.","Goes for the helm with Heavy Blow, but misses one blow in four."
+TRACO_TUDO_OU_NADA_FRAQUEZA,O Bloqueio anula o Golpe Pesado e segura o capacete.,Block cancels Heavy Blow and protects the helm.
+TRACO_RANCOR,Rancoroso,Spiteful
+TRACO_RANCOR_DESC,Volta mais forte a cada vez que vocês se enfrentam.,Comes back stronger every time you meet.
+TRACO_RANCOR_FRAQUEZA,O crescimento tem limite em cada região: treine e volte mais forte que ele.,His growth is capped in each region: train and come back stronger than him.
+ALCUNHA_CAMPEAO_VALDEMAR,o Rei das Feiras,King of the Fairs
+ENTRADA_CAMPEAO_VALDEMAR,"Valdemar: ""Parto antes de você piscar. Tente acompanhar.""","Valdemar: ""I'll be gone before you blink. Try to keep up."""
+DERROTA_CAMPEAO_VALDEMAR,"Valdemar: ""Caí... Na feira de verão eu volto, e você vai ver.""","Valdemar: ""I fell... I'll be back at the summer fair, you'll see."""
+ALCUNHA_MARTIM_MARTELO,o Sino das Capelas,the Chapel Bell
+ENTRADA_MARTIM_MARTELO,"Martim: ""Fica parado. É só a cabeça que eu quero.""","Martim: ""Hold still. It's only your head I want."""
+DERROTA_MARTIM_MARTELO,"Martim: ""O sino tocou... e foi o meu.""","Martim: ""The bell rang... and it was mine."""
+ALCUNHA_DAMA_ISOLDA_GAVIAO,o Olho do Condado,Eye of the County
+ENTRADA_DAMA_ISOLDA_GAVIAO,"Isolda: ""Escolho o ponto antes de você montar.""","Isolda: ""I choose my mark before you mount."""
+DERROTA_DAMA_ISOLDA_GAVIAO,"Isolda: ""Errei? Não. Você é que não estava onde devia.""","Isolda: ""Did I miss? No. You just weren't where you should be."""
+ALCUNHA_SIR_EGAS_MURO,a Porta Fechada,the Closed Gate
+ENTRADA_SIR_EGAS_MURO,"Egas: ""Bata quanto quiser. Eu fico.""","Egas: ""Strike all you like. I stay."""
+DERROTA_SIR_EGAS_MURO,"Egas: ""A porta abriu. Entre, então.""","Egas: ""The gate is open. Come in, then."""
+ALCUNHA_CONDE_RODRIGO_ALVAR,o Senhor de Alvar,Lord of Alvar
+ENTRADA_CONDE_RODRIGO_ALVAR,"O conde: ""Eu espero. Um conde sempre pode esperar.""","The count: ""I'll wait. A count can always wait."""
+DERROTA_CONDE_RODRIGO_ALVAR,"O conde: ""Esperei demais... Leve a taça, plebeu.""","The count: ""I waited too long... Take the cup, commoner."""
+ALCUNHA_SIR_HENRIQUE_LAMINA,a Lâmina do Ducado,Blade of the Duchy
+ENTRADA_SIR_HENRIQUE_LAMINA,"Henrique: ""Um corte só, na viseira.""","Henrique: ""One cut, right at the visor."""
+DERROTA_SIR_HENRIQUE_LAMINA,"Henrique: ""Cegou a lâmina... e o orgulho junto.""","Henrique: ""The blade dulls... and my pride with it."""
+ALCUNHA_DAMA_MAFALDA_TORMENTA,a Fúria do Norte,Fury of the North
+ENTRADA_DAMA_MAFALDA_TORMENTA,"Mafalda: ""Ou eu te derrubo, ou o céu cai antes.""","Mafalda: ""Either I unhorse you, or the sky falls first."""
+DERROTA_DAMA_MAFALDA_TORMENTA,"Mafalda: ""A tormenta passou. Por hoje.""","Mafalda: ""The storm has passed. For today."""
+ALCUNHA_SIR_BERMUDO_TOURO,o Que Não Para,the Unstoppable
+ENTRADA_SIR_BERMUDO_TOURO,"Bermudo: ""Meu cavalo não conhece outro passo além do galope.""","Bermudo: ""My horse knows no pace but the gallop."""
+DERROTA_SIR_BERMUDO_TOURO,"Bermudo: ""Fui rápido... e caí mais rápido ainda.""","Bermudo: ""I was fast... and fell even faster."""
+ALCUNHA_DUQUE_AFONSO_MONTARGIL,a Primeira Lança do Ducado,First Lance of the Duchy
+ENTRADA_DUQUE_AFONSO_MONTARGIL,"O duque: ""Quando a bandeira cair, eu já terei partido.""","The duke: ""By the time the flag falls, I'll already be gone."""
+DERROTA_DUQUE_AFONSO_MONTARGIL,"O duque: ""Tão rápido... e mesmo assim no chão. Muito bem.""","The duke: ""So fast... and still on the ground. Well done."""
+ALCUNHA_SIR_GIL_IMPLACAVEL,a Sombra Paciente,the Patient Shadow
+ENTRADA_SIR_GIL_IMPLACAVEL,Gil só acena com a cabeça. Ele vai esperar.,Gil only nods. He will wait.
+DERROTA_SIR_GIL_IMPLACAVEL,"Gil tira o elmo e, pela primeira vez, sorri.","Gil takes off his helm and, for the first time, smiles."
+ALCUNHA_DAMA_BRITES_ESCARPA,o Rochedo,the Crag
+ENTRADA_DAMA_BRITES_ESCARPA,"Brites: ""Já viu onda vencer rochedo?""","Brites: ""Ever seen a wave beat a crag?"""
+DERROTA_DAMA_BRITES_ESCARPA,"Brites: ""Até a escarpa cede, um dia.""","Brites: ""Even the cliff gives way, one day."""
+ALCUNHA_SIR_TRISTAO_FERRO_VELHO,o Veterano,the Old Hand
+ENTRADA_SIR_TRISTAO_FERRO_VELHO,"Tristão: ""Um ponto aqui, um ponto ali. É assim que se envelhece na liça.""","Tristão: ""A point here, a point there. That's how you grow old in the lists."""
+DERROTA_SIR_TRISTAO_FERRO_VELHO,"Tristão: ""Vinte anos... e um plebeu me ensina. Bom.""","Tristão: ""Twenty years... and a commoner teaches me. Good."""
+ALCUNHA_PRINCIPE_FERNANDO_AURORA,a Coroa de Amanhã,Tomorrow's Crown
+ENTRADA_PRINCIPE_FERNANDO_AURORA,"O príncipe: ""Um príncipe mira alto. Na sua cabeça, plebeu.""","The prince: ""A prince aims high. At your head, commoner."""
+DERROTA_PRINCIPE_FERNANDO_AURORA,"O príncipe: ""Meu pai vai saber disto... e eu não vou esquecer.""","The prince: ""My father will hear of this... and I won't forget."""
+ALCUNHA_SIR_AURELIO_INVICTO,o das Cem Fitas,the Hundred-Ribbon Knight
+ENTRADA_SIR_AURELIO_INVICTO,"Aurélio: ""Mais uma fita. A sua.""","Aurélio: ""One more ribbon. Yours."""
+DERROTA_SIR_AURELIO_INVICTO,"Aurélio: ""A primeira fita negra... guarde-a bem.""","Aurélio: ""The first black ribbon... keep it well."""
+ALCUNHA_DAMA_ELVIRA_SANGUE_REAL,a Herdeira,the Heiress
+ENTRADA_DAMA_ELVIRA_SANGUE_REAL,"Elvira: ""Nasci na sela. E você, nasceu onde?""","Elvira: ""I was born in the saddle. Where were you born?"""
+DERROTA_DAMA_ELVIRA_SANGUE_REAL,"Elvira: ""Sangue não ganha justa. Aprendi hoje.""","Elvira: ""Blood does not win jousts. I learned that today."""
+ALCUNHA_SIR_BALTASAR_ESCUDO_OURO,a Muralha Dourada,the Golden Wall
+ENTRADA_SIR_BALTASAR_ESCUDO_OURO,"Baltasar: ""Bata no ouro. Ele aguenta.""","Baltasar: ""Strike the gold. It holds."""
+DERROTA_SIR_BALTASAR_ESCUDO_OURO,"Baltasar: ""Amassou... Mande o seu ferreiro para mim.""","Baltasar: ""It dented... Send me your smith."""
+ALCUNHA_REI_SANCHO_JUSTADOR,o Senhor de Todas as Liças,Lord of All Lists
+ENTRADA_REI_SANCHO_JUSTADOR,"O rei: ""Guardo o melhor golpe para o fim. Sempre guardei.""","The king: ""I save my best blow for the end. I always have."""
+DERROTA_REI_SANCHO_JUSTADOR,"O rei: ""O reino tem um novo campeão. Levante-se, cavaleiro.""","The king: ""The realm has a new champion. Rise, knight."""
+ALCUNHA_NEMESIS_CORVO,a Sombra do Plebeu,the Commoner's Shadow
+ENTRADA_NEMESIS_CORVO,"O Corvo: ""Você de novo? A cada encontro eu volto mais forte.""","The Raven: ""You again? Every time we meet I come back stronger."""
+DERROTA_NEMESIS_CORVO,"O Corvo: ""Isto não acabou. Nunca acaba.""","The Raven: ""This is not over. It never is."""
+ESPACO_ESTANDARTE,Estandarte,Pennon
+ITEM_TROFEU_CAMPEAO_VALDEMAR,Estandarte do Rei das Feiras,King of the Fairs' Pennon
+ITEM_TROFEU_MARTIM_MARTELO,Penacho do Sino,Bell Plume
+ITEM_TROFEU_DAMA_ISOLDA_GAVIAO,Penacho de Penas de Gavião,Hawk-Feather Plume
+ITEM_TROFEU_SIR_EGAS_MURO,Manta da Porta Fechada,Closed Gate Caparison
+ITEM_TROFEU_CONDE_RODRIGO_ALVAR,Estandarte de Alvar,Pennon of Alvar
+ITEM_TROFEU_SIR_HENRIQUE_LAMINA,Penacho de Aço,Steel Plume
+ITEM_TROFEU_DAMA_MAFALDA_TORMENTA,Manta da Tormenta,Storm Caparison
+ITEM_TROFEU_SIR_BERMUDO_TOURO,Manta do Touro,Bull Caparison
+ITEM_TROFEU_DUQUE_AFONSO_MONTARGIL,Estandarte de Montargil,Pennon of Montargil
+ITEM_TROFEU_SIR_GIL_IMPLACAVEL,Penacho Negro da Sombra,Black Shadow Plume
+ITEM_TROFEU_DAMA_BRITES_ESCARPA,Estandarte do Rochedo,Crag Pennon
+ITEM_TROFEU_SIR_TRISTAO_FERRO_VELHO,Manta do Veterano,Veteran's Caparison
+ITEM_TROFEU_PRINCIPE_FERNANDO_AURORA,Penacho da Aurora,Dawn Plume
+ITEM_TROFEU_SIR_AURELIO_INVICTO,Estandarte das Cem Fitas,Hundred-Ribbon Pennon
+ITEM_TROFEU_DAMA_ELVIRA_SANGUE_REAL,Manta de Sangue Real,Royal-Blood Caparison
+ITEM_TROFEU_SIR_BALTASAR_ESCUDO_OURO,Estandarte Dourado,Golden Pennon
+ITEM_TROFEU_REI_SANCHO_JUSTADOR,Penacho Real,Royal Plume
+FICHA_TITULO,Ficha do adversário,Opponent sheet
+FICHA_VOCE,Você,You
+FICHA_PODER,Poder {n},Power {n}
+FICHA_FAIXA_VERDE,Favorável,Favorable
+FICHA_FAIXA_AMARELO,Parelha,Even
+FICHA_FAIXA_VERMELHO,Difícil,Hard
+FICHA_HABILIDADE,Habilidade: {nome},Skill: {nome}
+FICHA_ANULADA_POR,(anulada por {nome}),(countered by {nome})
+FICHA_SEM_HABILIDADE,Sem habilidade,No skill
+FICHA_SUAS_HABILIDADES,As suas: {lista},Yours: {lista}
+FICHA_TRACO,Traço: {nome},Trait: {nome}
+FICHA_FRAQUEZA,Ponto fraco: {texto},Weak spot: {texto}
+FICHA_SEM_TRACO,Traço: ainda desconhecido,Trait: still unknown
+FICHA_ENCONTROS,Encontros: {n} (+{bonus} em cada atributo),Meetings: {n} (+{bonus} to each attribute)
+FICHA_LIGA,Liga {liga},{liga} league
+FICHA_REVANCHE,"Revanche heroica: +{bonus} em cada atributo, recompensa {pct}%","Heroic rematch: +{bonus} to each attribute, {pct}% reward"
+FICHA_EQUIPAMENTOS,Equipamentos,Equipment
+FICHA_LUTAR,Lutar,Fight
+FICHA_VOLTAR,Voltar,Back
+DUELO_ARAUTO,"O arauto: Damas e senhores! {jogador} contra {campeao}, {alcunha}!","The herald: Ladies and lords! {jogador} against {campeao}, {alcunha}!"
+DUELO_ARAUTO_REVANCHE,"O arauto: A revanche! {campeao}, {alcunha}, volta à liça para lavar a honra!","The herald: The rematch! {campeao}, {alcunha}, returns to the lists to restore his honor!"
+DUELO_CONTRA,contra,versus
+DUELO_TOQUE,Toque para entrar na liça,Tap to enter the lists
+PERFIL_ABA_ESTATISTICAS,Estatísticas,Statistics
+PERFIL_ABA_TROFEUS,Troféus ({n}),Trophies ({n})
+TROFEUS_VAZIO,Vença um campeão de torneio para expor o primeiro troféu nesta estante.,Beat a tournament champion to put the first trophy on this shelf.
+TROFEUS_TOQUE,Toque num troféu para ver a peça e a revanche.,Tap a trophy to see its piece and the rematch.
+TROFEU_VENCIDO_EM,Vencido em: {torneio},Beaten at: {torneio}
+TROFEU_REVANCHES,Revanches vencidas: {n},Rematches won: {n}
+TROFEU_PECA,Peça: {nome} ({espaco}),Piece: {nome} ({espaco})
+TROFEU_USAR,Usar a peça,Wear the piece
+TROFEU_TIRAR,Tirar a peça,Remove the piece
+TROFEU_REVANCHE,Revanche heroica,Heroic rematch
+TROFEU_REVANCHE_AMANHA,Revanche de hoje feita,Today's rematch done
+TROFEU_NOVO,Troféu de {campeao} exposto na casa senhorial! Peça nova: {peca}.,{campeao}'s trophy now stands in your manor! New piece: {peca}.
+REVANCHE_VENCEU,Revanche heroica vencida!,Heroic rematch won!
+PVE_REVANCHE,(revanche),(rematch)
+EQUIP_PECA_TROFEU,troféu,trophy
+EQUIP_SO_VISUAL,Só aparência: não muda a justa.,Looks only: does not change the joust.
+ERRO_SEM_TROFEU,Vença este campeão primeiro.,Beat this champion first.
+ERRO_REVANCHE_FEITA_HOJE,A revanche com ele já foi hoje. Volte amanhã.,You already had today's rematch with him. Come back tomorrow.
+ERRO_PECA_BLOQUEADA,Peça ainda não conquistada.,Piece not won yet.
+ERRO_NAO_E_CAMPEAO,Esse rival não é campeão.,That rival is not a champion.

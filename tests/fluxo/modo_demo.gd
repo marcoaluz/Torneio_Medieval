@@ -4,7 +4,8 @@ extends Node
 ## a tela TM_TELA (titulo, bau, baus com TM_ABRIR=1|chances, forja com
 ## TM_PREDIO/TM_ABA, habilidades [TM_CONJUNTO], missoes com TM_ABA, torneios com TM_REGIAO);
 ## social (TM_ABA, TM_SUB, TM_CANAL, TM_ORDEM=0); TM_TITULO dá um título ao jogador na arena; historia (TM_CENA, TM_FALA) mostra
-## a vila tocando uma cena; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada, TM_HORA, TM_CLIMA); estabulo (TM_PELAGEM, TM_TROCAR=1); campo (TM_ATRIBUTO, TM_TREINANDO=1). Save em
+## a vila tocando uma cena; ficha (TM_RIVAL, TM_REVANCHE=1, TM_PVP=1), duelo (TM_RIVAL, TM_REVANCHE=1) e
+## trofeus (TM_TROFEU) dos campeões; vila (TM_NIVEL, TM_ORDEM=1 com a ordem criada, TM_HORA, TM_CLIMA); estabulo (TM_PELAGEM, TM_TROCAR=1); campo (TM_ATRIBUTO, TM_TREINANDO=1). Save em
 ## user://teste_modo_demo/.
 
 func _ready() -> void:
@@ -129,6 +130,38 @@ func _ready() -> void:
 		var vp: Vila = load("res://game/scenes/village/vila.tscn").instantiate()
 		add_child(vp)
 		(func(): vp.tocar_predio("casa_senhorial")).call_deferred()
+		return
+	if tela in ["ficha", "duelo", "trofeus"]:
+		# Campeões: ficha do adversário (TM_RIVAL, padrão o rei; TM_REVANCHE=1 a da
+		# revanche; TM_PVP=1 a de um adversário da liga), duelo do campeão (TM_RIVAL)
+		# ou a estante de troféus da casa senhorial (alguns campeões vencidos).
+		jog.estado["criado_em"] = int(jog.estado["criado_em"]) - 200000
+		jog.estado["tutorial"]["concluido"] = true
+		jog.estado["cavaleiro"]["nivel"] = 12
+		jog.estado["historia"]["vistas"] = jog.cfg_historia()["ordem"].duplicate()
+		var vencidos := ["campeao_valdemar", "martim_martelo", "dama_isolda_gaviao", "sir_egas_muro", "conde_rodrigo_alvar"]
+		for i in vencidos.size():
+			jog.estado["pve"]["trofeus"][vencidos[i]] = {"em": 1000 + i, "torneio": "feira_grande" if i == 0 else "torneio_conde", "revanches": i}
+		var rid := OS.get_environment("TM_RIVAL") if OS.get_environment("TM_RIVAL") != "" else "rei_sancho_justador"
+		var vf: Vila = load("res://game/scenes/village/vila.tscn").instantiate()
+		add_child(vf)
+		var abrir_f := func():
+			vf.cena_historia.visible = false
+			if tela == "trofeus":
+				vf.tela_perfil.abrir()
+				vf.tela_perfil.aba = "trofeus"
+				vf.tela_perfil.trofeu = OS.get_environment("TM_TROFEU") if OS.get_environment("TM_TROFEU") != "" else "martim_martelo"
+				vf.tela_perfil.atualizar()
+			elif tela == "duelo":
+				vf.duelo().mostrar(jog.preparar_revanche(rid)["rival"] if OS.get_environment("TM_REVANCHE") == "1" else jog.rival_para_justa(rid))
+			elif OS.get_environment("TM_PVP") == "1":
+				jog.procurar_adversario()
+				vf.preparar_luta(jog.preparar_pvp()["rival"], Callable(), func(): pass)
+			elif OS.get_environment("TM_REVANCHE") == "1":
+				vf.pedir_revanche(rid if jog.estado["pve"]["trofeus"].has(rid) else "campeao_valdemar")
+			else:
+				vf.preparar_luta(jog.rival_para_justa(rid), Callable(), func(): pass)
+		abrir_f.call_deferred()
 		return
 	if tela == "campo":
 		# Cena do campo de treino: TM_ATRIBUTO (forca, precisao, equilibrio) no

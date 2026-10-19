@@ -4,7 +4,15 @@ extends PanelContainer
 ## (setas para trocar), os torneios da região com liberação, progresso e
 ## desafios especiais; escolhido um, a chave de rivais com as estrelas de cada
 ## disputa e os botões Justar (manual) e Automático (3 estrelas, nunca o
-## campeão). Também há a justa livre (treino, sem recompensa).
+## campeão). Também há a justa livre (treino, sem recompensa). Campeão já
+## vencido ganha o botão da revanche heroica (uma por dia). Justar e Revanche
+## pedem a ficha do adversário a quem hospeda a tela (a vila); sem ninguém
+## ouvindo, vão direto para a arena.
+
+## A vila mostra a ficha do adversário e chama justar_direto ao lutar.
+signal pedir_justa(torneio: String, indice: int)
+## O mesmo para a revanche heroica (revanche_direto).
+signal pedir_revanche(campeao: String)
 
 var torneio := ""
 ## Região mostrada ("" = a atual do jogador).
@@ -119,6 +127,15 @@ func _montar_chave() -> void:
 		auto.disabled = not _jog.pode_automatico(torneio, i)["ok"]
 		auto.pressed.connect(func(): automatico(idx))
 		linha.add_child(auto)
+		if r.get("campeao", false) and _jog.trofeus().any(func(tf): return tf["campeao"] == rid):
+			var rev := Button.new()
+			rev.name = "Revanche"
+			rev.focus_mode = Control.FOCUS_NONE
+			var pr := _jog.pode_revanche(rid)
+			rev.text = tr("TROFEU_REVANCHE") if pr["ok"] else tr("TROFEU_REVANCHE_AMANHA")
+			rev.disabled = not pr["ok"]
+			rev.pressed.connect(func(): revanche(rid))
+			linha.add_child(rev)
 		_lista.add_child(linha)
 	var info: Array[String] = [tr("PVE_RECOMPENSA_TORNEIO").format({"ouro": int(t["recompensa"]["ouro"]), "xp": int(t["recompensa"]["xp"])})]
 	for d: String in _jog.desafios_do_torneio(torneio):
@@ -130,9 +147,28 @@ func _trocar_regiao(passo: int) -> void:
 	regiao = abertas[clampi(abertas.find(regiao) + passo, 0, abertas.size() - 1)]
 	montar()
 
-## Abre a arena (com o servidor ligado, pede a semente antes; sem rede, avisa).
+## Justar: a ficha do adversário antes (pela vila); sem vila, direto.
 func _justar(indice: int) -> void:
+	if pedir_justa.get_connections().is_empty():
+		justar_direto(indice)
+	else:
+		pedir_justa.emit(torneio, indice)
+
+## Abre a arena (com o servidor ligado, pede a semente antes; sem rede, avisa).
+func justar_direto(indice: int) -> void:
 	var r: Dictionary = await (get_node("/root/Fluxo") as FluxoTelas).justar(torneio, indice)
+	if not r["ok"]:
+		_info.text = tr("ERRO_" + str(r["erro"]).to_upper())
+
+## Revanche heroica contra o campeão (a ficha antes, pela vila).
+func revanche(campeao: String) -> void:
+	if pedir_revanche.get_connections().is_empty():
+		revanche_direto(campeao)
+	else:
+		pedir_revanche.emit(campeao)
+
+func revanche_direto(campeao: String) -> void:
+	var r: Dictionary = await (get_node("/root/Fluxo") as FluxoTelas).justar_revanche(campeao)
 	if not r["ok"]:
 		_info.text = tr("ERRO_" + str(r["erro"]).to_upper())
 

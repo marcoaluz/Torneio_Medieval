@@ -27,7 +27,7 @@ export interface Resultado {
   [chave: string]: any;
 }
 
-export const VERSAO = 11;
+export const VERSAO = 12;
 export const ESPACOS_REGRA = ["elmo", "peitoral", "escudo", "lanca"];
 
 export function erro(codigo: string): Resultado {

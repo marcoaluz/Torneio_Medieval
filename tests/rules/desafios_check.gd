@@ -39,6 +39,28 @@ func _initialize() -> void:
 			elif str(p.get(k)) != str(e) and not (typeof(e) == TYPE_FLOAT and int(p.get(k, -1)) == int(e)):
 				ok = false
 		_checa("perfil do rival: " + caso["nome"], ok)
+	# Revanche heroica e faixa de poder da ficha (campeões, 2026-10-18).
+	var base_rev: Dictionary = dados["revanche_base"]
+	var copia_rev := JSON.stringify(base_rev)
+	for caso: Dictionary in dados["revanche"]:
+		var r := RegraPve.rival_revanche(base_rev, dados["revanche_cfg"], int(caso["vitorias"]))
+		var ok := true
+		for chave: String in caso["esperado"]:
+			var v: Variant = _ler(r, chave)
+			var e: Variant = caso["esperado"][chave]
+			if e == null:
+				ok = ok and v == null
+			elif e is String:
+				ok = ok and str(v) == e
+			else:
+				ok = ok and v != null and int(v) == int(e)
+			if not ok:
+				print("  %s: esperado %s, veio %s" % [chave, e, v])
+				break
+		_checa("revanche: " + caso["nome"], ok)
+	_checa("revanche nao muda o campeao", JSON.stringify(base_rev) == copia_rev)
+	for caso: Dictionary in dados["faixa_poder"]:
+		_checa("faixa de poder: " + caso["nome"], RegraPve.faixa_poder(int(caso["jogador"]), int(caso["rival"]), dados["faixa_cfg"]) == caso["esperado"])
 	# Os desafios do jogo de verdade batem com os casos (mesmos ids e efeitos).
 	var defs_jogo: Dictionary = Balanceamento.carregar("pve")["desafios"]
 	_checa("pve.json tem os 5 desafios do GDD", defs_jogo.keys().size() == 5 and dados["defs"].keys().all(func(k): return defs_jogo.has(k)))

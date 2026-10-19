@@ -54,9 +54,10 @@ export function novo_estado(bal: (nome: string) => Dados, agora: number, semente
     inventario: { ouro: inteiro(ini["ouro"]), gemas: inteiro(ini["gemas"]), materiais: copiar(ini["materiais"]), itens: [], projetos: [] },
     equipamento: {},
     visual: {},
+    visual_trofeu: {},
     vila: { predios: {} },
     timers: [],
-    pve: { regiao: "feiras", torneios: {} },
+    pve: { regiao: "feiras", torneios: {}, trofeus: {} },
     tutorial: { passo: 0, concluido: false },
   };
   e["inventario"]["materiais"]["fragmentos"] = inteiro(e["inventario"]["materiais"]["fragmentos"] ?? 0);

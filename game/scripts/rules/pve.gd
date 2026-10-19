@@ -69,8 +69,50 @@ static func aplicar_desafios(cfg: Dictionary, lado_j: Dictionary, lado_r: Dictio
 			p["erro_mira_px"] = int(p["erro_mira_px"]) * int(d["ia_erro_mira_pct"]) / 100
 	return {"cfg": c, "lado_jogador": j, "lado_rival": r, "perfil_rival": p}
 
+## Revanche heroica (pve.json > revanche): o campeão já vencido volta mais
+## forte. Devolve uma cópia de `r` com os atributos do cavaleiro e do cavalo
+## + bonus (bonus_atributos + bonus_por_vitoria × revanches já vencidas, até
+## bonus_max; nenhum passa de teto_atributo) e o perfil_ajuste da revanche
+## somado ao do campeão (números somam; textos trocam). Puro.
+static func rival_revanche(r: Dictionary, cfg: Dictionary, vitorias: int) -> Dictionary:
+	var saida := r.duplicate(true)
+	var bonus := mini(int(cfg["bonus_atributos"]) + int(cfg["bonus_por_vitoria"]) * maxi(vitorias, 0), int(cfg["bonus_max"]))
+	var teto := int(cfg["teto_atributo"])
+	for parte in ["cavaleiro", "cavalo"]:
+		var atr: Dictionary = saida[parte]
+		var nomes: Array = atr.keys()
+		nomes.sort()
+		for k: String in nomes:
+			atr[k] = mini(int(atr[k]) + bonus, teto)
+	var ajuste: Dictionary = saida.get("perfil_ajuste", {})
+	var extra: Dictionary = cfg.get("perfil_ajuste", {})
+	var chaves: Array = extra.keys()
+	chaves.sort()
+	for k: String in chaves:
+		if k.begins_with("_"):
+			continue
+		if typeof(extra[k]) in [TYPE_INT, TYPE_FLOAT] and typeof(ajuste.get(k)) in [TYPE_INT, TYPE_FLOAT]:
+			ajuste[k] = int(ajuste[k]) + int(extra[k])
+		else:
+			ajuste[k] = extra[k]
+	saida["perfil_ajuste"] = ajuste
+	return saida
+
+## Faixa da ficha do adversário pelo poder dos dois (pve.json > ficha):
+## quanto o rival é mais forte, em % do poder do jogador (inteiro, trunca);
+## até verde_max_pct é "verde", até amarelo_max_pct "amarelo", acima "vermelho".
+static func faixa_poder(poder_jogador: int, poder_rival: int, cfg: Dictionary) -> String:
+	var dif := (poder_rival - poder_jogador) * 100 / maxi(poder_jogador, 1)
+	if dif <= int(cfg["verde_max_pct"]):
+		return "verde"
+	if dif <= int(cfg["amarelo_max_pct"]):
+		return "amarelo"
+	return "vermelho"
+
 ## Estilo de um campeão: o ajuste soma nos números do perfil da IA (sem
-## passar de zero) e troca os textos (ex.: zona_preferida). Puro.
+## passar de zero) e troca os textos (ex.: zona_preferida). Puro. O traço
+## de luta de cada campeão (pve.json > tracos) é feito só com o perfil_ajuste
+## e a habilidade dele; tests/rules/tracos_check.gd confere que aparece.
 ## Perfil da IA de um rival do PvE: o do perfil dele, mais ajuste_campeao se
 ## for campeão, mais o perfil_ajuste dele (ia = ia_rival.json; r = pve.json > rivais).
 static func perfil_do_rival(ia: Dictionary, r: Dictionary) -> Dictionary:

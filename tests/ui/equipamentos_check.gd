@@ -18,7 +18,7 @@ func _initialize() -> void:
 	root.add_child(tela)
 	await process_frame
 
-	_checa("13 espacos do cavaleiro", tela._botoes_espaco.size() == 13)
+	_checa("14 espacos do cavaleiro (com o estandarte dos trofeus)", tela._botoes_espaco.size() == 14)
 	_checa("espaco vazio aparece vazio", tela._botoes_espaco["capa"].text.ends_with("vazio"))
 	_checa("espaco equipado mostra a peca", tela._botoes_espaco["peitoral"].text.ends_with("Peitoral do escudeiro"))
 	tela.abrir_espaco("peitoral")

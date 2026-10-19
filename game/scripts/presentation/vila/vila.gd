@@ -57,6 +57,13 @@ var tela_equipamentos: TelaEquipamentos:
 			_som_da_tela(_tela_equipamentos)
 			$Interface.move_child(_tela_equipamentos, $Interface/TelaTreino.get_index() + 1)
 		return _tela_equipamentos
+## Ficha do adversário (antes de toda justa do PvE e do PvP) e tela de duelo
+## (antes de um campeão), por cima de tudo; criadas na primeira vez.
+var _ficha: FichaAdversario
+var _duelo: DueloCampeao
+## O que Lutar faz na ficha aberta agora.
+var _ao_lutar := Callable()
+var _ficha_volta_dos_equipamentos := false
 @onready var tela_torneios: TelaTorneios = $Interface/TelaTorneios
 @onready var tela_baus: TelaBaus = $Interface/TelaBaus
 @onready var tela_forja: TelaForja = $Interface/TelaForja
@@ -98,6 +105,13 @@ func _ready() -> void:
 	_fechar.pressed.connect(fechar_painel)
 	tela_perfil.melhorar_pedido.connect(func(r): if r["ok"]: _registrar_melhoria("casa_senhorial", r))
 	tela_perfil.abrir_equipamentos.connect(func(): tela_perfil.fechar(); tela_equipamentos.abrir())
+	# Antes de justar: a ficha do adversário (e o duelo, se for campeão).
+	tela_torneios.pedir_justa.connect(func(t, i): preparar_luta(_jog.preparar_disputa(t, i)["rival"],
+		func(): return _jog.preparar_disputa(t, i)["rival"], func(): tela_torneios.justar_direto(i)))
+	tela_torneios.pedir_revanche.connect(pedir_revanche)
+	tela_perfil.pedir_revanche.connect(func(c): tela_perfil.fechar(); pedir_revanche(c))
+	tela_liga.pedir_justa.connect(func(): preparar_luta(_jog.preparar_pvp().get("rival", {}),
+		func(): return _jog.preparar_pvp().get("rival", {}), func(): (get_node("/root/Fluxo") as FluxoTelas).justar_pvp()))
 	_fechar.text = tr("PAINEL_FECHAR")
 	_acao.pressed.connect(func(): fechar_painel(); tela_torneios.abrir(); abrir_justa.emit())
 	_botao_baus.pressed.connect(func(): fechar_painel(); tela_baus.abrir())
@@ -350,8 +364,67 @@ func _montar_topo() -> void:
 	for estado in ["normal", "hover", "pressed", "focus"]:
 		_topo_retrato.add_theme_stylebox_override(estado, StyleBoxEmpty.new())
 
+func ficha() -> FichaAdversario:
+	if _ficha == null:
+		_ficha = FichaAdversario.new()
+		_ficha.name = "FichaAdversario"
+		_ficha.set_anchors_preset(Control.PRESET_CENTER)
+		_ficha.offset_left = -450
+		_ficha.offset_right = 450
+		_ficha.offset_top = -262
+		_ficha.offset_bottom = 262
+		_ficha.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		_ficha.grow_vertical = Control.GROW_DIRECTION_BOTH
+		$Interface.add_child(_ficha)
+		_ficha.lutar.connect(_ao_lutar_na_ficha)
+		_ficha.abrir_equipamentos.connect(func():
+			_ficha.fechar()
+			_ficha_volta_dos_equipamentos = true
+			tela_equipamentos.abrir())
+		tela_equipamentos.fechada.connect(func():
+			if _ficha_volta_dos_equipamentos:
+				_ficha_volta_dos_equipamentos = false
+				_ficha.visible = true
+				_ficha.atualizar())
+	return _ficha
+
+func duelo() -> DueloCampeao:
+	if _duelo == null:
+		_duelo = DueloCampeao.new()
+		_duelo.name = "DueloCampeao"
+		$Interface.add_child(_duelo)
+		_duelo.entrar.connect(func(): if _ao_lutar.is_valid(): _ao_lutar.call())
+	return _duelo
+
+## Ficha do adversário `rv` antes da justa. `refazer` devolve o rival de novo
+## (depois de trocar o equipamento); `ao_lutar` abre a arena. Contra campeão
+## (ou na revanche), a tela de duelo entra entre a ficha e a arena.
+func preparar_luta(rv: Dictionary, refazer: Callable, ao_lutar: Callable) -> void:
+	if rv.is_empty():
+		ao_lutar.call()
+		return
+	_ao_lutar = ao_lutar
+	ficha().abrir(rv, refazer)
+
+func _ao_lutar_na_ficha() -> void:
+	var rv := ficha().rival
+	if rv.get("campeao", false):
+		duelo().mostrar(rv)
+	elif _ao_lutar.is_valid():
+		_ao_lutar.call()
+
+## Revanche heroica (da estante de troféus ou da chave do torneio): ficha, duelo e arena.
+func pedir_revanche(campeao: String) -> void:
+	var p := _jog.pode_revanche(campeao)
+	if not p["ok"]:
+		mostrar_letreiro(tr("ERRO_" + str(p["erro"]).to_upper()))
+		return
+	preparar_luta(_jog.preparar_revanche(campeao)["rival"], func(): return _jog.preparar_revanche(campeao)["rival"],
+		func(): tela_torneios.revanche_direto(campeao))
+
 func _unhandled_input(event: InputEvent) -> void:
-	if (_tela_equipamentos and _tela_equipamentos.visible) or tela_treino.visible or tela_torneios.visible:
+	if (_tela_equipamentos and _tela_equipamentos.visible) or tela_treino.visible or tela_torneios.visible \
+			or (_ficha and _ficha.visible) or (_duelo and _duelo.visible):
 		_toque_inicio = Vector2.INF
 		return
 	# Arrastar com o dedo move a câmera; só vira toque no prédio se o dedo

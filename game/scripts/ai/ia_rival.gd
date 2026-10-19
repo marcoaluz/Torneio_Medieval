@@ -103,6 +103,11 @@ func ponto_mira(cfg_mira: Dictionary) -> Vector2i:
 func batida_habilidade() -> int:
 	return int(perfil["habilidade_batida"])
 
+## Primeira passada em que tenta acionar a ativa (opcional, padrão 1: logo
+## na primeira). O traço "paciente" dos campeões guarda para a última.
+func passada_habilidade() -> int:
+	return maxi(int(perfil.get("habilidade_passada", 1)), 1)
+
 ## Centro do primeiro retângulo da zona, em décimos de px.
 static func centro_da_zona(cfg_mira: Dictionary, zona: String) -> Vector2i:
 	for z: Dictionary in cfg_mira["zonas"]:

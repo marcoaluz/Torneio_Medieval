@@ -1,6 +1,6 @@
 {
 	"versao": 1,
-	"_nota": "Espacos de peca da tela de Equipamentos (GDD, Equipamentos e direcao de arte). lado: em que coluna o espaco aparece em volta do retrato. tipo: status (conta na justa) ou visual (so aparencia). Os nomes viram ESPACO_<NOME>. Espaco sem item no inventario aparece vazio.",
+	"_nota": "Espacos de peca da tela de Equipamentos (GDD, Equipamentos e direcao de arte). lado: em que coluna o espaco aparece em volta do retrato. tipo: status (conta na justa) ou visual (so aparencia). Os nomes viram ESPACO_<NOME>. Espaco sem item no inventario aparece vazio. Espacos visuais tambem listam as pecas de trofeu dos campeoes (itens.json > pecas_trofeu): cimeira (penacho), caparacao (manta) e estandarte (na lanca).",
 	"cavaleiro": [
 		{ "espaco": "elmo", "lado": "esquerda", "tipo": "status" },
 		{ "espaco": "cimeira", "lado": "esquerda", "tipo": "visual" },
@@ -14,7 +14,8 @@
 		{ "espaco": "sobreveste", "lado": "direita", "tipo": "visual" },
 		{ "espaco": "capa", "lado": "direita", "tipo": "visual" },
 		{ "espaco": "escudo", "lado": "direita", "tipo": "status" },
-		{ "espaco": "lanca", "lado": "direita", "tipo": "status" }
+		{ "espaco": "lanca", "lado": "direita", "tipo": "status" },
+		{ "espaco": "estandarte", "lado": "direita", "tipo": "visual" }
 	],
 	"cavalo": [
 		{ "espaco": "testeira", "lado": "esquerda", "tipo": "status" },

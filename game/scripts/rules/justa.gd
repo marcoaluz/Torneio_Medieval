@@ -345,7 +345,7 @@ func _corrida_1ms() -> Array[Dictionary]:
 				eventos.append(ev)
 			_plano_ix += 1
 		var hb := ia.batida_habilidade()
-		if hb > 0 and rival.t_ms == hb * rival.compasso_ms():
+		if hb > 0 and rival.t_ms == hb * rival.compasso_ms() and fases.passada >= ia.passada_habilidade():
 			eventos.append_array(rival_ativar_habilidade())
 	if ia_jogador:
 		while _plano_jog_ix < _plano_jogador.size() and _plano_jogador[_plano_jog_ix] <= jogador.t_ms:
@@ -353,7 +353,7 @@ func _corrida_1ms() -> Array[Dictionary]:
 				eventos.append_array(tocar())
 			_plano_jog_ix += 1
 		var hbj := ia_jogador.batida_habilidade()
-		if hbj > 0 and jogador.t_ms == hbj * jogador.compasso_ms():
+		if hbj > 0 and jogador.t_ms == hbj * jogador.compasso_ms() and fases.passada >= ia_jogador.passada_habilidade():
 			eventos.append_array(ativar_habilidade())
 	var perdido := jogador.avancar_1ms()
 	var perdido_rival := rival.avancar_1ms()

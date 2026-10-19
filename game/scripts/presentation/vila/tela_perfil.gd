@@ -7,11 +7,16 @@ extends PanelContainer
 ## derrotas, taxa, maior sequência) em cartões. Embaixo, o que já existia no
 ## painel da casa: o nível dela e melhorar (ouro, tempo, em obra). Só lê do
 ## serviço Jogador (renome, liga, metas, `estatisticas()`); a melhoria passa
-## pelos mesmos comandos de antes.
+## pelos mesmos comandos de antes. A aba Troféus é a estante da casa: um
+## lugar por campeão do circuito (vazio até vencê-lo); tocar num troféu mostra
+## quando foi vencido, as revanches, a peça dele (usar ou tirar) e a revanche
+## heroica do dia (pedida a quem hospeda a tela, que abre a ficha).
 
 signal melhorar_pedido(resultado: Dictionary)
 ## O retrato do topo da vila abre este perfil; daqui, o botão abre os Equipamentos.
 signal abrir_equipamentos
+## Revanche heroica pedida na estante de troféus.
+signal pedir_revanche(campeao: String)
 
 const PREDIO := "casa_senhorial"
 const COR_DESTAQUE := Color(1, 0.88, 0.55)
@@ -21,6 +26,10 @@ const TEXTO_MIN := 22
 var _jog: ServicoJogador
 var _retrato: CamadasPersonagem
 var _chave := ""
+## "estatisticas" ou "trofeus" (a estante).
+var aba := "estatisticas"
+## Campeão escolhido na estante ("" = nenhum).
+var trofeu := ""
 
 @onready var _fundo: ColorRect = $Coluna/Corpo/Esquerda/Palco/Fundo
 @onready var _palco: Control = $Coluna/Corpo/Esquerda/Palco
@@ -29,6 +38,7 @@ var _chave := ""
 @onready var _casa: Label = $Coluna/Corpo/Esquerda/Identidade/Textos/Casa
 @onready var _titulo_atual: Label = $Coluna/Corpo/Esquerda/Titulo
 @onready var _direita: VBoxContainer = $Coluna/Corpo/Direita
+@onready var _esquerda: VBoxContainer = $Coluna/Corpo/Esquerda
 @onready var _casa_nivel: Label = $Coluna/Rodape/CasaNivel
 @onready var _melhorar: Button = $Coluna/Rodape/Melhorar
 @onready var _fechar: Button = $Coluna/Rodape/Fechar
@@ -62,6 +72,8 @@ func _notification(what: int) -> void:
 
 func abrir() -> void:
 	visible = true
+	aba = "estatisticas"
+	trofeu = ""
 	_aviso.text = ""
 	_aviso.visible = false
 	_chave = ""
@@ -80,7 +92,7 @@ func atualizar() -> void:
 	var est := _jog.estatisticas()
 	var chave := "%s|%s|%s|%s|%s|%s|%s" % [JSON.stringify(cav, "", true), JSON.stringify(est, "", true), _jog.renome(),
 		JSON.stringify(_jog.liga_atual(), "", true), JSON.stringify(_jog.visual_das_pecas(), "", true), _jog.titulo(),
-		TranslationServer.get_locale()]
+		TranslationServer.get_locale()] + "|%s|%s|%s" % [aba, trofeu, JSON.stringify(_jog.trofeus(), "", true)]
 	if chave != _chave:
 		_chave = chave
 		_montar_identidade(cav)
@@ -101,6 +113,10 @@ func _montar_direita(cav: Dictionary, est: Dictionary) -> void:
 	for c in _direita.get_children():
 		_direita.remove_child(c)
 		c.queue_free()
+	_montar_aba()
+	if aba == "trofeus":
+		_montar_estante()
+		return
 	# Nível e experiência.
 	var tabela: Array = Balanceamento.ler("progressao")["xp_por_nivel"]
 	var nivel := int(cav["nivel"])
@@ -151,6 +167,114 @@ func _montar_direita(cav: Dictionary, est: Dictionary) -> void:
 	for par: Array in [["disputadas", str(est["disputadas"])], ["vitorias", str(est["vitorias"])], ["derrotas", str(est["derrotas"])],
 			["taxa", taxa], ["maior_sequencia", str(est["maior_sequencia"])], ["derrubadas", str(est["derrubadas"])]]:
 		grade.add_child(_cartao(par[0], par[1]))
+
+## Botão na coluna da esquerda que troca entre as estatísticas e a estante
+## ("Troféus (n)" / "Estatísticas").
+func _montar_aba() -> void:
+	var b := _esquerda.get_node_or_null("Aba") as Button
+	if b == null:
+		b = Button.new()
+		b.name = "Aba"
+		b.focus_mode = Control.FOCUS_NONE
+		b.custom_minimum_size = Vector2(0, 64)
+		b.pressed.connect(func(): aba = "estatisticas" if aba == "trofeus" else "trofeus"; trofeu = ""; atualizar())
+		_esquerda.add_child(b)
+	b.text = tr("PERFIL_ABA_ESTATISTICAS") if aba == "trofeus" else tr("PERFIL_ABA_TROFEUS").format({"n": _jog.trofeus().size()})
+
+## Estante de troféus: uma prateleira por fileira, um lugar por campeão do
+## circuito (na ordem das regiões); vencido mostra o brasão dele, ainda não
+## vencido fica escuro com "?". Embaixo, o troféu escolhido.
+func _montar_estante() -> void:
+	var meus := {}
+	for t: Dictionary in _jog.trofeus():
+		meus[t["campeao"]] = t
+	if meus.is_empty():
+		_direita.add_child(_rotulo(tr("TROFEUS_VAZIO"), 14, COR_FRACA))
+	var campeoes := _jog.campeoes()
+	var por_fileira := 6
+	var estante := VBoxContainer.new()
+	estante.name = "Estante"
+	estante.add_theme_constant_override("separation", 0)
+	_direita.add_child(estante)
+	for i in range(0, campeoes.size(), por_fileira):
+		var fileira := HBoxContainer.new()
+		fileira.add_theme_constant_override("separation", 6)
+		estante.add_child(fileira)
+		for c: String in campeoes.slice(i, i + por_fileira):
+			fileira.add_child(_lugar(c, meus.get(c, {})))
+		var tabua := ColorRect.new()
+		tabua.color = Color(0.36, 0.22, 0.12)
+		tabua.custom_minimum_size = Vector2(0, 8)
+		estante.add_child(tabua)
+	if trofeu != "" and meus.has(trofeu):
+		_montar_trofeu(meus[trofeu])
+	elif not meus.is_empty():
+		_direita.add_child(_rotulo(tr("TROFEUS_TOQUE"), 12, COR_FRACA))
+
+## Lugar da estante: botão de 76×76 com o brasão do campeão (ou "?").
+func _lugar(campeao: String, t: Dictionary) -> Button:
+	var b := Button.new()
+	b.name = campeao
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(76, 76)
+	b.expand_icon = true
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if t.is_empty():
+		b.text = "?"
+		b.disabled = true
+		return b
+	var rv := _jog.rival_para_justa(campeao)
+	b.icon = GeradorBrasao.textura(rv["brasao"], Vector2i(36, 46))
+	b.tooltip_text = tr(rv["nome_chave"])
+	b.toggle_mode = true
+	b.button_pressed = trofeu == campeao
+	b.pressed.connect(func(): trofeu = campeao; atualizar())
+	return b
+
+## Troféu escolhido: nome e alcunha, onde foi vencido, revanches, a peça e a revanche do dia.
+func _montar_trofeu(t: Dictionary) -> void:
+	var c: String = t["campeao"]
+	var rv := _jog.rival_para_justa(c)
+	var caixa := VBoxContainer.new()
+	caixa.name = "Trofeu"
+	caixa.add_theme_constant_override("separation", 0)
+	_direita.add_child(caixa)
+	var nome := tr(rv["nome_chave"])
+	if str(rv.get("alcunha", "")) != "":
+		nome += ", " + tr(rv["alcunha"])
+	caixa.add_child(_rotulo(nome, 14, COR_DESTAQUE))
+	caixa.add_child(_rotulo(tr("TROFEU_VENCIDO_EM").format({"torneio": tr("TORNEIO_" + str(t["torneio"]).to_upper())}) + "  ·  " +
+		tr("TROFEU_REVANCHES").format({"n": int(t["revanches"])}), 12, COR_FRACA))
+	var peca := str(t["peca"])
+	var defs: Dictionary = Balanceamento.ler("itens")["pecas_trofeu"]
+	var botoes := HBoxContainer.new()
+	botoes.add_theme_constant_override("separation", 8)
+	if peca != "" and defs.has(peca):
+		var espaco := str(defs[peca]["espaco"])
+		caixa.add_child(_rotulo(tr("TROFEU_PECA").format({"nome": tr("ITEM_" + peca.to_upper()), "espaco": tr("ESPACO_" + espaco.to_upper())}), 12, Color(0.95, 0.9, 0.8)))
+		var usar := Button.new()
+		usar.name = "UsarPeca"
+		usar.focus_mode = Control.FOCUS_NONE
+		usar.custom_minimum_size = Vector2(0, 64)
+		var em_uso := _jog.peca_trofeu_em_uso(espaco) == peca
+		usar.text = tr("TROFEU_TIRAR") if em_uso else tr("TROFEU_USAR")
+		usar.pressed.connect(func():
+			var r := _jog.usar_peca_trofeu(espaco, "" if em_uso else peca)
+			_aviso.text = "" if r["ok"] else tr("ERRO_" + str(r["erro"]).to_upper())
+			_aviso.visible = _aviso.text != ""
+			_chave = ""
+			atualizar())
+		botoes.add_child(usar)
+	var rev := Button.new()
+	rev.name = "Revanche"
+	rev.focus_mode = Control.FOCUS_NONE
+	rev.custom_minimum_size = Vector2(0, 64)
+	var p := _jog.pode_revanche(c)
+	rev.text = tr("TROFEU_REVANCHE") if p["ok"] else tr("TROFEU_REVANCHE_AMANHA")
+	rev.disabled = not p["ok"]
+	rev.pressed.connect(func(): pedir_revanche.emit(c))
+	botoes.add_child(rev)
+	caixa.add_child(botoes)
 
 ## Cartão de estatística: número grande e o nome embaixo.
 func _cartao(id: String, valor: String) -> PanelContainer:

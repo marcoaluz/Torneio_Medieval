@@ -7,7 +7,7 @@
 #   python -I tools/gerar_arte.py --simular            lista o que falta, sem gastar credito
 #   python -I tools/gerar_arte.py                       gera tudo o que falta
 #   python -I tools/gerar_arte.py --so arena,ferreira   so estes predios/personagens
-#   python -I tools/gerar_arte.py --grupo vila|retratos
+#   python -I tools/gerar_arte.py --grupo vila|retratos|campeoes   (campeoes: docs/ARTE_PENDENTE.md)
 #   depois: driver.sh script res://tools/montar_folhas_vila.gd  (junta os estagios na folha)
 #
 # Chave: variavel de ambiente PIXELLAB_API_KEY ou .chaves.env na raiz (fora do git).
@@ -74,7 +74,31 @@ EXPRESSOES = {
     "neutro": "calm neutral expression", "alegre": "warm smiling expression", "serio": "serious stern expression",
     "timido": "shy nervous expression, looking slightly down", "bravo": "angry snarling expression",
     "debochado": "mocking smirk, one eyebrow raised",
+    "derrotado": "defeated and humbled expression, bruised face, looking down, dented helmet",
 }
+# Campeões do PvE (grupo "campeoes"): retrato de cada um em 3 expressões
+# (neutro na ficha, debochado no duelo, derrotado ao cair). O rei e o nêmesis
+# usam a descrição de RETRATO (são os mesmos da história). Lista e prompts
+# completos em docs/ARTE_PENDENTE.md. Cores: as da casa (pve.json > rivais > casa).
+RETRATO_CAMPEAO = {
+    "campeao_valdemar": "a cocky village fair champion knight in his forties, blond moustache, open bascinet with the visor raised, old gold and royal blue surcoat",
+    "martim_martelo": "a burly brute of a knight with a broken nose and a shaved head, great helm under his arm, royal blue and bone-white tabard",
+    "dama_isolda_gaviao": "a lean sharp-eyed lady knight with a hawk feather on her helm, hair tied back, forest green and old gold surcoat",
+    "sir_egas_muro": "a massive broad-shouldered knight with a thick black beard and a huge kite shield behind him, purple and old gold tabard",
+    "conde_rodrigo_alvar": "a haughty count with a trimmed grey goatee and a fur-trimmed cloak over polished armor, silver and royal blue heraldry",
+    "sir_henrique_lamina": "a slim young knight with slicked dark hair and a thin scar on the cheek, elegant fluted armor, royal blue and bone-white",
+    "dama_mafalda_tormenta": "a fierce northern lady knight with wild red hair and a storm-grey cloak, visor half lowered, forest green and old gold",
+    "sir_bermudo_touro": "a huge bull-necked knight with a horned helm and a thick red beard, purple and old gold tabard",
+    "duque_afonso_montargil": "a proud duke in gilded armor with a ducal coronet on his helm, clean-shaven, silver and royal blue heraldry",
+    "sir_gil_implacavel": "a silent knight in plain blued-steel armor, closed visor with only cold eyes visible through the slit, royal blue and bone-white",
+    "dama_brites_escarpa": "a stern weathered lady knight with short grey hair and a heavy tower shield, forest green and old gold",
+    "sir_tristao_ferro_velho": "an old veteran knight with a white beard, many scars and patched old-fashioned armor, purple and old gold",
+    "principe_fernando_aurora": "a young arrogant prince with golden curls and an ornate sunburst helm, silver and royal blue heraldry",
+    "sir_aurelio_invicto": "a legendary knight in his prime, a lance decorated with a hundred colored ribbons behind him, royal blue and bone-white",
+    "dama_elvira_sangue_real": "a cold aristocratic lady knight with pale skin, braided dark hair and a thin circlet, forest green and old gold",
+    "sir_baltasar_escudo_ouro": "a wealthy knight with a gleaming golden shield and rings over his gauntlets, purple and old gold",
+}
+EXPRESSOES_CAMPEAO = ["neutro", "debochado", "derrotado"]
 
 
 def chave():
@@ -176,6 +200,19 @@ def plano(grupos, so):
             destino = os.path.join(RETRATOS, "%s_%s.png" % (quem, expr))
             if not os.path.exists(destino):
                 falta.append(("retratos", quem, expr, destino, (128, 128), h["personagens"].get(quem, {})))
+    if "campeoes" in grupos:
+        pve = ler("game/data/balance/pve.json")["rivais"]
+        cores = ler("game/data/personagem/paletas.json")["cores_casa"]
+        for rid, r in pve.items():
+            if not (r.get("campeao") or r.get("nemesis")):
+                continue
+            quem = r.get("retrato", rid)
+            if so and quem not in so:
+                continue
+            for expr in EXPRESSOES_CAMPEAO:
+                destino = os.path.join(RETRATOS, "%s_%s.png" % (quem, expr))
+                if not os.path.exists(destino):
+                    falta.append(("campeoes", quem, expr, destino, (128, 128), {"cores": [cores[c] for c in r["casa"]]}))
     return falta
 
 
@@ -187,8 +224,9 @@ def main():
     a = ap.parse_args()
     so = set(x for x in a.so.split(",") if x)
     falta = plano(set(a.grupo.split(",")), so)
-    print("faltam %d imagens (%d da vila, %d retratos)" % (
-        len(falta), sum(1 for f in falta if f[0] == "vila"), sum(1 for f in falta if f[0] == "retratos")))
+    print("faltam %d imagens (%d da vila, %d retratos, %d de campeoes)" % (
+        len(falta), sum(1 for f in falta if f[0] == "vila"), sum(1 for f in falta if f[0] == "retratos"),
+        sum(1 for f in falta if f[0] == "campeoes")))
     if a.simular:
         for f in falta:
             print("  %-8s %s  %dx%d" % (f[0], os.path.relpath(f[3], RAIZ), f[4][0], f[4][1]))
@@ -223,12 +261,16 @@ def main():
                 corpo["init_image"] = {"type": "base64", "base64": primeiro}
                 corpo["init_image_strength"] = FORCA_ESTAGIO1
         else:
+            # Retratos da história e dos campeões: mesma moldura de prompt.
+            desc = RETRATO[quem] if quem in RETRATO else RETRATO_CAMPEAO[quem]
             descricao = "%s, portrait bust, head and shoulders, facing right, %s, %s, plain dark background" % (
-                ESTILO, RETRATO[quem], EXPRESSOES.get(extra, extra))
+                ESTILO, desc, EXPRESSOES.get(extra, extra))
+            semente = 2000 + sorted(RETRATO).index(quem) if quem in RETRATO else 3000 + sorted(RETRATO_CAMPEAO).index(quem)
+            cores_p = dados.get("cores") or ([dados["cor"]] if dados.get("cor") else [])
             corpo = {"description": descricao, "negative_description": NEGATIVO, "image_size": {"width": w, "height": hh},
                      "view": "side", "detail": "highly detailed", "shading": "detailed shading", "outline": "selective outline",
-                     "seed": 2000 + sorted(RETRATO).index(quem),
-                     "color_image": {"type": "base64", "base64": paleta_png([dados.get("cor", "")] if dados.get("cor") else [])}}
+                     "seed": semente,
+                     "color_image": {"type": "base64", "base64": paleta_png(cores_p)}}
         try:
             r = pedir(caminho, corpo, k)
         except RuntimeError as erro:

@@ -129,7 +129,9 @@ func _initialize() -> void:
 	_checa("crescimento do nemesis tem teto (+%d)" % (n_max - n_reino), n_max - n_reino == int(d["rivais"]["nemesis_corvo"]["cresce_max"]))
 	var conde := jog.rival_para_justa("conde_rodrigo_alvar", "condado")
 	var base_perfil: Dictionary = perfis[d["rivais"]["conde_rodrigo_alvar"]["perfil"]]
-	_checa("campeao com estilo de mira proprio", conde["perfil"]["zona_preferida"] == "capacete" and int(conde["perfil"]["erro_mira_px"]) < int(base_perfil["erro_mira_px"]) and conde["provocacao"] != "")
+	# Traço do conde (2026-10-18): paciente, guarda a habilidade para a última passada.
+	_checa("campeao com estilo proprio (traco %s)" % conde["traco"], conde["traco"] == "paciente" and int(conde["perfil"].get("habilidade_passada", 1)) == 3
+		and not base_perfil.has("habilidade_passada") and int(conde["perfil"]["erro_mira_px"]) < int(base_perfil["erro_mira_px"]) and conde["provocacao"] != "")
 
 	# Migração do save v1
 	var velho := {"versao": 1, "inventario": {"ouro": 5, "itens": []}}

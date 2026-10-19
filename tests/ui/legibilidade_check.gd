@@ -4,7 +4,8 @@ extends SceneTree
 ##  - tema_jogo.tres: texto padrão de 22 px, título de 28 px, botão com ≥ 64 px;
 ##  - em cada tela aberta pela vila (perfil, campo de treino, estábulo, armeiro,
 ##    ferreiro, baús, missões, liga, loja, social, configurações, habilidades,
-##    torneios, equipamentos): todo texto visível tem ≥ 22 px, todo botão
+##    torneios, equipamentos, ficha do adversário, duelo do campeão, estante
+##    de troféus): todo texto visível tem ≥ 22 px, todo botão
 ##    visível tem ≥ 64×64 px (o ícone do topo também) e a tela cabe na vista
 ##    base de 960×540 (16:9) e na de 1200×540 (20:9);
 ##  - topo da vila: retrato, brasão, nome, nível com barra de XP, ouro e gemas;
@@ -29,6 +30,7 @@ func _initialize() -> void:
 	jog.estado["cavaleiro"]["nome"] = "Isolda"
 	jog.estado["inventario"]["ouro"] = 12345
 	jog.estado["inventario"]["gemas"] = 450
+	jog.estado["pve"]["trofeus"] = {"campeao_valdemar": {"em": 1, "torneio": "feira_grande", "revanches": 2}}
 
 	var tema: Theme = load("res://game/scenes/ui/tema_jogo.tres")
 	_checa("tema: texto padrao de %d px (%d)" % [TEXTO_MIN, tema.default_font_size], tema.default_font_size >= TEXTO_MIN)
@@ -123,6 +125,14 @@ func _passada(vila: Vila, jog: ServicoJogador, vista: Vector2i) -> void:
 		"habilidades": func(): vila.tela_habilidades.abrir(),
 		"torneios": func(): vila.tela_torneios.abrir(),
 		"equipamentos": func(): vila.tela_equipamentos.abrir(),
+		"ficha do adversario": func(): vila.preparar_luta(jog.rival_para_justa("dama_elvira_sangue_real"), Callable(), func(): pass),
+		"ficha da revanche": func(): vila.pedir_revanche("campeao_valdemar"),
+		"duelo do campeao": func(): vila.duelo().mostrar(jog.rival_para_justa("sir_baltasar_escudo_ouro")),
+		"estante de trofeus": func():
+			vila.tela_perfil.abrir()
+			vila.tela_perfil.aba = "trofeus"
+			vila.tela_perfil.trofeu = "campeao_valdemar"
+			vila.tela_perfil.atualizar(),
 	}
 	for nome: String in telas:
 		telas[nome].call()
@@ -139,7 +149,7 @@ func _passada(vila: Vila, jog: ServicoJogador, vista: Vector2i) -> void:
 ## A tela visível por cima da vila (filha de Interface, nome Tela*).
 func _tela_aberta(vila: Vila) -> Control:
 	for t in vila.get_node("Interface").get_children():
-		if t is Control and str(t.name).begins_with("Tela") and (t as Control).visible:
+		if t is Control and (str(t.name).begins_with("Tela") or t.name in [&"FichaAdversario", &"DueloCampeao"]) and (t as Control).visible:
 			return t
 	return null
 

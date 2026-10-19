@@ -284,6 +284,15 @@ func _ao_terminar(vencedor: JustaFases.Lado, motivo: String, _pj: int, _pr: int)
 			linhas.append(tr("PVE_PROJETO_GANHO").format({"conjunto": tr("CONJUNTO_" + str(r["projeto"]).to_upper())}))
 		if str(r.get("regiao_nova", "")) != "":
 			linhas.append(tr("PVE_REGIAO_LIBERADA").format({"regiao": tr("REGIAO_" + str(r["regiao_nova"]).to_upper())}))
+		# Campeões: a frase dele quando cai, o troféu da primeira vitória e a revanche.
+		var info: Dictionary = controlador.rival_info
+		if r.get("venceu", false) and str(info.get("frase_derrota", "")) != "":
+			linhas.insert(0, tr(info["frase_derrota"]))
+		if r.get("venceu", false) and str(r.get("revanche", "")) != "":
+			linhas.append(tr("REVANCHE_VENCEU"))
+		if str(r.get("trofeu", "")) != "":
+			linhas.append(tr("TROFEU_NOVO").format({"campeao": tr("RIVAL_" + str(r["trofeu"]).to_upper()),
+				"peca": tr("ITEM_" + str(r["peca_trofeu"]).to_upper())}))
 		resultado_motivo.text = "\n".join(linhas)
 		resultado_dica.text = tr("PVE_TOQUE_PARA_VOLTAR")
 	_botao_dobrar(r if not r.is_empty() else {})

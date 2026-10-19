@@ -234,6 +234,11 @@ static func visual_provisorio(visual: String) -> String:
 		for m: String in modelos:
 			if modelos[m].has("visual_provisorio"):
 				_provisorios[str(modelos[m]["visual"])] = str(modelos[m]["visual_provisorio"])
+		# Peças de troféu dos campeões (só aparência) também têm a provisória.
+		var trofeus: Dictionary = Balanceamento.ler("itens").get("pecas_trofeu", {})
+		for t: String in trofeus:
+			if trofeus[t] is Dictionary and trofeus[t].has("visual_provisorio"):
+				_provisorios[str(trofeus[t]["visual"])] = str(trofeus[t]["visual_provisorio"])
 		_provisorios["__lido"] = ""
 	return str(_provisorios.get(visual, ""))
 

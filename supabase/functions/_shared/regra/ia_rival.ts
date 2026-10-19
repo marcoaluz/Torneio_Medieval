@@ -109,4 +109,9 @@ export class IaRival {
   batida_habilidade(): number {
     return Math.trunc(this.perfil["habilidade_batida"]);
   }
+
+  /** Primeira passada em que tenta acionar a ativa (opcional, padrão 1). */
+  passada_habilidade(): number {
+    return Math.max(Math.trunc(this.perfil["habilidade_passada"] ?? 1), 1);
+  }
 }

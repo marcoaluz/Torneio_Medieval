@@ -66,6 +66,13 @@ social: codigo, moeda, bloqueados [id], denuncias [{alvo, nome, motivo,    (v11,
               sim_global, contador}  # msg: {id, de_id, de_nome, texto, chave, em, idioma, simulado}
 ```
 
+**Versão 12 (campeões, 2026-10-18):**
+
+```
+pve.trofeus {campeao: {em, torneio, revanches, revanche_dia}}  # primeira vitória sobre o campeão; revanche_dia = dia (metas) da última revanche
+visual_trofeu {espaco: peca}   # peça de troféu em uso (itens.json > pecas_trofeu), só aparência: cimeira, caparacao, estandarte
+```
+
 - `lado_para_justa()` monta o lado da regra (`{cavaleiro, cavalo, equipamento, habilidade}`) a partir das peças equipadas: o `status` do modelo mais a durabilidade atual (peça com 0 perde os bônus na regra).
 - `visual_das_pecas()` dá a variante de arte de cada espaço, já com o guarda-roupa aplicado; a arena veste o cavaleiro do jogador com ela, com as cores da casa e com a pelagem.
 

@@ -51,7 +51,7 @@ Use a skill `/run-torneio-medieval` (`.claude/skills/run-torneio-medieval/driver
 - Se o plugin não estiver instalado nesta conta: `claude plugins marketplace add jame581/skillsmith` e `claude plugins install godot-prompter@skillsmith`.
 
 ## Onde paramos (para quem retomar)
-Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTADO.md`; a decisão e o motivo de cada escolha, em `docs/DECISOES.md`.
+Atualizado em 2026-10-18. O detalhe completo de cada sistema está em `docs/ESTADO.md`; a decisão e o motivo de cada escolha, em `docs/DECISOES.md`.
 
 - **Pedido do usuário:** executar **todos** os prompts de `docs/PACOTE_DE_PROMPTS.md` em sequência, sem parar para revisão; ele analisa tudo depois.
 - **Parar e perguntar antes de:** gastar crédito ou mexer em serviço externo. Isso inclui PixelLab, ElevenLabs, criar projeto ou aplicar migração no Supabase, Firebase, AdMob e lojas. Tudo o que é local, faça direto.
@@ -92,7 +92,8 @@ Atualizado em 2026-10-14. O detalhe completo de cada sistema está em `docs/ESTA
 - **Interface legível no celular:** texto de 22 px, título de 28 px (`theme_type_variation = &"Titulo"`) e botão ou ícone tocável com no mínimo 64×64 px, vindos de `game/scenes/ui/tema_jogo.tres`. Nunca `font_size` menor que 22 em cena ou script. Tela nova ou mudança de layout: abra em 16:9 e 20:9 e rode `tests/ui/legibilidade_check.gd` (acrescente a tela à lista dele). A vila é vista com zoom (`vila.json > camera`) e arrasta com o dedo.
 - **Cores da vila:** seguem a arena da justa (clara e saturada): shader `vivificar` e `ambiente.json > paleta`. `ambiente.json > brilho_minimo` (0,85) vale para toda hora e clima. Hora e clima fixos para capturas: `TM_HORA` e `TM_CLIMA` na demo da vila.
 - **Mudou a geometria do cavaleiro?** Meça as zonas na arte, atualize `mira.json`, os pontos fixos dos testes e regrave as referências (`TM_GRAVAR=1`) e os cenários (`tools/gravar_cenarios.gd`).
-- **Versão do save:** hoje é 11 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
+- **Versão do save:** hoje é 12 (`ServicoJogador.VERSAO`). Todo campo novo no save ganha um passo em `migrar()` e uma linha em `docs/DADOS_JOGADOR.md`.
+- **Campeões (traço, ficha, troféus, revanche):** o traço de cada campeão é só o `perfil_ajuste` + a habilidade dele; o catálogo `pve.json > tracos` tem os textos e a assinatura. Mexeu num campeão, na IA ou no impacto? Rode `tests/rules/tracos_check.gd` (o traço tem que continuar aparecendo) e o relatório `tools/simular_campeoes.gd` (TM_N=100) para ver se continua justo. Peças de troféu ficam em `itens.json > pecas_trofeu`, fora de `modelos` (não saem de baú). Arte pendente: `docs/ARTE_PENDENTE.md`.
 - **Mudança na regra da justa:**
   - regere os casos compartilhados com o oráculo Python correspondente;
   - regrave as gravações com `TM_GRAVAR=1` em `tests/rules/justa_simulacao_check.gd` e `tests/ai/ia_justa_check.gd`.

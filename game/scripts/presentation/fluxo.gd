@@ -119,6 +119,25 @@ func justar(torneio: String, indice: int) -> Dictionary:
 	_justa("disputa")
 	return {"ok": true, "erro": ""}
 
+## Revanche heroica contra um campeão já vencido (uma por dia): como justar,
+## com o servidor sorteando a semente (`iniciar_revanche`). {ok, erro}.
+func justar_revanche(campeao: String) -> Dictionary:
+	var d := {"revanche": campeao, "torneio": "", "indice": -1}
+	var nuvem := get_node_or_null("/root/Nuvem") as ServicoNuvem
+	if nuvem and nuvem.usa_acao():
+		var r := await nuvem.chamar("iniciar_revanche", [campeao])
+		if not r.get("ok", false):
+			return {"ok": false, "erro": r.get("erro", "sem_conexao")}
+		d["servidor"] = r
+	else:
+		var p := _jog().pode_revanche(campeao)
+		if not p["ok"]:
+			return p
+	disputa = d
+	ultimo_resultado = {}
+	_justa("disputa")
+	return {"ok": true, "erro": ""}
+
 ## Justa de PvP contra o adversário escolhido no salão da liga (3.17).
 func justar_pvp() -> void:
 	disputa = {}

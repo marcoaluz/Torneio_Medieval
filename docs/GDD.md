@@ -304,6 +304,17 @@ Cada região tem 5 a 8 torneios. Cada torneio é uma chave de 3 a 5 rivais, term
 
 **Desafios especiais:** uma chance só (não dá para repetir), cavalo emprestado, sem escudo, chuva (janela de ritmo menor), justa noturna.
 
+**Campeões**
+
+Os 17 campeões do circuito e o nêmesis têm personalidade própria, que o jogador consegue ler e vencer:
+
+- **Alcunha** (ex.: Martim, o Martelo, "o Sino das Capelas"), **frase de entrada** (dita na tela de duelo) e **frase de derrota** (quando cai).
+- **Traço de luta:** um comportamento claro, feito só com o estilo da IA e a habilidade dele, sempre com um ponto fraco declarado. Traços: larga perfeito (mira solta), só mira o capacete (o Bloqueio desvia), nunca erra o peito (quase não derruba), bloqueia muito (a Investida atravessa), guarda a habilidade para a última passada (está sem ela nas duas primeiras), nunca perde o compasso (larga mal), joga no escudo (pontua pouco), tudo ou nada (erra um golpe em quatro) e, no nêmesis, rancoroso (volta mais forte a cada encontro).
+- **Ficha do adversário** antes de toda justa do PvE e do PvP: retrato (provisório com a cor da casa até ter arte), nome, alcunha, brasão, habilidade (e qual a anula), traço com o ponto fraco e o poder dos dois lados com cor: verde favorável, amarelo parelha, vermelho difícil. Botão para ir aos Equipamentos e trocar antes de lutar.
+- **Tela de duelo** antes de um campeão: os dois lados frente a frente, o arauto anunciando os dois e a frase de entrada do campeão.
+- **Troféu:** a primeira vitória sobre um campeão expõe o troféu dele na estante da casa senhorial e dá uma peça cosmética dele (penacho, manta ou estandarte), só de aparência.
+- **Revanche heroica:** campeão já vencido pode ser enfrentado de novo, uma vez por dia, mais forte a cada revanche vencida (até um teto) e com recompensa melhor (três vezes a de uma disputa de 3 estrelas da região, baú de ferro e ornamento).
+
 **Baús**
 
 | Baú | Tempo para abrir | De onde vem |
@@ -493,6 +504,19 @@ Sugestões que não estavam na conversa e que vale deixar previstas agora, mesmo
 | Ordens (clãs) | Jogadores se juntam, ajudam nos timers uns dos outros e disputam entre ordens | Lançamento |
 | Trilha "rock medieval" original | Identidade do jogo; nada de música licenciada | Polimento |
 | Métricas de jogo | Saber onde o jogador desiste, para ajustar dificuldade e timers | Fatia vertical |
+
+**Ideias novas**
+
+Acrescentadas depois do lançamento do circuito, a partir dos campeões.
+
+| Ideia | Por que | Situação |
+| --- | --- | --- |
+| Traço de luta dos campeões | Cada campeão vira um quebra-cabeça legível, com ponto fraco, e não só números maiores | Feito (2026-10-18) |
+| Ficha do adversário | O jogador decide o equipamento e a habilidade antes de lutar, em vez de descobrir na derrota | Feito, PvE e PvP |
+| Tela de duelo com o arauto | Dá peso de final a cada campeão | Feito; falta voz própria do arauto |
+| Troféus na casa senhorial | A casa mostra a carreira do plebeu; cada campeão vencido fica visível | Feito; troféus desenhados pendentes |
+| Peça cosmética do campeão | Recompensa de vaidade que não mexe no equilíbrio | Feito; arte das peças pendente |
+| Revanche heroica diária | Motivo para voltar a campeões vencidos sem repetir a mesma luta | Feito |
 
 ## Outras modalidades
 

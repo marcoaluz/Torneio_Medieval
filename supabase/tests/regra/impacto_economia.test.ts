@@ -156,6 +156,25 @@ describe("desafios do PvE", () => {
       for (const k of Object.keys(caso["esperado"])) assert.equal(String(p[k]), String(caso["esperado"][k]), k);
     });
   }
+  for (const caso of dados["revanche"]) {
+    test(`revanche: ${caso["nome"]}`, () => {
+      const antes = normalizar(dados["revanche_base"]);
+      const r = Pve.rival_revanche(dados["revanche_base"], dados["revanche_cfg"], caso["vitorias"]);
+      for (const chave of Object.keys(caso["esperado"])) {
+        const v = ler(r, chave);
+        const e = caso["esperado"][chave];
+        if (e === null) assert.equal(v, undefined, chave);
+        else if (typeof e === "string") assert.equal(String(v), e, chave);
+        else assert.equal(Math.trunc(Number(v)), Math.trunc(e), chave);
+      }
+      assert.equal(normalizar(dados["revanche_base"]), antes, "nao muda o campeao");
+    });
+  }
+  test("faixa de poder da ficha", () => {
+    for (const c of dados["faixa_poder"]) {
+      assert.equal(Pve.faixa_poder(c["jogador"], c["rival"], dados["faixa_cfg"]), c["esperado"], c["nome"]);
+    }
+  });
   for (const caso of dados["perfil_rival"]) {
     test(`perfil do rival: ${caso["nome"]}`, () => {
       const p = Pve.perfil_do_rival(dados["ia_perfil_rival"], caso["rival"]);

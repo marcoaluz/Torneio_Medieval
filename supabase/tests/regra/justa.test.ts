@@ -82,6 +82,15 @@ describe("justa completa (gravações do GDScript)", () => {
     }
   });
 
+  test("com IA: rival paciente (habilidade so da 3a passada)", () => {
+    const g = carregar_casos("justa_referencia_ia_paciente");
+    for (const pedaco of [0, 17]) {
+      const j = new Justa(g["config"], g["lado_jogador"], g["lado_rival"], Math.trunc(g["semente"]), g["perfil"]);
+      assert.deepEqual(repetir(j, g["entradas"], pedaco), g["eventos"], `pedaco ${pedaco}`);
+    }
+    assert.ok((g["eventos"] as string[]).some((e) => e.startsWith("habilidade|") && e.includes("passada=3")), "a ativa saiu na 3a passada");
+  });
+
   test("dados do jogo validos juntos", () => {
     const cfg = {
       justa: carregar_dados("balance/justa.json"), galope: carregar_dados("balance/galope.json"),
